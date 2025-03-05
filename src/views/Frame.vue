@@ -1,13 +1,14 @@
 <template>
 <div class="frame">
     <Sidebar/>
+    <router-view />
     <Footer/>
 </div>
 </template>
 
 <script setup>
 import Sidebar from '@/components/common/Sidebar.vue';
-import Footer from '@/components/common/footer.vue'
+import Footer from '@/components/common/Footer.vue'
 </script>
 
 <style scoped>
