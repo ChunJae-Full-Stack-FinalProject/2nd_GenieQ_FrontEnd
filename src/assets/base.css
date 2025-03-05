@@ -3,6 +3,7 @@
 *::after {
   box-sizing: border-box;
   margin: 0;
+  padding: 0;
 
   /* 16 light */
   font-family: 'Pretendard';
@@ -12,5 +13,10 @@
 }
 
 body {
-  min-height: 100vh;
+  width: 100vw; /* 화면 너비 */
+  min-height: 100vh; /* 화면 전체 */
+}
+
+div {
+  border: 1px solid pink;
 }
