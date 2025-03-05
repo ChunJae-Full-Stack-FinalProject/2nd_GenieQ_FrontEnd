@@ -29,7 +29,7 @@ const router = createRouter({
         { path: '', redirect: '/home' },
         { path: 'home', name: 'home', component: TestHomeComponent },
         { path: 'immediately', name: 'immediately', component: ImmediatelyComponent },
-        { path: 'generation', name: 'generation', component: GenerationMain },
+        { path: 'passage', name: 'passage', component: GenerationMain },
         // 나중에 컴포넌트가 생성될 때 추가되도록 설정, 위에 import 안하고 사용 가능
         { path: 'delay', name: 'delay', component: () => import('@/components/test/DelayComponent.vue') },
       ]
