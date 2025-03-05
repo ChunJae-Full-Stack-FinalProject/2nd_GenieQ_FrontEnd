@@ -35,20 +35,15 @@
             모달 버튼
             <BaseButton text="확인 창 모달" type="type1" @click="showConfirmModal = true" />
             <BaseButton text="경고 창 모달" type="type1" @click="showWarningModal = true" />
+            <BaseButton text="파일로 추출" type="type1" @click="showFileModal = true" />
             <!-- 확인창 모달 -->
-            <ConfirmModal
-              :isOpen="showConfirmModal"
-              title="확인"
-              message="작업을 완료하시겠습니까?"
-              @close="showConfirmModal = false"
+            <ConfirmModal :isOpen="showConfirmModal" title="확인" message="작업을 완료하시겠습니까?" @close="showConfirmModal = false"
             />
             <!-- 경고창 모달 -->
-            <WarningModal
-              :isOpen="showWarningModal"
-              title="경고"
-              message="이 작업을 실행하시겠습니까?"
-              @close="showWarningModal = false"
+            <WarningModal :isOpen="showWarningModal" title="경고" message="이 작업을 실행하시겠습니까?" @close="showWarningModal = false"
             />
+            <!-- 추출 파일 선택 모달 -->
+            <FileSelectModal :isOpen="showFileModal" @close="showFileModal = false" @confirm="handleFileSelection" />
           </div>
         </div>
     </div>
@@ -57,12 +52,14 @@
 <script setup>
 import TestSideNavBarComponent from '@/components/test/TestSideNavBarComponent.vue';
 import BaseButton from '@/components/common/button/BaseButton.vue';
-import ConfirmModal from '@/components/common/modal/common/ConfirmModalComponent.vue';
-import WarningModal from '@/components/common/modal/common/WarningModalComponent.vue';
+import ConfirmModal from '@/components/common/modal/type/ConfirmModalComponent.vue';
+import WarningModal from '@/components/common/modal/type/WarningModalComponent.vue';
+import FileSelectModal from '@/components/common/modal/type/FileSelectModal.vue';
 import { ref } from "vue";
 
 const showConfirmModal = ref(false);
 const showWarningModal = ref(false);
+const showFileModal = ref(false);
 </script>
 
 <style scoped>
