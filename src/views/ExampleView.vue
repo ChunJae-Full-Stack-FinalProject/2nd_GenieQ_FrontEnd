@@ -11,12 +11,31 @@
           content-area 에 각 컴포넌트가 들어가게 됩니다. <br><br>
           <!-- 라우터 뷰로 slot을 대체합니다 -->
           <router-view />
+        <!-- 기본 버튼 -->
+        <div>
+          <h2>기본 버튼</h2>
+            <!-- 기본 크기 -->
+            <BaseButton text="TYPE 1" type="type1" @click="handleClick" />
+
+            <!-- 크기 변경 -->
+            <BaseButton text="LARGE BUTTON" type="type2" width="200px" height="50px" />
+
+            <!-- 더 작은 버튼 -->
+            <BaseButton text="SMALL" type="type3" width="80px" height="30px" />
+
+            <!-- 비활성화 버튼 -->
+            <BaseButton text="DISABLED" type="type4" disabled />
+
+            <!-- hover 효과 확인 -->
+            <BaseButton text="HOVER ME" type="type5" width="150px" height="45px" />
+          </div>
         </div>
     </div>
 </template>
 
 <script setup>
 import TestSideNavBarComponent from '@/components/test/TestSideNavBarComponent.vue';
+import BaseButton from '@/components/common/button/BaseButton.vue';
 </script>
 
 <style scoped>
