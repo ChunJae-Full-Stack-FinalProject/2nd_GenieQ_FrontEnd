@@ -11,23 +11,44 @@
           content-area 에 각 컴포넌트가 들어가게 됩니다. <br><br>
           <!-- 라우터 뷰로 slot을 대체합니다 -->
           <router-view />
-        <!-- 기본 버튼 -->
-        <div>
-          <h2>기본 버튼</h2>
-            <!-- 기본 크기 -->
-            <BaseButton text="TYPE 1" type="type1" @click="handleClick" />
+          <!-- 기본 버튼 -->
+          <div>
+            <h2>기본 버튼</h2>
+              <!-- 기본 크기 -->
+              <BaseButton text="TYPE 1" type="type1" @click="handleClick" />
 
-            <!-- 크기 변경 -->
-            <BaseButton text="LARGE BUTTON" type="type2" width="200px" height="50px" />
+              <!-- 크기 변경 -->
+              <BaseButton text="LARGE BUTTON" type="type2" width="200px" height="50px" />
 
-            <!-- 더 작은 버튼 -->
-            <BaseButton text="SMALL" type="type3" width="80px" height="30px" />
+              <!-- 더 작은 버튼 -->
+              <BaseButton text="SMALL" type="type3" width="80px" height="30px" />
 
-            <!-- 비활성화 버튼 -->
-            <BaseButton text="DISABLED" type="type4" disabled />
+              <!-- 비활성화 버튼 -->
+              <BaseButton text="DISABLED" type="type4" disabled />
 
-            <!-- hover 효과 확인 -->
-            <BaseButton text="HOVER ME" type="type5" width="150px" height="45px" />
+              <!-- hover 효과 확인 -->
+              <BaseButton text="HOVER ME" type="type5" width="150px" height="45px" />
+          </div>
+
+          <!-- 모달 사용 -->
+          <div>
+            모달 버튼
+            <BaseButton text="확인 창 모달" type="type1" @click="showConfirmModal = true" />
+            <BaseButton text="경고 창 모달" type="type1" @click="showWarningModal = true" />
+            <!-- 확인창 모달 -->
+            <ConfirmModal
+              :isOpen="showConfirmModal"
+              title="확인"
+              message="작업을 완료하시겠습니까?"
+              @close="showConfirmModal = false"
+            />
+            <!-- 경고창 모달 -->
+            <WarningModal
+              :isOpen="showWarningModal"
+              title="경고"
+              message="이 작업을 실행하시겠습니까?"
+              @close="showWarningModal = false"
+            />
           </div>
         </div>
     </div>
@@ -36,6 +57,12 @@
 <script setup>
 import TestSideNavBarComponent from '@/components/test/TestSideNavBarComponent.vue';
 import BaseButton from '@/components/common/button/BaseButton.vue';
+import ConfirmModal from '@/components/common/modal/common/ConfirmModalComponent.vue';
+import WarningModal from '@/components/common/modal/common/WarningModalComponent.vue';
+import { ref } from "vue";
+
+const showConfirmModal = ref(false);
+const showWarningModal = ref(false);
 </script>
 
 <style scoped>
