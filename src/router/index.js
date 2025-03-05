@@ -3,7 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import LoginView from '@/views/LoginView.vue'
 import Frame from '@/views/Frame.vue'
 import TestHomeComponent from '@/components/test/HomeComponent.vue'
-import TestPassageComponent from '@/components/test/PassageComponent.vue'
+import ImmediatelyComponent from '@/components/test/ImmediatelyComponent.vue'
 
 // 로그인 상태 체크 가드
 const requireAuth = (to, from, next) => {
@@ -25,8 +25,9 @@ const router = createRouter({
       children: [
         { path: '', redirect: '/home' },
         { path: 'home', name: 'home', component: TestHomeComponent },
-        { path: 'generation', name: 'generation', component: TestPassageComponent },
-        { path: 'mypage', name: 'mypage', component: () => import('@/components/test/StoreComponent.vue') },
+        { path: 'immediately', name: 'immediately', component: ImmediatelyComponent },
+        // 나중에 컴포넌트가 생성될 때 추가되도록 설정
+        { path: 'mypage', name: 'mypage', component: () => import('@/components/test/DelayComponent.vue') },
       ]
     },
     

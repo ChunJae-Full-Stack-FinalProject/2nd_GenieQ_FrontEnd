@@ -11,8 +11,13 @@
           </router-link>
         </li>
         <li>
-          <router-link to="/generation" :class="{ active: currentPath === '/generation' }">
-            <span>문제 생성</span>
+          <router-link to="/immediately" :class="{ active: currentPath === '/immediately' }">
+            <span>이미 호출됨</span>
+          </router-link>
+        </li>
+        <li>
+          <router-link to="/mypage" :class="{ active: currentPath === '/mypage' }">
+            <span>지연 호출</span>
           </router-link>
         </li>
       </ul>
