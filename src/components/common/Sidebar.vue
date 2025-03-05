@@ -6,7 +6,7 @@
                 <img src="@/assets/icons/icon_home.png" alt="홈페이지" class="home-icon" /> 
                 홈
             </router-link>
-            <router-link to="/create" class="nav-item" :class="{ 'active-box': isActive('/create') }">
+            <router-link to="/passage" class="nav-item" :class="{ 'active-box': isActive('/passage') }">
                 <img src="@/assets/icons/icon_passage.png" alt="지문생성" class="passage-icon" /> 
                  지문 생성
             </router-link>
