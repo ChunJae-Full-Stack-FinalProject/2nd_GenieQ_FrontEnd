@@ -4,6 +4,7 @@ import LoginView from '@/views/LoginView.vue'
 import Frame from '@/views/Frame.vue'
 import TestHomeComponent from '@/components/test/HomeComponent.vue'
 import ImmediatelyComponent from '@/components/test/ImmediatelyComponent.vue'
+import ExampleView from '@/views/ExampleView.vue'
 
 // 로그인 상태 체크 가드
 const requireAuth = (to, from, next) => {
@@ -19,8 +20,9 @@ const router = createRouter({
   routes: [
     // 인증 없이 접근 가능 - 로그인 페이지
     { path: '/login', name: 'login', component: LoginView },
+    { path: '/ex', name: 'ex', component: ExampleView },
     
-    // Frame 컴포넌트를 부모로 하는 중첩 라우트 구조 (기존 코드 유지)
+    // Frame 컴포넌트를 부모로 하는 중첩 라우트 구조
     { path: '/', component: Frame, // beforeEnter: requireAuth, // 인증 필요 - 모든 자식 라우트
       children: [
         { path: '', redirect: '/home' },
