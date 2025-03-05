@@ -12,11 +12,11 @@
         </li>
         <li>
           <router-link to="/immediately" :class="{ active: currentPath === '/immediately' }">
-            <span>이미 호출됨</span>
+            <span>즉시 호출됨</span>
           </router-link>
         </li>
         <li>
-          <router-link to="/mypage" :class="{ active: currentPath === '/mypage' }">
+          <router-link to="/delay" :class="{ active: currentPath === '/delay' }">
             <span>지연 호출</span>
           </router-link>
         </li>
