@@ -10,8 +10,9 @@
     </div>
 </template>
 <script setup>
-import CreatePassageMain from './components/CreatePassage/components/CreatePassageMain.vue';
-import PaymentUsage from './components/CreatePassage/components/PaymentUsage.vue';
+import CreatePassageMain from '@/components/generation/passage/CreatePassageMain.vue';
+import PaymentUsage from '@/components/generation/passage/PaymentUsage.vue';
+import BaseButton from '../common/button/BaseButton.vue';
 
 </script>
 <style scoped>
