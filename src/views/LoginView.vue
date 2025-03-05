@@ -1,6 +1,6 @@
 <template lang="html">
     <div>
-        hello
+        hello<Icon icon="ic:baseline-content-paste" width="24" height="24" />
     </div>
 </template>
 <script>
