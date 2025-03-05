@@ -5,6 +5,7 @@ import Frame from '@/views/Frame.vue'
 import TestHomeComponent from '@/components/test/TestHomeComponent.vue'
 import ImmediatelyComponent from '@/components/test/ImmediatelyComponent.vue'
 import ExampleView from '@/views/ExampleView.vue'
+import GenerationMain from '@/components/generation/GenerationMain.vue'
 
 // 로그인 상태 체크 가드
 const requireAuth = (to, from, next) => {
@@ -28,11 +29,11 @@ const router = createRouter({
         { path: '', redirect: '/home' },
         { path: 'home', name: 'home', component: TestHomeComponent },
         { path: 'immediately', name: 'immediately', component: ImmediatelyComponent },
+        { path: 'generation', name: 'generation', component: GenerationMain },
         // 나중에 컴포넌트가 생성될 때 추가되도록 설정, 위에 import 안하고 사용 가능
         { path: 'delay', name: 'delay', component: () => import('@/components/test/DelayComponent.vue') },
       ]
     },
-    
     // 존재하지 않는 페이지 처리
     { path: '/:pathMatch(.*)*', redirect: '/' }
   ],
