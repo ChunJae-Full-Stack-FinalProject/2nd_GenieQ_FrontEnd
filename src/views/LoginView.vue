@@ -35,18 +35,24 @@
            <button @click="login" class="login-button">로그인하기</button>
            
            <div class="signup-section">
-             <span class="notion">GenieQ가 처음이신가요?</span>
+            <a href="https://www.notion.so/TODO-1aced0befda38064a42edcad95dd9d69?pvs=4"><span class="notion">GenieQ가 처음이신가요?</span></a>
              <router-link to="/singup" class="signup-link">계정 만들기</router-link>
            </div>
          </div>
        </div>
      </div>
+     <Footer/>
    </template>
    
    <script setup>
+   import Footer from '@/components/common/footer.vue';
    </script>
    
    <style scoped>
+    .footer {
+        background-color: #ffffff;
+    }
+
    .login-container {
      display: flex;
      flex-direction: column;

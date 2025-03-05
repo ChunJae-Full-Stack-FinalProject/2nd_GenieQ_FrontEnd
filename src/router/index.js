@@ -5,6 +5,7 @@ import Frame from '@/views/Frame.vue'
 import TestHomeComponent from '@/components/test/TestHomeComponent.vue'
 import ImmediatelyComponent from '@/components/test/ImmediatelyComponent.vue'
 import ExampleView from '@/views/ExampleView.vue'
+import SingUpPage from '@/components/auth/SingUpPage.vue'
 
 // 로그인 상태 체크 가드
 const requireAuth = (to, from, next) => {
@@ -21,6 +22,8 @@ const router = createRouter({
     // 인증 없이 접근 가능 - 로그인 페이지
     { path: '/login', name: 'login', component: LoginView },
     { path: '/ex', name: 'ex', component: ExampleView },
+    // { path: '/singup', name: 'signup', component: ()=> import('../components/auth/SingUpPage.vue')},
+    { path: '/singup', name: 'signup', component:SingUpPage },
     
     // Frame 컴포넌트를 부모로 하는 중첩 라우트 구조
     { path: '/', component: Frame, // beforeEnter: requireAuth, // 인증 필요 - 모든 자식 라우트
