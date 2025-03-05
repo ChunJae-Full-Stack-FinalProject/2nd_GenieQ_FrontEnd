@@ -2,7 +2,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import LoginView from '@/views/LoginView.vue'
 import Frame from '@/views/Frame.vue'
-import TestHomeComponent from '@/components/test/HomeComponent.vue'
+import TestHomeComponent from '@/components/test/TestHomeComponent.vue'
 import ImmediatelyComponent from '@/components/test/ImmediatelyComponent.vue'
 import ExampleView from '@/views/ExampleView.vue'
 
@@ -28,8 +28,8 @@ const router = createRouter({
         { path: '', redirect: '/home' },
         { path: 'home', name: 'home', component: TestHomeComponent },
         { path: 'immediately', name: 'immediately', component: ImmediatelyComponent },
-        // 나중에 컴포넌트가 생성될 때 추가되도록 설정
-        { path: 'mypage', name: 'mypage', component: () => import('@/components/test/DelayComponent.vue') },
+        // 나중에 컴포넌트가 생성될 때 추가되도록 설정, 위에 import 안하고 사용 가능
+        { path: 'delay', name: 'delay', component: () => import('@/components/test/DelayComponent.vue') },
       ]
     },
     

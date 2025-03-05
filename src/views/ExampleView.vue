@@ -16,7 +16,7 @@
 </template>
 
 <script setup>
-import TestSideNavBarComponent from '@/components/test/SideNavBarComponent.vue';
+import TestSideNavBarComponent from '@/components/test/TestSideNavBarComponent.vue';
 </script>
 
 <style scoped>
