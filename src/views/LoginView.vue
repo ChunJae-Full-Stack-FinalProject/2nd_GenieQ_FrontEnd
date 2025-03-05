@@ -1,13 +1,12 @@
-<template lang="html">
-    <div>
-        hello<Icon icon="ic:baseline-content-paste" width="24" height="24" />
+<template>
+    <div class="login-container">
+        로그인 페이지를 작성
+        
     </div>
-</template>
-<script>
-export default {
-    
-}
-</script>
-<style lang="css">
-    
-</style>
+  </template>
+  
+  <script>
+  </script>
+  
+  <style scoped>
+  </style>
