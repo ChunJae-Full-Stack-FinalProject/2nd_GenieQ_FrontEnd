@@ -45,19 +45,6 @@
 
 </script>
 <style scoped>
-#create-passage-main {
-    box-sizing: border-box;
-
-    position: absolute;
-    width: 928px;
-    height: 584px;
-    left: 292px;
-    top: 118px;
-
-    background: #FFFFFF;
-    border: 1px solid #BDBDBD;
-    border-radius: 12px;
-}
 #main-title {
     position: absolute;
     width: 87px;
@@ -73,6 +60,19 @@
 
     letter-spacing: -0.02em;
     color: #000000;
+}
+.input-container {
+    box-sizing: border-box;
+
+    position: absolute;
+    width: 928px;
+    height: 584px;
+    left: 292px;
+    top: 118px;
+
+    background: #FFFFFF;
+    border: 1px solid #BDBDBD;
+    border-radius: 12px;
 }
 #input-head {
     position: absolute;
@@ -189,26 +189,24 @@
 .category-option label::before {
     content: '';
     position: absolute;
-    left: 0;
-    top: 3.5px;
+    left: 2px;
+    top: 6px;
     width: 12px;
     height: 12px;
     border: 1.5px solid #ddd;
     border-radius: 50%;
     background: #fff;
 }
-.category-option input[type="radio"]:checked + label:before {
-    border-color: #FF9F40;
-}
 .category-option input[type="radio"]:checked + label:after {
     content: '';
     position: absolute;
-    left: 3px;
-    top: 8px;
-    width: 8px;
-    height: 7px;
+    left: 2px;
+    top: 6px;
+    width: 12px;
+    height: 12px;
     border-radius: 50%;
-    background: #FF9F40; /* 주황색 내부 원 */
+    border: none;
+    background-color: #FF9F40;
 }
 
 .text-container {
