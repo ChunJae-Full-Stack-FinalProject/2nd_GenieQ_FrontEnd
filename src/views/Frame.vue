@@ -1,13 +1,15 @@
 <template>
 <div class="frame">
     <Sidebar/>
-    <Footer/>
+    <GenieQFooter/>
+    <TermsVies/>
 </div>
 </template>
 
 <script setup>
 import Sidebar from '@/components/common/Sidebar.vue';
-import Footer from '@/components/common/footer.vue'
+import GenieQFooter from '@/components/common/Footer.vue'
+import TermsVies from '@/components/common/TermsView.vue'
 </script>
 
 <style scoped>
