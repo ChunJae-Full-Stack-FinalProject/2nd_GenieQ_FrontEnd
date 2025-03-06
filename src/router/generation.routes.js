@@ -1,5 +1,6 @@
-import PassageContent from "@/components/generation/PassageContent.vue";
-import PassageMain from "@/components/generation/PassageMain.vue";
+import PassageContent from "@/components/generation/passage/PassageContent.vue";
+import PassageMain from "@/components/generation/passage/PassageMain.vue";
+import QuestionMain from "@/components/generation/question/QuestionMain.vue";
 
 // passage 라우트를 라우트 객체 배열로 정의
 const generationRoutes = [
@@ -10,6 +11,13 @@ const generationRoutes = [
         { path: '', name: 'passage-main', component: PassageMain },
         { path: 'create', name: 'passage-create', component: PassageContent },
       ]
+    },
+    {
+        path: 'question',
+        name: 'question',
+        children: [
+            { path: '', name: 'question-main', component: QuestionMain },
+        ]
     }
   ];
   
