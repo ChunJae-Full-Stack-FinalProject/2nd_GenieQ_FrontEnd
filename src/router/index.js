@@ -7,6 +7,8 @@ import ImmediatelyComponent from '@/components/test/ImmediatelyComponent.vue'
 import ExampleView from '@/views/ExampleView.vue'
 import MyPageMain from '@/components/mypage/MyPageMain.vue'
 import SingUpPage from '@/components/auth/SingUpPage.vue'
+import TermsView from '@/components/common/TermsView.vue'
+import PolicyView from '@/components/common/Privacy.vue'
 
 // 각 페이지의 라우트들 import
 import generationRoutes from './generation.routes'
@@ -36,6 +38,8 @@ const router = createRouter({
         { path: 'immediately', name: 'immediately', component: ImmediatelyComponent },
         { path: 'mypage', name: 'mypage', component: MyPageMain },
         ...generationRoutes,
+        { path: '/terms', component: TermsView }, //이용약관
+        { path: "/privacy", component: PolicyView}, //개인정보
         // 나중에 컴포넌트가 생성될 때 추가되도록 설정, 위에 import 안하고 사용 가능
         { path: 'delay', name: 'delay', component: () => import('@/components/test/DelayComponent.vue') },
         
