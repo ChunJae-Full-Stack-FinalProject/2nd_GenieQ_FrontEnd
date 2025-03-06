@@ -18,7 +18,7 @@
       </div>
 
       <!-- 검색 입력창 -->
-      <div class="search-container">
+      <div v-if="!selectedPassage" class="search-container">
         <input
           type="text"
           v-model="searchQuery"
@@ -58,7 +58,7 @@
 
       <!-- 버튼 영역 -->
       <div class="modal-footer">
-        <BaseButton text="닫기" type="type3" width="140px" height="54px" @click="closeModal" />
+        <BaseButton :text="selectedPassage ? '이전으로' : '닫기'" type="type3" width="140px" height="54px" @click="handleBackOrClose" />
         <BaseButton text="불러오기" type="type1" width="182px" height="54px" :disabled="filteredPassages.length === 0"/>
       </div>
     </div>
@@ -66,7 +66,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed  } from "vue";
 import { Icon } from "@iconify/vue";
 import BaseModal from "../../BaseModal.vue";
 import BaseButton from "@/components/common/button/BaseButton.vue";
@@ -123,6 +123,7 @@ const emit = defineEmits(["close"]);
 const searchQuery = ref("");
 const activeTab = ref("recent");
 const selectedPassage = ref(null); // ✅ 선택된 지문 저장
+const activatedPassage = ref(null);
 
 // ✅ 미리보기 버튼을 클릭하면 지문 선택
 const selectPassage = (passage) => {
@@ -130,6 +131,15 @@ const selectPassage = (passage) => {
 };
 
 // ✅ 닫기 버튼 클릭 시 초기화
+const handleBackOrClose = () => {
+  if (selectedPassage.value) {
+    selectedPassage.value = null; // '이전으로' 클릭 시 목록 화면으로 전환
+    selectedPassage = { ...selectedPassage };
+  } else {
+    closeModal(); // '닫기' 클릭 시 모달 닫기
+  }
+};
+
 const closeModal = () => {
   emit("close");
   searchQuery.value = "";

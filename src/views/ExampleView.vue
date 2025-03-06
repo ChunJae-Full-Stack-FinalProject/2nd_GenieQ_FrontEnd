@@ -15,7 +15,7 @@
           <div>
             <h2>기본 버튼</h2>
               <!-- 기본 크기 -->
-              <BaseButton text="TYPE 1" type="type1" @click="handleClick" />
+              <BaseButton text="TYPE 1" type="type1"/>
 
               <!-- 크기 변경 -->
               <BaseButton text="LARGE BUTTON" type="type2" width="200px" height="50px" />
