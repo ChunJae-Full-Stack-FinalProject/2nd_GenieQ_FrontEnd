@@ -9,7 +9,8 @@
             <BaseButton id="save-button" text="저장하기" type="type2" width="248px" height="54px" />
             <BaseButton id="download-button" text="추출하기" type="type2" width="248px" height="54px" disabled/>
             <BaseButton id="connect-create-button" text="이어서 문항 추출하기" type="type4" width="520px" height="54px" />
-
+            <PlainTooltip id="download-message" message="추출은 저장 후 가능해요" width="205px"/>
+            <PlainTooltip id="start-edit" message="필요한 부분을 클릭하고 편집을 시작하세요" width="316px"/>
         </div>
     </div>
 </template>
@@ -17,7 +18,9 @@
 import InputPassageTitle from '@/components/generation/passage/PassageContent/InputPassageTitle.vue';
 import PassageContentMain from '@/components/generation/passage/PassageContent/PassageContentMain.vue';
 import PassageSummary from '@/components/generation/passage/PassageContent/PassageSummary.vue';
-import BaseButton from '../common/button/BaseButton.vue';
+import BaseButton from '@/components/common/button/BaseButton.vue';
+import PlainTooltip from '@/components/common/PlainTooltip.vue';
+
 </script>
 <style scoped>
 #main-title {
@@ -57,5 +60,15 @@ import BaseButton from '../common/button/BaseButton.vue';
     position: absolute;
     top: 854px;
     left: 1244px;
+}
+#download-message {
+    position: absolute;
+    top: 803px;
+    left: 1059px;
+}
+#start-edit {
+    position: absolute;
+    top: 185px;
+    left: 800px;
 }
 </style>
