@@ -1,1 +1,0 @@
-## 현재 위치 : @/components/generation
