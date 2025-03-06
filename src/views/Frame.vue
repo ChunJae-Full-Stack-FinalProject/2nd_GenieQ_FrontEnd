@@ -4,16 +4,17 @@
     <div class="main-content">
       <router-view />
     </div>
-    <Footer/>
+    <GenieQFooter/>
 </div>
 </template>
 
 <script setup>
 import Sidebar from '@/components/common/Sidebar.vue';
-import Footer from '@/components/common/Footer.vue'
+import GenieQFooter from '@/components/common/Footer.vue';
 </script>
 
 <style scoped>
+
 .side-bar{
   width: 156px;
 }
@@ -25,7 +26,6 @@ import Footer from '@/components/common/Footer.vue'
   min-height: 100vh; /* ✅ 전체 높이를 최소 100vh로 유지 */
   overflow: hidden; /* ✅ 내부 스크롤 방지 */
 }
-/* ✅ 사이드바를 제외한 컨텐츠 영역 */
 .main-content {
   margin-left: 156px; /* ✅ 사이드바 공간 확보 */
   min-height: 100vh; /* ✅ 전체 높이 유지 */

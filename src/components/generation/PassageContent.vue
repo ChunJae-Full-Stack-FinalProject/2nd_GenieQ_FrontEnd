@@ -1,6 +1,5 @@
 <template>
     <div class="app-container">
-        <!-- <Sidebar/> 컴포넌트 추가 -->
         <div class="main-content">
             <p id="main-title">지문 생성</p>
             <InputPassageTitle/>
