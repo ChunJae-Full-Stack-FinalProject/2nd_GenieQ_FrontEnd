@@ -5,6 +5,11 @@
             <InputPassageTitle/>
             <PassageContentMain/>   
             <PassageSummary/>
+            <BaseButton id="recreate-button" text="재생성하기(1회 차감)" type="type2" width="248px" height="54px" />
+            <BaseButton id="save-button" text="저장하기" type="type2" width="248px" height="54px" />
+            <BaseButton id="download-button" text="추출하기" type="type2" width="248px" height="54px" disabled/>
+            <BaseButton id="connect-create-button" text="이어서 문항 추출하기" type="type4" width="520px" height="54px" />
+
         </div>
     </div>
 </template>
@@ -12,6 +17,7 @@
 import InputPassageTitle from '@/components/generation/passage/PassageContent/InputPassageTitle.vue';
 import PassageContentMain from '@/components/generation/passage/PassageContent/PassageContentMain.vue';
 import PassageSummary from '@/components/generation/passage/PassageContent/PassageSummary.vue';
+import BaseButton from '../common/button/BaseButton.vue';
 </script>
 <style scoped>
 #main-title {
@@ -30,5 +36,26 @@ import PassageSummary from '@/components/generation/passage/PassageContent/Passa
 
     letter-spacing: -0.02em;
     color: #000000;
+}
+
+#recreate-button {
+    position: absolute;
+    top: 854px;
+    left: 428px;
+}
+#save-button {
+    position: absolute;
+    top: 854px;
+    left: 700px;
+}
+#download-button {
+    position: absolute;
+    top: 854px;
+    left: 972px;
+}
+#connect-create-button {
+    position: absolute;
+    top: 854px;
+    left: 1244px;
 }
 </style>
