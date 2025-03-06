@@ -43,10 +43,9 @@ const isActive = (path) => {
 <style scoped>
 .sidebar {
   width: 156px;
-  height: 100vh; /* ✅ 화면 높이에 맞춤 */
+  height: 100vh; /* 화면 높이에 맞춤 */
   background-color: #16252D;
   color: white;
-  position: fixed;
   top: 0;
   left: 0;
   padding: 20px 0;
@@ -64,9 +63,9 @@ const isActive = (path) => {
 }
 
 .nav-item {
-  display: flex; /* ✅ flex로 설정 */
+  display: flex; /* flex로 설정 */
   align-items: center;
-  width: 100%; /* ✅ 사이드바 전체 너비 맞춤 */
+  width: 100%; /* 사이드바 전체 너비 맞춤 */
   padding: 16px 20px;
   gap: 8px;
   color: white;
@@ -79,22 +78,22 @@ const isActive = (path) => {
   margin-right: 10px;
 }
 
-/* ✅ 현재 선택된 메뉴(홈, 지문 생성, 문항 생성, 자료실) 스타일 */
+/* 현재 선택된 메뉴(홈, 지문 생성, 문항 생성, 자료실) 스타일 */
 .active-box {
-  display: flex; /* ✅ 블록 요소처럼 확장 */
+  display: flex; /* 블록 요소처럼 확장 */
   align-items: center;
   background: #FF9F40 !important;
   color: #FFFFFF !important;
-  width: 100%; /* ✅ 사이드바 전체 너비 맞춤 */
-  border-radius: 0; /* ✅ 둥근 모서리 제거 */
+  width: 100%; /*  사이드바 전체 너비 맞춤 */
+  border-radius: 0; /*  둥근 모서리 제거 */
 }
 
-/* ✅ 마이페이지 선택 시 글씨 색만 변경 */
+/* 마이페이지 선택 시 글씨 색만 변경 */
 .active-text {
   color: #FF9F40 !important;
 }
 
-/* ✅ 마이페이지를 하단에 정렬 */
+/* 마이페이지를 하단에 정렬 */
 .bottom-menu {
   margin-top: auto;
   padding-bottom: 20px;

@@ -46,7 +46,16 @@
             <!-- 지문 불러오기 모달 -->
             <LoadPassageModal :isOpen="showLoadPassageModal" @close="showLoadPassageModal = false"/>
           </div>
+
+          <!-- 기본 tooltip -->
+        <div>
+          <PlainTooltip id="example" message="Test Message" width="153px"/>
+          <!-- 피그마에 뜬 width값에 20 더해서 width 속성에 넣어주세요!! -->
+           <!-- id값을 이용해서 style 태그에 position:absolute; top:00px; left:00px; 로 위치 조정해주세요 -->
         </div>
+        </div>
+
+        
     </div>
 </template>
 
@@ -57,12 +66,14 @@ import ConfirmModal from '@/components/common/modal/type/ConfirmModalComponent.v
 import WarningModal from '@/components/common/modal/type/WarningModalComponent.vue';
 import FileSelectModal from '@/components/common/modal/type/FileSelectModal.vue';
 import LoadPassageModal from '@/components/common/modal/type/generation/LoadPassageModal.vue';
+import PlainTooltip from '@/components/common/PlainTooltip.vue';
 import { ref } from "vue";
 
 const showConfirmModal = ref(false);
 const showWarningModal = ref(false);
 const showFileModal = ref(false);
 const showLoadPassageModal = ref(false);
+
 </script>
 
 <style scoped>
