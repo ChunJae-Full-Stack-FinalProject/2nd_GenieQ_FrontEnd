@@ -14,8 +14,8 @@
                             type="type3"
                             :width="type.width"
                             height="40px"
-                            :class="{ active: activePattern === type.id }"
-                            @click="activePattern = type.id"
+                            :class="{ active: activePattern === type.label }"
+                            @click="activePattern = type.label"
                         />
                     </div>
                 </div>
@@ -30,8 +30,8 @@
                             type="type3"
                             :width="type.width"
                             height="40px"
-                            :class="{ active: activeType === type.id }"
-                            @click="activeType = type.id"
+                            :class="{ active: activeType === type.label }"
+                            @click="activeType = type.label"
                         />
                     </div>
                 </div>
@@ -47,46 +47,74 @@
                             type="type3"
                             :width="level.width"
                             height="40px"
-                            :class="{ active: activeDifficulty === level.id }"
-                            @click="activeDifficulty = level.id"
+                            :class="{ active: activeDifficulty === level.label }"
+                            @click="activeDifficulty = level.label"
                         />
                     </div>
                 </div>
             </div>
             <div class="example-group">
-                <div class="example-list empty">
-                  <div class="empty-list">문항 유형과 서술 방식을 선택해 주세요.</div>
+                <!-- ✅ 필터링된 리스트 -->
+                 <div class="example-list">
+                <div class="list-wrapper" v-if="filteredQuestions.length > 0">
+                    <div
+                    v-for="(item, index) in filteredQuestions"
+                    :key="index"
+                    class="example-item"
+                    :class="{ active: selectedQuestion === item }"
+                    @click="selectedQuestion = item"
+                    >
+                    <span class="category">{{ item.pattern }}</span>
+                    <div class="question-title">{{ item.title }}</div>
+                    </div>
                 </div>
+
+                <!-- ✅ 필터링된 문항이 없을 때 -->
+                <div v-else>
+                    <div class="empty-msg">문항 유형과 서술 방식을 선택해 주세요.</div>
+                </div>
+                </div>
+
+                <!-- ✅ 선택된 문항 미리보기 -->
                 <div class="example-preview">
                     <div class="preview-title">문항 미리보기</div>
-                </div>     
+                    <div v-if="selectedQuestion">
+                    <div class="question-title">{{ selectedQuestion.title }}</div>
+                    <div class="question-content">{{ selectedQuestion.question }}</div>
+                    </div>
+                </div>    
             </div>
              <!-- 버튼 영역 -->
             <div class="modal-footer">
                 <PlainTooltip id="tooltip" message="생성 시 이용권 1회 차감" width="205px"/>
                 <BaseButton text="닫기" type="type3" width="140px" height="54px" @click="closeModal" />
-                <BaseButton text="문항 생성하기" type="type1" width="182px" height="54px" disabled/>
+                <BaseButton text="문항 생성하기" type="type1" width="182px" height="54px" :disabled="!selectedQuestion"/>
             </div>
         </div>
     </BaseModal>
 </template>
 <script setup>
-import { ref } from "vue";
+import { ref, computed, watch } from "vue";
 import BaseModal from "../../BaseModal.vue";
 import BaseButton from "@/components/common/button/BaseButton.vue";
 import PlainTooltip from '@/components/common/PlainTooltip.vue';
+import questionExample from '@/assets/data/questionExample.json';
 
 const emit = defineEmits(["close"]);
 
 const activePattern = ref(null); // 문항 유형 선택값
 const activeType = ref(null); // 서술 방식 선택값
 const activeDifficulty = ref(null); // 난이도 선택값
+const selectedQuestion = ref(null); // 선택된 문항을 ref로 저장
+
+
 
 const closeModal = () => {
   emit("close");
   activePattern.value = null;
   activeType.value = null;
   activeDifficulty.value = null;
+  selectedQuestion.value = null;
 };
 
 const questionPattern = ref([
@@ -109,7 +137,30 @@ const difficultyLevels = ref([
     { id: 11, label: "상", width: "38px" },
 ]);
 
+const questions = questionExample;
 
+// ✅ 선택된 라디오 버튼에 따라 자동 필터링
+const filteredQuestions = computed(() => {
+  return questionExample.filter((q) => {
+    return (
+      (activePattern.value === null || activePattern.value === "전체" || q.pattern === activePattern.value) &&
+      (activeType.value === null || activeType.value === "전체" || q.type === activeType.value) &&
+      (activeDifficulty.value === null || activeDifficulty.value === "전체" || q.difficulty === activeDifficulty.value)
+    );
+  });
+});
+
+// ✅ 필터링된 리스트 변경 시 첫 번째 문항을 자동으로 선택
+watch(filteredQuestions, (newList) => {
+  if (newList.length > 0) {
+    // 기존 선택 문항이 필터링 결과에 포함되지 않으면 첫 번째 문항 선택
+    if (!selectedQuestion.value || !newList.includes(selectedQuestion.value)) {
+      selectedQuestion.value = newList[0];
+    }
+  } else {
+    selectedQuestion.value = null;
+  }
+});
 </script>
 
 <style scoped>
@@ -170,9 +221,9 @@ color: #BDBDBD;
 
 /* ✅ 활성화된 Chip 스타일 */
 .chip.active {
-    background-color: #FFEDDC; /* 활성화 Fill 색상 */
-    border: 1px solid #FF9F40; /* 활성화 라인 색상 */
-    color: #FF9F40; /* 활성화 글씨 색상 */
+    background-color: #FFEDDC;
+    border: none;
+    color: #FF9F40;
 }
 
 .example-group{
@@ -186,16 +237,63 @@ color: #BDBDBD;
     border-radius: 20px;
     border: 1px solid #BDBDBD;
     padding: 20px;
-    flex-wrap: wrap;
-}
-
-.empty{
     display: flex;
     align-items: center;
     justify-content: center;
 }
+.list-wrapper{
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 545px;
+    height: 550px;
+    max-height: 550px;
+    overflow-y: scroll;
+}
 
-.empty-list{
+.example-item{
+    width: 510px;
+    height: 96px;
+    border-radius: 20px;
+    border: 1px solid #BDBDBD;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 16px;
+    gap: 10px;
+    cursor: pointer;
+}  
+
+/* ✅ 활성화된 example-item 스타일 */
+.example-item.active {
+    border: 1px solid #FF9F40;
+    background-color: #FFF5EB;
+}
+
+
+.category{
+    width: 100px;
+    height: 32px;
+    border-radius: 8px;
+    padding: 4px 8px;
+    border: 1px solid #FF9F40;
+    color: #FF9F40;
+    background-color: #FFE5CA;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 150%;
+    letter-spacing: -2%;
+}
+
+.question-title{
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 150%;
+    letter-spacing: -2%;
+    color: #303030;
+}
+
+.empty-msg{
     font-weight: 700;
     font-size: 20px;
     line-height: 150%;
@@ -211,6 +309,8 @@ color: #BDBDBD;
     border: 1px solid #BDBDBD;
     padding: 24px;
     display: flex;
+    flex-direction: column;
+    align-items: flex-start;
 }
 
 .preview-title{
@@ -218,6 +318,24 @@ color: #BDBDBD;
     font-size: 20px;
     line-height: 150%;
     letter-spacing: -2%;
+    margin-bottom: 30px;
+}
+
+.question-title{
+    font-weight: 400;
+    font-size: 20px;
+    line-height: 150%;
+    letter-spacing: -2%;
+    margin-bottom: 12px;
+}
+
+.question-content{
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 40px;
+    letter-spacing: -2%;
+    white-space: pre-wrap;
+    text-align: start;
 }
 
 /* 버튼 영역 */
