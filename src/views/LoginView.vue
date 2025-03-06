@@ -29,7 +29,7 @@
            </div>
            
            <div class="login-options">
-             <router-link to="/find-account" class="find-account">비밀번호 찾기</router-link>
+             <router-link to="/passwordsearch" class="find-account">비밀번호 찾기</router-link>
            </div>
            
            <button @click="login" class="login-button">로그인하기</button>

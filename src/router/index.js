@@ -5,7 +5,6 @@ import Frame from '@/views/Frame.vue'
 import TestHomeComponent from '@/components/test/TestHomeComponent.vue'
 import ImmediatelyComponent from '@/components/test/ImmediatelyComponent.vue'
 import ExampleView from '@/views/ExampleView.vue'
-import MyPageMain from '@/components/mypage/MyPageContent.vue'
 import TermsView from '@/components/common/TermsView.vue'
 import PolicyView from '@/components/common/Privacy.vue'
 
