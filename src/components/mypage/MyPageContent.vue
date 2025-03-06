@@ -10,6 +10,9 @@
 </template>
 <script setup>
     import Info from './Info.vue';
+    import Ticket from './Ticket.vue';
+    import Notice from './Notice.vue';
+    import Fnq from './Fnq.vue';
 </script>
 <style scoped>
     
