@@ -1,9 +1,9 @@
 <template>
-    <div class="terms-page">
-      <div class="terms-container">
-        <h1>이용약관</h1>
-        <div class="terms-box">
-          <pre>{{ termsText }}</pre> 
+    <div class="privacy-page">
+      <div class="privacy-container">
+        <h1>개인정보 처리방침</h1>
+        <div class="privacy-box">
+          <pre>{{ privacyText }}</pre> 
         </div>
       </div>
     </div>
@@ -12,16 +12,16 @@
 <script setup>
 import { ref, onMounted } from "vue";
 
-const termsText = ref("");
+const privacyText = ref("");
 const files = import.meta.glob("@/assets/policy/*.txt", { as: "raw" });
 
 onMounted(async () => {
   try {
-    const file = await files["/src/assets/policy/terms.txt"](); 
-    termsText.value = file; 
+    const file = await files["/src/assets/policy/privacy.txt"](); 
+    privacyText.value = file;
   } catch (error) {
-    console.error("이용약관을 불러오는 중 오류 발생:", error);
-    termsText.value = "이용약관을 불러오는 중 오류가 발생했습니다.";
+    console.error("개인정보 처리방침을 불러오는 중 오류 발생:", error);
+    privacyText.value = "개인정보 처리방침을 불러오는 중 오류가 발생했습니다.";
   }
 });
 </script>
@@ -29,13 +29,13 @@ onMounted(async () => {
 <style scoped>
 /* 전체 스크롤 문제 해결 */
 html, body {
-  overflow-x: hidden; /*가로 스크롤 제거 */
+  overflow-x: hidden; /* 가로 스크롤 제거 */
   margin: 0;
   padding: 0;
 }
 
 /* 배경색 적용 및 높이 자동 조정 */
-.terms-page {
+.privacy-page {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -45,8 +45,8 @@ html, body {
   padding-bottom: 50px;
 }
 
-/* 이용약관 컨텐츠 중앙 배치 */
-.terms-container {
+/* 개인정보 처리방침 컨텐츠 중앙 배치 */
+.privacy-container {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -57,8 +57,8 @@ html, body {
   padding: 50px 0;
 }
 
-/* 스크롤을 `terms-box` 내부에서만 적용 */
-.terms-box {
+/* 스크롤을 `privacy-box` 내부에서만 적용 */
+.privacy-box {
   width: 100%;
   height: 552.19px;
   background-color: #FFFFFF;
@@ -71,10 +71,11 @@ html, body {
   line-height: 1.5;
 }
 
-.terms-container h1 {
+/* 제목 왼쪽 정렬 */
+.privacy-container h1 {
   width: 100%;
-  text-align: left; /* 왼쪽 정렬 */
-  padding-left: 15px; /* 왼쪽 여백 추가 */
+  text-align: left;
+  padding-left: 15px;
 }
 
 </style>
