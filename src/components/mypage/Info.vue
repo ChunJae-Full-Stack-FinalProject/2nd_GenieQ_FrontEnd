@@ -1,54 +1,54 @@
 <template>
-    <div id="mypage-info">
-      <h2 class="page-title">마이페이지</h2>
-      <div class="tab-menu">
-        <span class="active-tab">회원정보</span>
-        <span>이용권</span>
-        <span>공지사항</span>
-        <span>자주 묻는 질문</span>
-      </div>
-  
-      <div class="info-container">
-        <section class="info-section">
-          <h3 class="info-title">기본 정보</h3>
-          <div class="info-box">
-            <div class="info-item">
-              <span class="info-label">이름</span>
-              <span class="info-value">송겨울</span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">이메일</span>
-              <span class="info-value">songwinter@naver.com</span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">비밀번호</span>
-              <span class="info-value">********</span>
-            </div>
+  <div id="mypage-info">
+    <h2 class="page-title">마이페이지</h2>
+    <div class="tab-menu">
+      <span class="active-tab">회원정보</span>
+      <span>이용권</span>
+      <span>공지사항</span>
+      <span>자주 묻는 질문</span>
+    </div>
+
+    <div class="info-container">
+      <section class="info-section">
+        <h3 class="info-title">기본 정보</h3>
+        <div class="info-box">
+          <div class="info-item">
+            <span class="info-label">이름</span>
+            <span class="info-value">송겨울</span>
           </div>
-        </section>
-  
-        <section class="info-section">
-          <h3 class="info-title">추가 정보</h3>
-          <div class="info-box">
-            <div class="info-item">
-              <span class="info-label">성별</span>
-              <span class="info-value">여성</span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">소속</span>
-              <span class="info-value">고등교사</span>
-            </div>
+          <div class="info-item">
+            <span class="info-label">이메일</span>
+            <span class="info-value">songwinter@naver.com</span>
           </div>
-        </section>
-  
-        <button class="edit-button">정보 변경하기</button>
-  
-        <div class="account-actions">
-          <span class="delete-account">회원 탈퇴</span>
-          <span class="logout">로그아웃</span>
+          <div class="info-item">
+            <span class="info-label">비밀번호</span>
+            <span class="info-value">********</span>
+          </div>
         </div>
+      </section>
+
+      <section class="info-section">
+        <h3 class="info-title">추가 정보</h3>
+        <div class="info-box">
+          <div class="info-item">
+            <span class="info-label">성별</span>
+            <span class="info-value">여성</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">소속</span>
+            <span class="info-value">고등교사</span>
+          </div>
+        </div>
+      </section>
+
+      <button class="edit-button">정보 변경하기</button>
+
+      <div class="account-actions">
+        <span class="delete-account">회원 탈퇴</span>
+        <span class="logout">로그아웃</span>
       </div>
     </div>
+  </div>
 </template>
 
 <script setup>
@@ -56,5 +56,103 @@
 </script>
 
 <style scoped>
+  #mypage-info {
+    position: relative;
+    width: 1920px;
+    height: 973px;
+    left: 1851px;
+    top: 12547px;
+    background: #F6F6F6;
+  }
 
+  .page-title {
+    position: absolute;
+    width: 102px;
+    height: 36px;
+    left: 40px;
+    top: 40px;
+    font-family: 'Pretendard';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 24px;
+    line-height: 150%;
+    letter-spacing: -0.02em;
+    color: #303030;
+  }
+
+  .tab-menu {
+
+  }
+
+  .active-tab {
+
+  }
+
+  .info-container {
+
+  }
+
+  .info-section {
+      
+  }
+
+  .info-title {
+
+  }
+
+  .info-box {
+
+  }
+
+  .info-item {
+
+  }
+
+  .info-label {
+
+  }
+
+  .info-value {
+
+  }
+
+  .info-item {
+
+  }
+
+  .info-label {
+
+  }
+
+  .info-value {
+
+  }
+
+  .info-item {
+
+  }
+
+  .info-label {
+
+  }
+
+  .info-value {
+
+  }
+
+  .edit-button {
+
+  }
+
+  .account-actions {
+
+  }
+
+  .delete-account {
+
+  }
+
+  .logout {
+
+  }
 </style>  
