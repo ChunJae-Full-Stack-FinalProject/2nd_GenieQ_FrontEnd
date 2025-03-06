@@ -1,11 +1,9 @@
 <template>
-    <div class="app-container">
-        <div class="main-content">
-            <Info/>
-            <Ticket/>
-            <Notice/>
-            <Fnq/>
-        </div>
+    <div id="content-container">
+        <Info/>
+        <Ticket/>
+        <Notice/>
+        <Fnq/>
     </div>
 </template>
 <script setup>
@@ -15,5 +13,9 @@
     import Fnq from './Fnq.vue';
 </script>
 <style scoped>
-    
+    #content-container {
+        position: absolute;
+        left: 156px;
+        top: 182px;
+    }
 </style>
