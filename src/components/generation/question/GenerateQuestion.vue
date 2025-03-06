@@ -3,10 +3,12 @@
         <p id="main-head">문항 생성</p>
         <div class="main-content">
             <PassageTitle/>
+            <EditPassageQuestion/>
         </div>
     </div>
 </template>
 <script setup>
+import EditPassageQuestion from './GenerateQuestion/EditPassageQuestion/EditPassageQuestion.vue';
 import PassageTitle from './GenerateQuestion/PassageTitle.vue';
 
 
