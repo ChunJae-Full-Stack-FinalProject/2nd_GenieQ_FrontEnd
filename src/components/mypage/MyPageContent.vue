@@ -3,14 +3,14 @@
         <Info/>
         <Ticket/>
         <Notice/>
-        <Fnq/>
+        <Faq/>
     </div>
 </template>
 <script setup>
     import Info from './Info.vue';
     import Ticket from './Ticket.vue';
     import Notice from './Notice.vue';
-    import Fnq from './Fnq.vue';
+    import Faq from './Faq.vue';
 </script>
 <style scoped>
     #content-container {
