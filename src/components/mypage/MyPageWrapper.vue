@@ -12,7 +12,7 @@
       </span>
     </div>
   </div>
-  <MyPageContent/>
+  <MyPageContent :selectedTab="selectedTab"/>
 </template>
 
 <script setup>
@@ -47,6 +47,16 @@ const tabs = ["회원정보", "이용권", "공지사항", "자주 묻는 질문
   color: #303030;
   left: 40px; /* 왼쪽 간격 유지 */
   top: 40px;
+
+  font-family: 'Pretendard';
+  font-style: normal;
+  font-weight: 700;
+  font-size: 15.5px;
+  line-height: 150%;
+
+  letter-spacing: -0.02em;
+
+  color: #303030;
 }
 
 /* 상단 탭 메뉴 */
@@ -54,8 +64,8 @@ const tabs = ["회원정보", "이용권", "공지사항", "자주 묻는 질문
   display: flex;
   flex-direction: row;
   align-items: center;
-  padding-left: 180px; /* "마이페이지" 끝나는 지점부터 시작 */
-  gap: 40px; /* 탭 간격 동일하게 설정 */
+  padding-left: 180px; 
+  gap: 40px; 
   position: absolute;
   width: auto;
   height: 50px;
@@ -67,11 +77,26 @@ const tabs = ["회원정보", "이용권", "공지사항", "자주 묻는 질문
   font-size: 16px;
   padding: 10px 20px;
   cursor: pointer;
+
+  font-family: 'Pretendard';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 12.9167px;
+  line-height: 150%;
+
+  letter-spacing: -0.02em;
+
+  color: #303030;
+
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+
 }
 
 /* 선택된 탭 스타일 (볼드 + 밑줄) */
 .active-tab {
   border-bottom: 2px solid #FF9F40;
-  font-weight: bold;
+  font-weight: bold !important;
 }
 </style>
