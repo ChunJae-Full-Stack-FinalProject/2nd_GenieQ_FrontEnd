@@ -5,7 +5,9 @@ import Frame from '@/views/Frame.vue'
 import TestHomeComponent from '@/components/test/TestHomeComponent.vue'
 import ImmediatelyComponent from '@/components/test/ImmediatelyComponent.vue'
 import ExampleView from '@/views/ExampleView.vue'
-import GenerationMain from '@/components/generation/GenerationMain.vue'
+import MyPageMain from '@/components/mypage/MyPageMain.vue'
+import PassageLayout from '@/components/generation/PassageLayout.vue'
+import SingUpPage from '@/components/auth/SingUpPage.vue'
 import TermsView from '@/components/common/TermsView.vue'
 import PolicyView from '@/components/common/Privacy.vue'
 
@@ -24,6 +26,7 @@ const router = createRouter({
     // 인증 없이 접근 가능 - 로그인 페이지
     { path: '/login', name: 'login', component: LoginView },
     { path: '/ex', name: 'ex', component: ExampleView },
+    { path: '/singup', name:'singup', component:SingUpPage},
     
     // Frame 컴포넌트를 부모로 하는 중첩 라우트 구조
     { path: '/', component: Frame, // beforeEnter: requireAuth, // 인증 필요 - 모든 자식 라우트
@@ -31,11 +34,13 @@ const router = createRouter({
         { path: '', redirect: '/home' },
         { path: 'home', name: 'home', component: TestHomeComponent },
         { path: 'immediately', name: 'immediately', component: ImmediatelyComponent },
-        { path: 'passage', name: 'passage', component: GenerationMain },
+        { path: 'mypage', name: 'mypage', component: MyPageMain },
+        { path: 'passage', name: 'passage', component: PassageLayout, },
         { path: '/terms', component: TermsView }, //이용약관
         { path: "/privacy", component: PolicyView}, //개인정보
         // 나중에 컴포넌트가 생성될 때 추가되도록 설정, 위에 import 안하고 사용 가능
         { path: 'delay', name: 'delay', component: () => import('@/components/test/DelayComponent.vue') },
+        
       ]
     },
     // 존재하지 않는 페이지 처리
