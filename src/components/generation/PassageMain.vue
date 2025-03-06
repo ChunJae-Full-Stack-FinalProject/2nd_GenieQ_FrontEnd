@@ -6,7 +6,7 @@
             <BaseButton id="reset_button" text="초기화" type="type2" width="248px" height="54px" />
 
             <router-link to="/passage/create">
-                <!-- front 작업할 때 disabled 속성 추가해야함 -->
+            <!-- front 작업할 때 disabled 속성 추가해야함 -->
                 <BaseButton id="create_button" text="지문 생성하기" type="type2" width="248px" height="54px"/>
             </router-link>
 
