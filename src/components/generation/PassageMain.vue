@@ -21,35 +21,13 @@ import BaseButton from '../common/button/BaseButton.vue';
 </script>
 <style scoped>
 #reset_button {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    padding: 12px 8px;
-    gap: 8px;
-
     position: absolute;
-    width: 248px;
-    height: 54px;
     left: 1244px;
     top: 852px;
-
-    border-radius: 8px;
 }
 #create_button {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    padding: 12px 8px;
-    gap: 8px;
-
     position: absolute;
-    width: 248px;
-    height: 54px;
     left: 1516px;
     top: 852px;
-
-    border-radius: 8px;
 }
 </style>
