@@ -17,7 +17,8 @@
         width="87px"
         height="56px"
         :class="{ active: activeItem === item.id }"
-        :disabled="activeItem !== item.id"     />
+        :disabled="activeItem !== item.id" 
+        @click.stop="previewPassage(item)" />
     </div>
   </div>
 </template>
@@ -28,6 +29,7 @@ import { ref, onMounted } from 'vue';
 import BaseButton from '@/components/common/button/BaseButton.vue';
 
 const props = defineProps({ items: Array });
+const emit = defineEmits(["preview"]);
 
 const activeItem = ref(null);
 
@@ -42,6 +44,10 @@ const toggleActive = (id) => {
   if (activeItem.value !== id) {
     activeItem.value = id;
   }
+};
+
+const previewPassage = (item) => {
+  emit("preview", item); // 부모에게 선택된 지문 전달
 };
 </script>
   
