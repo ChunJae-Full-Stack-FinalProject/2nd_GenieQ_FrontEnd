@@ -1,4 +1,4 @@
-import GenerationMain from "@/components/generation/GenerationMain.vue";
+import GenerationMain from "@/components/generation/passage/PassageMain.vue";
 import { createRouter, createWebHistory } from "vue-router";
 
 const router = createRouter({
