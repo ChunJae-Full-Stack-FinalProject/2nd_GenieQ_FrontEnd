@@ -8,7 +8,10 @@
             <BaseButton id="recreate-button" text="재생성하기(1회 차감)" type="type2" width="248px" height="54px" />
             <BaseButton id="save-button" text="저장하기" type="type2" width="248px" height="54px" />
             <BaseButton id="download-button" text="추출하기" type="type2" width="248px" height="54px" disabled/>
-            <BaseButton id="connect-create-button" text="이어서 문항 추출하기" type="type4" width="520px" height="54px" />
+            <router-link to="/question">
+                <BaseButton id="connect-create-button" text="이어서 문항 생성하기" type="type4" width="520px" height="54px" />
+            </router-link>
+            
             <PlainTooltip id="download-message" message="추출은 저장 후 가능해요" width="205px"/>
             <PlainTooltip id="start-edit" message="필요한 부분을 클릭하고 편집을 시작하세요" width="316px"/>
         </div>
