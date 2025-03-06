@@ -7,7 +7,6 @@ const myPageRoutes = [
       name: 'mypage',
       children: [
         { path: '', name: 'my-page-wrapper', component: myPageWrapper },
-        { path: '', name: 'my-page-content', component: myPageContent },
       ]
     }
   ];
