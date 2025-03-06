@@ -37,6 +37,7 @@
     flex-direction: column;
     align-items: flex-start;
     padding: 0px;
+    gap: 8px;
 
     width: 522px;
     height: 152px;
@@ -49,7 +50,7 @@
 #passage-type-text {
     width: 522px;
     height: 36px;
-    padding-top: 10px;
+    padding-top: 5px;
     margin: 0px;
 
     font-family: 'Pretendard';
