@@ -3,11 +3,11 @@ import myPageContent from "@/components/mypage/MyPageContent.vue";
 
 const myPageRoutes = [
     {
-      path: 'myPage',
-      name: 'myPage',
+      path: 'mypage',
+      name: 'mypage',
       children: [
-        { path: 'wrapper', name: 'my-page-wrapper', component: myPageWrapper },
-        { path: 'content', name: 'my-page-content', component: myPageContent },
+        { path: '', name: 'my-page-wrapper', component: myPageWrapper },
+        { path: '', name: 'my-page-content', component: myPageContent },
       ]
     }
   ];
