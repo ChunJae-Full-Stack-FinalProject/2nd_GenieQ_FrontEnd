@@ -1,18 +1,15 @@
 <template>
-    <div class="tofaq-container">
+    <div class="notionlink-container">
         <div class="top-container">
-            
-            <div class="tofaq-title">자주 묻는 질문 확인하기</div>
-            
-            <Icon icon="weui:arrow-outlined" width="24" height="24" id="arrow-icon" style="color: #ffffff" />
+            <div class="notionlink-title">사용법 보러가기</div>
         </div>
     </div>
 </template>
 <script setup>
-import { Icon } from "@iconify/vue";
+
 </script>
 <style>
-.tofaq-container {
+.notionlink-container {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -23,8 +20,8 @@ import { Icon } from "@iconify/vue";
     width: 520px;
     height: 132px;
     left: 1245px;
-    top: 48px;
-    background: #303030;
+    top: 196px;
+    background: url("@/assets/images/guide_image.png") no-repeat;
     border-radius: 8px;
     box-sizing: border-box;
 }
@@ -41,7 +38,7 @@ import { Icon } from "@iconify/vue";
     width: 480px;
     height: 46px;
 }
-.tofaq-title {
+.notionlink-title {
     font-family: 'Pretendard';
     font-style: normal;
     font-weight: 700;
