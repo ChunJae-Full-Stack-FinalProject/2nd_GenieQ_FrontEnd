@@ -1,13 +1,5 @@
 <template>
   <div id="mypage-info">
-    <h2 class="page-title">마이페이지</h2>
-    <div class="tab-menu">
-      <span class="active-tab">회원정보</span>
-      <span>이용권</span>
-      <span>공지사항</span>
-      <span>자주 묻는 질문</span>
-    </div>
-
     <div class="info-container">
       <section class="info-section">
         <h3 class="info-title">기본 정보</h3>
@@ -52,42 +44,10 @@
 </template>
 
 <script setup>
-// 추후 API 연결 시 데이터 바인딩 가능
+
 </script>
 
 <style scoped>
-  #mypage-info {
-    position: relative;
-    width: 1920px;
-    height: 973px;
-    left: 1851px;
-    top: 12547px;
-    background: #F6F6F6;
-  }
-
-  .page-title {
-    position: absolute;
-    width: 102px;
-    height: 36px;
-    left: 40px;
-    top: 40px;
-    font-family: 'Pretendard';
-    font-style: normal;
-    font-weight: 700;
-    font-size: 24px;
-    line-height: 150%;
-    letter-spacing: -0.02em;
-    color: #303030;
-  }
-
-  .tab-menu {
-
-  }
-
-  .active-tab {
-
-  }
-
   .info-container {
 
   }
