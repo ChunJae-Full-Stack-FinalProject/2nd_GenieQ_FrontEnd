@@ -46,7 +46,6 @@ const isActive = (path) => {
   height: 100vh; /* 화면 높이에 맞춤 */
   background-color: #16252D;
   color: white;
-  position: fixed;
   top: 0;
   left: 0;
   padding: 20px 0;
