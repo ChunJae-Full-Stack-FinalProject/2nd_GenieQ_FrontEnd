@@ -29,13 +29,24 @@
             <!-- hover 효과 확인 -->
             <BaseButton text="HOVER ME" type="type5" width="150px" height="45px" />
           </div>
+
+          <!-- 기본 tooltip -->
+        <div>
+          <PlainTooltip id="example" message="Test Message" width="153px"/>
+          <!-- 피그마에 뜬 width값에 20 더해서 width 속성에 넣어주세요!! -->
+           <!-- id값을 이용해서 style 태그에 position:absolute; top:00px; left:00px; 로 위치 조정해주세요 -->
         </div>
+        </div>
+
+        
     </div>
 </template>
 
 <script setup>
 import TestSideNavBarComponent from '@/components/test/TestSideNavBarComponent.vue';
 import BaseButton from '@/components/common/button/BaseButton.vue';
+import PlainTooltip from '@/components/common/PlainTooltip.vue';
+
 </script>
 
 <style scoped>
