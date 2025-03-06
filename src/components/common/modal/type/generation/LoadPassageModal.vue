@@ -1,5 +1,5 @@
 <template>
-  <BaseModal :isOpen="isOpen" width="1232px" height="880px" @close="closeModal">
+  <BaseModal :isOpen="isOpen" width="1232px" height="968px" @close="closeModal">
     <div class="search-modal">
       <!-- 제목 및 설명 -->
       <div class="header">
@@ -25,17 +25,19 @@
           placeholder="검색어를 입력하세요"
           class="search-input"
         />
-        <button class="search-button">🔍</button>
-      </div>
-
-      <!-- 검색 결과 -->
-      <div class="search-results">
-        <p v-if="searchQuery && !hasResults">‘{{ searchQuery }}’에 대한 검색 결과가 존재하지 않습니다.</p>
+        <button class="search-button"><Icon icon="iconamoon:search" width="24" height="24"  style="color: #757575" /></button>
       </div>
 
       <!-- 중간 영역 (리스트 or 상세보기) -->
-      <SearchList v-if="!selectedItem" :items="items" @select="selectItem" />
-      <SearchDetail v-else :item="selectedItem" @back="selectedItem = null" />
+      <div :class="contentAreaClass">
+        <!-- ✅ 검색 결과가 없을 때 -->
+        <div v-if="filteredPassages.length === 0" class="no-results">
+          ‘{{ searchQuery }}’에 대한 검색 결과가 존재하지 않습니다.
+        </div>
+        <!-- ✅ 검색 결과가 있을 때 -->
+        <SearchList v-else :items="filteredPassages" @select="selectItem" />
+      </div>
+
 
       <!-- 버튼 영역 -->
       <div class="modal-footer">
@@ -48,9 +50,25 @@
 
 <script setup>
 import { ref, computed } from "vue";
+import { Icon } from "@iconify/vue";
 import BaseModal from "../../BaseModal.vue";
 import BaseButton from "@/components/common/button/BaseButton.vue";
 import SearchList from "./SearchList.vue";
+
+const passages = ref([
+  { id: 1, title: "인공지능과 기계 학습 작업명이 보일 예정입니다." },
+  { id: 2, title: "최근 작업 내역" },
+  { id: 3, title: "즐겨찾기 목록" },
+  { id: 4, title: "AI 관련 작업 불러오기" },
+  { id: 5, title: "인공지능과 기계 학습 작업명이 보일 예정입니다." },
+  { id: 6, title: "최근 작업 내역" },
+  { id: 7, title: "즐겨찾기 목록" },
+  { id: 8, title: "AI 관련 작업 불러오기" },
+  { id: 9, title: "인공지능과 기계 학습 작업명이 보일 예정입니다." },
+  { id: 10, title: "최근 작업 내역" },
+  { id: 11, title: "즐겨찾기 목록" },
+  { id: 12, title: "AI 관련 작업 불러오기" },
+]);
 
 const props = defineProps({
   isOpen: Boolean,
@@ -64,20 +82,30 @@ const closeModal = () => {
   emit("close");
 };
 
-const hasResults = computed(() => {
-  return false; // 실제 데이터 연동 시 변경
+// ✅ 검색어에 따라 목록 필터링
+const filteredPassages = computed(() => {
+  if (!searchQuery.value) return passages.value;
+  return passages.value.filter((passage) =>
+    passage.title.toLowerCase().includes(searchQuery.value.toLowerCase())
+  );
+});
+
+// ✅ 검색 결과 여부에 따라 클래스 변경
+const contentAreaClass = computed(() => {
+  return filteredPassages.value.length === 0 ? "content-area no-results-mode" : "content-area";
 });
 </script>
 
 <style scoped>
 /* 모달 컨테이너 */
 .search-modal {
-  width: 100%;
+  width: 1232px;
+  height: 968px;
   display: flex;
   flex-direction: column;
-  align-items: flex-start; /* 왼쪽 정렬 */
+  align-items: flex-start;
   gap: 16px;
-  padding: 20px;
+  padding: 40px;
 }
 
 /* 제목 및 설명 */
@@ -114,10 +142,12 @@ const hasResults = computed(() => {
   background: none;
   border: none;
   font-size: 16px;
-  padding: 10px 20px;
+  padding: 0px; 
   cursor: pointer;
   color: #757575;
-  font-weight: bold;
+  font-weight: 400;
+  line-height: 28px;
+  letter-spacing: -2%;
 }
 
 .tab-menu button.active {
@@ -129,8 +159,8 @@ const hasResults = computed(() => {
 .search-container {
   display: flex;
   align-items: center;
-  width: 100%;
-  max-width: 400px;
+  width: 500px;
+  height: 44px;
   border: 1px solid #ddd;
   border-radius: 6px;
   padding: 8px;
@@ -150,14 +180,14 @@ const hasResults = computed(() => {
   cursor: pointer;
 }
 
-/* 검색 결과 */
-.search-results {
-  min-height: 200px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  font-size: 16px;
-  color: #757575;
+/* 중간 내용 박스 */
+.content-area{
+  width: 1152px;
+  height: 582px;
+  border-radius: 12px;
+  border: 1px solid #BDBDBD;
+  align-self: center;
+  padding: 11px 20px;
 }
 
 /* 버튼 영역 */
@@ -165,5 +195,22 @@ const hasResults = computed(() => {
   display: flex;
   gap: 10px;
   align-self: flex-end;
+}
+
+/* 검색 결과 없음 메시지 */
+.no-results {
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 150%;
+  letter-spacing: -2%;
+  text-align: center;
+}
+
+/* ✅ 검색 결과가 없을 때 추가되는 스타일 */
+.content-area.no-results-mode {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 </style>
