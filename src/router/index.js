@@ -6,8 +6,10 @@ import TestHomeComponent from '@/components/test/TestHomeComponent.vue'
 import ImmediatelyComponent from '@/components/test/ImmediatelyComponent.vue'
 import ExampleView from '@/views/ExampleView.vue'
 import MyPageMain from '@/components/mypage/MyPageMain.vue'
-import PassageLayout from '@/components/generation/PassageLayout.vue'
 import SingUpPage from '@/components/auth/SingUpPage.vue'
+
+// 각 페이지의 라우트들 import
+import generationRoutes from './generation.routes'
 
 // 로그인 상태 체크 가드
 const requireAuth = (to, from, next) => {
@@ -33,7 +35,7 @@ const router = createRouter({
         { path: 'home', name: 'home', component: TestHomeComponent },
         { path: 'immediately', name: 'immediately', component: ImmediatelyComponent },
         { path: 'mypage', name: 'mypage', component: MyPageMain },
-        { path: 'passage', name: 'passage', component: PassageLayout, },
+        ...generationRoutes,
         // 나중에 컴포넌트가 생성될 때 추가되도록 설정, 위에 import 안하고 사용 가능
         { path: 'delay', name: 'delay', component: () => import('@/components/test/DelayComponent.vue') },
         

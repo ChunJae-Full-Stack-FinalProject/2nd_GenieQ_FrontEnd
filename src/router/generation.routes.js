@@ -1,11 +1,16 @@
-import GenerationMain from "@/components/generation/passage/PassageMain.vue";
-import { createRouter, createWebHistory } from "vue-router";
+import PassageContent from "@/components/generation/PassageContent.vue";
+import PassageMain from "@/components/generation/PassageMain.vue";
 
-const router = createRouter({
-    history: createWebHistory(),
-    routes: [
-        // { path: '/passage', name: 'passage', component: GenerationMain }
-    ]
-});
-
-export default router;
+// passage 라우트를 라우트 객체 배열로 정의
+const generationRoutes = [
+    {
+      path: 'passage',
+      name: 'passage',
+      children: [
+        { path: '', name: 'passage-main', component: PassageMain },
+        { path: 'create', name: 'passage-create', component: PassageContent },
+      ]
+    }
+  ];
+  
+  export default generationRoutes;
