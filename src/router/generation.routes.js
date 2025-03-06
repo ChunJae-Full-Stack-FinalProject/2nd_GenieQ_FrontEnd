@@ -13,8 +13,8 @@ const generationRoutes = [
       ]
     },
     {
-        path: 'question',
-        name: 'question',
+        path: 'questions',
+        name: 'questions',
         children: [
             { path: '', name: 'question-main', component: QuestionMain },
         ]
