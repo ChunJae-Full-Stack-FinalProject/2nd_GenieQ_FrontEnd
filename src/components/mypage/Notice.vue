@@ -36,8 +36,7 @@
   
       <!-- 페이지네이션 -->
       <div class="pagination">
-        <button @click="firstPage" :disabled="currentPage === 1">«</button>
-        <button @click="prevPageGroup" :disabled="currentPage === 1"><</button>
+        <button @click="prevPage" :disabled="currentPage === 1"><</button>
         
         <span
             v-for="page in visiblePages"
@@ -47,7 +46,7 @@
             {{ page }}
         </span>
         
-        <button @click="nextPageGroup" :disabled="currentPage === totalPages">></button>
+        <button v-if="totalPages > 5" @click="nextPage" :disabled="currentPage === totalPages">></button>
         <button @click="lastPage" :disabled="currentPage === totalPages">»</button>
         </div>
     </div>
@@ -67,97 +66,69 @@
   const selectedTab = ref("all");
   
   /* ✅ 공지사항 데이터 */
-  const notices = ref([
-  { NOT_CODE: 1, NOT_TYPE: "서비스", NOT_TITLE: "지니큐 베타서비스 런칭 안내", NOT_DATE: "2024-03-06" },
-  { NOT_CODE: 2, NOT_TYPE: "작업", NOT_TITLE: "1차 서버 점검 안내", NOT_DATE: "2024-03-05" },
-  { NOT_CODE: 3, NOT_TYPE: "작업", NOT_TITLE: "네트워크 점검 안내 (3/3)", NOT_DATE: "2024-03-03" },
-  { NOT_CODE: 4, NOT_TYPE: "작업", NOT_TITLE: "서버 업데이트 안내", NOT_DATE: "2024-03-01" },
-  { NOT_CODE: 5, NOT_TYPE: "서비스", NOT_TITLE: "새로운 기능 추가", NOT_DATE: "2024-02-28" },
-  { NOT_CODE: 6, NOT_TYPE: "서비스", NOT_TITLE: "긴급 점검 안내", NOT_DATE: "2024-02-26" },
-  { NOT_CODE: 7, NOT_TYPE: "작업", NOT_TITLE: "DB 최적화 작업", NOT_DATE: "2024-02-25" },
-  { NOT_CODE: 8, NOT_TYPE: "서비스", NOT_TITLE: "약관 개정 안내", NOT_DATE: "2024-02-20" },
-  { NOT_CODE: 9, NOT_TYPE: "서비스", NOT_TITLE: "보안 업데이트 안내", NOT_DATE: "2024-02-15" },
-  { NOT_CODE: 10, NOT_TYPE: "작업", NOT_TITLE: "서버 마이그레이션 안내", NOT_DATE: "2024-02-10" },
-  { NOT_CODE: 11, NOT_TYPE: "서비스", NOT_TITLE: "신규 서비스 런칭", NOT_DATE: "2024-02-05" },
-  { NOT_CODE: 12, NOT_TYPE: "작업", NOT_TITLE: "API 개선 작업", NOT_DATE: "2024-02-01" },
-  { NOT_CODE: 13, NOT_TYPE: "서비스", NOT_TITLE: "사용자 인터페이스 개선", NOT_DATE: "2024-01-28" },
-  { NOT_CODE: 14, NOT_TYPE: "작업", NOT_TITLE: "백엔드 시스템 업그레이드", NOT_DATE: "2024-01-25" },
-  { NOT_CODE: 15, NOT_TYPE: "서비스", NOT_TITLE: "고객지원 채널 확장", NOT_DATE: "2024-01-20" },
-  { NOT_CODE: 16, NOT_TYPE: "작업", NOT_TITLE: "서버 유지보수 작업", NOT_DATE: "2024-01-15" },
-  { NOT_CODE: 17, NOT_TYPE: "서비스", NOT_TITLE: "이메일 인증 시스템 업데이트", NOT_DATE: "2024-01-10" },
-  { NOT_CODE: 18, NOT_TYPE: "작업", NOT_TITLE: "데이터 마이그레이션", NOT_DATE: "2024-01-05" },
-  { NOT_CODE: 19, NOT_TYPE: "서비스", NOT_TITLE: "알림 기능 추가", NOT_DATE: "2023-12-30" },
-  { NOT_CODE: 20, NOT_TYPE: "작업", NOT_TITLE: "보안 패치 적용", NOT_DATE: "2023-12-25" },
-  { NOT_CODE: 21, NOT_TYPE: "서비스", NOT_TITLE: "모바일 최적화 업데이트", NOT_DATE: "2023-12-20" },
-  { NOT_CODE: 22, NOT_TYPE: "작업", NOT_TITLE: "로그 시스템 개선", NOT_DATE: "2023-12-15" },
-  { NOT_CODE: 23, NOT_TYPE: "서비스", NOT_TITLE: "AI 추천 시스템 도입", NOT_DATE: "2023-12-10" },
-  { NOT_CODE: 24, NOT_TYPE: "작업", NOT_TITLE: "네트워크 안정화 작업", NOT_DATE: "2023-12-05" },
-  { NOT_CODE: 25, NOT_TYPE: "서비스", NOT_TITLE: "UX/UI 디자인 개편", NOT_DATE: "2023-12-01" },
-  { NOT_CODE: 26, NOT_TYPE: "작업", NOT_TITLE: "DB 확장 작업", NOT_DATE: "2023-11-25" },
-  { NOT_CODE: 27, NOT_TYPE: "서비스", NOT_TITLE: "다크 모드 기능 추가", NOT_DATE: "2023-11-20" },
-  { NOT_CODE: 28, NOT_TYPE: "작업", NOT_TITLE: "성능 최적화 작업", NOT_DATE: "2023-11-15" },
-  { NOT_CODE: 29, NOT_TYPE: "서비스", NOT_TITLE: "접근성 향상 업데이트", NOT_DATE: "2023-11-10" },
-  { NOT_CODE: 30, NOT_TYPE: "작업", NOT_TITLE: "백업 및 복구 시스템 강화", NOT_DATE: "2023-11-05" }
-]);
-
-
+const notices = ref([]);
+for (let i = 1; i <= 60; i++) {
+  notices.value.push({
+    NOT_CODE: i,
+    NOT_TYPE: i % 2 === 0 ? "서비스" : "작업",
+    NOT_TITLE: `공지사항 제목 ${i}`,
+    NOT_DATE: `2024-03-${String(31 - i).padStart(2, '0')}`
+  });
+}
   
-  /* ✅ 필터링된 공지사항 목록 */
-  const filteredNotices = computed(() => {
+ /* ✅ 필터링된 공지사항 목록 */
+const filteredNotices = computed(() => {
     if (selectedTab.value === "all") return notices.value;
     return notices.value.filter(n => n.NOT_TYPE.toLowerCase() === selectedTab.value);
-  });
-  
-  /* ✅ 페이지네이션 */
+});
+
+/* ✅ 페이지네이션 */
 const currentPage = ref(1);
-const itemsPerPage = 10;
+const itemsPerPage = 10; // ✅ 한 페이지에 10개
+const maxVisiblePages = 5; // ✅ 페이지네이션 최대 표시 개수
 
 /* ✅ 총 페이지 수 */
-const totalPages = computed(() => Math.ceil(filteredNotices.value.length / itemsPerPage));
+const totalPages = computed(() => Math.ceil(notices.value.length / itemsPerPage));
 
 /* ✅ 현재 페이지에 맞는 데이터 */
 const paginatedNotices = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage;
-  return filteredNotices.value.slice(start, start + itemsPerPage);
+    const start = (currentPage.value - 1) * itemsPerPage;
+    return notices.value.slice(start, start + itemsPerPage);
 });
 
-/* ✅ 페이지네이션 로직 */
-    const maxVisiblePages = 5;
-
 /* ✅ 표시할 페이지 목록 */
-    const visiblePages = computed(() => {
+const visiblePages = computed(() => {
+    const total = totalPages.value;
     const startPage = Math.floor((currentPage.value - 1) / maxVisiblePages) * maxVisiblePages + 1;
-    return Array.from({ length: maxVisiblePages }, (_, i) => startPage + i).filter(page => page <= totalPages.value);
-    });
+    const endPage = Math.min(startPage + maxVisiblePages - 1, total);
+    return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
+});
 
 /* ✅ 페이지 변경 함수 */
-    const changePage = (page) => {
+const changePage = (page) => {
     if (page >= 1 && page <= totalPages.value) {
         currentPage.value = page;
     }
-    };
+};
 
-    /* ✅ 이전 페이지 그룹 이동 */
-    const prevPageGroup = () => {
+/* ✅ 이전 페이지 이동 (한 칸 이동) */
+const prevPage = () => {
     if (currentPage.value > 1) {
-        const prevGroupStart = Math.max(1, currentPage.value - maxVisiblePages);
-        currentPage.value = prevGroupStart;
+        currentPage.value--;
     }
-    };
+};
 
-    /* ✅ 다음 페이지 그룹 이동 */
-    const nextPageGroup = () => {
-    if (currentPage.value + maxVisiblePages <= totalPages.value) {
-        const nextGroupStart = Math.min(totalPages.value, currentPage.value + maxVisiblePages);
-        currentPage.value = nextGroupStart;
+/* ✅ 다음 페이지 이동 (한 칸 이동) */
+const nextPage = () => {
+    if (currentPage.value < totalPages.value) {
+        currentPage.value++;
     }
-    };
+};
 
-    /* ✅ 첫 페이지 이동 */
-    const firstPage = () => { currentPage.value = 1; };
-
-    /* ✅ 마지막 페이지 이동 */
-    const lastPage = () => { currentPage.value = totalPages.value; };
+/* ✅ 마지막 페이지 이동 */
+const lastPage = () => {
+    currentPage.value = totalPages.value;
+};
   </script>
   
   <style scoped>
