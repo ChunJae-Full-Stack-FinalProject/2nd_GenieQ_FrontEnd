@@ -5,8 +5,8 @@ import Frame from '@/views/Frame.vue'
 import TestHomeComponent from '@/components/test/TestHomeComponent.vue'
 import ImmediatelyComponent from '@/components/test/ImmediatelyComponent.vue'
 import ExampleView from '@/views/ExampleView.vue'
-import GenerationMain from '@/components/generation/PassageMain.vue'
-import PassageContent from '@/components/generation/PassageContent.vue'
+import GenerationMain from '@/components/generation/passage/PassageMain.vue'
+import PassageContent from '@/components/generation/passage/PassageContent.vue'
 
 // 로그인 상태 체크 가드
 const requireAuth = (to, from, next) => {

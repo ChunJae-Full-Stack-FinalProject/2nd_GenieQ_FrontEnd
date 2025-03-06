@@ -10,9 +10,9 @@
     </div>
 </template>
 <script setup>
-import InputPassageTitle from '@/components/generation/passage/InputPassageTitle.vue';
-import PassageContentMain from '@/components/generation/passage/PassageContentMain.vue';
-import PassageSummary from '@/components/generation/passage/PassageSummary.vue';
+import InputPassageTitle from '@/components/generation/passage/PassageContent/InputPassageTitle.vue';
+import PassageContentMain from '@/components/generation/passage/PassageContent/PassageContentMain.vue';
+import PassageSummary from '@/components/generation/passage/PassageContent/PassageSummary.vue';
 </script>
 <style scoped>
 #main-title {
