@@ -1,9 +1,9 @@
 <template>
   <div id="mypage-info">
     <div class="info-container">
-      <section class="info-section">
+      <section class="basic-info-section">
         <h3 class="info-title">기본 정보</h3>
-        <div class="info-box">
+        <div class="basic-info-box">
           <div class="info-item">
             <span class="info-label">이름</span>
             <span class="info-value">송겨울</span>
@@ -19,9 +19,9 @@
         </div>
       </section>
 
-      <section class="info-section">
+      <section class="additional-info-section">
         <h3 class="info-title">추가 정보</h3>
-        <div class="info-box">
+        <div class="additional-info-box">
           <div class="info-item">
             <span class="info-label">성별</span>
             <span class="info-value">여성</span>
@@ -49,42 +49,26 @@
 
 <style scoped>
   .info-container {
-
+    
   }
 
-  .info-section {
-      
+  .basic-info-section {
+
   }
 
   .info-title {
 
   }
 
-  .info-box {
+  .basic-info-box {
 
   }
 
-  .info-item {
+  .additional-info-section {
 
   }
 
-  .info-label {
-
-  }
-
-  .info-value {
-
-  }
-
-  .info-item {
-
-  }
-
-  .info-label {
-
-  }
-
-  .info-value {
+  .additional-info-box {
 
   }
 
@@ -115,4 +99,5 @@
   .logout {
 
   }
+  
 </style>  
