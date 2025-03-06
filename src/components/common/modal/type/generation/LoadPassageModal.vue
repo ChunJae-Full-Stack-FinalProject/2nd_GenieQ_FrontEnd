@@ -42,7 +42,7 @@
       <!-- 버튼 영역 -->
       <div class="modal-footer">
         <BaseButton text="닫기" type="type3" width="140px" height="54px" @click="closeModal" />
-        <BaseButton text="불러오기" type="type1" width="182px" height="54px" />
+        <BaseButton text="불러오기" type="type1" width="182px" height="54px" :disabled="filteredPassages.length === 0"/>
       </div>
     </div>
   </BaseModal>
@@ -79,8 +79,10 @@ const searchQuery = ref("");
 const activeTab = ref("recent");
 
 const closeModal = () => {
-  emit("close");
+  emit("close");         // 모달 닫기 이벤트 발생
+  searchQuery.value = ""; // 🔥 검색어 초기화
 };
+
 
 // ✅ 검색어에 따라 목록 필터링
 const filteredPassages = computed(() => {
