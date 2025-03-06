@@ -74,3 +74,4 @@ const tabs = ["회원정보", "이용권", "공지사항", "자주 묻는 질문
   border-bottom: 2px solid #FF9F40;
   font-weight: bold;
 }
+</style>
