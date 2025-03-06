@@ -154,10 +154,16 @@ const filteredPassages = computed(() => {
   );
 });
 
-// ✅ 검색 결과 여부에 따라 `content-area` 스타일 변경
+// ✅ 검색 결과 & 지문 미리보기 상태에 따라 `content-area` 스타일 변경
 const contentAreaClass = computed(() => {
-  return selectedPassage.value ? "content-area passage-mode" : "content-area";
+  if (selectedPassage.value) {
+    return "content-area passage-mode"; // 🔥 미리보기 화면
+  } else if (filteredPassages.value.length === 0) {
+    return "content-area no-results-mode"; // 🔥 검색 결과 없음
+  }
+  return "content-area"; // 🔥 기본 목록 표시
 });
+
 </script>
 
 <style scoped>
