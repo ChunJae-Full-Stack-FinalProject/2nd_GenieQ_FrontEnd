@@ -66,21 +66,23 @@
   const selectedTab = ref("all");
   
   /* ✅ 공지사항 데이터 */
-const notices = ref([]);
+  const notices = ref([]);
 for (let i = 1; i <= 60; i++) {
   notices.value.push({
     NOT_CODE: i,
     NOT_TYPE: i % 2 === 0 ? "서비스" : "작업",
-    NOT_TITLE: `공지사항 제목 ${i}`,
-    NOT_DATE: `2024-03-${String(31 - i).padStart(2, '0')}`
+    NOT_TITLE: `공지사항 제목 ${i}`,  
+    NOT_DATE: `2024-03-${String(31 - i).padStart(2, '0')}` 
   });
 }
+
   
- /* ✅ 필터링된 공지사항 목록 */
+/* ✅ 필터링된 공지사항 목록 */
 const filteredNotices = computed(() => {
     if (selectedTab.value === "all") return notices.value;
-    return notices.value.filter(n => n.NOT_TYPE.toLowerCase() === selectedTab.value);
+    return notices.value.filter(n => n.NOT_TYPE === (selectedTab.value === "service" ? "서비스" : "작업"));
 });
+
 
 /* ✅ 페이지네이션 */
 const currentPage = ref(1);
@@ -93,8 +95,9 @@ const totalPages = computed(() => Math.ceil(notices.value.length / itemsPerPage)
 /* ✅ 현재 페이지에 맞는 데이터 */
 const paginatedNotices = computed(() => {
     const start = (currentPage.value - 1) * itemsPerPage;
-    return notices.value.slice(start, start + itemsPerPage);
+    return filteredNotices.value.slice(start, start + itemsPerPage);
 });
+
 
 /* ✅ 표시할 페이지 목록 */
 const visiblePages = computed(() => {
@@ -185,7 +188,6 @@ const lastPage = () => {
     background: none;
     border: none;
     border-radius: 24px; /* 버튼 둥글게 */
-    cursor: pointer;
     transition: all 0.3s ease;
     
 }
@@ -372,23 +374,50 @@ td:nth-child(3) {
     display: flex;
     justify-content: center;
     margin-top: 20px;
-  }
-  
+    gap: 8px; /* 숫자 간격 조절 */
+}
+
+.pagination span {
+    display: inline-block;
+    min-width: 26px; /* 숫자 크기에 맞게 최소 너비 설정 */
+    text-align: center;
+    font-size: 14px;
+    cursor: pointer;
+    user-select: none; /* 텍스트 선택 방지 */
+    outline: none; /* 클릭 시 포커스(깜박거리는 커서) 제거 */
+}
+
   .pagination button {
     border: none;
     background: none;
     padding: 5px 10px;
-    cursor: pointer;
     font-size: 14px;
   }
   
   .pagination button:hover {
     font-weight: bold;
   }
-  
+
   .active-page {
-    font-weight: bold;
-    color: orange;
+    color: #FF9F40;
+    text-decoration: underline;
   }
-  </style>
-  
+
+  /* ✅ 모든 요소에서 클릭 후 포커스(깜박거리는 커서) 제거 */
+* {
+    outline: none !important; /* 모든 요소의 포커스 제거 */
+    user-select: none !important; /* 텍스트 선택 방지 */
+    -webkit-user-select: none !important; /* 사파리, 크롬 지원 */
+    -moz-user-select: none !important; /* 파이어폭스 지원 */
+    -ms-user-select: none !important; /* 엣지 지원 */
+}
+
+/* ✅ 버튼, 링크, 페이지네이션, 필터 버튼 클릭 시 포커스 제거 */
+button, a, span, input, select, textarea {
+    outline: none !important;
+    box-shadow: none !important;
+    border: none;
+    background: none;
+}
+
+</style>
