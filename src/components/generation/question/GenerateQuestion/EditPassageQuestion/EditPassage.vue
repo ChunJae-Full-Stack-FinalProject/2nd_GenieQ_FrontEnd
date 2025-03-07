@@ -19,19 +19,24 @@
                 <p id="edit-head">에디터</p>
                 <div id="editor-tool">
                     <ul class="editor-list">
-                        <li><b>B</b></li>
-                        <li><u>U</u></li>
-                        <li><s>S</s></li>
+                        <li @click="formatText('bold')"><b>B</b></li>
+                        <li @click="formatText('underline')"><u>U</u></li>
+                        <li @click="formatText('strikethrough')"><s>S</s></li>
                     </ul>
                 </div>
             </div>
         </div>
         <div class="passage-container">
             <p>지문</p>
-            <div id="passage-count"><span style="color: #FF9500;">{{ contentText.length }}</span>/1700</div>
+            <div id="passage-count"><span style="color: #FF9500;">{{ getTextLength() }}</span>/1700</div>
             <div id="passage-content-main">
-                <textarea id="content-text" placeholder="본문을 입력해주세요." v-model="contentText"
-                    @click="saveCurrentCursorPosition" @keyup="saveCurrentCursorPosition"></textarea>
+                <!-- 기본 텍스트 입력 영역 -->
+                <textarea id="content-text" 
+                    placeholder="본문을 입력해주세요." 
+                    v-model="contentText"
+                    @select="onTextSelect"
+                    @click="onTextSelect"
+                    @keyup="onTextSelect"></textarea>
             </div>
         </div>
     </div>
@@ -49,11 +54,23 @@ export default {
             symbolList: [],
             showTooltip: false,
             contentText: '',
-            cursorPosition: 0,
-            currentSymbolType: '㉠'
+            currentSymbolType: '㉠',
+            selectionStart: 0,
+            selectionEnd: 0
         }
     },
     methods: {
+        getTextLength() {
+            // HTML 태그를 제외한 순수 텍스트 길이 계산
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = this.contentText;
+            return tempDiv.textContent.length;
+        },
+        onTextSelect() {
+            const textarea = document.getElementById('content-text');
+            this.selectionStart = textarea.selectionStart;
+            this.selectionEnd = textarea.selectionEnd;
+        },
         showSymbolTooltip(symbol) {
             // 이미 열려있는 같은 심볼 툴팁이면 닫기
             if (this.showTooltip && this.currentSymbolType === symbol) {
@@ -76,34 +93,73 @@ export default {
 
             // 툴팁 표시
             this.showTooltip = true;
-
-            // 현재 텍스트 영역의 커서 위치 저장
-            this.saveCurrentCursorPosition();
-        },
-        saveCurrentCursorPosition() {
-            const textarea = document.getElementById('content-text');
-            if (textarea) {
-                this.cursorPosition = textarea.selectionStart;
-            }
         },
         insertSymbol(symbol) {
-            // 선택된 심볼을 현재 커서 위치에 삽입
-            const before = this.contentText.substring(0, this.cursorPosition);
-            const after = this.contentText.substring(this.cursorPosition);
-
+            const textarea = document.getElementById('content-text');
+            
+            // 현재 선택 위치 저장
+            const start = this.selectionStart;
+            const end = this.selectionEnd;
+            
+            // 선택 범위 앞뒤 텍스트
+            const beforeSelection = this.contentText.substring(0, start);
+            const afterSelection = this.contentText.substring(end);
+            
             // 심볼 삽입
-            this.contentText = before + symbol + after;
-
-            // 포커스를 다시 텍스트 영역으로 설정하고 커서 위치 조정
+            this.contentText = beforeSelection + symbol + afterSelection;
+            
+            // 심볼 삽입 후 커서 위치 설정
             this.$nextTick(() => {
-                const textarea = document.getElementById('content-text');
-                if (textarea) {
-                    textarea.focus();
-                    // 새 커서 위치는 삽입된 심볼 이후
-                    const newPosition = this.cursorPosition + 1;
-                    textarea.setSelectionRange(newPosition, newPosition);
-                    this.cursorPosition = newPosition;
-                }
+                textarea.focus();
+                const newCursorPos = start + symbol.length;
+                textarea.setSelectionRange(newCursorPos, newCursorPos);
+                this.selectionStart = newCursorPos;
+                this.selectionEnd = newCursorPos;
+            });
+            
+            // 툴팁 닫기
+            this.showTooltip = false;
+        },
+        formatText(type) {
+            const textarea = document.getElementById('content-text');
+            
+            // 선택된 텍스트가 없으면 아무것도 하지 않음
+            if (this.selectionStart === this.selectionEnd) {
+                return;
+            }
+            
+            // 현재 선택 범위 가져오기
+            const selectedText = this.contentText.substring(this.selectionStart, this.selectionEnd);
+            const beforeText = this.contentText.substring(0, this.selectionStart);
+            const afterText = this.contentText.substring(this.selectionEnd);
+            
+            // 태그 생성
+            let formattedText;
+            switch(type) {
+                case 'bold':
+                    formattedText = `<b>${selectedText}</b>`;
+                    break;
+                case 'underline':
+                    formattedText = `<u>${selectedText}</u>`;
+                    break;
+                case 'strikethrough':
+                    formattedText = `<s>${selectedText}</s>`;
+                    break;
+                default:
+                    formattedText = selectedText;
+            }
+            
+            // 텍스트 업데이트
+            this.contentText = beforeText + formattedText + afterText;
+            
+            // 새 커서 위치 계산 및 설정
+            const newCursorPos = this.selectionStart + formattedText.length;
+            
+            this.$nextTick(() => {
+                textarea.focus();
+                textarea.setSelectionRange(newCursorPos, newCursorPos);
+                this.selectionStart = newCursorPos;
+                this.selectionEnd = newCursorPos;
             });
         }
     }
@@ -217,6 +273,7 @@ export default {
 
     letter-spacing: -0.02em;
     color: #000000;
+    cursor: pointer;
 }
 #edit-head {
     position: absolute;
@@ -322,7 +379,10 @@ export default {
     z-index: 0;
 
     border: none;
-    outline: none; /* 포커스 된 경우의 파란 테두리 삭제 */
+    outline: none;
     resize: none;
+    overflow-y: auto;
+    text-align: left;
+    padding: 0;
 }
 </style>
