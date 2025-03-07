@@ -40,38 +40,55 @@
                 </thead>
                 <tbody>
                     <tr v-for="(item, index) in workItems" :key="index" :class="{ 'row-checked': item.checked }">
-                    <td>
-                        <label class="custom-checkbox">
+                        <td @contextmenu="showEditForm(index, $event)">
+                            <label class="custom-checkbox">
                             <input type="checkbox" class="checkbox-input" v-model="item.checked">
                             <span class="checkbox-custom"></span>
-                        </label>
-                    </td>
-                    <td class="work-name">{{ item.name }}</td>
-                    <td class="work-title">{{ item.title }}</td>
-                    <td class="work-type"><span class="type-tag">{{ item.type }}</span></td>
-                    <td class="work-date">{{ item.date }}</td>
-                    <td class="work-action"><button class="extract-btn" @click="extractItem(item)">추출 <i class="download-icon"></i></button></td>
-                    <td class="work-favorite">
-                        <span class="star-container" @click="toggleFavorite(index)">
-                        <Icon v-if="item.favorite" icon="mynaui:star-solid" width="24" height="24" style="color: #FF9F40" />
-                        <Icon v-else icon="mynaui:star" width="24" height="24" style="color: #FF9F40" />
-                        </span>
-                    </td>
+                            </label>
+                        </td>
+                        <td class="work-name" @contextmenu="showEditForm(index, $event)">
+                            <div v-if="editingIndex === index">
+                            <input type="text" v-model="item.name" @blur="finishEditing" @keyup.enter="finishEditing" ref="editInput" class="edit-input"/>
+                            </div>
+                            <div v-else>
+                            {{ item.name }}
+                            </div>
+                        </td>
+                        <td class="work-title" @contextmenu="showEditForm(index, $event)">{{ item.title }}</td>
+                        <td class="work-type" @contextmenu="showEditForm(index, $event)">
+                            <span class="type-tag">{{ item.type }}</span>
+                        </td>
+                        <td class="work-date" @contextmenu="showEditForm(index, $event)">{{ item.date }}</td>
+                        <td class="work-action" @contextmenu="showEditForm(index, $event)">
+                            <button class="extract-btn" @click="extractItem(item)">추출 <i class="download-icon"></i></button>
+                        </td>
+                        <td class="work-favorite" @contextmenu="showEditForm(index, $event)">
+                            <span class="star-container" @click="toggleFavorite(index)">
+                            <Icon v-if="item.favorite" icon="mynaui:star-solid" width="24" height="24" style="color: #FF9F40" />
+                            <Icon v-else icon="mynaui:star" width="24" height="24" style="color: #FF9F40" />
+                            </span>
+                        </td>
                     </tr>
                 </tbody>
                 </table>
             </div>
         </div>
     </div>
+
+    <!-- 컨텍스트 메뉴(우클릭시 나오는 박스) -->
+    <div v-if="showContextMenu" class="context-menu" :style="{ top: contextMenuPosition.y + 'px', left: contextMenuPosition.x + 'px' }">
+        <div class="menu-item" @click="startEditing">
+            <span>이름 변경</span>
+        </div>
+    </div>
+
 </template>
 <script setup>
-import { ref } from 'vue';
-
-// 체크박스 상태변화 함수.
-const checked = ref(false);
+import { ref, nextTick, onMounted, onUnmounted } from 'vue';
 
 // 데이터 정의 - ref로 감싸서 반응형으로 만듭니다
 const workItems = ref([
+  // 기존 데이터 유지
   {
     name: '수능특강 기반 문제생성saasasdsadasdsadads',
     title: '메이드투메이드의 건배',
@@ -136,74 +153,84 @@ const workItems = ref([
     favorite: false,
     checked: false
   },
-  {
-    name: '수능특강 기반 문제생성saasasdsadasdsadads',
-    title: '메이드투메이드의 건배',
-    type: '지문',
-    date: '2025-02-28',
-    favorite: false,
-    checked: false
-  },
-  {
-    name: '수능특강 기반 문제생성saasasdsadasdsadads',
-    title: '메이드투메이드의 건배',
-    type: '지문',
-    date: '2025-02-28',
-    favorite: false,
-    checked: false
-  },
-  {
-    name: '수능특강 기반 문제생성saasasdsadasdsadads',
-    title: '메이드투메이드의 건배',
-    type: '지문',
-    date: '2025-02-28',
-    favorite: false,
-    checked: false
-  },
-  {
-    name: '수능특강 기반 문제생성saasasdsadasdsadads',
-    title: '메이드투메이드의 건배',
-    type: '지문',
-    date: '2025-02-28',
-    favorite: false,
-    checked: false
-  },
-  {
-    name: '수능특강 기반 문제생성saasasdsadasdsadads',
-    title: '메이드투메이드의 건배',
-    type: '지문',
-    date: '2025-02-28',
-    favorite: false,
-    checked: false
-  },
-  {
-    name: '수능특강 기반 문제생성saasasdsadasdsadads',
-    title: '메이드투메이드의 건배',
-    type: '지문',
-    date: '2025-02-28',
-    favorite: false,
-    checked: false
-  },
-  {
-    name: '수능특강 기반 문제생성saasasdsadasdsadads',
-    title: '메이드투메이드의 건배',
-    type: '지문',
-    date: '2025-02-28',
-    favorite: false,
-    checked: false
-  },
-  
- 
+
 ]);
+
+// 컨텍스트 메뉴 상태 관리
+const showContextMenu = ref(false);
+const contextMenuPosition = ref({ x: 0, y: 0 });
+const contextMenuIndex = ref(-1);
+
+// 편집 중인 항목의 인덱스 (-1이면 편집 중이 아님)
+const editingIndex = ref(-1);
+const editInput = ref(null);
+
+// 컨텍스트 메뉴 표시
+const showEditForm = (index, event) => {
+  if (!event) return;
+  
+  // 기존의 컨텍스트 메뉴 닫기
+  showContextMenu.value = false;
+  
+  // 새 컨텍스트 메뉴 위치 설정
+  contextMenuPosition.value = {
+    x: event.clientX,
+    y: event.clientY
+  };
+  
+  // 클릭된 항목 인덱스 저장
+  contextMenuIndex.value = index;
+  
+  // 컨텍스트 메뉴 표시
+  showContextMenu.value = true;
+  
+  // 브라우저 기본 컨텍스트 메뉴 방지
+  event.preventDefault();
+};
+
+// 이름 변경 시작
+const startEditing = () => {
+  // 컨텍스트 메뉴 숨기기
+  showContextMenu.value = false;
+  
+  // 편집 모드 활성화
+  editingIndex.value = contextMenuIndex.value;
+  
+  // 입력 필드 포커스
+  nextTick(() => {
+    const inputs = document.querySelectorAll('.edit-input');
+    if (inputs && inputs.length > 0) {
+      inputs[0].focus();
+    }
+  });
+};
+
+// 컨텍스트 메뉴 닫기 함수
+const closeContextMenu = (event) => {
+  if (showContextMenu.value && !event.target.closest('.context-menu')) {
+    showContextMenu.value = false;
+  }
+};
+
+// 문서 클릭 시 컨텍스트 메뉴 닫기
+onMounted(() => {
+  document.addEventListener('click', closeContextMenu);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', closeContextMenu);
+});
+
+// 편집 완료
+const finishEditing = () => {
+  editingIndex.value = -1;
+};
 
 // 메소드 정의 - 화살표 함수로 작성합니다
 const extractItem = (item) => {
   // 추출 버튼 클릭 시 실행될 로직
   console.log('추출 버튼 클릭:', item);
 };
-
-
-
 
 const toggleFavorite = (index) => {
   // 즐겨찾기 토글 로직
@@ -544,10 +571,48 @@ td{
 
 .search-icon {
   position: absolute;
-  top: 52%;
+  top: 20px;
   right: 15px;
   transform: translateY(-50%);
   cursor: pointer;
+}
+
+
+/* 편집 입력 필드 스타일 */
+.edit-input {
+  width: 100%;
+  padding: 10px 10px;
+  border: 1px solid #000000;
+  border-radius: 4px;
+  font-size: 14px;
+  outline: none;
+}
+
+/* 오른쪽 클릭 표시 (커서 변경) */
+.data-table td {
+  cursor: context-menu;
+}
+
+
+/* 컨텍스트 메뉴 스타일 */
+.context-menu {
+  position: fixed;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  min-width: 120px;
+}
+
+.menu-item {
+  padding: 10px 15px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.menu-item:hover {
+  background-color: #f5f5f5;
 }
 </style>
 
