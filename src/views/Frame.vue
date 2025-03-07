@@ -13,13 +13,9 @@ import GenieQFooter from '@/components/common/Footer.vue';
 
 <style>
 .frame {
-  display: flex;
-  min-height: 100vh;
   background-color: #F6F6F6;
   display: flex;
-  min-height: 100vh; /* ✅ 전체 높이를 최소 100vh로 유지 */
   overflow: hidden; /* ✅ 내부 스크롤 방지 */
-  
 }
 .main-content {
   min-height: 100vh; /* ✅ 전체 높이 유지 */
