@@ -6,6 +6,7 @@
         <Faq v-if="selectedTab === '자주 묻는 질문'" />
     </div>
 </template>
+
 <script setup>
     import Info from './Info.vue';
     import Ticket from './Ticket.vue';
@@ -15,8 +16,8 @@
     defineProps({
   selectedTab: String
 });
-
 </script>
+
 <style scoped>
     #content-container {
         position: absolute;
