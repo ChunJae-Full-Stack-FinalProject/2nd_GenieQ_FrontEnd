@@ -7,6 +7,17 @@
             <span>전체</span>
             <P>(N개)</P>
         </div>
+
+        <div class="storage-worklistmain-search">
+            <div class="search-container">
+                <input type="text" placeholder="검색어를 입력하세요." class="search-input">
+            </div>
+            <div class="search-icon">
+                <Icon icon="iconamoon:search-light" width="20" height="20"  style="color: #757575" />
+            </div>
+        </div>
+
+
         <div class="storage-worklistmain-subtitle2">
             <span>삭제</span>
             <button style="border: 0; background-color: transparent;">
@@ -260,6 +271,7 @@ const toggleFavorite = (index) => {
   color: #FF9F40;
 }
 
+
 .storage-worklist-table {
    display: flex;
    flex-direction: column;
@@ -493,4 +505,49 @@ td{
 .row-checked {
   background-color: #FFEDDC !important;
 }
+
+
+/* 검색인풋창 디자인. */
+.storage-worklistmain-search {
+   display: flex;
+   align-items: flex-start;
+   gap: 3px;
+   isolation: isolate;
+   position: absolute;
+   left: 1420px;
+   top: 80px;
+   box-sizing: border-box;
+}
+
+.search-container {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.search-input {
+  width: 100%;
+  height: 40px;
+  padding: 0 10px 0 15px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 18px;
+  color: #333;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.search-input::placeholder {
+  color: #757575;
+}
+
+.search-icon {
+  position: absolute;
+  top: 52%;
+  right: 15px;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
 </style>
+
