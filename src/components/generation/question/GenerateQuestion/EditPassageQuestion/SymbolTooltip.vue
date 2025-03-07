@@ -1,31 +1,54 @@
 <template>
-    <div class="symbol-tooltip-container">
-      <div class="symbol-tooltip">
-        <span v-for="(symbol, index) in symbols" :key="index" class="symbol-item" @click="onSymbolClick(symbol)">
-            {{ symbol }}
-        </span>
-      </div>
-      <div class="arrow"></div>
+<div class="symbol-tooltip-container">
+    <div class="symbol-tooltip">
+    <span v-for="(symbol, index) in symbols" :key="index" class="symbol-item" 
+        @click="onSymbolClick(symbol)">
+        {{ symbol }}
+    </span>
     </div>
-  </template>
-  <script>
-  export default {
+    <div class="arrow" :style="arrowStyle"></div>
+</div>
+</template>
+<script>
+export default {
     name: 'SymbolTooltip',
     props: {
-      message: {
+        message: {
+            type: String,
+            default: 'empty'
+        },
+        width: {
+            type: String,
+            default: 'auto'
+        },
+        symbolType: {
         type: String,
-        default: 'empty'
-      },
-      width: {
-        type: String,
-        default: 'auto'
-      }
+        default: '㉠'
+        }
     },
     computed: {
         symbols() {
             // 메시지를 개별 문자로 분리
             return this.message.split('');
-        }
+        },
+        arrowStyle() {
+            // 심볼 타입에 따라 화살표 위치 조정
+            let translateX = '-230%';  // 기본값
+            
+            if (this.symbolType === '㉠') {
+                translateX = '-230%';
+            } else if (this.symbolType === 'ⓐ') {
+                translateX = '-80%';
+            } else if (this.symbolType === '㉮') {
+                translateX = '70%';
+            } else if (this.symbolType === '①') {
+                translateX = '220%';
+            }
+
+            return {
+                transform: `translateX(${translateX})`
+            };
+        },
     },
     methods: {
         onSymbolClick(symbol) {
@@ -33,47 +56,41 @@
             this.$emit('symbol-click', symbol);
         }
     }
-  }
-  </script>
-  <style scoped>
-  .symbol-tooltip-container {
-      position: relative;
-      display: inline-block;
-  }
-  .symbol-tooltip {
+}
+</script>
+<style scoped>
+.symbol-tooltip-container {
+    position: relative;
+    top: 60px;
+    left: 133px;
+}
+.symbol-tooltip {
+    padding: 2px;
     background-color: #E1E1E1;
     color: #424242;
-    padding: 10px 15px;
-    position: relative;
     display: flex;
     align-items: center;
     justify-content: space-around;
-    border-radius: 8px;
-  }
-  .symbol-item {
+    height: 33px;
+}
+.symbol-item {
     display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 40px;
-      height: 40px;
-      margin: 0 5px;
-      cursor: pointer;
-      font-family: 'Pretendard';
-      font-style: normal;
-      font-weight: 500;
-      font-size: 18px;
-      line-height: 150%;
-      color: #424242;
-  }
-  .arrow {
+    justify-content: center;
+    align-items: center;
+    width: 25px;
+    height: 35px;
+    cursor: pointer;
+    font-size: 25px;
+    color: #424242;
+}
+.arrow {
     position: absolute;
     top: -15px;
-    left: 50%;
-    transform: translateX(-50%);
     width: 0;
     height: 0;
-    border-left: 15px solid transparent;
-    border-right: 15px solid transparent;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
     border-bottom: 15px solid #E1E1E1;
-  }
-  </style>
+}
+
+</style>
