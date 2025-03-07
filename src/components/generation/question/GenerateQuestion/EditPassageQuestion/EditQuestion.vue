@@ -2,8 +2,10 @@
     <div class="edit-question">
         <div class="question-main">
             <div class="question-header">
-                <span v-if="!isEditing" id="question-title">{{ title }}</span>
-                <input v-else type="text" v-model="title" id="input-title"/>
+                <div class="title-container">
+                    <span v-if="!isEditing" id="question-title">{{ title }}</span>
+                    <input v-else type="text" v-model="title" id="input-title" ref="titleInput"/>
+                </div>
 
                 <button class="edit-button" @click="toggleEditMode">
                     <Icon icon="mingcute:pencil-fill" width="24" height="24" 
@@ -63,9 +65,15 @@ export default {
         // 편집 모드 토글
         toggleEditMode() {
             this.isEditing = !this.isEditing;
-            
-            // 편집 모드가 종료되면 변경사항 알림
-            if (!this.isEditing) {
+
+            // 편집 모드로 전환되면 input title에 포커스
+            if (this.isEditing) {
+                this.$nextTick(() => {
+                    if (this.$refs.titleInput) {
+                        this.$refs.titleInput.focus();
+                    }
+                })
+            } else {
                 this.$emit('update:questions', this.items);
                 this.$emit('update:questionTitle', this.title);
             }
@@ -126,8 +134,10 @@ export default {
     top: 24px;
 }
 .question-header {
-    width: 736.67px;
     height: 36px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 
     font-family: 'Pretendard';
     font-style: normal;
@@ -137,6 +147,10 @@ export default {
 
     letter-spacing: -0.02em;
     color: #303030;
+}
+.title-container {
+    flex: 1;
+    margin-right: 10px;
 }
 #question-title {
     font-family: 'Pretendard';
@@ -150,6 +164,8 @@ export default {
     align-self: stretch;
 }
 #input-title {
+    width: calc(100% - 40px); /* 연필 아이콘 영역을 고려한 너비 */
+    height: 36px;
     font-family: 'Pretendard';
     font-style: normal;
     font-weight: 400;
