@@ -3,7 +3,7 @@
         <div class="edit-tool-bar">
             <p>편집 도구</p>
             <div class="edit-tool-bar-content">
-                <p>단어·문장 기호</p>
+                <p id="symbol-head">단어·문장 기호</p>
                 <div id="symbol-tool">
                     <ul class="symbol-list">
                         <li @click="showSymbolTooltip('㉠')">㉠</li>
@@ -12,7 +12,11 @@
                         <li @click="showSymbolTooltip('①')">①</li>
                     </ul>
                 </div>
-                <p>에디터</p>
+
+                <SymbolTooltip :message="symbolList.join('')" :symbolType="currentSymbolType" 
+                    class="symbol-tooltip" v-if="showTooltip" @symbol-click="insertSymbol"/>
+
+                <p id="edit-head">에디터</p>
                 <div id="editor-tool">
                     <ul class="editor-list">
                         <li><b>B</b></li>
@@ -24,13 +28,12 @@
         </div>
         <div class="passage-container">
             <p>지문</p>
-            <div id="passage-count"><span style="color: #FF9500;">1453</span>/1700</div>
+            <div id="passage-count"><span style="color: #FF9500;">{{ contentText.length }}</span>/1700</div>
             <div id="passage-content-main">
-                <textarea id="content-text" placeholder="본문을 입력해주세요."></textarea>
+                <textarea id="content-text" placeholder="본문을 입력해주세요." v-model="contentText"
+                    @click="saveCurrentCursorPosition" @keyup="saveCurrentCursorPosition"></textarea>
             </div>
         </div>
-
-        <SymbolTooltip :message="symbolList.join('')" class="symbol-tooltip" v-if="showTooltip" @symbol-click="insertSymbol"/>
     </div>
 </template>
 <script>
@@ -46,11 +49,20 @@ export default {
             symbolList: [],
             showTooltip: false,
             contentText: '',
-            cursorPosition: 0
+            cursorPosition: 0,
+            currentSymbolType: '㉠'
         }
     },
     methods: {
         showSymbolTooltip(symbol) {
+            // 이미 열려있는 같은 심볼 툴팁이면 닫기
+            if (this.showTooltip && this.currentSymbolType === symbol) {
+                this.showTooltip = false;
+                return;
+            }
+
+            this.currentSymbolType = symbol;
+            
             // 각 심볼에 따른 목록 정의
             const symbolSeries = {
                 '㉠': ['㉠', '㉡', '㉢', '㉣', '㉤'],
@@ -58,6 +70,7 @@ export default {
                 'ⓐ': ['ⓐ', 'ⓑ', 'ⓒ', 'ⓓ', 'ⓔ'],
                 '①': ['①', '②', '③', '④', '⑤']
             };
+
             // 선택된 심볼에 해당하는 시리즈 설정
             this.symbolList = symbolSeries[symbol] || [];
 
@@ -65,6 +78,9 @@ export default {
             this.showTooltip = true;
 
             // 현재 텍스트 영역의 커서 위치 저장
+            this.saveCurrentCursorPosition();
+        },
+        saveCurrentCursorPosition() {
             const textarea = document.getElementById('content-text');
             if (textarea) {
                 this.cursorPosition = textarea.selectionStart;
@@ -72,22 +88,23 @@ export default {
         },
         insertSymbol(symbol) {
             // 선택된 심볼을 현재 커서 위치에 삽입
-            const textarea = document.getElementById('content-text');
-            if (textarea) {
-                const start = this.cursorPosition;
-                const before = this.contentText.substring(0, start);
-                const after = this.contentText.substring(start);
-                
-                // 심볼 삽입
-                this.contentText = before + symbol + after;
-                
-                // 포커스를 다시 텍스트 영역으로 설정하고 커서 위치 조정
-                this.$nextTick(() => {
+            const before = this.contentText.substring(0, this.cursorPosition);
+            const after = this.contentText.substring(this.cursorPosition);
+
+            // 심볼 삽입
+            this.contentText = before + symbol + after;
+
+            // 포커스를 다시 텍스트 영역으로 설정하고 커서 위치 조정
+            this.$nextTick(() => {
+                const textarea = document.getElementById('content-text');
+                if (textarea) {
                     textarea.focus();
-                    textarea.setSelectionRange(start + 1, start + 1);
-                    this.cursorPosition = start + 1;
-                });
-            }
+                    // 새 커서 위치는 삽입된 심볼 이후
+                    const newPosition = this.cursorPosition + 1;
+                    textarea.setSelectionRange(newPosition, newPosition);
+                    this.cursorPosition = newPosition;
+                }
+            });
         }
     }
 }
@@ -152,7 +169,7 @@ export default {
     flex-grow: 0;
     z-index: 1;
 }
-.edit-tool-bar-content p:nth-child(1) {
+#symbol-head {
     position: absolute;
     width: 112px;
     height: 30px;
@@ -201,7 +218,7 @@ export default {
     letter-spacing: -0.02em;
     color: #000000;
 }
-.edit-tool-bar-content p:nth-child(3) {
+#edit-head {
     position: absolute;
     width: 52px;
     height: 30px;
@@ -307,11 +324,5 @@ export default {
     border: none;
     outline: none; /* 포커스 된 경우의 파란 테두리 삭제 */
     resize: none;
-}
-.symbol-tooltip {
-    position: absolute;
-    left: 137px;
-    top: 89px;
-    z-index: 3;
 }
 </style>
