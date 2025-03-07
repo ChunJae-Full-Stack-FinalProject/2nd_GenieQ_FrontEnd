@@ -1,5 +1,6 @@
 <template>
     <BaseModal :isOpen="isOpen" width="435px" height="292px" @close="closeModal">
+      <div class="modal-container">
         <!-- ✅ 항상 표시되는 경고 아이콘 -->
         <div class="warning-icon">
           <div class="warning-circle">
@@ -33,6 +34,7 @@
           />
         </div>
       </div>
+    </div>
     </BaseModal>
 </template>
   
@@ -60,6 +62,11 @@
 </script>
   
 <style scoped>
+  .modal-container{
+    display: flex;
+    flex-direction: column;
+  }
+  
   .modal-content-group {
     display: flex;
     flex-direction: column;
@@ -72,7 +79,7 @@
   }
 
   .warning-icon{
-    align-self: flex-start;
+    align-self: center;
   }
   
   /* ✅ 경고 아이콘 스타일 */
