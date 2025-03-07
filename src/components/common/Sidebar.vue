@@ -14,7 +14,7 @@
                 <img src="@/assets/icons/icon_question.png" alt="문항생성" class="question-icon" /> 
                 문항 생성
             </router-link>
-            <router-link to="/resources" class="nav-item" :class="{ 'active-box': isActive('/resources') }">
+            <router-link to="/storage" class="nav-item" :class="{ 'active-box': isActive('/storage') }">
                 <img src="@/assets/icons/icon_file.png" alt="자료실" class="file-icon" /> 
                  자료실
             </router-link>
