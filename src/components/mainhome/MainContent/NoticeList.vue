@@ -4,7 +4,9 @@
                 <div>
                     <div class="top-container">
                         <div class="notice-title">공지사항</div>
-                        <Icon icon="weui:arrow-outlined" width="24" height="24" id="arrow-icon" style="color: #303030" />
+                        <router-link :to="{ name: 'my-page-wrapper', query: { 'tab': '공지사항' } }">
+                            <Icon icon="weui:arrow-outlined" width="24" height="24" id="arrow-icon" style="color: #303030" />
+                        </router-link>
                     </div>
                 </div>
                 <div class="notice-main">
