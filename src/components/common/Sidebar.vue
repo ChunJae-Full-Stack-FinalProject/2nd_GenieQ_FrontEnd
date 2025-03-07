@@ -14,7 +14,7 @@
                 <img src="@/assets/icons/icon_question.png" alt="문항생성" class="question-icon" /> 
                 문항 생성
             </router-link>
-            <router-link to="/resources" class="nav-item" :class="{ 'active-box': isActive('/resources') }">
+            <router-link to="/storage" class="nav-item" :class="{ 'active-box': isActive('/storage') }">
                 <img src="@/assets/icons/icon_file.png" alt="자료실" class="file-icon" /> 
                  자료실
             </router-link>
@@ -34,9 +34,14 @@ import { useRoute } from 'vue-router';
 
 const route = useRoute();
 
-// 현재 활성화된 경로 확인
+// 현재 활성화된 경로 확인 (수정된 버전)
 const isActive = (path) => {
-    return route.path === path;
+    if (path === '/') {
+        // 홈 경로인 경우, 정확히 '/'인 경우에만 활성화
+        return route.path === '/home' || route.path === '';
+    }
+    // 다른 경로는 해당 경로로 시작하는지 확인
+    return route.path.startsWith(path);
 };
 </script>
 
