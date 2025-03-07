@@ -44,7 +44,7 @@
             <!-- 경고창 모달 -->
             <WarningModal :isOpen="showWarningModal" title="경고" message="이 작업을 실행하시겠습니까?" @close="showWarningModal = false"/>
             <!-- 추출 파일 선택 모달 -->
-            <FileSelectModal :isOpen="showFileModal" @close="showFileModal = false" @confirm="handleFileSelection" />
+            <FileSelectModal :isOpen="showFileModal" @close="showFileModal = false"/>
             <!-- 지문 불러오기 모달 -->
             <LoadPassageModal :isOpen="showLoadPassageModal" @close="showLoadPassageModal = false"/>
             <!-- 지문 불러오기 모달 -->
@@ -83,7 +83,6 @@ const showFileModal = ref(false);
 const showLoadPassageModal = ref(false);
 const showGenerateQuestionModal = ref(false);
 const showChangePwdModal = ref(false);
-
 </script>
 
 <style scoped>

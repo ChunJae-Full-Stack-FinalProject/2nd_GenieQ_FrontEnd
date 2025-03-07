@@ -1,7 +1,6 @@
 <template>
     <BaseModal :isOpen="isOpen" width="435px" height="533px" @close="closeModal">
         <div class="modal-container">
-        <!-- ✅ 항상 표시되는 잠금 아이콘 -->
         <div class="pwd-icon">
           <div class="pwd-circle">
             <div class="pwd-inner-circle">
@@ -9,9 +8,7 @@
             </div>
           </div> 
         </div>
-
         <div class="modal-title">비밀번호 변경</div>
-
         <form class="pwd-form">
             <div class="pwd-input-group">
                 <label>현재 비밀번호 *</label>
@@ -36,24 +33,15 @@
             
             <div class="pwd-input-group">
                 <label>새로운 비밀번호 확인 *</label>
-                <!-- <div class="input-container">
+                <div class="input-container" :class="{'error-border': isPasswordMismatch, 'success-border': isPasswordMatch}">
                     <input v-model="confirmPassword" :type="showPassword.confirm ? 'text' : 'password'" placeholder="새로운 비밀번호 입력" />
                     <Icon :icon="showPassword.confirm ? 'basil:eye-outline' : 'basil:eye-closed-outline'" width="24px" height="24px" class="eye-icon" @click="togglePasswordVisibility('confirm')" />
-                </div> -->
-                <div class="input-container" :class="{'error-border': isPasswordMismatch, 'success-border': isPasswordMatch}">
-
-    <input v-model="confirmPassword" :type="showPassword.confirm ? 'text' : 'password'" placeholder="새로운 비밀번호 입력" />
-    <Icon :icon="showPassword.confirm ? 'basil:eye-outline' : 'basil:eye-closed-outline'" width="24px" height="24px" class="eye-icon" @click="togglePasswordVisibility('confirm')" />
-</div>
-
-<div class="error-area">
-    <span class="error-text" v-if="isPasswordMismatch">비밀번호가 일치하지 않습니다.</span>
-    <span class="success-text" v-if="isPasswordMatch">비밀번호가 일치합니다.</span>
-</div>
-
-
+                </div>
+                <div class="error-area">
+                    <span class="error-text" v-if="isPasswordMismatch">비밀번호가 일치하지 않습니다.</span>
+                    <span class="success-text" v-if="isPasswordMatch">비밀번호가 일치합니다.</span>
+                </div>
             </div>
-
              <!-- 버튼 영역 -->
              <div class="modal-footer">
                 <BaseButton text="닫기" type="type3" width="187.5px" height="46px" @click="closeModal" />
@@ -70,6 +58,9 @@ import BaseModal from '../../BaseModal.vue';
 import { Icon } from '@iconify/vue';
 
 const emit = defineEmits(["close"]);
+const props = defineProps({
+  isOpen: Boolean,
+});
 const showPassword = ref({ current: false, new: false, confirm: false });
 const currentPassword = ref('');
 const newPassword = ref('');
@@ -113,7 +104,7 @@ const isButtonEnabled = computed(() => {
     align-self: center;
 }
 
-/* ✅ 잠금 아이콘 스타일 */
+/* 잠금 아이콘 스타일 */
 .pwd-circle {
     width: 60px;
     height: 60px;
