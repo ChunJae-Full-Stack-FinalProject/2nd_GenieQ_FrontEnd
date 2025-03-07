@@ -36,7 +36,7 @@
                     </div>
                 </div>
                 <!-- ✅ 난이도 선택 (라디오 버튼 방식) -->
-                <div class="for-difficulty">
+                <!-- <div class="for-difficulty">
                     <span class="chip-label">난이도</span>
                     <div class="chip-group">
                         <BaseButton
@@ -51,28 +51,27 @@
                             @click="activeDifficulty = level.label"
                         />
                     </div>
-                </div>
+                </div> -->
             </div>
             <div class="example-group">
                 <!-- ✅ 필터링된 리스트 -->
-                 <div class="example-list">
-                <div class="list-wrapper" v-if="filteredQuestions.length > 0">
-                    <div
-                    v-for="(item, index) in filteredQuestions"
-                    :key="index"
-                    class="example-item"
-                    :class="{ active: selectedQuestion === item }"
-                    @click="selectedQuestion = item"
-                    >
-                    <span class="category">{{ item.pattern }}</span>
-                    <div class="question-title">{{ item.title }}</div>
+                <div class="example-list">
+                    <div class="list-wrapper" v-if="filteredQuestions.length > 0 && (activePattern || activeType || activeDifficulty)">
+                        <div
+                            v-for="(item, index) in filteredQuestions"
+                            :key="index"
+                            class="example-item"
+                            :class="{ active: JSON.stringify(selectedQuestion) === JSON.stringify(item) }"
+                            @click="selectedQuestion = item">
+                            <span class="category">{{ item.pattern }}</span>
+                            <div class="example-title">{{ item.title }}</div>
+                        </div>
                     </div>
-                </div>
 
-                <!-- ✅ 필터링된 문항이 없을 때 -->
-                <div v-else>
-                    <div class="empty-msg">문항 유형과 서술 방식을 선택해 주세요.</div>
-                </div>
+                    <!-- ✅ 필터링된 문항이 없을 때 -->
+                    <div v-else>
+                        <div class="empty-msg">문항 유형과 서술 방식을 선택해 주세요.</div>
+                    </div>
                 </div>
 
                 <!-- ✅ 선택된 문항 미리보기 -->
@@ -107,8 +106,6 @@ const activeType = ref(null); // 서술 방식 선택값
 const activeDifficulty = ref(null); // 난이도 선택값
 const selectedQuestion = ref(null); // 선택된 문항을 ref로 저장
 
-
-
 const closeModal = () => {
   emit("close");
   activePattern.value = null;
@@ -141,6 +138,10 @@ const questions = questionExample;
 
 // ✅ 선택된 라디오 버튼에 따라 자동 필터링
 const filteredQuestions = computed(() => {
+  if (!activePattern.value && !activeType.value && !activeDifficulty.value) {
+    return []; // 필터가 선택되지 않았다면 빈 배열 반환
+  }
+  
   return questionExample.filter((q) => {
     return (
       (activePattern.value === null || activePattern.value === "전체" || q.pattern === activePattern.value) &&
@@ -149,6 +150,7 @@ const filteredQuestions = computed(() => {
     );
   });
 });
+
 
 // ✅ 필터링된 리스트 변경 시 첫 번째 문항을 자동으로 선택
 watch(filteredQuestions, (newList) => {
@@ -241,6 +243,7 @@ color: #BDBDBD;
     align-items: center;
     justify-content: center;
 }
+
 .list-wrapper{
     display: flex;
     flex-direction: column;
@@ -285,7 +288,7 @@ color: #BDBDBD;
     letter-spacing: -2%;
 }
 
-.question-title{
+.example-title{
     font-weight: 500;
     font-size: 16px;
     line-height: 150%;
@@ -327,6 +330,7 @@ color: #BDBDBD;
     line-height: 150%;
     letter-spacing: -2%;
     margin-bottom: 12px;
+    text-align: left;
 }
 
 .question-content{
@@ -346,6 +350,6 @@ color: #BDBDBD;
 }
 
 #tooltip{
-    position:absolute; top:800px; left:1010px;
+    position:absolute; top:763px; left:1010px;
 }
 </style>
