@@ -2,7 +2,7 @@
     <div class="card-container">
         <div class="storage-likelist-title">
             <p>즐겨찾기</p>
-            <Icon icon="weui:arrow-outlined" width="24" height="24" id="arrow-icon" style="color: #303030" />
+            <router-link to="/likelistMina"><Icon icon="weui:arrow-outlined" width="24" height="24" id="arrow-icon" style="color: #303030" /></router-link>
         </div>
        <div class="storage-likelist-table">
   <div class="table-container">

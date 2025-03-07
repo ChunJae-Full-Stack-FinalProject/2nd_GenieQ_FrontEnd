@@ -2,7 +2,7 @@
     <div class="card-container">
         <div class="storage-worklist-title">
             <p>최근 작업 내역</p>
-            <Icon icon="weui:arrow-outlined" width="24" height="24" id="arrow-icon" style="color: #303030" />
+            <router-link to="/worklistMina"><Icon icon="weui:arrow-outlined" width="24" height="24" id="arrow-icon" style="color: #303030" /></router-link>
         </div>
         <div class="storage-worklist-subtitle">
             <span>최대 150개까지 보관됩니다.</span>
