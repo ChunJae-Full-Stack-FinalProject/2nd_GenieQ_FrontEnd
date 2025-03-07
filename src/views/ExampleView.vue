@@ -73,7 +73,7 @@ import WarningModal from '@/components/common/modal/type/WarningModalComponent.v
 import FileSelectModal from '@/components/common/modal/type/FileSelectModal.vue';
 import LoadPassageModal from '@/components/common/modal/type/generation/LoadPassageModal.vue';
 import GenerateQuestionModal from '@/components/common/modal/type/generation/GenerateQuestionModal.vue';
-import ChangePasswordModal from '@/components/common/modal/type/mypage/changePasswordModal.vue';
+import ChangePasswordModal from '@/components/common/modal/type/mypage/ChangePasswordModal.vue';
 import PlainTooltip from '@/components/common/PlainTooltip.vue';
 import { ref } from "vue";
 
