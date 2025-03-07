@@ -11,7 +11,7 @@
     import Info from './Info.vue';
     import Ticket from './Ticket.vue';
     import Notice from './Notice.vue';
-    import Faq from './Fnq.vue';
+    import Faq from './Faq.vue';
 
     defineProps({
   selectedTab: String
