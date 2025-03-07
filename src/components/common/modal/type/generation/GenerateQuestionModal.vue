@@ -101,6 +101,10 @@ import questionExample from '@/assets/data/questionExample.json';
 
 const emit = defineEmits(["close"]);
 
+const props = defineProps({
+  isOpen: Boolean,
+});
+
 const activePattern = ref(null); // 문항 유형 선택값
 const activeType = ref(null); // 서술 방식 선택값
 const activeDifficulty = ref(null); // 난이도 선택값

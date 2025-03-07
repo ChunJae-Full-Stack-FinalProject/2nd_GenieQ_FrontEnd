@@ -3,7 +3,7 @@
         <div class="edit-tool-bar">
             <p>편집 도구</p>
             <div class="edit-tool-bar-content">
-                <p>단어·문장 기호</p>
+                <p id="symbol-head">단어·문장 기호</p>
                 <div id="symbol-tool">
                     <ul class="symbol-list">
                         <li @click="showSymbolTooltip('㉠')">㉠</li>
@@ -12,25 +12,33 @@
                         <li @click="showSymbolTooltip('①')">①</li>
                     </ul>
                 </div>
-                <p>에디터</p>
+
+                <SymbolTooltip :message="symbolList.join('')" :symbolType="currentSymbolType" 
+                    class="symbol-tooltip" v-if="showTooltip" @symbol-click="insertSymbol"/>
+
+                <p id="edit-head">에디터</p>
                 <div id="editor-tool">
                     <ul class="editor-list">
-                        <li><b>B</b></li>
-                        <li><u>U</u></li>
-                        <li><s>S</s></li>
+                        <li @click="formatText('bold')"><b>B</b></li>
+                        <li @click="formatText('underline')"><u>U</u></li>
+                        <li @click="formatText('strikethrough')"><s>S</s></li>
                     </ul>
                 </div>
             </div>
         </div>
         <div class="passage-container">
             <p>지문</p>
-            <div id="passage-count"><span style="color: #FF9500;">1453</span>/1700</div>
+            <div id="passage-count"><span style="color: #FF9500;">{{ getTextLength() }}</span>/1700</div>
             <div id="passage-content-main">
-                <textarea id="content-text" placeholder="본문을 입력해주세요."></textarea>
+                <!-- 기본 텍스트 입력 영역 -->
+                <textarea id="content-text" 
+                    placeholder="본문을 입력해주세요." 
+                    v-model="contentText"
+                    @select="onTextSelect"
+                    @click="onTextSelect"
+                    @keyup="onTextSelect"></textarea>
             </div>
         </div>
-
-        <SymbolTooltip :message="symbolList.join('')" class="symbol-tooltip" v-if="showTooltip" @symbol-click="insertSymbol"/>
     </div>
 </template>
 <script>
@@ -46,11 +54,32 @@ export default {
             symbolList: [],
             showTooltip: false,
             contentText: '',
-            cursorPosition: 0
+            currentSymbolType: '㉠',
+            selectionStart: 0,
+            selectionEnd: 0
         }
     },
     methods: {
+        getTextLength() {
+            // HTML 태그를 제외한 순수 텍스트 길이 계산
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = this.contentText;
+            return tempDiv.textContent.length;
+        },
+        onTextSelect() {
+            const textarea = document.getElementById('content-text');
+            this.selectionStart = textarea.selectionStart;
+            this.selectionEnd = textarea.selectionEnd;
+        },
         showSymbolTooltip(symbol) {
+            // 이미 열려있는 같은 심볼 툴팁이면 닫기
+            if (this.showTooltip && this.currentSymbolType === symbol) {
+                this.showTooltip = false;
+                return;
+            }
+
+            this.currentSymbolType = symbol;
+            
             // 각 심볼에 따른 목록 정의
             const symbolSeries = {
                 '㉠': ['㉠', '㉡', '㉢', '㉣', '㉤'],
@@ -58,36 +87,80 @@ export default {
                 'ⓐ': ['ⓐ', 'ⓑ', 'ⓒ', 'ⓓ', 'ⓔ'],
                 '①': ['①', '②', '③', '④', '⑤']
             };
+
             // 선택된 심볼에 해당하는 시리즈 설정
             this.symbolList = symbolSeries[symbol] || [];
 
             // 툴팁 표시
             this.showTooltip = true;
-
-            // 현재 텍스트 영역의 커서 위치 저장
-            const textarea = document.getElementById('content-text');
-            if (textarea) {
-                this.cursorPosition = textarea.selectionStart;
-            }
         },
         insertSymbol(symbol) {
-            // 선택된 심볼을 현재 커서 위치에 삽입
             const textarea = document.getElementById('content-text');
-            if (textarea) {
-                const start = this.cursorPosition;
-                const before = this.contentText.substring(0, start);
-                const after = this.contentText.substring(start);
-                
-                // 심볼 삽입
-                this.contentText = before + symbol + after;
-                
-                // 포커스를 다시 텍스트 영역으로 설정하고 커서 위치 조정
-                this.$nextTick(() => {
-                    textarea.focus();
-                    textarea.setSelectionRange(start + 1, start + 1);
-                    this.cursorPosition = start + 1;
-                });
+            
+            // 현재 선택 위치 저장
+            const start = this.selectionStart;
+            const end = this.selectionEnd;
+            
+            // 선택 범위 앞뒤 텍스트
+            const beforeSelection = this.contentText.substring(0, start);
+            const afterSelection = this.contentText.substring(end);
+            
+            // 심볼 삽입
+            this.contentText = beforeSelection + symbol + afterSelection;
+            
+            // 심볼 삽입 후 커서 위치 설정
+            this.$nextTick(() => {
+                textarea.focus();
+                const newCursorPos = start + symbol.length;
+                textarea.setSelectionRange(newCursorPos, newCursorPos);
+                this.selectionStart = newCursorPos;
+                this.selectionEnd = newCursorPos;
+            });
+            
+            // 툴팁 닫기
+            this.showTooltip = false;
+        },
+        formatText(type) {
+            const textarea = document.getElementById('content-text');
+            
+            // 선택된 텍스트가 없으면 아무것도 하지 않음
+            if (this.selectionStart === this.selectionEnd) {
+                return;
             }
+            
+            // 현재 선택 범위 가져오기
+            const selectedText = this.contentText.substring(this.selectionStart, this.selectionEnd);
+            const beforeText = this.contentText.substring(0, this.selectionStart);
+            const afterText = this.contentText.substring(this.selectionEnd);
+            
+            // 태그 생성
+            let formattedText;
+            switch(type) {
+                case 'bold':
+                    formattedText = `<b>${selectedText}</b>`;
+                    break;
+                case 'underline':
+                    formattedText = `<u>${selectedText}</u>`;
+                    break;
+                case 'strikethrough':
+                    formattedText = `<s>${selectedText}</s>`;
+                    break;
+                default:
+                    formattedText = selectedText;
+            }
+            
+            // 텍스트 업데이트
+            this.contentText = beforeText + formattedText + afterText;
+            
+            // 새 커서 위치 계산 및 설정
+            const newCursorPos = this.selectionStart + formattedText.length;
+            
+            this.$nextTick(() => {
+                textarea.focus();
+                textarea.setSelectionRange(newCursorPos, newCursorPos);
+                this.selectionStart = newCursorPos;
+                this.selectionEnd = newCursorPos;
+            });
         }
     }
 }
@@ -152,7 +225,7 @@ export default {
     flex-grow: 0;
     z-index: 1;
 }
-.edit-tool-bar-content p:nth-child(1) {
+#symbol-head {
     position: absolute;
     width: 112px;
     height: 30px;
@@ -200,8 +273,9 @@ export default {
 
     letter-spacing: -0.02em;
     color: #000000;
+    cursor: pointer;
 }
-.edit-tool-bar-content p:nth-child(3) {
+#edit-head {
     position: absolute;
     width: 52px;
     height: 30px;
@@ -305,13 +379,10 @@ export default {
     z-index: 0;
 
     border: none;
-    outline: none; /* 포커스 된 경우의 파란 테두리 삭제 */
+    outline: none;
     resize: none;
-}
-.symbol-tooltip {
-    position: absolute;
-    left: 137px;
-    top: 89px;
-    z-index: 3;
+    overflow-y: auto;
+    text-align: left;
+    padding: 0;
 }
 </style>

@@ -1,15 +1,20 @@
 <template>
     <div>
-        <button class="stores-passage">
+        <button class="stores-passage" @click="showLoadPassageModal = true">
             <Icon icon="material-symbols:bookmark" id="bookmark-icon" style="color: #424242" />
             <p id="text">자료실에서 지문 불러오기</p>
         </button>
+        <!-- 지문 불러오기 모달 -->
+        <LoadPassageModal :isOpen="showLoadPassageModal" @close="showLoadPassageModal = false"/>
         <!-- 버튼을 통해 불러온 후 활성화되도록 연결 -->
         <!-- <textarea id="user-passage-text" placeholder="지문을 입력해주세요."></textarea> -->
     </div>
 </template>
 <script setup>
+import { ref } from "vue";
+import LoadPassageModal from '@/components/common/modal/type/generation/LoadPassageModal.vue';
 
+const showLoadPassageModal = ref(false);
 </script>
 <style scoped>
 .stores-passage {
@@ -32,6 +37,7 @@
     border-radius: 12px;
 
     background-color: #FFFFFF;
+    cursor: pointer;
 }
 #bookmark-icon {
     position: absolute;

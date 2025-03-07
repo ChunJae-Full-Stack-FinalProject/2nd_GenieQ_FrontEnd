@@ -19,6 +19,12 @@
 import { ref } from "vue";
 import MyPageContent from './MyPageContent.vue';
 
+// onMounted(()=> {
+//   console.log("컴포넌트가 마운트되었습니다 !");
+//   selectedTab = "자주 묻는 질문";
+// })
+
+
 /* 현재 선택된 탭 (기본값: 회원정보) */
 const selectedTab = ref("회원정보");
 
