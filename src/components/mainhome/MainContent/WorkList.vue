@@ -49,6 +49,13 @@ import { Icon } from "@iconify/vue";
    border-radius: 8px;
    box-sizing: border-box;
 }
+
+.worklist-title p {
+    font-size: 24px;
+    font-weight: 700;
+}
+
+
 .worklist-table {
    display: flex;
    flex-direction: column;
@@ -65,6 +72,7 @@ import { Icon } from "@iconify/vue";
    border-radius: 8px;
    box-sizing: border-box;
 }
+
 
 .data-table thead th{
     display: flex;
@@ -148,7 +156,6 @@ tr th:nth-child(2) {
 
     width: 240px;
     height: 46px;
-
 
     flex: none;
     order: 1;
