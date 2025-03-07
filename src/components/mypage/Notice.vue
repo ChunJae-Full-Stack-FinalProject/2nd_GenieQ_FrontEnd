@@ -8,7 +8,7 @@
         <button 
           v-for="tab in tabs" 
           :key="tab.value"
-          @click="selectedTab = tab.value"
+          @click="changeTab(tab.value)"
           :class="{ 'active-tab': selectedTab === tab.value }">
           {{ tab.label }}
         </button>
@@ -36,7 +36,7 @@
   
       <!-- 페이지네이션 -->
       <div class="pagination">
-        <button @click="prevPage" :disabled="currentPage === 1"><</button>
+        <button v-if="totalPages > 5" @click="prevPage" :disabled="currentPage === 1"><</button>
         
         <span
             v-for="page in visiblePages"
@@ -55,17 +55,17 @@
   <script setup>
   import { ref, computed } from "vue";
   
-  /* ✅ 공지사항 필터 */
+  /* 공지사항 필터 */
   const tabs = [
     { label: "전체", value: "all" },
     { label: "서비스", value: "service" },
     { label: "작업", value: "job" }
   ];
   
-  /* ✅ 현재 선택된 탭 */
+  /* 현재 선택된 탭 */
   const selectedTab = ref("all");
   
-  /* ✅ 공지사항 데이터 */
+  /* 공지사항 데이터 */
   const notices = ref([]);
 for (let i = 1; i <= 60; i++) {
   notices.value.push({
@@ -77,29 +77,29 @@ for (let i = 1; i <= 60; i++) {
 }
 
   
-/* ✅ 필터링된 공지사항 목록 */
+/* 필터링된 공지사항 목록 */
 const filteredNotices = computed(() => {
     if (selectedTab.value === "all") return notices.value;
     return notices.value.filter(n => n.NOT_TYPE === (selectedTab.value === "service" ? "서비스" : "작업"));
 });
 
 
-/* ✅ 페이지네이션 */
+/* 페이지네이션 */
 const currentPage = ref(1);
-const itemsPerPage = 10; // ✅ 한 페이지에 10개
-const maxVisiblePages = 5; // ✅ 페이지네이션 최대 표시 개수
+const itemsPerPage = 10; 
+const maxVisiblePages = 5; 
 
-/* ✅ 총 페이지 수 */
-const totalPages = computed(() => Math.ceil(notices.value.length / itemsPerPage));
+/* 총 페이지 수 */
+const totalPages = computed(() => Math.ceil(filteredNotices.value.length / itemsPerPage));
 
-/* ✅ 현재 페이지에 맞는 데이터 */
+/* 현재 페이지에 맞는 데이터 */
 const paginatedNotices = computed(() => {
     const start = (currentPage.value - 1) * itemsPerPage;
     return filteredNotices.value.slice(start, start + itemsPerPage);
 });
 
 
-/* ✅ 표시할 페이지 목록 */
+/*  표시할 페이지 목록 */
 const visiblePages = computed(() => {
     const total = totalPages.value;
     const startPage = Math.floor((currentPage.value - 1) / maxVisiblePages) * maxVisiblePages + 1;
@@ -107,31 +107,42 @@ const visiblePages = computed(() => {
     return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
 });
 
-/* ✅ 페이지 변경 함수 */
+/* 페이지 변경 함수 */
 const changePage = (page) => {
     if (page >= 1 && page <= totalPages.value) {
         currentPage.value = page;
     }
 };
 
-/* ✅ 이전 페이지 이동 (한 칸 이동) */
+/* 이전 페이지 이동 (한 칸 이동) */
 const prevPage = () => {
-    if (currentPage.value > 1) {
-        currentPage.value--;
+    let page = currentPage.value - 1;  
+
+    if (page >= 1 && page <= totalPages.value) {
+        currentPage.value = page; 
+    } else {
+        currentPage.value = Math.min(1, totalPages.value); 
     }
 };
 
-/* ✅ 다음 페이지 이동 (한 칸 이동) */
+
+/* 다음 페이지 이동 (한 칸 이동) */
 const nextPage = () => {
     if (currentPage.value < totalPages.value) {
         currentPage.value++;
     }
 };
 
-/* ✅ 마지막 페이지 이동 */
+/* 마지막 페이지 이동 */
 const lastPage = () => {
     currentPage.value = totalPages.value;
 };
+
+const changeTab = (tab) => {
+    selectedTab.value = tab;
+    currentPage.value = 1; 
+};
+
   </script>
   
   <style scoped>
@@ -146,7 +157,7 @@ const lastPage = () => {
   .notice-title {
   position: relative;
   top: 10px; 
-  left: 150px; 
+  left: 130px; 
  
     font-family: 'Pretendard';
     font-style: normal;
@@ -164,7 +175,7 @@ const lastPage = () => {
     gap: 16px;
     padding-bottom: 10px;
     margin-top: 30px; 
-    margin-left: 160px; 
+    margin-left: 130px; 
 }
 
 /* 기본 버튼 스타일 */
@@ -192,27 +203,27 @@ const lastPage = () => {
     
 }
 
-/* 선택된 필터 버튼 (검은색 배경 + 흰색 글씨) */
+/* 선택된 필터 버튼 */
 .sub-tabs .active-tab {
-    background-color: #303030; /* 🔹 검정색 배경 */
-    color: #FFFFFF; /* 🔹 흰색 글씨 */
+    background-color: #303030; 
+    color: #FFFFFF; 
     font-weight: bold;
 }
   
- /* ✅ 테이블 위쪽 선 스타일 (진한 회색 + 3px 두께) */
+ /* 테이블 위쪽 선 스타일 */
 .table-wrapper {
-  width: 1472px; /* 표 크기 맞춤 */
-  height: 480px; /* 표 높이 맞춤 */
+  width: 1472px; 
+  height: 480px; 
   margin: 0 auto;
-  margin-left: 150px; 
+  margin-left: 130px; 
   margin-top: 4px;
   background: #FFFFFF;
   border: 1px solid #ddd;
   overflow: hidden;
-  border-top: 3px solid #424242; /* 🔹 진한 회색 + 3px */
+  border-top: 3px solid #424242; 
 }
 
-/* ✅ 테이블 기본 스타일 */
+/* 테이블 기본 스타일 */
 table {
     box-sizing: border-box;
 
@@ -271,7 +282,7 @@ tr {
     flex-grow: 0;
 }
 
-/* ✅ "분류" 컬럼 간격 */
+/* 분류 컬럼*/
 th:nth-child(1) {
     flex-direction: row;
     align-items: center;
@@ -294,6 +305,7 @@ td:nth-child(1) {
 
     flex-direction: row;
     align-items: center;
+    text-align: center;
     padding: 8px;
     gap: 8px;
 
@@ -301,10 +313,11 @@ td:nth-child(1) {
     height: 44px;
 }
 
-/* ✅ "제목" 컬럼 간격 */
+/* 제목컬럼*/
 th:nth-child(2) {
     flex-direction: row;
     align-items: center;
+    text-align: left;
     padding: 8px;
     gap: 8px;
 
@@ -331,7 +344,7 @@ td:nth-child(2) {
     height: 44px;
 }
 
-/* ✅ "등록일" 컬럼 간격 */
+/* 등록일컬럼 */
 th:nth-child(3) {
     display: flex;
     flex-direction: row;
@@ -369,22 +382,25 @@ td:nth-child(3) {
 }
 
   
-  /* ✅ 페이지네이션 */
+  /* 페이지네이션 */
   .pagination {
     display: flex;
     justify-content: center;
+    align-items: center; 
+    width: 100%; 
     margin-top: 20px;
-    gap: 8px; /* 숫자 간격 조절 */
+    margin-left: 150px;
+    gap: 8px; 
 }
 
 .pagination span {
     display: inline-block;
-    min-width: 26px; /* 숫자 크기에 맞게 최소 너비 설정 */
+    min-width: 26px; 
     text-align: center;
     font-size: 14px;
     cursor: pointer;
-    user-select: none; /* 텍스트 선택 방지 */
-    outline: none; /* 클릭 시 포커스(깜박거리는 커서) 제거 */
+    user-select: none; 
+    outline: none; 
 }
 
   .pagination button {
@@ -403,16 +419,16 @@ td:nth-child(3) {
     text-decoration: underline;
   }
 
-  /* ✅ 모든 요소에서 클릭 후 포커스(깜박거리는 커서) 제거 */
+  /* 모든 요소에서 클릭 후 포커스(깜박거리는 커서) 제거 */
 * {
-    outline: none !important; /* 모든 요소의 포커스 제거 */
-    user-select: none !important; /* 텍스트 선택 방지 */
-    -webkit-user-select: none !important; /* 사파리, 크롬 지원 */
-    -moz-user-select: none !important; /* 파이어폭스 지원 */
-    -ms-user-select: none !important; /* 엣지 지원 */
+    outline: none !important; 
+    user-select: none !important; 
+    -webkit-user-select: none !important; 
+    -moz-user-select: none !important; 
+    -ms-user-select: none !important; 
 }
 
-/* ✅ 버튼, 링크, 페이지네이션, 필터 버튼 클릭 시 포커스 제거 */
+/* 버튼, 링크, 페이지네이션, 필터 버튼 클릭 시 포커스 제거 */
 button, a, span, input, select, textarea {
     outline: none !important;
     box-shadow: none !important;
