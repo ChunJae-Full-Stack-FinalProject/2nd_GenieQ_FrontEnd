@@ -28,13 +28,13 @@
                   </tr>
               </thead>
               <tbody>
-                  <tr v-for="(item, index) in workItems" :key="index">
-                  <td>
-                    <label class="custom-checkbox">
-                      <input type="checkbox" class="checkbox-input">
-                      <span class="checkbox-custom"></span>
-                    </label>
-                  </td>
+                <tr v-for="(item, index) in workItems" :key="index" :class="{ 'row-checked': item.checked }">
+                    <td>
+                        <label class="custom-checkbox">
+                            <input type="checkbox" class="checkbox-input" v-model="item.checked">
+                            <span class="checkbox-custom"></span>
+                        </label>
+                    </td>
                   <td class="work-name">{{ item.name }}</td>
                   <td class="work-title">{{ item.title }}</td>
                   <td class="work-type"><span class="type-tag">{{ item.type }}</span></td>
@@ -62,111 +62,77 @@ import { ref } from 'vue';
 // 데이터 정의 - ref로 감싸서 반응형으로 만듭니다
 const workItems = ref([
 {
-  name: '수능특강 기반 문제생성saasasdsadasdsadads',
-  title: '메이드투메이드의 건배',
-  type: '지문',
-  date: '2025-02-28',
-  favorite: false
-},
-{
-  name: '수능특강 기반 문제생성saasasdsadasdsadads',
-  title: '메이드투메이드의 건배',
-  type: '지문',
-  date: '2025-02-28',
-  favorite: false
-},
-{
-  name: '수능특강 기반 문제생성saasasdsadasdsadads',
-  title: '메이드투메이드의 건배',
-  type: '지문',
-  date: '2025-02-28',
-  favorite: false
-},
-{
-  name: '수능특강 기반 문제생성saasasdsadasdsadads',
-  title: '메이드투메이드의 건배',
-  type: '지문',
-  date: '2025-02-28',
-  favorite: false
-},
-{
-  name: '수능특강 기반 문제생성saasasdsadasdsadads',
-  title: '메이드투메이드의 건배',
-  type: '지문',
-  date: '2025-02-28',
-  favorite: false
-},
-{
-  name: '수능특강 기반 문제생성saasasdsadasdsadads',
-  title: '메이드투메이드의 건배',
-  type: '지문',
-  date: '2025-02-28',
-  favorite: false
-},
-{
-  name: '수능특강 기반 문제생성saasasdsadasdsadads',
-  title: '메이드투메이드의 건배',
-  type: '지문',
-  date: '2025-02-28',
-  favorite: false
-},
-{
-  name: '수능특강 기반 문제생성saasasdsadasdsadads',
-  title: '메이드투메이드의 건배',
-  type: '지문',
-  date: '2025-02-28',
-  favorite: false
-},
-{
-  name: '수능특강 기반 문제생성saasasdsadasdsadads',
-  title: '메이드투메이드의 건배',
-  type: '지문',
-  date: '2025-02-28',
-  favorite: false
-},
-{
-  name: '수능특강 기반 문제생성saasasdsadasdsadads',
-  title: '메이드투메이드의 건배',
-  type: '지문',
-  date: '2025-02-28',
-  favorite: false
-},
-{
-  name: '수능특강 기반 문제생성saasasdsadasdsadads',
-  title: '메이드투메이드의 건배',
-  type: '지문',
-  date: '2025-02-28',
-  favorite: false
-},
-{
-  name: '수능특강 기반 문제생성saasasdsadasdsadads',
-  title: '메이드투메이드의 건배',
-  type: '지문',
-  date: '2025-02-28',
-  favorite: false
-},
-{
-  name: '수능특강 기반 문제생성saasasdsadasdsadads',
-  title: '메이드투메이드의 건배',
-  type: '지문',
-  date: '2025-02-28',
-  favorite: false
-},
-{
-  name: '수능특강 기반 문제생성saasasdsadasdsadads',
-  title: '메이드투메이드의 건배',
-  type: '지문',
-  date: '2025-02-28',
-  favorite: false
-},
-{
-  name: '수능특강 기반 문제생성saasasdsadasdsadads',
-  title: '메이드투메이드의 건배',
-  type: '지문',
-  date: '2025-02-28',
-  favorite: false
-},
-
+    name: '수능특강 기반 문제생성saasasdsadasdsadads',
+    title: '메이드투메이드의 건배',
+    type: '지문',
+    date: '2025-02-28',
+    favorite: false,
+    checked: false 
+  },
+  {
+    name: '수능특강 기반 문제생성saasasdsadasdsadads',
+    title: '메이드투메이드의 건배',
+    type: '지문',
+    date: '2025-02-28',
+    favorite: false,
+    checked: false,
+  },
+  {
+    name: '수능특강 기반 문제생성saasasdsadasdsadads',
+    title: '메이드투메이드의 건배',
+    type: '지문',
+    date: '2025-02-28',
+    favorite: false,
+    checked: false
+  },
+  {
+    name: '수능특강 기반 문제생성saasasdsadasdsadads',
+    title: '메이드투메이드의 건배',
+    type: '지문',
+    date: '2025-02-28',
+    favorite: false,
+    checked: false
+  },
+  {
+    name: '수능특강 기반 문제생성saasasdsadasdsadads',
+    title: '메이드투메이드의 건배',
+    type: '지문',
+    date: '2025-02-28',
+    favorite: false,
+    checked: false
+  },
+  {
+    name: '수능특강 기반 문제생성saasasdsadasdsadads',
+    title: '메이드투메이드의 건배',
+    type: '지문',
+    date: '2025-02-28',
+    favorite: false,
+    checked: false
+  },
+  {
+    name: '수능특강 기반 문제생성saasasdsadasdsadads',
+    title: '메이드투메이드의 건배',
+    type: '지문',
+    date: '2025-02-28',
+    favorite: false,
+    checked: false
+  },
+  {
+    name: '수능특강 기반 문제생성saasasdsadasdsadads',
+    title: '메이드투메이드의 건배',
+    type: '지문',
+    date: '2025-02-28',
+    favorite: false,
+    checked: false
+  },
+  {
+    name: '수능특강 기반 문제생성saasasdsadasdsadads',
+    title: '메이드투메이드의 건배',
+    type: '지문',
+    date: '2025-02-28',
+    favorite: false,
+    checked: false
+  },
 
 ]);
 
@@ -468,8 +434,9 @@ margin-left: 4px;
   transform: rotate(45deg);
 }
 
-/* 마우스 오버 효과 */
-.checkbox-input:hover + .checkbox-custom {
-  background-color: #f0f0f0;
+
+/* 체크시 td 전체 색변경 */
+.row-checked {
+  background-color: #FFEDDC !important;
 }
 </style>
