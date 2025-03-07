@@ -14,7 +14,7 @@
 </template>
 <script setup>
 import CreatePassageMain from '@/components/generation/passage/PassageMain/CreatePassageMain.vue';
-import PaymentUsage from '@/components/generation/passage/PassageMain/PaymentUsage.vue';
+import PaymentUsage from '@/components/generation/PaymentUsage.vue';
 import BaseButton from '@/components/common/button/BaseButton.vue';
 </script>
 <style scoped>
