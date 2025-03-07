@@ -1,5 +1,4 @@
 import myPageWrapper from "@/components/mypage/MyPageWrapper.vue";
-import myPageContent from "@/components/mypage/MyPageContent.vue";
 
 const myPageRoutes = [
     {
