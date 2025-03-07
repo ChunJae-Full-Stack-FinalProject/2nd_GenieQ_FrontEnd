@@ -4,12 +4,17 @@
             
             <div class="tofaq-title">자주 묻는 질문 확인하기</div>
             
+            <router-link :to="{ name: 'my-page-wrapper', params: { 'tab': '자주 묻는 질문' } }">
             <Icon icon="weui:arrow-outlined" width="24" height="24" id="arrow-icon" style="color: #ffffff" />
+            </Router-Link>
         </div>
     </div>
 </template>
 <script setup>
 import { Icon } from "@iconify/vue";
+import { ref } from 'vue';
+
+const faqTab = ref('자주 묻는 질문');
 </script>
 <style>
 .tofaq-container {
