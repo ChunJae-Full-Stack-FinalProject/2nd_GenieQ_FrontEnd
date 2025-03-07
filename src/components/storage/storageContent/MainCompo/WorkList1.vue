@@ -1,10 +1,13 @@
 <template>
     <div class="card-container">
-        <div class="worklist-title">
+        <div class="storage-worklist-title">
             <p>최근 작업 내역</p>
             <Icon icon="weui:arrow-outlined" width="24" height="24" id="arrow-icon" style="color: #303030" />
         </div>
-       <div class="worklist-table">
+        <div class="storage-worklist-subtitle">
+            <span>최대 150개까지 보관됩니다.</span>
+        </div>
+       <div class="storage-worklist-table">
   <div class="table-container">
     <table class="data-table">
       <thead>
@@ -56,8 +59,50 @@ const workItems = ref([
     type: '지문',
     date: '2025-02-28',
     favorite: false
-  }
-  // 추가 데이터 아이템들...
+  },
+  {
+    name: '수능특강 기반 문제생성saasasdsadasdsadads',
+    title: '메이드투메이드의 건배',
+    type: '지문',
+    date: '2025-02-28',
+    favorite: false
+  },
+  {
+    name: '수능특강 기반 문제생성saasasdsadasdsadads',
+    title: '메이드투메이드의 건배',
+    type: '지문',
+    date: '2025-02-28',
+    favorite: false
+  },
+  {
+    name: '수능특강 기반 문제생성saasasdsadasdsadads',
+    title: '메이드투메이드의 건배',
+    type: '지문',
+    date: '2025-02-28',
+    favorite: false
+  },
+  {
+    name: '수능특강 기반 문제생성saasasdsadasdsadads',
+    title: '메이드투메이드의 건배',
+    type: '지문',
+    date: '2025-02-28',
+    favorite: false
+  },
+  {
+    name: '수능특강 기반 문제생성saasasdsadasdsadads',
+    title: '메이드투메이드의 건배',
+    type: '지문',
+    date: '2025-02-28',
+    favorite: false
+  },
+  {
+    name: '수능특강 기반 문제생성saasasdsadasdsadads',
+    title: '메이드투메이드의 건배',
+    type: '지문',
+    date: '2025-02-28',
+    favorite: false
+  },
+ 
 ]);
 
 // 메소드 정의 - 화살표 함수로 작성합니다
@@ -72,7 +117,7 @@ const toggleFavorite = (index) => {
 };
 </script>
 <style scoped>
- .worklist-title {
+ .storage-worklist-title {
    display: flex;
    align-items: flex-start;
    gap: 12px;
@@ -81,11 +126,37 @@ const toggleFavorite = (index) => {
    width: 1472px;
    height: 506px;
    left: 292px;
-   top: 350px;
+   top: 385px;
    box-sizing: border-box;
 }
 
-.worklist-table {
+.storage-worklist-title p {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.storage-worklist-subtitle {
+   display: flex;
+   align-items: flex-start;
+   gap: 12px;
+   isolation: isolate;
+   position: absolute;
+   width: 1472px;
+   height: 506px;
+   left: 292px;
+   top: 418px;
+   box-sizing: border-box;
+}
+
+.storage-worklist-subtitle span {
+  font-size: 16px;
+  font-weight: 500;
+  margin: 0;
+  color: #E84739;
+}
+
+.storage-worklist-table {
    display: flex;
    flex-direction: column;
    align-items: flex-start;
@@ -93,20 +164,16 @@ const toggleFavorite = (index) => {
    isolation: isolate;
    position: absolute;
    width: 1472px;
-   height: 500px;
+   height: 385.89px;
    left: 292px;
-   top: 400px;  
+   top: 450px;  
    background: #FFFFFF;
    border-radius: 12px;
    box-sizing: border-box;
    overflow: hidden; /* 내부 요소가 border-radius를 넘지 않도록 */
 }
 
-.worklist-title p {
-  font-size: 20px;
-  font-weight: 700;
-  margin: 0;
-}
+
 
 td{
   height: 29.21px;  

@@ -8,7 +8,7 @@ const strageRoutes = [
         name: 'storage',
         children: [
             { path : '', name:'storage-main', component: StorageMain },
-            // { path : 'storageworklist', name:'storageworklist', component: WorkList1 },
+            { path : 'storageworklist', name:'storageworklist', component: WorkList1 },
         ]
     }
 ]
