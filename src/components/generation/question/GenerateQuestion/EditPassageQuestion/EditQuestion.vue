@@ -56,7 +56,7 @@ export default {
             // 내부적으로 관리할 제목 데이터
             title: '',
             // 내부적으로 관리할 문항 데이터
-            questions: []
+            items: []
         }
     },
     methods: {
@@ -86,7 +86,7 @@ export default {
         },
         questionTitle: {
             handler(newVal) {
-                this.title = newVal
+                this.title = newVal;
             }
         }
     }
@@ -149,9 +149,24 @@ export default {
     color: #303030;
     align-self: stretch;
 }
+#input-title {
+    font-family: 'Pretendard';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 24px;
+    line-height: 150%;
+
+    letter-spacing: -0.02em;
+    color: #303030;
+    align-self: stretch;
+
+    border: none;
+    width: 500px;
+}
 .edit-button {
     border: none;
     background: none;
+    cursor: pointer;
     
     position: relative;
     top: 3px;
