@@ -37,6 +37,7 @@
             <BaseButton text="경고 창 모달" type="type1" @click="showWarningModal = true" />
             <BaseButton text="파일로 추출" type="type1" @click="showFileModal = true" />
             <BaseButton text="지문 불러오기" type="type1" @click="showLoadPassageModal = true" />
+            <BaseButton text="문항 생성" type="type1" @click="showGenerateQuestionModal = true" />
             <!-- 확인창 모달 -->
             <ConfirmModal :isOpen="showConfirmModal" title="확인" message="작업을 완료하시겠습니까?" @close="showConfirmModal = false"/>
             <!-- 경고창 모달 -->
@@ -45,11 +46,13 @@
             <FileSelectModal :isOpen="showFileModal" @close="showFileModal = false" @confirm="handleFileSelection" />
             <!-- 지문 불러오기 모달 -->
             <LoadPassageModal :isOpen="showLoadPassageModal" @close="showLoadPassageModal = false"/>
+            <!-- 지문 불러오기 모달 -->
+            <GenerateQuestionModal :isOpen="showGenerateQuestionModal" @close="showGenerateQuestionModal = false"/>
           </div>
 
           <!-- 기본 tooltip -->
         <div>
-          <PlainTooltip id="example" message="Test Message" width="153px"/>
+          <PlainTooltip id="example" message="Test Message" width="183px" />
           <!-- 피그마에 뜬 width값에 20 더해서 width 속성에 넣어주세요!! -->
            <!-- id값을 이용해서 style 태그에 position:absolute; top:00px; left:00px; 로 위치 조정해주세요 -->
         </div>
@@ -66,6 +69,7 @@ import ConfirmModal from '@/components/common/modal/type/ConfirmModalComponent.v
 import WarningModal from '@/components/common/modal/type/WarningModalComponent.vue';
 import FileSelectModal from '@/components/common/modal/type/FileSelectModal.vue';
 import LoadPassageModal from '@/components/common/modal/type/generation/LoadPassageModal.vue';
+import GenerateQuestionModal from '@/components/common/modal/type/generation/GenerateQuestionModal.vue';
 import PlainTooltip from '@/components/common/PlainTooltip.vue';
 import { ref } from "vue";
 
@@ -73,6 +77,7 @@ const showConfirmModal = ref(false);
 const showWarningModal = ref(false);
 const showFileModal = ref(false);
 const showLoadPassageModal = ref(false);
+const showGenerateQuestionModal = ref(false);
 
 </script>
 
