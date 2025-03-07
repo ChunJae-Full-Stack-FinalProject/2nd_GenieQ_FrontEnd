@@ -18,79 +18,19 @@
         </tr>
       </thead>
       <tbody>
-        <tr>
-          <td class="work-name">수능특강 기반 문제생성saasasdsadasdsadads</td>
-          <td class="work-title">메이드투메이드의 건배</td>
-          <td class="work-type"><span class="type-tag">지문</span></td>
-          <td class="work-date">2025-02-28</td>
-          <td class="work-action"><button class="extract-btn">추출 <i class="download-icon"></i></button></td>
-          <td class="work-favorite"><span class="star-empty">☆</span></td>
+        <tr v-for="(item, index) in workItems" :key="index">
+          <td class="work-name">{{ item.name }}</td>
+          <td class="work-title">{{ item.title }}</td>
+          <td class="work-type"><span class="type-tag">{{ item.type }}</span></td>
+          <td class="work-date">{{ item.date }}</td>
+          <td class="work-action"><button class="extract-btn" @click="extractItem(item)">추출 <i class="download-icon"></i></button></td>
+          <td class="work-favorite">
+            <span class="star-container" @click="toggleFavorite(index)">
+              <Icon v-if="item.favorite" icon="mynaui:star-solid" width="24" height="24" style="color: #FF9F40" />
+              <Icon v-else icon="mynaui:star" width="24" height="24" style="color: #FF9F40" />
+            </span>
+          </td>
         </tr>
-       <tr>
-          <td class="work-name">수능특강 기반 문제생성saasasdsadasdsadads</td>
-          <td class="work-title">메이드투메이드의 건배</td>
-          <td class="work-type"><span class="type-tag">지문</span></td>
-          <td class="work-date">2025-02-28</td>
-          <td class="work-action"><button class="extract-btn">추출 <i class="download-icon"></i></button></td>
-          <td class="work-favorite"><span class="star-empty">☆</span></td>
-        </tr>
-        <tr>
-          <td class="work-name">수능특강 기반 문제생성saasasdsadasdsadads</td>
-          <td class="work-title">메이드투메이드의 건배</td>
-          <td class="work-type"><span class="type-tag">지문</span></td>
-          <td class="work-date">2025-02-28</td>
-          <td class="work-action"><button class="extract-btn">추출 <i class="download-icon"></i></button></td>
-          <td class="work-favorite"><span class="star-empty">☆</span></td>
-        </tr>
-        <tr>
-          <td class="work-name">수능특강 기반 문제생성saasasdsadasdsadads</td>
-          <td class="work-title">메이드투메이드의 건배</td>
-          <td class="work-type"><span class="type-tag">지문</span></td>
-          <td class="work-date">2025-02-28</td>
-          <td class="work-action"><button class="extract-btn">추출 <i class="download-icon"></i></button></td>
-          <td class="work-favorite"><span class="star-empty">☆</span></td>
-        </tr>
-        <tr>
-          <td class="work-name">수능특강 기반 문제생성saasasdsadasdsadads</td>
-          <td class="work-title">메이드투메이드의 건배</td>
-          <td class="work-type"><span class="type-tag">지문</span></td>
-          <td class="work-date">2025-02-28</td>
-          <td class="work-action"><button class="extract-btn">추출 <i class="download-icon"></i></button></td>
-          <td class="work-favorite"><span class="star-empty">☆</span></td>
-        </tr>
-        <tr>
-          <td class="work-name">수능특강 기반 문제생성saasasdsadasdsadads</td>
-          <td class="work-title">메이드투메이드의 건배</td>
-          <td class="work-type"><span class="type-tag">지문</span></td>
-          <td class="work-date">2025-02-28</td>
-          <td class="work-action"><button class="extract-btn">추출 <i class="download-icon"></i></button></td>
-          <td class="work-favorite"><span class="star-empty">☆</span></td>
-        </tr>
-        <tr>
-          <td class="work-name">수능특강 기반 문제생성saasasdsadasdsadads</td>
-          <td class="work-title">메이드투메이드의 건배</td>
-          <td class="work-type"><span class="type-tag">지문</span></td>
-          <td class="work-date">2025-02-28</td>
-          <td class="work-action"><button class="extract-btn">추출 <i class="download-icon"></i></button></td>
-          <td class="work-favorite"><span class="star-empty">☆</span></td>
-        </tr>
-        <tr>
-          <td class="work-name">수능특강 기반 문제생성saasasdsadasdsadads</td>
-          <td class="work-title">메이드투메이드의 건배</td>
-          <td class="work-type"><span class="type-tag">지문</span></td>
-          <td class="work-date">2025-02-28</td>
-          <td class="work-action"><button class="extract-btn">추출 <i class="download-icon"></i></button></td>
-          <td class="work-favorite"><span class="star-empty">☆</span></td>
-        </tr>
-        <tr>
-          <td class="work-name">수능특강 기반 문제생성saasasdsadasdsadads</td>
-          <td class="work-title">메이드투메이드의 건배</td>
-          <td class="work-type"><span class="type-tag">지문</span></td>
-          <td class="work-date">2025-02-28</td>
-          <td class="work-action"><button class="extract-btn">추출 <i class="download-icon"></i></button></td>
-          <td class="work-favorite"><span class="star-empty">☆</span></td>
-        </tr>
-
       </tbody>
     </table>
   </div>
@@ -99,7 +39,37 @@
 
 </template>
 <script setup>
-import { Icon } from "@iconify/vue";
+import { ref } from 'vue';
+
+// 데이터 정의 - ref로 감싸서 반응형으로 만듭니다
+const workItems = ref([
+  {
+    name: '수능특강 기반 문제생성saasasdsadasdsadads',
+    title: '메이드투메이드의 건배',
+    type: '지문',
+    date: '2025-02-28',
+    favorite: false
+  },
+  {
+    name: '수능특강 기반 문제생성saasasdsadasdsadads',
+    title: '메이드투메이드의 건배',
+    type: '지문',
+    date: '2025-02-28',
+    favorite: false
+  }
+  // 추가 데이터 아이템들...
+]);
+
+// 메소드 정의 - 화살표 함수로 작성합니다
+const extractItem = (item) => {
+  // 추출 버튼 클릭 시 실행될 로직
+  console.log('추출 버튼 클릭:', item);
+};
+
+const toggleFavorite = (index) => {
+  // 즐겨찾기 토글 로직
+  workItems.value[index].favorite = !workItems.value[index].favorite;
+};
 </script>
 <style scoped>
  .worklist-title {
