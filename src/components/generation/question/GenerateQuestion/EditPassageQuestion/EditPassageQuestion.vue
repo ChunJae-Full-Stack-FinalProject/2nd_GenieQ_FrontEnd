@@ -1,10 +1,12 @@
 <template>
     <div class="edit-passage-question">
         <EditPassage/>
+        <EditQuestion/>
     </div>
 </template>
 <script setup>
 import EditPassage from './EditPassage.vue';
+import EditQuestion from './EditQuestion.vue';
 </script>
 <style scoped>
 .edit-passage-question {
