@@ -1,232 +1,191 @@
 <template>
-  <div id="mypage-info">
-    <div class="info-container">
+  <div class="wrapper">
+    <div class="button">
+      <div class="button-type1">저장하기</div>
+    </div>
 
-      <section class="basic-info-section">
-        <div class="info-header">
-          <h3 class="info-title">기본 정보</h3>
+    <div class="content">
+      <!-- 기본 정보 -->
+      <section class="basic">
+        <div class="title-container">
+          <span class="title">기본 정보</span>
         </div>
-        <div class="info-item">
-          <span class="info-label">이름</span>
-          <span class="info-value">송겨울</span>
+        <div class="item">
+          <span class="label">이름</span>
+          <span class="value value-box">송겨울</span>
         </div>
-        <div class="info-item">
-          <span class="info-label">이메일</span>
-          <span class="info-value">songwinter@naver.com</span>
+        <div class="item">
+          <span class="label">이메일</span>
+          <span class="value">songwinter@naver.com</span>
         </div>
-        <div class="info-item">
-          <span class="info-label">비밀번호</span>
-          <span class="info-value">********</span>
+        <div class="item">
+          <span class="label">비밀번호</span>
+          <span class="value">****</span>
         </div>
       </section>
 
-      <section class="additional-info-section">
-        <div class="info-header">
-          <h3 class="info-title">추가 정보</h3>
+      <!-- 추가 정보 -->
+      <section class="additional">
+        <div class="title-container">
+          <span class="title">추가 정보</span>
         </div>
-        <div class="info-item">
-          <span class="info-label">성별</span>
-          <span class="info-value">여성</span>
+        <div class="item">
+          <span class="label">성별</span>
+          <span class="value">여성</span>
         </div>
-        <div class="info-item">
-          <span class="info-label">소속</span>
-          <span class="info-value">고등교사</span>
+        <div class="item">
+          <span class="label">소속</span>
+          <span class="value value-box">고등교사</span>
         </div>
       </section>
+    </div>
 
-      <button class="edit-button">정보 변경하기</button>
-
-      <div class="account-actions">
-        <span class="delete-account">회원 탈퇴</span>
-        <span class="logout">로그아웃</span>
-      </div>
+    <div class="account">
+      <span class="withdrawal">회원 탈퇴</span>
+      <span class="logout">로그아웃</span>
     </div>
   </div>
 </template>
 
-<script setup>
-
-</script>
-
 <style scoped>
-  .info-container {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 0px;
-    gap: 40px;
-    position: absolute;
-    width: 1472px;
-    height: 384px;
-    left: 292px;
-    top: 275px;
-  }
+/* 전체 레이아웃 */
+.wrapper {
+  width: 100%; 
+  max-width: 1764px; 
+  height: 700px;
+  margin: 0 auto;
+}
 
-  .basic-info-section {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 8px 20px;
-    gap: 4px;
-    width: 1472px;
-    height: 194px;
-    background: #FFFFFF;
-    border-radius: 12px;
-    flex: none;
-    order: 0;
-    align-self: stretch;
-    flex-grow: 0;
-  }
+/* 버튼 */
+.button {
+  width: 1764px;
+  height: 46px;
+}
+.button-type1 {
+  width: 248px;
+  height: 46px;
+}
 
-  .additional-info-section {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 8px 20px;
-    gap: 4px;
-    width: 1472px;
-    height: 158px;
-    background: #FFFFFF;
-    border-radius: 12px;
-    flex: none;
-    order: 1;
-    align-self: stretch;
-    flex-grow: 0;
-  }
-
-  .info-header {
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    padding: 0px;
-    gap: 160px;
-    width: 1432px;
-    height: 46px;
-    border-bottom: 1px solid #E1E1E1;
-    border-radius: 12px 12px 0px 0px;
-    flex: none;
-    order: 0;
-    align-self: stretch;
-    flex-grow: 0;
-  }
-
-  .info-title {
-    width: 73px;
-    height: 30px;
-    font-family: 'Pretendard';
-    font-style: normal;
-    font-weight: 700;
-    font-size: 20px;
-    line-height: 150%;
-    letter-spacing: -0.02em;
-    color: #FF9F40;
-    flex: none;
-    order: 0;
-    flex-grow: 0;
-  }
-
-  .info-item {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    padding: 0px;
-    gap: 160px;
-    width: 1432px;
-    height: 44px;
-    flex: none;
-    order: 1;
-    align-self: stretch;
-    flex-grow: 0;
-  }
-
-  .info-label {
-    width: 28px;
-    height: 24px;
-    font-family: 'Pretendard';
-    font-style: normal;
-    font-weight: 500;
-    font-size: 16px;
-    line-height: 150%;
-    letter-spacing: -0.02em;
-    color: #303030;
-    flex: none;
-    order: 0;
-    flex-grow: 0;
-  }
-
-  .info-value {
-    width: 41px;
-    height: 28px;
-    font-family: 'Pretendard';
-    font-style: normal;
-    font-weight: 400;
-    font-size: 16px;
-    line-height: 28px;
-    letter-spacing: -0.02em;
-    color: #303030;
-    flex: none;
-    order: 0;
-    flex-grow: 0;
-  }
-
-  .edit-button {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    padding: 8px;
-    gap: 8px;
-    position: absolute;
-    width: 248px;
-    height: 46px;
-    left: 1516px;
-    top: 205px;
-    background: #FF9F40;
-    border-radius: 8px;
-  }
-
-  .account-actions {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    padding: 0px;
-    gap: 16px;
-    position: absolute;
-    width: 240px;
-    height: 40px;
-    left: 1524px;
-    top: 860px;
-  }
-
-  .delete-account {
-    width: 58px;
-    height: 24px;
-    font-family: 'Pretendard';
-    font-style: normal;
-    font-weight: 500;
-    font-size: 16px;
-    line-height: 150%;
-    letter-spacing: -0.02em;
-    color: #5F5F5F;
-    flex: none;
-    order: 0;
-    flex-grow: 0;
-  }
-
-  .logout {
-    width: 55px;
-    height: 24px;
-    font-family: 'Pretendard';
-    font-style: normal;
-    font-weight: 500;
-    font-size: 16px;
-    line-height: 150%;
-    letter-spacing: -0.02em;
-    color: #FF9F40;
-    flex: none;
-    order: 0;
-    flex-grow: 0;
-  }
+.content {
+  width: 1472px;
+  height: auto; 
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-bottom: 80px;
+  padding-top: 50px;
+  position: relative; 
   
-</style>  
+}
+
+.content::after {
+  content: ""; 
+  display: block;
+  width: 100%;
+  height: 1px;
+  background-color: #BDBDBD;
+  position: absolute;
+  bottom: -60px; 
+  left: 150px; 
+}
+
+
+/* 기본 정보, 추가 정보 공통 박스 스타일 */
+.basic, .additional {
+  width: 1472px;
+  background: #FFFFFF;
+  border-radius: 12px;
+  padding: 20px;  /* 내부 여백 */
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-left: 150px;
+}
+
+/* 기본 정보 박스 */
+.basic {
+  height: 194px;
+}
+
+/* 추가 정보 박스 */
+.additional {
+  height: 150px;
+  margin-top: 25px;
+}
+
+/* 타이틀 */
+.title-container {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+.title {
+  font-family: 'Pretendard';
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 150%;
+  letter-spacing: -2%;
+  color: #FF9F40;
+}
+
+/* 기본 정보, 추가 정보 내용 스타일 */
+.item {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start; /* 왼쪽 정렬 */
+  gap: 20px; 
+
+  font-family: 'Pretendard';
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 150%;
+  letter-spacing: -2%;
+}
+
+/* 라벨 및 값 스타일 */
+.label {
+  width: 120px;
+  color: #424242;
+}
+.value-box {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  gap: 8px;
+
+  width: 360px;
+  height: 40px;
+
+  background: #FFFFFF; /* 배경색 */
+  border: 1px solid #BDBDBD; /* 테두리 */
+  border-radius: 8px; /* 모서리 둥글게 */
+
+  flex: none;
+  order: 1;
+  flex-grow: 0;
+  
+  color: #303030;
+}
+
+.account {
+  width: 240px;
+  height: 40px;
+  display: flex;
+  gap: 70px;
+  font-family: 'Pretendard';
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 150%;
+  letter-spacing: -2%;
+  margin-left: auto;
+  margin-right: 110px; 
+  margin-top: 90px;
+}
+
+.withdrawal {
+  color: #5F5F5F;
+}
+.logout {
+  color: #FF9F40;
+}
+</style>
