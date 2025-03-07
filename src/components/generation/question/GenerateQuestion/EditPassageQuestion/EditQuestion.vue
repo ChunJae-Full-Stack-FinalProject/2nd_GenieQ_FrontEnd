@@ -66,6 +66,9 @@ export default {
         toggleEditMode() {
             this.isEditing = !this.isEditing;
 
+            // 편집 모드 변경 이벤트를 발생시켜 부모 컴포넌트에 알림
+            this.$emit('edit-mode-changed', this.isEditing);
+            
             // 편집 모드로 전환되면 input title에 포커스
             if (this.isEditing) {
                 this.$nextTick(() => {

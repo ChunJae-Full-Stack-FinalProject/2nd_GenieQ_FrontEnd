@@ -6,7 +6,7 @@
             <input v-else type="text" v-model="answer" id="input-answer"/>
 
             <span v-if="!isEditing" id="description-content">{{ content }}</span>
-            <input v-else type="text" v-model="content" id="input-content"/>
+            <textarea v-else type="text" v-model="content" id="input-content"></textarea>
         </div>
     </div>
 </template>
@@ -24,6 +24,11 @@ export default {
             type: String,
             default: "연구 커뮤니티는 이러한 모델의 규모를 확장하면 성능이 향상된다고 인정한다고 했으므로, \n① ‘LLMs의 성능은 모델의 크기를 줄일수록 향상된다.’ 는 글의 내용과 일치하지 않는다."
         },
+        // 편집 모드 상태를 props로 받음
+        isEditing: {
+            type: Boolean,
+            default: false
+        }
     },
     data() {
         return {
@@ -106,7 +111,7 @@ export default {
     align-self: stretch;
     flex-grow: 0;
 }
-#correct-answer {
+#correct-answer, #input-answer {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -129,7 +134,7 @@ export default {
     align-self: stretch;
     flex-grow: 0;
 }
-#description-content {
+#description-content, #input-content {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -137,6 +142,7 @@ export default {
     gap: 34px;
 
     width: 480px;
+    height: 230px;
 
     font-family: 'Pretendard';
     font-style: normal;
@@ -151,5 +157,7 @@ export default {
     order: 0;
     align-self: stretch;
     flex-grow: 0;
+
+    resize: none;
 }
 </style>

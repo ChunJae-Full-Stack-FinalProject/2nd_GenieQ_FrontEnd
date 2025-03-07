@@ -3,18 +3,37 @@
         <p id="main-head">문항 생성</p>
         <div class="main-content">
             <PassageTitle/>
-            <EditPassageQuestion/>
+            <EditPassageQuestion @edit-mode-changed="updateEditingMode"/>
             <PassageSummary/>
-            <QuestionDescription/>
+            <QuestionDescription :isEditing="isEditingGlobal"/>
         </div>
     </div>
 </template>
-<script setup>
+<script>
 import EditPassageQuestion from './GenerateQuestion/EditPassageQuestion/EditPassageQuestion.vue';
 import PassageTitle from './GenerateQuestion/PassageTitle.vue';
 import PassageSummary from '../passage/PassageContent/PassageSummary.vue';
 import QuestionDescription from './GenerateQuestion/QuestionDescription.vue';
 
+export default {
+    name: 'GenerateQuestion',
+    components: {
+        EditPassageQuestion,
+        PassageTitle,
+        PassageSummary,
+        QuestionDescription
+    },
+    data() {
+        return {
+            isEditingGlobal: false
+        }
+    },
+    methods: {
+        updateEditingMode(value) {
+            this.isEditingGlobal = value;
+        }
+    }
+}
 </script>
 <style scoped>
 #main-head {

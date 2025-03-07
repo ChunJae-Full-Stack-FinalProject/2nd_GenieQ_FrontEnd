@@ -1,12 +1,26 @@
 <template>
     <div class="edit-passage-question">
         <EditPassage/>
-        <EditQuestion/>
+        <EditQuestion @edit-mode-changed="forwardEditModeChange"/>
     </div>
 </template>
-<script setup>
+<script>
 import EditPassage from './EditPassage.vue';
 import EditQuestion from './EditQuestion.vue';
+
+export default {
+    name: 'EditPassageQuestion',
+    components: {
+        EditPassage,
+        EditQuestion
+    },
+    methods: {
+        forwardEditModeChange(value) {
+            // EditQuestion에서 전달받은 이벤트를 부모 컴포넌트로 전달
+            this.$emit('edit-mode-changed', value);
+        }
+    }
+}
 </script>
 <style scoped>
 .edit-passage-question {
