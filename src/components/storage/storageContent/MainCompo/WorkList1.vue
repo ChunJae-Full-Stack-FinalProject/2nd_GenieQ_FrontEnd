@@ -2,7 +2,7 @@
     <div class="card-container">
         <div class="storage-worklist-title">
             <p>최근 작업 내역</p>
-            <router-link to="/worklistMina"><Icon icon="weui:arrow-outlined" width="24" height="24" id="arrow-icon" style="color: #303030" /></router-link>
+            <router-link to="/storage/worklistMina"><Icon icon="weui:arrow-outlined" width="24" height="24" id="arrow-icon" style="color: #303030" /></router-link>
         </div>
         <div class="storage-worklist-subtitle">
             <span>최대 150개까지 보관됩니다.</span>
@@ -123,8 +123,6 @@ const toggleFavorite = (index) => {
    gap: 12px;
    isolation: isolate;
    position: absolute;
-   width: 1472px;
-   height: 506px;
    left: 292px;
    top: 385px;
    box-sizing: border-box;
@@ -142,8 +140,6 @@ const toggleFavorite = (index) => {
    gap: 12px;
    isolation: isolate;
    position: absolute;
-   width: 1472px;
-   height: 506px;
    left: 292px;
    top: 418px;
    box-sizing: border-box;
@@ -172,8 +168,6 @@ const toggleFavorite = (index) => {
    box-sizing: border-box;
    overflow: hidden; /* 내부 요소가 border-radius를 넘지 않도록 */
 }
-
-
 
 td{
   height: 29.21px;  

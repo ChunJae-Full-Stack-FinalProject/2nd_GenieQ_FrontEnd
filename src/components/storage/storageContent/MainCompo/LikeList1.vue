@@ -2,7 +2,7 @@
     <div class="card-container">
         <div class="storage-likelist-title">
             <p>즐겨찾기</p>
-            <router-link to="/likelistMina"><Icon icon="weui:arrow-outlined" width="24" height="24" id="arrow-icon" style="color: #303030" /></router-link>
+            <router-link to="/storage/likelistMina"><Icon icon="weui:arrow-outlined" width="24" height="24" id="arrow-icon" style="color: #303030" /></router-link>
         </div>
        <div class="storage-likelist-table">
   <div class="table-container">
@@ -120,8 +120,6 @@ const toggleFavorite = (index) => {
    gap: 12px;
    isolation: isolate;
    position: absolute;
-   width: 1472px;
-   height: 506px;
    left: 292px;
    top: 50px;
    box-sizing: border-box;

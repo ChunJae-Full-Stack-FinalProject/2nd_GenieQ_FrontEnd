@@ -2,7 +2,7 @@
     <div class="card-container">
         <div class="worklist-title">
             <p>최근 작업 내역</p>
-            <Icon icon="weui:arrow-outlined" width="24" height="24" id="arrow-icon" style="color: #303030" />
+            <router-link to="/storage/worklistMina"><Icon icon="weui:arrow-outlined" width="24" height="24" id="arrow-icon" style="color: #303030" /></router-link>
         </div>
        <div class="worklist-table">
   <div class="table-container">
@@ -78,8 +78,6 @@ const toggleFavorite = (index) => {
    gap: 12px;
    isolation: isolate;
    position: absolute;
-   width: 1472px;
-   height: 506px;
    left: 292px;
    top: 350px;
    box-sizing: border-box;
@@ -146,14 +144,14 @@ td{
 
 /* 열 너비 조정 */
 .data-table th:nth-child(1), .data-table td:nth-child(1) {
-  width: 20%;
+  width: 30%;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .data-table th:nth-child(2), .data-table td:nth-child(2) {
-  width: 30%;
+  width: 20%;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -161,10 +159,12 @@ td{
 
 .data-table th:nth-child(3), .data-table td:nth-child(3) {
   width: 10%;
+  text-align: center;
 }
 
 .data-table th:nth-child(4), .data-table td:nth-child(4) {
   width: 15%;
+  text-align: center;
 }
 
 .data-table th:nth-child(5), .data-table td:nth-child(5) {
