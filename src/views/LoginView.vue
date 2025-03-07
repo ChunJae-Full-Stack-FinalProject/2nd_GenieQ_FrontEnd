@@ -54,6 +54,7 @@
      align-items: center;
      min-height: 100vh;
      background: url("@/assets/images/login_bg.png") no-repeat;
+     background-position: top;
      padding: 20px;
    }
    

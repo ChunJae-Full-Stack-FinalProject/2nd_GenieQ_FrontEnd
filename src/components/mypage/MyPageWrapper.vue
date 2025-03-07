@@ -16,13 +16,15 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref ,onMounted} from "vue";
 import MyPageContent from './MyPageContent.vue';
+import { useRoute } from "vue-router";
+const route=useRoute();
+onMounted(()=> {
+  console.log("컴포넌트가 마운트되었습니다 !");
+   selectedTab.value=route.query.tab;
 
-// onMounted(()=> {
-//   console.log("컴포넌트가 마운트되었습니다 !");
-//   selectedTab = "자주 묻는 질문";
-// })
+})
 
 
 /* 현재 선택된 탭 (기본값: 회원정보) */
