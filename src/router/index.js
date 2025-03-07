@@ -2,7 +2,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import LoginView from '@/views/LoginView.vue'
 import Frame from '@/views/Frame.vue'
-import TestHomeComponent from '@/components/test/TestHomeComponent.vue'
+import Mainhome from '@/components/mainhome/MainHome.vue'
 import ImmediatelyComponent from '@/components/test/ImmediatelyComponent.vue'
 import ExampleView from '@/views/ExampleView.vue'
 import TermsView from '@/components/common/TermsView.vue'
@@ -12,7 +12,6 @@ import PolicyView from '@/components/common/Privacy.vue'
 import generationRoutes from './generation.routes'
 import authRoutes from '@/router/auth.routes.js'
 import myPageRoutes from './mypage.routes'
-
 
 // 로그인 상태 체크 가드
 const requireAuth = (to, from, next) => {
@@ -35,7 +34,7 @@ const router = createRouter({
     { path: '/', component: Frame, // beforeEnter: requireAuth, // 인증 필요 - 모든 자식 라우트
       children: [
         { path: '', redirect: '/home' },
-        { path: 'home', name: 'home', component: TestHomeComponent },
+        { path: 'home', name: 'home', component: Mainhome },
         { path: 'immediately', name: 'immediately', component: ImmediatelyComponent },
         ...generationRoutes,
         { path: '/terms', component: TermsView }, //이용약관
