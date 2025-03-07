@@ -5,14 +5,19 @@
             <InsertPassage/>
             <PaymentUsage/>
             <BaseButton id="reset_button" text="초기화" type="type2" width="248px" height="54px" />
-            <BaseButton id="select-type" text="문항 유형 선택하기" type="type1" width="248px" height="54px"/>
+            <BaseButton id="select-type" text="문항 유형 선택하기" type="type1" width="248px" height="54px" @click="showGenerateQuestionModal = true"/>
+            <GenerateQuestionModal :isOpen="showGenerateQuestionModal" @close="showGenerateQuestionModal = false"/>
         </div>
     </div>
 </template>
 <script setup>
+import { ref } from "vue";
 import PaymentUsage from '../PaymentUsage.vue';
 import InsertPassage from './QuestionMain/InsertPassage.vue';
 import BaseButton from '@/components/common/button/BaseButton.vue';
+import GenerateQuestionModal from '@/components/common/modal/type/generation/GenerateQuestionModal.vue';
+
+const showGenerateQuestionModal = ref(false);
 </script>
 <style scoped>
 #main-head {
