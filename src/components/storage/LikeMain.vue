@@ -29,7 +29,12 @@
               </thead>
               <tbody>
                   <tr v-for="(item, index) in workItems" :key="index">
-                  <td><input type="checkbox"></td>
+                  <td>
+                    <label class="custom-checkbox">
+                      <input type="checkbox" class="checkbox-input">
+                      <span class="checkbox-custom"></span>
+                    </label>
+                  </td>
                   <td class="work-name">{{ item.name }}</td>
                   <td class="work-title">{{ item.title }}</td>
                   <td class="work-type"><span class="type-tag">{{ item.type }}</span></td>
@@ -50,6 +55,9 @@
 </template>
 <script setup>
 import { ref } from 'vue';
+
+//체크박스 상태변화 변수.
+// const checked = ref(false);
 
 // 데이터 정의 - ref로 감싸서 반응형으로 만듭니다
 const workItems = ref([
@@ -418,5 +426,50 @@ margin: 0 auto;
 .download-icon {
 display: inline-block;
 margin-left: 4px;
+}
+
+
+
+/* 체크박스 컨테이너 스타일 */
+.custom-checkbox {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+
+/* 원래 체크박스는 숨김 */
+.checkbox-input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* 커스텀 체크박스 스타일 */
+.checkbox-custom {
+  position: relative;
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  background-color: white;
+  border: 1px solid #303030;
+  vertical-align: middle;
+}
+
+/* 체크된 상태의 커스텀 체크박스 */
+.checkbox-input:checked + .checkbox-custom::after {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 2px;
+  width: 5px;
+  height: 10px;
+  border: solid #303030;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* 마우스 오버 효과 */
+.checkbox-input:hover + .checkbox-custom {
+  background-color: #f0f0f0;
 }
 </style>
