@@ -85,19 +85,6 @@ import BaseButton from '../common/button/BaseButton.vue';
   left: 136px;
   top: 94px;
 }
-
-.content::after {
-  content: ""; 
-  display: block;
-  width: 100%;
-  height: 1px;
-  background-color: #BDBDBD;
-  position: absolute;
-  bottom: -60px; 
-  left: 150px; 
-}
-
-
 /* 기본 정보, 추가 정보 공통 박스 스타일 */
 .basic, .additional {
   width: 1472px;
@@ -226,21 +213,6 @@ color: #424242;
   
   color: #303030;
 }
-
-.account {
-  width: 240px;
-  height: 40px;
-  display: flex;
-  gap: 70px;
-  font-family: 'Pretendard';
-  font-weight: 500;
-  font-size: 16px;
-  line-height: 150%;
-  letter-spacing: -2%;
-  margin-left: auto;
-  margin-right: 110px; 
-  margin-top: 90px;
-}
 #pwd-change {
   left: 1000px;
   font-family: 'Pretendard';
@@ -257,11 +229,55 @@ color: #424242;
   position: absolute;
   left: 535px;
 }
+.content::after {
+  content: ""; 
+  display: block;
+  width: 100%;
+  height: 1px;
+  background-color: #BDBDBD;
+  position: absolute;
+  bottom: -340px;
+}
+.account {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0px;
+  gap: 16px;
 
+  position: absolute;
+  width: 240px;
+  height: 40px;
+  left: 1524px;
+  top: 860px;
+}
 .withdrawal {
+  position: absolute;
+  left: -112px;
+  width: 112px;
+  height: 40px;
+
+  font-family: 'Pretendard';
+  font-style: normal;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 150%;
+
+  letter-spacing: -0.02em;
   color: #5F5F5F;
 }
 .logout {
+  position: absolute;
+  width: 112px;
+  height: 40px;
+
+  font-family: 'Pretendard';
+  font-style: normal;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 150%;
+
+  letter-spacing: -0.02em;
   color: #FF9F40;
 }
 </style>
