@@ -1,0 +1,155 @@
+<template>
+    <div class="question-description">
+        <p id="description-head">문제 해설</p>
+        <div class="description-main">
+            <span v-if="!isEditing" id="correct-answer">정답 {{ answer }}</span>
+            <input v-else type="text" v-model="answer" id="input-answer"/>
+
+            <span v-if="!isEditing" id="description-content">{{ content }}</span>
+            <input v-else type="text" v-model="content" id="input-content"/>
+        </div>
+    </div>
+</template>
+<script>
+export default {
+    name: 'QuestionDescription',
+    props: {
+        // 정답
+        correct: {
+            type: String,
+            default: '①'
+        },
+        // 해설
+        description: {
+            type: String,
+            default: "연구 커뮤니티는 이러한 모델의 규모를 확장하면 성능이 향상된다고 인정한다고 했으므로, \n① ‘LLMs의 성능은 모델의 크기를 줄일수록 향상된다.’ 는 글의 내용과 일치하지 않는다."
+        },
+    },
+    data() {
+        return {
+            // 내부적으로 관리할 정답 데이터
+            answer: '',
+            // 내부적으로 관리할 해설 데이터
+            content: '',
+        }
+    },
+    created() {
+        // props로 받은 데이터를 내부 상태로 복사
+        this.answer = this.correct;
+        this.content = this.description;
+    },
+    watch: {
+        // props가 외부에서 변경될 경우, 내부 상태도 업데이트
+        correct: {
+            handler(newVal) {
+                this.answer = newVal;
+            }
+        },
+        description: {
+            handler(newVal) {
+                this.content = newVal;
+            }
+        }
+    }
+}
+</script>
+<style scoped>
+.question-description {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0px;
+    gap: 4px;
+
+    position: absolute;
+    width: 520px;
+    height: 369px;
+    left: 1244px;
+    top: 929px;
+}
+#description-head {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 8px;
+    gap: 8px;
+
+    width: 105px;
+    height: 48px;
+
+    font-family: 'Pretendard';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 24px;
+    line-height: 32px;
+    color: #000000;
+}
+.description-main {
+    box-sizing: border-box;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    gap: 8px;
+
+    width: 520px;
+    height: 317px;
+
+    background: #FFFFFF;
+    border: 1px solid #BDBDBD;
+    border-radius: 12px;
+
+    flex: none;
+    order: 1;
+    align-self: stretch;
+    flex-grow: 0;
+}
+#correct-answer {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0px;
+    gap: 34px;
+    
+    width: 480px;
+
+    font-family: 'Pretendard';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 17px;
+    line-height: 32px;
+
+    letter-spacing: -0.019em;
+    color: #000000;
+
+    flex: none;
+    order: 0;
+    align-self: stretch;
+    flex-grow: 0;
+}
+#description-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0px;
+    gap: 34px;
+
+    width: 480px;
+
+    font-family: 'Pretendard';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 17px;
+    line-height: 32px;
+
+    letter-spacing: -0.019em;
+    color: #000000;
+
+    flex: none;
+    order: 0;
+    align-self: stretch;
+    flex-grow: 0;
+}
+</style>

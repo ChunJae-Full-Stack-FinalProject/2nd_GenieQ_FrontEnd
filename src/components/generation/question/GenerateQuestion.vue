@@ -4,13 +4,16 @@
         <div class="main-content">
             <PassageTitle/>
             <EditPassageQuestion/>
+            <PassageSummary/>
+            <QuestionDescription/>
         </div>
     </div>
 </template>
 <script setup>
 import EditPassageQuestion from './GenerateQuestion/EditPassageQuestion/EditPassageQuestion.vue';
 import PassageTitle from './GenerateQuestion/PassageTitle.vue';
-
+import PassageSummary from '../passage/PassageContent/PassageSummary.vue';
+import QuestionDescription from './GenerateQuestion/QuestionDescription.vue';
 
 </script>
 <style scoped>
