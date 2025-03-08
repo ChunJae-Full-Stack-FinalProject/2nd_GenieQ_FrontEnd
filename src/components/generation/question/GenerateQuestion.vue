@@ -5,17 +5,20 @@
             <PassageTitle/>
             <EditPassageQuestion @edit-mode-changed="updateEditingMode"/>
             <PassageSummary/>
-            <QuestionDescription :isEditing="isEditingGlobal"/>
+            <QuestionDescription :isEditing="isEditingGlobal" :questionData="questionData"/>
             <div class="button-container">
                 <BaseButton text="문항 추가하기" type="type2" id="add-button" width="248px" height="54px"/>
-                <BaseButton text="문항 추가하기" type="type2" id="save-button" width="248px" height="54px"/>
-                <BaseButton text="문항 추가하기" type="type2" id="download-button" width="248px" height="54px" disabled/>
+                <BaseButton text="저장하기" type="type2" id="save-button" width="248px" height="54px"/>
+                <BaseButton text="추출하기" type="type2" id="download-button" width="248px" height="54px" disabled/>
             </div>
             <PlainTooltip id="download-tooltip" message="추출은 저장 후 가능해요" width="203px" />
         </div>
     </div>
 </template>
 <script>
+import { onMounted } from 'vue';
+import { useRoute } from 'vue-router';
+
 import EditPassageQuestion from './GenerateQuestion/EditPassageQuestion/EditPassageQuestion.vue';
 import PassageTitle from './GenerateQuestion/PassageTitle.vue';
 import PassageSummary from '../passage/PassageContent/PassageSummary.vue';
@@ -35,12 +38,31 @@ export default {
     },
     data() {
         return {
-            isEditingGlobal: false
+            isEditingGlobal: false,
+            pattern: null,
+            type: null,
+            questionData: null
         }
     },
     methods: {
         updateEditingMode(value) {
             this.isEditingGlobal = value;
+        }
+    },
+    mounted() {
+        // 라우터에서 전달된 데이터 가져오기
+        const route = this.$router.currentRoute.value;
+
+        // URL 쿼리 파라미터에서 문항 유형과 서술 방식 가져오기
+        if (route.query) {
+            this.pattern = route.query.pattern || null;
+            this.type = route.query.type || null;
+        }
+
+        // 라우터 state에서 선택된 문항 데이터 가져오기
+        if (route.state && route.state.questionData) {
+            this.questionData = route.state.questionData;
+            console.log('전달받은 문항 데이터 : ', this.questionData);
         }
     }
 }
@@ -97,6 +119,6 @@ export default {
 #download-tooltip {
     position: absolute;
     top: 1277px;
-    left: 1100px;
+    left: 1070px;
 }
 </style>

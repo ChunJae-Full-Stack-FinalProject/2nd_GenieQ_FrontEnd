@@ -4,20 +4,58 @@
         <div class="main-content">
             <InsertPassage/>
             <PaymentUsage/>
-            <BaseButton id="reset_button" text="초기화" type="type2" width="248px" height="54px" />
+            <BaseButton id="reset_button" text="초기화" type="type2" width="248px" height="54px" @click="resetPassage"/>
             <BaseButton id="select-type" text="문항 유형 선택하기" type="type1" width="248px" height="54px" @click="showGenerateQuestionModal = true"/>
             <GenerateQuestionModal :isOpen="showGenerateQuestionModal" @close="showGenerateQuestionModal = false"/>
+            <LoadPassageModal :isOpen="showLoadPassageModal" @close="showLoadPassageModal = false" @loadPassage="handleLoadPassage"/>
         </div>
     </div>
 </template>
 <script setup>
-import { ref } from "vue";
+import { ref, provide} from "vue";
 import PaymentUsage from '../PaymentUsage.vue';
 import InsertPassage from './QuestionMain/InsertPassage.vue';
 import BaseButton from '@/components/common/button/BaseButton.vue';
 import GenerateQuestionModal from '@/components/common/modal/type/generation/GenerateQuestionModal.vue';
+import LoadPassageModal from "@/components/common/modal/type/generation/LoadPassageModal.vue";
 
 const showGenerateQuestionModal = ref(false);
+const showLoadPassageModal = ref(false);
+
+// 지문 상태 및 메서드
+const currentPassage = ref({
+    title: '',
+    content: ''
+});
+
+// 지문 설정 함수
+const setPassage = (passage) => {
+    currentPassage.value = passage;
+};
+
+// 지문 초기화 함수
+const resetPassage = () => {
+    currentPassage.value = {
+        title: '',
+        content: ''
+    };
+};
+
+// LoadPassageModal에서 지문 선택 시 호출될 함수
+const handleLoadPassage = (passage) => {
+    setPassage(passage);
+    showLoadPassageModal.value = false;
+};
+
+// "지문 불러오기" 버튼 클릭 시 모달 열기 (InsertPassage에서 호출)
+const openLoadPassageModal = () => {
+    showLoadPassageModal.value = true;
+};
+
+// provide를 통해 하위 컴포넌트에 상태와 메서드 제공
+provide('passageData', {
+    currentPassage, setPassage, resetPassage, openLoadPassageModal
+});
 </script>
 <style scoped>
 .app-container {

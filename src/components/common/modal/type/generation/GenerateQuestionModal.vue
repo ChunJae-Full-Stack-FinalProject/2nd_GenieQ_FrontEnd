@@ -87,18 +87,21 @@
             <div class="modal-footer">
                 <PlainTooltip id="tooltip" message="생성 시 이용권 1회 차감" width="205px"/>
                 <BaseButton text="닫기" type="type3" width="140px" height="54px" @click="closeModal" />
-                <BaseButton text="문항 생성하기" type="type1" width="182px" height="54px" :disabled="!selectedQuestion"/>
+                <BaseButton text="문항 생성하기" type="type1" width="182px" height="54px" :disabled="!selectedQuestion"
+                @click="handleGenerateQuestion"/>
             </div>
         </div>
     </BaseModal>
 </template>
 <script setup>
 import { ref, computed, watch } from "vue";
+import { useRouter } from 'vue-router';
 import BaseModal from "../../BaseModal.vue";
 import BaseButton from "@/components/common/button/BaseButton.vue";
 import PlainTooltip from '@/components/common/PlainTooltip.vue';
 import questionExample from '@/assets/data/questionExample.json';
 
+const router = useRouter();
 const emit = defineEmits(["close"]);
 
 const props = defineProps({
@@ -116,6 +119,34 @@ const closeModal = () => {
   activeType.value = null;
   activeDifficulty.value = null;
   selectedQuestion.value = null;
+};
+
+// 문항 생성하기 버튼 클릭 핸들러
+const handleGenerateQuestion = () => {
+    if (selectedQuestion.value) {
+        // GenerateQuestion 페이지로 이동하면서 데이터 전달
+        router.push({
+            path: '/questions/generate',
+            query: {
+                pattern: activePattern.value,
+                type: activeType.value
+            },
+
+            // params는 router.push에서 바로 쓰면 사라질 수 있어서 state로 전달
+            state: {
+                questionData: selectedQuestion.value
+            }
+        });
+
+        // 모달 닫기
+        emit("close");
+
+        // 선택 상태 초기화
+        activePattern.value = null;
+        activeType.value = null;
+        activeDifficulty.value = null;
+        selectedQuestion.value = null;
+    }
 };
 
 const questionPattern = ref([
