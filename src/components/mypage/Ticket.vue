@@ -15,7 +15,8 @@
       <div class="info-card2">
         <div class="info-item">
           <span class="info-label">이용 내역 조회</span>
-          <span class="arrow-icon">›</span>
+            <span class="arrow-icon" @click="showUsageHistoryModal = true">›</span>
+          
         </div>
       </div>
     </div>
@@ -152,11 +153,17 @@
         </div>
       </div>
     </div>
+    <!-- 이용 내역 모달 -->
+    <UsageHistoryModal v-if="showUsageHistoryModal" @close="showUsageHistoryModal = false" />
   </div>
-  </template>
+</template>
   
   <script setup>
 import { ref } from 'vue';
+
+import UsageHistoryModal from '@/components/common/modal/type/mypage/UsageHistoryModal.vue';
+// 이용 내역 모달 표시 여부
+const showUsageHistoryModal = ref(false);
 
 // 활성화된 탭 상태 관리
 const activeTab = ref('usage');
