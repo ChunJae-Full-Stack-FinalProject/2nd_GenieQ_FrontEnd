@@ -167,6 +167,8 @@ const activeTab = ref('usage');
 
   .ticket-container {
     /* width: 1472px;  */
+    width: 100%;
+    padding: 20px 30px 80px 20px;
     width: 1472px; 
     position: absolute;
     margin: 0 auto; 
