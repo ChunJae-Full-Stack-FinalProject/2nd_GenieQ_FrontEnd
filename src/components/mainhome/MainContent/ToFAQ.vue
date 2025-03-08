@@ -1,12 +1,12 @@
 <template>
+    <router-link :to="{ name: 'my-page-wrapper', query: { 'tab': '자주 묻는 질문' } }">
     <div class="tofaq-container">
         <div class="top-container">
             <div class="tofaq-title">자주 묻는 질문 확인하기</div>
-            <router-link :to="{ name: 'my-page-wrapper', query: { 'tab': '자주 묻는 질문' } }">
                 <Icon icon="weui:arrow-outlined" width="24" height="24" id="arrow-icon" style="color: #ffffff" />
-            </Router-Link>
+            </div>
         </div>
-    </div>
+    </router-link>
 </template>
 <script setup>
 import { Icon } from "@iconify/vue";

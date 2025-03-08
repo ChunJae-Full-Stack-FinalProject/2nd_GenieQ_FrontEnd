@@ -3,7 +3,7 @@
         <div class="card">
             <div>
                 <p class="card-title">문제 출제를 더 쉽고, 빠르고, 정확하게 <br> 안녕하세요. 유저이름님</p>
-                <p class="sub-text">현재 보유 이동권 <span class="highlight">n회</span></p>
+                <p class="sub-text">현재 보유 이동권 <span class="highlight">n</span>회</p>
             </div>
             <router-link :to="{ name: 'my-page-wrapper', query: { 'tab': '이용권' } }">
                 <div class="count-badge">추가 구매</div>
@@ -33,6 +33,7 @@
 }
 
 .card-title {
+    font-family: 'Pretendard';
     font-weight: 500;
     font-size: 16px;
     line-height: 24px;
@@ -46,6 +47,7 @@
 }
 
 .sub-text {
+    font-family: 'Pretendard';
     font-size: 14px;
     line-height: 20px;
     color: #666666;
@@ -60,6 +62,7 @@
     color: white;
     padding: 8px 16px;
     border-radius: 8px;
+    font-family: 'Pretendard';
     font-size: 16px;
     font-weight: 600;
 }
