@@ -21,66 +21,77 @@
     </div>
     
     <!-- 탭 영역 -->
-    <div class="tab-section">
-      <div class="tab-container">
-        <button 
-          class="tab-btn" 
-          :class="{ active: activeTab === 'usage' }" 
-          @click="activeTab = 'usage'"
-        >
-          이용권 구매
-        </button>
-        <button 
-          class="tab-btn" 
-          :class="{ active: activeTab === 'history' }" 
-          @click="activeTab = 'history'"
-        >
-          결제 내역 조회
-        </button>
-      </div>
-    </div>
-    
-    <!-- 이용권 패키지 영역 -->
-     <div class="purchase-container">
-    <div class="packages-section">
-      <h3 class="section-title">이용권 패키지</h3>
+    <div class="purchase-wrapper">
+        <div class="tab-section">
+          <div class="tab-container">
+            <button 
+              class="tab-btn" 
+              :class="{ active: activeTab === 'usage' }" 
+              @click="activeTab = 'usage'"
+            >
+              이용권 구매
+            </button>
+            <button 
+              class="tab-btn" 
+              :class="{ active: activeTab === 'history' }" 
+              @click="activeTab = 'history'"
+            >
+              결제 내역 조회
+            </button>
+          </div>
+        </div>
       
-      <div class="package-list">
-        <!-- 10회 이용권 -->
-        <div class="package-card">
-          <div class="package-info">
-            <span class="package-title">지문/문항 생성 10회 이용권</span>
-            <span class="package-price">10,000원</span>
-          </div>
-          <button class="purchase-btn">구매하기</button>
-        </div>
+      <!-- 이용권 패키지 영역 -->
+      <div class="purchase-container" v-if="activeTab === 'usage'">
+      <div class="packages-section">
+        <h3 class="section-title">이용권 패키지</h3>
         
-        <!-- 50회 이용권 -->
-        <div class="package-card">
-          <div class="package-info">
-            <span class="package-title">지문/문항 생성 50회 이용권</span>
-            <div class="price-section">
-              <span class="original-price">50,000원</span>
-              <span class="discount-rate">20% 할인</span>
-              <span class="package-price">40,000원</span>
+        <div class="package-list">
+          <!-- 10회 이용권 -->
+          <div class="package-card">
+            <div class="package-info">
+              <span class="package-title">지문/문항 생성 10회 이용권</span>
+              <span class="package-price">10,000원</span>
             </div>
+            <button class="purchase-btn">구매하기</button>
           </div>
-          <button class="purchase-btn">구매하기</button>
-        </div>
-        
-        <!-- 100회 이용권 -->
-        <div class="package-card">
-          <div class="package-info">
-            <span class="package-title">지문/문항 생성 100회 이용권</span>
-            <div class="price-section">
-              <span class="original-price">100,000원</span>
-              <span class="discount-rate">30% 할인</span>
-              <span class="package-price">70,000원</span>
+          
+          <!-- 50회 이용권 -->
+          <div class="package-card">
+            <div class="package-info">
+              <span class="package-title">지문/문항 생성 50회 이용권</span>
+              <div class="price-section">
+                <span class="original-price">50,000원</span>
+                <span class="discount-rate">20% 할인</span>
+                <span class="package-price">40,000원</span>
+              </div>
             </div>
+            <button class="purchase-btn">구매하기</button>
           </div>
-          <button class="purchase-btn">구매하기</button>
+          
+          <!-- 100회 이용권 -->
+          <div class="package-card">
+            <div class="package-info">
+              <span class="package-title">지문/문항 생성 100회 이용권</span>
+              <div class="price-section">
+                <span class="original-price">100,000원</span>
+                <span class="discount-rate">30% 할인</span>
+                <span class="package-price">70,000원</span>
+              </div>
+            </div>
+            <button class="purchase-btn">구매하기</button>
+          </div>
         </div>
       </div>
+
+      <!-- 결제 내역 영역 -->
+      <div class="purchase-container" v-if="activeTab === 'history'">
+        <h3 class="section-title">결제 내역</h3>
+        <div class="history-empty">
+          <p>결제 내역이 없습니다.</p>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -97,12 +108,14 @@ const activeTab = ref('usage');
   <style scoped>
 
   .ticket-container {
+    /* width: 1472px;  */
     width: 1472px; 
     position: absolute;
     margin: 0 auto; 
     padding: 20px;
     top: 10px; 
     left: 130px; 
+    background-color: #f7f7f7;
   }
   
   .ticket-title {
@@ -170,43 +183,57 @@ const activeTab = ref('usage');
   color: #999;
 }
 
+/* 구매 영역 전체 래퍼 */
+.purchase-wrapper {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
 /* 탭 섹션 */
 .tab-section {
-  margin-bottom: 25px;
+  border-bottom: 1px solid #eee;
 }
 
 .tab-container {
   display: flex;
-  margin-bottom: 20px;
-  background-color: #f8f8f8;
-  border-radius: 4px;
-  padding: 2px;
+  background-color: white;
+  padding: 0;
 }
 
 .tab-btn {
-  padding: 8px 16px;
+  padding: 15px 24px;
   font-size: 14px;
   background: none;
   border: none;
   cursor: pointer;
   color: #666;
-  border-radius: 4px;
-  margin: 2px;
+  border-radius: 0;
+  margin: 0;
+  position: relative;
+  transition: all 0.2s;
 }
 
 .tab-btn.active {
-  font-weight: 500;
+  font-weight: 600;
   color: #000;
-  background-color: #fff2e6; /* 연한 주황색 배경 */
+  background-color: white;
 }
 
-/* 구매 컨테이너 (하얀색 배경) */
+.tab-btn.active::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #ff9f40;
+}
+
+/* 구매 컨테이너 */
 .purchase-container {
-  background-color: white;
-  border-radius: 8px;
   padding: 24px;
-  margin-bottom: 20px;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
 
 /* 패키지 섹션 */
@@ -253,13 +280,13 @@ const activeTab = ref('usage');
 
 .original-price {
   font-size: 13px;
-  color: #999;
+  color: #ff9f40;
   text-decoration: line-through;
 }
 
 .discount-rate {
   font-size: 13px;
-  color: #ff9f40; /* 주황색으로 변경 */
+  color: #ff9f40;
   font-weight: 500;
 }
 
@@ -285,5 +312,13 @@ const activeTab = ref('usage');
 
 .purchase-btn:hover {
   background-color: #e88e30;
+}
+
+/* 결제 내역 영역 */
+.history-empty {
+  text-align: center;
+  padding: 40px 0;
+  color: #888;
+  font-size: 14px;
 }
 </style>
