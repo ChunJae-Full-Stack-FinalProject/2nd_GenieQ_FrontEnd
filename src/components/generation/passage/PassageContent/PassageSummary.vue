@@ -5,11 +5,11 @@
             <div class="passage-type-main">
                 <div id="subject">
                     <p id="subject-head">지문 주제</p>
-                    <p id="subject-text">사회</p>
+                    <p id="subject-text">{{ subject }}</p>
                 </div>
                 <div id="keyword">
                     <p id="keyword-head">지문 제재</p>
-                    <p id="keyword-text">인공지능과 기계학습</p>
+                    <p id="keyword-text">{{ keyword }}</p>
                 </div>
             </div>
         </div>
@@ -26,14 +26,30 @@
     </div>
 </template>
 <script setup>
-import { ref } from 'vue';
+import { ref, defineExpose } from 'vue';
 
+// 데이터 관리
+const subject = ref('사회');
+const keyword = ref('인공지능과 기계학습');
 const items = ref ([
     '인공지능과 기계학습의 원리는 데이터 처리와 분석을 통해 성능을 개선하는 것이다.',
     '기계학습의 응용은 의료, 금융, 제조업 등 다양한 분야에 걸쳐 있으며, 데이터의 효율적 이용을 통해 새로운 가능성을 제공한다.',
     '인공지능과 기계학습의 활용은 윤리적 문제를 동반할 수 있으며, 기술의 공정성과 투명성을 확보하기 위한 관리가 필요하다.'
-
 ]);
+
+// 외부에서 접근할 수 있도록 요약 정보를 가져오는 함수 노출
+const getSummary = () => {
+    return {
+        subject: subject.value,
+        keyword: keyword.value,
+        items: [...items.value]
+    };
+};
+
+// 노출할 메소드 정의
+defineExpose({
+    getSummary
+});
 </script>
 <style scoped>
 #passage-summary {

@@ -238,6 +238,10 @@ const toggleFavorite = (index) => {
 };
 </script>
 <style scoped>
+.card-container {
+    width: 100%;
+    padding: 20px 30px 80px 20px;
+}
  .storage-worklistmain-title {
    display: flex;
    align-items: flex-start;
