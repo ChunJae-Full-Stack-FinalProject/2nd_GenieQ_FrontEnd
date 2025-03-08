@@ -115,6 +115,7 @@ const activeTab = ref('usage');
     padding: 20px;
     top: 10px; 
     left: 130px; 
+
   }
   
   .ticket-title {
@@ -190,16 +191,19 @@ const activeTab = ref('usage');
   overflow: hidden;
 }
 
-/* 탭 섹션 */
 .tab-section {
-  border-bottom: 1px solid #eee;
+  padding-bottom: 0; /* 하단 패딩 제거 */
+  margin-bottom: 0; /* 하단 마진 제거 */
+  width: fit-content;
 }
 
 .tab-container {
   display: flex;
-  background-color: white;
+  background-color: #f7f7f7;
   padding: 0;
+  width: fit-content; /* 콘텐츠에 맞게 너비 설정 */
 }
+
 
 .tab-btn {
   padding: 15px 24px;
@@ -208,26 +212,21 @@ const activeTab = ref('usage');
   border: none;
   cursor: pointer;
   color: #666;
-  border-radius: 0;
+  background-color: #FFEDDC ;
+  border-radius: 12px 12px 0 0;
   margin: 0;
   position: relative;
   transition: all 0.2s;
+  z-index: 1;
 }
 
 .tab-btn.active {
   font-weight: 600;
   color: #000;
   background-color: white;
-}
-
-.tab-btn.active::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  background-color: #ff9f40;
+  border-radius: 12px 12px 0 0;
+  z-index: 2;
+  
 }
 
 /* 구매 컨테이너 */
@@ -253,9 +252,9 @@ const activeTab = ref('usage');
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border: 1px solid #e5e5e5;
+  border: 1px solid #BDBDBD;
   border-radius: 4px;
-  padding: 16px 20px;
+  padding: 16px 20px;   
 }
 
 .package-info {
@@ -268,7 +267,7 @@ const activeTab = ref('usage');
 
 .package-title {
   font-size: 14px;
-  color: #333;
+  color: #303030;
 }
 
 .price-section {
@@ -278,8 +277,8 @@ const activeTab = ref('usage');
 }
 
 .original-price {
-  font-size: 13px;
-  color: #ff9f40;
+  font-size: 13px; 
+  color: #303030;
   text-decoration: line-through;
 }
 
@@ -292,10 +291,12 @@ const activeTab = ref('usage');
 .package-price {
   font-size: 14px;
   font-weight: 600;
-  color: #333;
+  color: #ff9f40;
 }
 
 .purchase-btn {
+  width: 15%;
+
   background-color: #ff9f40;
   color: white;
   border: none;
