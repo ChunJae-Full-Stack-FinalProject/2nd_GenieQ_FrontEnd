@@ -2,12 +2,12 @@
         <div class="noticecard-container">
             <div class="noticelist-card">
                 <div>
+                    <router-link :to="{ name: 'my-page-wrapper', query: { 'tab': '공지사항' } }">
                     <div class="top-container">
                         <div class="notice-title">공지사항</div>
-                        <router-link :to="{ name: 'my-page-wrapper', query: { 'tab': '공지사항' } }">
                             <Icon icon="weui:arrow-outlined" width="24" height="24" id="arrow-icon" style="color: #303030" />
-                        </router-link>
-                    </div>
+                        </div>
+                    </router-link>
                 </div>
                 <div class="notice-main">
                     <ol class="notice-list">
@@ -49,6 +49,7 @@ const items = ref ([
 }
 
 .notice-title {
+    font-family: 'Pretendard';
     font-weight: 500;
     font-size: 16px;
     line-height: 24px;
@@ -119,8 +120,6 @@ const items = ref ([
     order: 1;
     align-self: stretch;
     flex-grow: 0;
-
-
 }
 .list-item {
     box-sizing: border-box;
@@ -139,7 +138,6 @@ const items = ref ([
     order: 0;
     align-self: stretch;
     flex-grow: 0;
-
 }
 
 </style>
