@@ -1,9 +1,13 @@
 <template>
-<div class="frame">
+  <div class="frame">
     <Sidebar/>
-    <router-view />
-    <GenieQFooter/>
-</div>
+    <div class="main-content">
+      <div class="content-area">
+        <router-view />
+      </div>
+    </div>
+    <GenieQFooter id="footer"/>
+  </div>
 </template>
 
 <script setup>
@@ -15,11 +19,31 @@ import GenieQFooter from '@/components/common/Footer.vue';
 .frame {
   background-color: #F6F6F6;
   display: flex;
-  overflow: hidden; /* ✅ 내부 스크롤 방지 */
+  overflow-x: auto;
+  min-width: 1200px;
+  min-height: 100vh;
 }
+
 .main-content {
-  min-height: 100vh; /* ✅ 전체 높이 유지 */
-  justify-content: space-between;
+  min-height: 100vh;
+  width: calc(100% - 156px);
+  margin-left: 156px;
+  display: flex;
+  flex-direction: column;
+  background-color: #F6F6F6;
+  flex: 1;
+}
+
+.content-area {
+  flex: 1;
+  background-color: #F6F6F6;
+  padding-bottom: 50px;
+}
+
+#footer {
+  position: fixed;
+  bottom: 0;
   width: calc(100% - 156px); /* 사이드바 제외한 너비 */
+  margin-left: 156px;
 }
 </style>
