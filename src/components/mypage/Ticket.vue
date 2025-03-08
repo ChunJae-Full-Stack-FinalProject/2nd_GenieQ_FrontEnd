@@ -41,60 +41,118 @@
           </div>
         </div>
       
-      <!-- 이용권 패키지 영역 -->
-      <div class="purchase-container" v-if="activeTab === 'usage'">
-      <div class="packages-section">
-        <h3 class="section-title">이용권 패키지</h3>
-        
-        <div class="package-list">
-          <!-- 10회 이용권 -->
-          <div class="package-card">
-            <div class="package-info">
-              <span class="package-title">지문/문항 생성 10회 이용권</span>
-              <span class="package-price">10,000원</span>
-            </div>
-            <button class="purchase-btn">구매하기</button>
-          </div>
-          
-          <!-- 50회 이용권 -->
-          <div class="package-card">
-            <div class="package-info">
-              <span class="package-title">지문/문항 생성 50회 이용권</span>
-              <div class="price-section">
-                <span class="original-price">50,000원</span>
-                <span class="discount-rate">20% 할인</span>
-                <span class="package-price">40,000원</span>
+         <!-- 콘텐츠 영역 -->
+      <div class="purchase-container">
+        <!-- 이용권 패키지 영역 -->
+        <div v-if="activeTab === 'usage'">
+          <div class="packages-section">
+            <h3 class="section-title">이용권 패키지</h3>
+            
+            <div class="package-list">
+              <!-- 10회 이용권 -->
+              <div class="package-card">
+                <div class="package-info">
+                  <span class="package-title">지문/문항 생성 10회 이용권</span>
+                  <span class="package-price">10,000원</span>
+                </div>
+                <button class="purchase-btn">구매하기</button>
+              </div>
+              
+              <!-- 50회 이용권 -->
+              <div class="package-card">
+                <div class="package-info">
+                  <span class="package-title">지문/문항 생성 50회 이용권</span>
+                  <div class="price-section">
+                    <span class="original-price">50,000원</span>
+                    <span class="discount-rate">20% 할인</span>
+                    <span class="package-price">40,000원</span>
+                  </div>
+                </div>
+                <button class="purchase-btn">구매하기</button>
+              </div>
+              
+              <!-- 100회 이용권 -->
+              <div class="package-card">
+                <div class="package-info">
+                  <span class="package-title">지문/문항 생성 100회 이용권</span>
+                  <div class="price-section">
+                    <span class="original-price">100,000원</span>
+                    <span class="discount-rate">30% 할인</span>
+                    <span class="package-price">70,000원</span>
+                  </div>
+                </div>
+                <button class="purchase-btn">구매하기</button>
               </div>
             </div>
-            <button class="purchase-btn">구매하기</button>
           </div>
-          
-          <!-- 100회 이용권 -->
-          <div class="package-card">
-            <div class="package-info">
-              <span class="package-title">지문/문항 생성 100회 이용권</span>
-              <div class="price-section">
-                <span class="original-price">100,000원</span>
-                <span class="discount-rate">30% 할인</span>
-                <span class="package-price">70,000원</span>
+        </div>
+
+        <!-- 결제 내역 영역 -->
+        <div v-else-if="activeTab === 'history'">
+          <div class="history-section">
+ 
+            
+            <div class="history-filter">
+              <div class="filter-group">
+                <div class="select-container">
+                  <select class="filter-select">
+                    <option>기간 선택</option>
+                    <option>최근 1개월</option>
+                    <option>최근 3개월</option>
+                    <option>최근 6개월</option>
+                    <option>최근 12개월</option>
+                  </select>
+                </div>
+                <div class="date-range">
+                  <input type="date" class="date-input" value="2025-02-04">
+                  <span class="date-separator">-</span>
+                  <input type="date" class="date-input" value="2025-03-04">
+                </div>
+                <button class="search-btn">검색</button>
+              </div>
+              <div class="download-group">
+                <button class="download-btn">
+                  <span>거래내역 다운로드</span>
+                  <Icon class="download-icon" icon="ic:baseline-download" width="24" height="24"  style="color: #757575" />
+                </button>
               </div>
             </div>
-            <button class="purchase-btn">구매하기</button>
+            
+            <div class="history-table">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th class="column-num">순번</th>
+                    <th class="column-title">결제 내역</th>
+                    <th class="column-price">금액</th>
+                    <th class="column-date">결제 날짜</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="n in 5" :key="n">
+                    <td>{{ n }}</td>
+                    <td>지문/문항 생성 10회 이용권</td>
+                    <td>10,000원</td>
+                    <td>YYYY-MM-DD</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            
+            <div class="pagination">
+              <a href="#" class="page-active">1</a>
+              <a href="#">2</a>
+              <a href="#">3</a>
+              <a href="#">4</a>
+              <a href="#">5</a>
+              <a href="#" class="page-next">></a>
+              <a href="#" class="page-last">>></a>
+            </div>
           </div>
         </div>
       </div>
-
-      <!-- 결제 내역 영역 -->
-      <div class="purchase-container" v-if="activeTab === 'history'">
-        <h3 class="section-title">결제 내역</h3>
-        <div class="history-empty">
-          <p>결제 내역이 없습니다.</p>
-        </div>
-      </div>
-
     </div>
   </div>
-</div>
   </template>
   
   <script setup>
@@ -320,5 +378,201 @@ const activeTab = ref('usage');
   padding: 40px 0;
   color: #888;
   font-size: 14px;
+}
+
+/* 결제 내역 필터 영역 */
+.history-filter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  margin-top: 20px;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.select-container {
+  position: relative;
+  display: inline-block;
+}
+
+.filter-select {
+  padding: 8px 30px 8px 15px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background-color: white;
+  font-size: 14px;
+  color: #303030;
+  width: 120px;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+}
+
+/* 삼각형 아이콘 추가 */
+.select-container::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 10px solid #000; /* 삼각형 색상 */
+  pointer-events: none; /* 클릭 이벤트가 select에 전달되도록 */
+}
+
+/* Firefox에서 기본 화살표 제거 */
+.filter-select::-ms-expand {
+  display: none;
+}
+
+.date-range {
+  display: flex;
+  align-items: center;
+}
+/* 달력 아이콘 제거 */
+.date-input::-webkit-calendar-picker-indicator {
+  display: none;
+}
+
+/* 크로스 브라우저 호환성을 위한 추가 스타일 */
+.date-input {
+  appearance: textfield; /* 표준 */
+  -webkit-appearance: textfield; /* Safari, Chrome */
+  -moz-appearance: textfield; /* Firefox */
+}
+
+.date-input {
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  width: 120px;
+  font-size: 14px;
+}
+
+.date-separator {
+  margin: 0 5px;
+  color: #666;
+}
+
+.search-btn {
+  background-color: #ff9f40;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.download-group {
+  display: flex;
+  align-items: center;
+}
+
+.download-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  font-size: 14px;
+  color: #303030;
+  cursor: pointer;
+}
+
+/* 결제 내역 테이블 */
+.history-table {
+  margin-bottom: 20px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table th {
+  background-color: #ffffff;
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 14px;
+  color: #303030;
+  border-bottom: 1.29px solid #757575;
+}
+
+.data-table td {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 14px;
+  color: #303030;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.data-table tr:last-child td {
+  border-bottom: none;
+}
+
+
+.column-num {
+  width: 80px;
+}
+.column-title {
+  width: 250px;
+}
+
+.column-price {
+  width: 120px;
+}
+
+.column-date {
+  width: 150px;
+}
+
+/* 페이지네이션 */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.pagination a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #333;
+  text-decoration: none;
+}
+
+.pagination a.page-active {
+  color: #ff9f40;
+  font-weight: 500;
+}
+
+.pagination a.page-next, 
+.pagination a.page-last {
+  color: #666;
+}
+
+.pagination a:hover:not(.page-active) {
+  background-color: #f0f0f0;
 }
 </style>
