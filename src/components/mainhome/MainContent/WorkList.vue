@@ -1,56 +1,60 @@
 <template>
-    <div class="card-container">
-        <div class="worklist-title">
-            <p>최근 작업 내역</p>
-            <router-link to="/storage/worklistMina"><Icon icon="weui:arrow-outlined" width="24" height="24" id="arrow-icon" style="color: #303030" /></router-link>
-        </div>
-       <div class="worklist-table">
-  <div class="table-container">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>작업명</th>
-          <th>제재</th>
-          <th>유형</th>
-          <th>최종 작업일</th>
-          <th>추출하기</th>
-          <th>즐겨찾기</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(item, index) in workItems" :key="index">
-          <td class="work-name">{{ item.name }}</td>
-          <td class="work-title">{{ item.title }}</td>
-          <td class="work-type">
-            <span class="type-tag">{{ item.type }}</span>
-          </td>
-          <td class="work-date">{{ item.date }}</td>
-          <td class="work-action">
-            <button class="extract-btn" @click="extractItem(item)">
-              <p id="btn-text">추출 </p>
-              <Icon icon="lucide:upload" id="btn-icon" style="color: #FFFFFF" />
-            </button>
-          </td>
-          <td class="work-favorite">
-            <span class="star-container" @click="toggleFavorite(index)">
-              <Icon v-if="item.favorite" icon="mynaui:star-solid" width="24" height="24" style="color: #FF9F40" />
-              <Icon v-else icon="mynaui:star" width="24" height="24" style="color: #FF9F40" />
-            </span>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+  <div class="card-container">
+    <div class="worklist-title">
+        <p>최근 작업 내역</p>
+        <router-link to="/storage/worklistMina"><Icon icon="weui:arrow-outlined" width="24" height="24" id="arrow-icon" style="color: #303030" /></router-link>
+    </div>
+    <div class="worklist-table">
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>작업명</th>
+            <th>제재</th>
+            <th>유형</th>
+            <th>최종 작업일</th>
+            <th>추출하기</th>
+            <th>즐겨찾기</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(item, index) in workItems" :key="index">
+            <td class="work-name">{{ item.name }}</td>
+            <td class="work-title">{{ item.title }}</td>
+            <td class="work-type">
+              <span class="type-tag">{{ item.type }}</span>
+            </td>
+            <td class="work-date">{{ item.date }}</td>
+            <td class="work-action">
+              <button class="extract-btn" @click="openFileModal(item)">
+                <p id="btn-text">추출 </p>
+                <Icon icon="lucide:upload" id="btn-icon" style="color: #FFFFFF" />
+              </button>
+            </td>
+            <td class="work-favorite">
+              <span class="star-container" @click="toggleFavorite(index)">
+                <Icon v-if="item.favorite" icon="mynaui:star-solid" width="24" height="24" style="color: #FF9F40" />
+                <Icon v-else icon="mynaui:star" width="24" height="24" style="color: #FF9F40" />
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
-</div>
+
+  <!-- 파일 선택 모달 -->
+  <FileSelectModal :isOpen="isModalOpen" @close="closeFileModal" @confirm="handleFileSelection"/>
 </div>
 
 </template>
 <script setup>
+import FileSelectModal from '@/components/common/modal/type/FileSelectModal.vue';
 import { ref } from 'vue';
 
 // 데이터 정의 - ref로 감싸서 반응형으로 만듭니다
 const workItems = ref([
-  {
+{
     name: '수능특강 기반 문제생성saasasdsadasdsadads',
     title: '메이드투메이드의 건배',
     type: '지문',
@@ -67,11 +71,28 @@ const workItems = ref([
   // 추가 데이터 아이템들...
 ]);
 
-// 메소드 정의 - 화살표 함수로 작성합니다
-const extractItem = (item) => {
-  // 추출 버튼 클릭 시 실행될 로직
-  console.log('추출 버튼 클릭:', item);
+// 모달 상태 관리
+const isModalOpen = ref(false);
+const selectedItem = ref(null);
+
+// 추출 버튼 클릭 시 모달 열기
+const openFileModal = (item) => {
+  selectedItem.value = item;
+  isModalOpen.value = true;
 };
+
+// 모달 닫기
+const closeFileModal = () => {
+  isModalOpen.value = false;
+}
+
+// 파일 형식 선택 후 처리
+const handleFileSelection = (fileType) => {
+  console.log('선택된 파일 형식:', fileType);
+  console.log('선택된 작업 아이템:', selectedItem.value);
+
+  // 파일 추출 로직 구현
+}
 
 const toggleFavorite = (index) => {
   // 즐겨찾기 토글 로직
