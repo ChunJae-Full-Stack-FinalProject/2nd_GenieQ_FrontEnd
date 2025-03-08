@@ -7,12 +7,12 @@
             <BaseButton id="reset_button" text="초기화" type="type2" width="248px" height="54px" @click="resetPassage"/>
             <BaseButton id="select-type" text="문항 유형 선택하기" type="type1" width="248px" height="54px" @click="showGenerateQuestionModal = true"/>
             <GenerateQuestionModal :isOpen="showGenerateQuestionModal" @close="showGenerateQuestionModal = false"/>
-            <LoadPassageModal :isOpen="showLoadPassageModal" @close="showLoadPassageModal = false" @loadPassage="handleLoadPassage"/>
+            <LoadPassageModal :isOpen="showLoadPassageModal" @close="closeLoadPassageModal" @loadPassage="handleLoadPassage"/>
         </div>
     </div>
 </template>
 <script setup>
-import { ref, provide} from "vue";
+import { ref, provide } from 'vue';
 import PaymentUsage from '../PaymentUsage.vue';
 import InsertPassage from './QuestionMain/InsertPassage.vue';
 import BaseButton from '@/components/common/button/BaseButton.vue';
@@ -44,6 +44,11 @@ const resetPassage = () => {
 // LoadPassageModal에서 지문 선택 시 호출될 함수
 const handleLoadPassage = (passage) => {
     setPassage(passage);
+    showLoadPassageModal.value = false;
+};
+
+// 모달 닫기 함수
+const closeLoadPassageModal = () => {
     showLoadPassageModal.value = false;
 };
 
