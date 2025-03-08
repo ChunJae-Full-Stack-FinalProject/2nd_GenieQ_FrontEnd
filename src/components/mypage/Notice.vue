@@ -149,7 +149,7 @@ const changeTab = (tab) => {
   /* 공지사항 컨테이너 */
   .notice-container {
     width: 1472px; /*  표 크기 맞춤 */
-    margin: 0 auto; /*  중앙 정렬 */
+    /* margin: 0 auto;  메인 콘텐트에서 전체영역을 잡아서 마진오토값을 주석처리*/
     padding: 20px;
   }
   
