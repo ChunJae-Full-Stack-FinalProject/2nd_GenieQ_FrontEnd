@@ -49,15 +49,17 @@ const isActive = (path) => {
 .sidebar {
   width: 156px;
   height: 100vh; /* 화면 높이에 맞춤 */
+  min-height: 100vh; /* 최소 높이 설정 */
   background-color: #16252D;
   color: white;
+  position: fixed;
   top: 0;
   left: 0;
   padding: 20px 0;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  overflow-y: auto;
+  z-index: 100; /* 다른 요소 위에 표시 */
 }
 
 .logo {
