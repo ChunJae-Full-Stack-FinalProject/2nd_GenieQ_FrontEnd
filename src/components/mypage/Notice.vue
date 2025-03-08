@@ -27,7 +27,11 @@
           <tbody>
             <tr v-for="notice in paginatedNotices" :key="notice.NOT_CODE">
               <td>{{ notice.NOT_TYPE }}</td>
-              <td>{{ notice.NOT_TITLE }}</td>
+              <td>
+                <router-link :to="`/notice/${notice.NOT_CODE}`" class="notice-link">
+                  {{ notice.NOT_TITLE }}
+                </router-link>
+              </td>
               <td>{{ notice.NOT_DATE }}</td>
             </tr>
           </tbody>
@@ -54,6 +58,7 @@
   
   <script setup>
   import { ref, computed } from "vue";
+
   
   /* 공지사항 필터 */
   const tabs = [
@@ -72,17 +77,16 @@ for (let i = 1; i <= 60; i++) {
     NOT_CODE: i,
     NOT_TYPE: i % 2 === 0 ? "서비스" : "작업",
     NOT_TITLE: `공지사항 제목 ${i}`,  
-    NOT_DATE: `2024-03-${String(31 - i).padStart(2, '0')}` 
+    NOT_DATE: `2024-03-${String(31 - i).padStart(2, '0')}`,
+    NOT_CONTENT: `공지사항의 ${i}번 상세(Detail)내용입니다. `,
   });
 }
 
-  
 /* 필터링된 공지사항 목록 */
 const filteredNotices = computed(() => {
     if (selectedTab.value === "all") return notices.value;
     return notices.value.filter(n => n.NOT_TYPE === (selectedTab.value === "service" ? "서비스" : "작업"));
 });
-
 
 /* 페이지네이션 */
 const currentPage = ref(1);
@@ -435,5 +439,7 @@ button, a, span, input, select, textarea {
     border: none;
     background: none;
 }
+
+
 
 </style>
