@@ -21,9 +21,16 @@
         <tr v-for="(item, index) in workItems" :key="index">
           <td class="work-name">{{ item.name }}</td>
           <td class="work-title">{{ item.title }}</td>
-          <td class="work-type"><span class="type-tag">{{ item.type }}</span></td>
+          <td class="work-type">
+            <span class="type-tag">{{ item.type }}</span>
+          </td>
           <td class="work-date">{{ item.date }}</td>
-          <td class="work-action"><button class="extract-btn" @click="extractItem(item)">추출 <i class="download-icon"></i></button></td>
+          <td class="work-action">
+            <button class="extract-btn" @click="extractItem(item)">
+              <p id="btn-text">추출 </p>
+              <Icon icon="lucide:upload" id="btn-icon" style="color: #FFFFFF" />
+            </button>
+          </td>
           <td class="work-favorite">
             <span class="star-container" @click="toggleFavorite(index)">
               <Icon v-if="item.favorite" icon="mynaui:star-solid" width="24" height="24" style="color: #FF9F40" />
@@ -126,6 +133,7 @@ td{
   text-align: left;
   padding: 10px 20px;    
   border-bottom: 1px solid #e1e1e1;
+  font-family: 'Pretendard';
   font-weight: 700;
   color: #424242;
 }
@@ -135,6 +143,7 @@ td{
   padding: 3.5px 20px;    
   border-bottom: 1px solid #e1e1e1;
   font-weight: 500;
+  font-family: 'Pretendard';
   color: #424242;
   white-space: nowrap; 
   overflow: hidden;  
@@ -199,11 +208,12 @@ td{
   min-width: 50px;
   height: 28px;
   background-color: #f0f0f0;
-  border-radius: 4px;
+  border-radius: 12px;
   padding: 0 10px;
-  font-size: 14px;
+  font-family: 'Pretendard';
+  font-size: 16px;
   color: #333;
-  font-weight: 400;
+  font-weight: 500;
 }
 
 .type-tag-combined {
@@ -214,18 +224,36 @@ td{
 /* 추출 버튼 */
 .extract-btn {
   display: flex;
-  align-items: center;
+  flex-direction: row;
   justify-content: center;
-  gap: 4px;
-  background-color: #333;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 6px 12px;
-  font-size: 13px;
-  cursor: pointer;
-}
+  align-items: center;
+  padding: 5px 8px;
+  gap: 8px;
 
+  width: 72px;
+  height: 34px;
+
+  background: #303030;
+  border-radius: 8px;
+}
+#btn-text {
+font-family: 'Pretendard';
+font-style: normal;
+font-weight: 600;
+font-size: 16px;
+line-height: 150%;
+
+letter-spacing: -0.02em;
+color: #FFFFFF;
+}
+#btn-icon {
+  width: 20px;
+  height: 20px;
+
+  flex: none;
+  order: 1;
+  flex-grow: 0;
+}
 .download-icon:after {
   content: "↑";
   font-size: 12px;
