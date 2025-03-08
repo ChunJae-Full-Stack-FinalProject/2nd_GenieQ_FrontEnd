@@ -23,5 +23,8 @@
         position: absolute;
         left: 156px;
         top: 182px;
+        background-color: #F7F7F7;
+        width: 100%;
+        height: 100%;
     }
 </style>
