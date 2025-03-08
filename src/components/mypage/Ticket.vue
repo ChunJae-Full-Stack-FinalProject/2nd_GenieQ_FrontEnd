@@ -115,7 +115,6 @@ const activeTab = ref('usage');
     padding: 20px;
     top: 10px; 
     left: 130px; 
-    background-color: #f7f7f7;
   }
   
   .ticket-title {
