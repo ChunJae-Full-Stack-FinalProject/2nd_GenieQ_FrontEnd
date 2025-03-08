@@ -59,7 +59,7 @@
       <!-- 버튼 영역 -->
       <div class="modal-footer">
         <BaseButton :text="selectedPassage ? '이전으로' : '닫기'" type="type3" width="140px" height="54px" @click="handleBackOrClose" />
-        <BaseButton text="불러오기" type="type1" width="182px" height="54px" :disabled="filteredPassages.length === 0"/>
+        <BaseButton text="불러오기" type="type1" width="182px" height="54px" :disabled="!selectedPassage" @click="handleLoadPassage"/>
       </div>
     </div>
   </BaseModal>
@@ -118,12 +118,21 @@ AI의 발전은 윤리적 문제도 동반하고 있습니다. AI가 생성하�
 const props = defineProps({
   isOpen: Boolean,
 });
-const emit = defineEmits(["close"]);
+
+// 불러오기, 닫기 이벤트 정의
+const emit = defineEmits(["close", "loadPassage"]);
 
 const searchQuery = ref("");
 const activeTab = ref("recent");
 const selectedPassage = ref(null); // ✅ 선택된 지문 저장
-const activatedPassage = ref(null);
+
+// 불러오기 버튼 클릭 시 처리
+const handleLoadPassage = () => {
+  if (selectedPassage.value) {
+    // 부모 컴포넌트에 선택한 지문 전달
+    emit("loadPassage", selectedPassage.value);
+  }
+};
 
 // ✅ 미리보기 버튼을 클릭하면 지문 선택
 const selectPassage = (passage) => {
