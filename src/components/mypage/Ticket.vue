@@ -16,7 +16,7 @@
         <div class="info-item">
           <span class="info-label">이용 내역 조회</span>
             <span class="arrow-icon" @click="showUsageHistoryModal = true">›</span>
-          
+            <UsageHistoryModal :isOpen="showUsageHistoryModal" @close="showUsageHistoryModal = false"/>
         </div>
       </div>
     </div>
@@ -106,7 +106,7 @@
                 </div>
                 <div class="date-range">
                   <input type="date" class="date-input" value="2025-02-04">
-                  <span class="date-separator">-</span>
+                    <span class="date-separator">-</span>
                   <input type="date" class="date-input" value="2025-03-04">
                 </div>
                 <button class="search-btn">검색</button>
@@ -162,7 +162,6 @@
 import { ref } from 'vue';
 
 import UsageHistoryModal from '@/components/common/modal/type/mypage/UsageHistoryModal.vue';
-// 이용 내역 모달 표시 여부
 const showUsageHistoryModal = ref(false);
 
 // 활성화된 탭 상태 관리
@@ -447,24 +446,29 @@ const activeTab = ref('usage');
   display: flex;
   align-items: center;
 }
-/* 달력 아이콘 제거 */
+/* 달력 아이콘 제거하고 전체 영역을 클릭 가능하게 */
 .date-input::-webkit-calendar-picker-indicator {
-  display: none;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+  opacity: 0;
 }
 
-/* 크로스 브라우저 호환성을 위한 추가 스타일 */
-.date-input {
-  appearance: textfield; /* 표준 */
-  -webkit-appearance: textfield; /* Safari, Chrome */
-  -moz-appearance: textfield; /* Firefox */
-}
+
 
 .date-input {
+  position: relative;
   padding: 8px 10px;
   border: 1px solid #ddd;
   border-radius: 4px;
   width: 120px;
   font-size: 14px;
+  cursor: pointer; /* 커서를 포인터로 변경하여 클릭 가능함을 표시 */
 }
 
 .date-separator {
