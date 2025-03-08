@@ -13,7 +13,7 @@
         <div id="passage-count"><span style="color: #FF9500;">{{ currentLength }}</span>/1700</div>
 
         <div>
-            <div v-if="activeTab === 'user'" class="insert-passage-main" @contextmenu.prevent="handleRightClick">
+            <div v-if="activeTab === 'user'" class="insert-passage-main">
                 <UserInsertPassage/>
             </div>
             <div v-else class="insert-passage-main">
@@ -26,7 +26,7 @@
 import StoresInsertPassage from './StoresInsertPassage.vue';
 import UserInsertPassage from './UserInsertPassage.vue';
 
-import { ref, inject, computed } from 'vue';
+import { ref, inject, computed, watch } from 'vue';
 
 // 현재 활성화된 탭 상태 관리
 const activeTab = ref('user');
@@ -42,6 +42,12 @@ const setActiveTab = (tab) => {
 const currentLength = computed(() => {
     return currentPassage.value?.content?.length || 0;
 });
+
+// 탭 변경 시 currentLength 업데이트를 위한 감시자
+watch (activeTab, () => {
+    // 탭이 변경될 때 글자 수 재계산
+    currentLength.value;
+})
 </script>
 <style scoped>
 .insert-passage {
