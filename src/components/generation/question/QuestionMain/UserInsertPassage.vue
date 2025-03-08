@@ -1,11 +1,22 @@
 <template>
     <div>
-        <textarea id="user-passage-text" placeholder="지문을 입력해주세요."></textarea>
+        <textarea id="user-passage-text" v-model="userInput" placeholder="지문을 입력해주세요."></textarea>
     </div>
 </template>
 <script setup>
-import { ref } from 'vue';
+import { ref, inject, watch } from 'vue';
+
 const userInput = ref('');
+
+// 상위 컴포넌트에서 제공한 데이터 주입
+const { currentPassage } = inject('passageData');
+
+// 부모 컴포넌트에서 전달받은 지문 상태 감시
+watch(() => currentPassage.value, (newPassage) => {
+    if (newPassage && newPassage.content) {
+        userInput.value = newPassage.content;
+    }
+}, { immediate: true, deep: true });
 </script>
 <style scoped>
 #user-passage-text {

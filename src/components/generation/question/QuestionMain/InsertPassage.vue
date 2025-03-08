@@ -10,10 +10,10 @@
                 자료실 지문
             </p>
         </div>
-        <div id="passage-count"><span style="color: #FF9500;">1234</span>/1700</div>
+        <div id="passage-count"><span style="color: #FF9500;">{{ currentLength }}</span>/1700</div>
 
         <div>
-            <div v-if="activeTab === 'user'" class="insert-passage-main">
+            <div v-if="activeTab === 'user'" class="insert-passage-main" @contextmenu.prevent="handleRightClick">
                 <UserInsertPassage/>
             </div>
             <div v-else class="insert-passage-main">
@@ -26,15 +26,22 @@
 import StoresInsertPassage from './StoresInsertPassage.vue';
 import UserInsertPassage from './UserInsertPassage.vue';
 
-import { ref } from 'vue';
+import { ref, inject, computed } from 'vue';
 
 // 현재 활성화된 탭 상태 관리
 const activeTab = ref('user');
+
+// provide로 제공된 데이터 주입
+const { currentPassage, openLoadPassageModal } = inject('passageData');
 
 const setActiveTab = (tab) => {
     activeTab.value = tab;
 };
 
+// 현재 입력된 글자 수 계산
+const currentLength = computed(() => {
+    return currentPassage.value?.content?.length || 0;
+});
 </script>
 <style scoped>
 .insert-passage {
