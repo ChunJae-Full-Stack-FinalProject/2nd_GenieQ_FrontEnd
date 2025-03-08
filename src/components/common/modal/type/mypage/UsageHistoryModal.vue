@@ -54,10 +54,20 @@
               <a href="#" class="page-last">>></a>
             </div>
           </div>
+        <div class="close-btn-container">
+          <BaseButton class="close-btn" text="닫기" type="type3" width="90.42px" height="34.5px" @click="closeModal" />
+      </div>
 </BaseModal>
 </template> 
 <script setup>
 import BaseModal from "../../BaseModal.vue";
+import BaseButton from "@/components/common/button/BaseButton.vue";
+
+const emit = defineEmits(['close']);
+
+const closeModal = () => {
+  emit("close");
+};
 </script>
     
 <style scoped>
@@ -293,4 +303,17 @@ import BaseModal from "../../BaseModal.vue";
 .pagination a:hover:not(.page-active) {
   background-color: #f0f0f0;
 }
+
+
+.close-btn-container{
+  width:100%;
+  height: 100%;
+  display: flex;
+  justify-content: end;
+}
+.close-btn{
+  font-size:12.92px;
+  font-weight: 700;
+}
+
 </style>
