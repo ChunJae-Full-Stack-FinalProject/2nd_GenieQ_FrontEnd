@@ -7,7 +7,7 @@
             <PassageSummary/>
             <BaseButton id="recreate-button" text="재생성하기(1회 차감)" type="type2" width="248px" height="54px" />
             <BaseButton id="save-button" text="저장하기" type="type2" width="248px" height="54px" />
-            <BaseButton id="download-button" text="추출하기" type="type2" width="248px" height="54px" disabled/>
+            <BaseButton id="download-button" text="추출하기" type="type2" width="248px" height="54px" disabled @click="openFileModal()"/>
             <router-link to="/question">
                 <BaseButton id="connect-create-button" text="이어서 문항 생성하기" type="type4" width="520px" height="54px" />
             </router-link>
@@ -15,6 +15,9 @@
             <PlainTooltip id="download-message" message="추출은 저장 후 가능해요" width="205px"/>
             <PlainTooltip id="start-edit" message="필요한 부분을 클릭하고 편집을 시작하세요" width="316px"/>
         </div>
+
+        <!-- 파일 선택 모달 -->
+        <FileSelectModal :isOpen="isFileModalOpen" @close="closeFileModal" @confirm="handleFileSelect"/>
     </div>
 </template>
 <script setup>
@@ -23,9 +26,48 @@ import PassageContentMain from '@/components/generation/passage/PassageContent/P
 import PassageSummary from '@/components/generation/passage/PassageContent/PassageSummary.vue';
 import BaseButton from '@/components/common/button/BaseButton.vue';
 import PlainTooltip from '@/components/common/PlainTooltip.vue';
+import FileSelectModal from '@/components/common/modal/type/FileSelectModal.vue';
 
+import { ref } from 'vue';
+
+// 모달 상태 관리
+const isFileModalOpen = ref(false);
+
+// 컴포넌트 참조
+const passageTitleRef = ref(null);
+const passageContentRef = ref(null);
+const passageSummaryRef = ref(null);
+
+// 추출 버튼 클릭 시 모달 열기
+const openFileModal = () => {
+    isFileModalOpen.value = true;
+};
+
+// 모달 닫기
+const closeFileModal = () => {
+    isFileModalOpen.value = false;
+}
+
+// 파일 형식 선택 처리
+const handleFileSelect = (fileType) => {
+    // 컴포넌트에서 데이터 수집
+    const passageData = {
+        title: passageTitleRef.value?.getTitle?.() || '',
+        content: passageContentRef.value?.getContent?.() || '',
+        summary: PassageSummaryRef.value?.getSummary?.() || '',
+        fileType: fileType
+    };
+
+    console.log('파일 추출하기: ', passageData);
+    // 파일 추출 로직 구현
+    
+}
 </script>
 <style scoped>
+.app-container {
+    width: 100%;
+    padding: 20px 30px 80px 20px;
+}
 #main-title {
     position: absolute;
     width: 87px;

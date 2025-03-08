@@ -46,6 +46,10 @@ export default {
 }
 </script>
 <style scoped>
+.app-container {
+    width: 100%;
+    padding: 20px 30px 80px 20px;
+}
 #main-head {
     position: absolute;
     width: 90px;
