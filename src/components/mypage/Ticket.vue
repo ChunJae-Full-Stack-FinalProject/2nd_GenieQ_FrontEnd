@@ -13,13 +13,12 @@
       </div>
       
       <div class="info-card2">
-        <div class="info-item">
+        <div class="info-item" @click="showUsageHistoryModal = true">
           <span class="info-label">이용 내역 조회</span>
-            <span class="arrow-icon" @click="showUsageHistoryModal = true">›</span>
-            <UsageHistoryModal :isOpen="showUsageHistoryModal" @close="showUsageHistoryModal = false"/>
+            <span class="arrow-icon">›</span>
+          </div>
         </div>
       </div>
-    </div>
     
     <!-- 탭 영역 -->
     <div class="purchase-wrapper">
@@ -91,23 +90,21 @@
         <!-- 결제 내역 영역 -->
         <div v-else-if="activeTab === 'history'">
           <div class="history-section">
- 
-            
             <div class="history-filter">
               <div class="filter-group">
                 <div class="select-container">
-                  <select class="filter-select">
-                    <option>기간 선택</option>
-                    <option>최근 1개월</option>
-                    <option>최근 3개월</option>
-                    <option>최근 6개월</option>
-                    <option>최근 12개월</option>
+                  <select class="filter-select" v-model="selectedPeriod" @change="updateDateRange">
+                    <option value="">기간 선택</option>
+                    <option value="1">최근 1개월</option>
+                    <option value="3">최근 3개월</option>
+                    <option value="6">최근 6개월</option>
+                    <option value="12">최근 12개월</option>
                   </select>
                 </div>
                 <div class="date-range">
-                  <input type="date" class="date-input" value="2025-02-04">
+                  <input type="date" class="date-input" v-model="startDate">
                     <span class="date-separator">-</span>
-                  <input type="date" class="date-input" value="2025-03-04">
+                  <input type="date" class="date-input" v-model="endDate">
                 </div>
                 <button class="search-btn">검색</button>
               </div>
@@ -154,19 +151,56 @@
       </div>
     </div>
     <!-- 이용 내역 모달 -->
-    <UsageHistoryModal v-if="showUsageHistoryModal" @close="showUsageHistoryModal = false" />
+    <UsageHistoryModal :isOpen="showUsageHistoryModal" @close="showUsageHistoryModal = false" />
   </div>
 </template>
   
-  <script setup>
-import { ref } from 'vue';
-
+<script setup>
+import { ref, onMounted } from 'vue';
 import UsageHistoryModal from '@/components/common/modal/type/mypage/UsageHistoryModal.vue';
+
 const showUsageHistoryModal = ref(false);
 
 // 활성화된 탭 상태 관리
 const activeTab = ref('usage');
 
+// 날짜 관련 상태 관리
+const selectedPeriod = ref('');
+const startDate = ref('');
+const endDate = ref('');
+
+// 오늘 날짜를 YYYY-MM-DD 형식으로 반환
+const getTodayFormatted = () => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+// n개월 전 날짜를 YYYY-MM-DD 형식으로 반환
+const getMonthsAgoFormatted = (months) => {
+  const date = new Date();
+  date.setMonth(date.getMonth() - months);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+// 선택한 기간에 따라 날짜 범위 업데이트
+const updateDateRange = () => {
+  if (selectedPeriod.value) {
+    const months = parseInt(selectedPeriod.value);
+    endDate.value = getTodayFormatted();
+    startDate.value = getMonthsAgoFormatted(months);
+  }
+};
+
+// 컴포넌트 마운트 시, 오늘 날짜로 종료일 설정
+onMounted(() => {
+  endDate.value = getTodayFormatted();
+});
 </script>
   
   <style scoped>
@@ -251,7 +285,6 @@ const activeTab = ref('usage');
 
 /* 구매 영역 전체 래퍼 */
 .purchase-wrapper {
-  background-color: white;
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
   overflow: hidden;
@@ -297,6 +330,7 @@ const activeTab = ref('usage');
 
 /* 구매 컨테이너 */
 .purchase-container {
+  background-color: white;
   padding: 24px;
 }
 
