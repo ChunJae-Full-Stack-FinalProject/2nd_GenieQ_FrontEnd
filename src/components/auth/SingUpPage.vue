@@ -12,37 +12,39 @@
           
           <div class="form-group">
             <label class="input-label">이메일*</label>
-            <div class="input-wrapper">
+            <div class="input-wrapper" :class="{ 'error': emailError }">
               <Icon icon="lucide:user-round" class="input-icon" />
-              <input type="email" placeholder="이메일 주소를 입력해 주세요." class="form-input" />
+              <input type="text" placeholder="이메일을 입력하세요." v-model="email" class="form-input" @input="validateEmail">
             </div>
-            <button class="button gray-button">인증메일 발송</button>
+            <div v-if="emailError" class="error-message">{{ emailError }}</div>
+            <button class="button gray-button" style="margin-top: 10px;">인증메일 발송</button>
           </div> 
           
           <div class="form-group">
             <label class="input-label">인증코드 확인*</label>
             <div class="input-with-button">
-              <input type="text" placeholder="인증코드를 입력하세요." class="form-input input-with-margin" />
+              <input type="text" placeholder="인증코드를 입력하세요." class="form-input2" />
               <button class="button verify-button">인증</button>
             </div>
           </div>
           
           <div class="form-group">
             <label class="input-label">비밀번호 입력*</label>
-            <div class="input-wrapper">
+            <div class="input-wrapper" :class="{ 'error': passwordError }">
               <Icon icon="lucide:lock-keyhole" class="input-icon" />
-              <input type="password" placeholder="비밀번호를 입력해 주세요." class="form-input" />
-              <Icon icon="ic:outline-remove-red-eye" class="eye-icon" />
+              <input :type="showPassword ? 'text' : 'password'" placeholder="비밀번호를 입력해 주세요." v-model="password" class="form-input" @input="validatePassword" @blur="passwordTouched = true; validatePassword()" />
+              <Icon :icon="showPassword ? 'ic:baseline-remove-red-eye' : 'ic:outline-remove-red-eye'" class="eye-icon" @click="toggleShowPassword"/>
             </div>
+            <div v-if="passwordError" class="error-message">{{ passwordError }}</div>
             <p class="password-hint">8자리 이상, 영문+숫자+특수문자(!@#$%^&*)조합</p>
           </div>
           
           <div class="form-group">
-            <div class="input-wrapper">
+            <div class="input-wrapper" :class="{ 'error': confirmPasswordError }">
               <Icon icon="lucide:lock-keyhole" class="input-icon" />
-              <input type="password" placeholder="비밀번호를 한 번 더 입력해 주세요." class="form-input" />
-              <Icon icon="ic:outline-remove-red-eye" class="eye-icon" />
+              <input :type="showConfirmPassword ? 'text' : 'password'" placeholder="비밀번호를 한 번 더 입력해 주세요." v-model="confirmPassword" class="form-input" @input="validateConfirmPassword" @blur="confirmPasswordTouched = true; validateConfirmPassword()" />              <Icon :icon="showConfirmPassword ? 'ic:baseline-remove-red-eye' : 'ic:outline-remove-red-eye'" class="eye-icon" @click="toggleShowConfirmPassword"/>
             </div>
+            <div v-if="confirmPasswordError" class="error-message">{{ confirmPasswordError }}</div>
           </div>
         </div>
         
@@ -51,9 +53,10 @@
           
           <div class="form-group">
             <label class="input-label">이름*</label>
-            <div class="input-wrapper">
-              <input type="text" placeholder="이름을 입력해 주세요." class="form-input" />
+            <div class="input-wrapper" :class="{ 'error': nameError }">
+              <input type="text" placeholder="이름을 입력해 주세요." class="form-input" v-model="username" @input="validateName" @blur="nameTouched = true; validateName()" />
             </div>
+            <div v-if="nameError" class="error-message">{{ nameError }}</div>
           </div>
         </div>
         
@@ -123,7 +126,140 @@
   import { Icon } from "@iconify/vue";
 
 
-  import { ref } from 'vue';
+  import { ref, watch } from 'vue';
+  const email = ref('');
+  const emailError = ref('');
+  // 비밀번호 관련 상태
+  const password = ref('');
+  const confirmPassword = ref('');
+  const passwordError = ref('');
+  const confirmPasswordError = ref('');
+  const showPassword = ref(false);
+  const showConfirmPassword = ref(false);
+  const passwordTouched = ref(false);
+  const confirmPasswordTouched = ref(false);
+  // 이름 관련 상태
+  const username = ref('');
+  const nameError = ref('');
+  const nameTouched = ref(false);
+
+
+
+  // 이메일 유효성 검사
+  const validateEmail = () => {
+  if (!email.value) {
+    emailError.value = '이메일 형식으로 입력해 주세요';
+    return;
+  }
+  
+  // @을 기준으로 한 구간이 알파벳 or 숫자 or 특수문자 조합으로 이루어져 있는지 체크
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  if (!emailRegex.test(email.value)) {
+    emailError.value = '이메일 형식으로 입력해 주세요';
+  } else {
+    emailError.value = '';
+  }
+};
+
+  // 비밀번호 보이기/숨기기 토글
+const toggleShowPassword = () => {
+  showPassword.value = !showPassword.value;
+};
+
+const toggleShowConfirmPassword = () => {
+  showConfirmPassword.value = !showConfirmPassword.value;
+};
+
+// 비밀번호 유효성 검사
+const validatePassword = () => {
+  // 입력값이 없고, 아직 사용자가 입력을 시작하지 않았다면 오류 표시하지 않음
+  if (!password.value && !passwordTouched.value) {
+    passwordError.value = '';
+    return;
+  }
+  
+  // 입력값이 없고, 사용자가 이미 입력을 시작했다면 오류 표시
+  if (!password.value && passwordTouched.value) {
+    passwordError.value = '비밀번호를 입력해 주세요.';
+    return;
+  }
+
+  // 8자리 이상 검사
+  if (password.value.length < 8) {
+    passwordError.value = '비밀번호를 조건에 맞게 입력해 주세요.';
+    return;
+  }
+
+  // 영문 포함 검사
+  const hasLetter = /[a-zA-Z]/.test(password.value);
+  // 숫자 포함 검사
+  const hasNumber = /[0-9]/.test(password.value);
+  // 특수문자 포함 검사
+  const hasSpecial = /[!@#$%^&*]/.test(password.value);
+
+  if (!hasLetter || !hasNumber || !hasSpecial) {
+    passwordError.value = '비밀번호를 조건에 맞게 입력해 주세요.';
+  } else {
+    passwordError.value = '';
+  }
+
+  // 확인 비밀번호가 있을 경우 일치 여부 확인
+  if (confirmPassword.value) {
+    validateConfirmPassword();
+  }
+};
+
+// 비밀번호 확인 유효성 검사
+const validateConfirmPassword = () => {
+  // 입력값이 없고, 아직 사용자가 입력을 시작하지 않았다면 오류 표시하지 않음
+  if (!confirmPassword.value && !confirmPasswordTouched.value) {
+    confirmPasswordError.value = '';
+    return;
+  }
+  
+  // 입력값이 없고, 사용자가 이미 입력을 시작했다면 오류 표시
+  if (!confirmPassword.value && confirmPasswordTouched.value) {
+    confirmPasswordError.value = '비밀번호를 확인해 주세요.';
+    return;
+  }
+
+  if (password.value !== confirmPassword.value) {
+    confirmPasswordError.value = '비밀번호를 확인해 주세요.';
+  } else {
+    confirmPasswordError.value = '';
+  }
+};
+
+// 이름 유효성 검사
+const validateName = () => {
+  // 입력값이 없고, 아직 사용자가 입력을 시작하지 않았다면 오류 표시하지 않음
+  if (!username.value && !nameTouched.value) {
+    nameError.value = '';
+    return;
+  }
+  
+  // 입력값이 없고, 사용자가 이미 입력을 시작했다면 오류 표시
+  if (!username.value && nameTouched.value) {
+    nameError.value = '이름을 입력해 주세요.';
+    return;
+  }
+
+  // 한글만 허용하는 정규식
+  const koreanOnly = /^[가-힣]{2,8}$/;
+  
+  // 숫자, 특수문자, 공백 포함 검사
+  const hasInvalidChar = /[\d\s!@#$%^&*(),.?":{}|<>]/.test(username.value);
+  
+  if (hasInvalidChar) {
+    nameError.value = '숫자, 특수문자, 공백은 입력할 수 없습니다.';
+  } else if (!koreanOnly.test(username.value)) {
+    nameError.value = '이름은 2~8자의 한글만 입력 가능합니다.';
+  } else {
+    nameError.value = '';
+  }
+};
+
+
   // 성별 상태 관리
   const gender = ref('male'); // 기본값은 남성으로 설정
   const privacyChecked = ref(false);
@@ -134,6 +270,12 @@
 };
 
 
+  // 입력값 변경 시 유효성 검사
+  watch(email, validateEmail);
+  watch(password, validatePassword);
+  watch(confirmPassword, validateConfirmPassword);  
+  watch(username, validateName);
+  
   </script>
   
   <style scoped>
@@ -251,6 +393,18 @@
     margin-right: 12px;
     color: #BDBDBD;
     cursor: pointer;
+  }
+
+  .form-input2{
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    height: 44px;
+    border: 1px solid #BDBDBD;
+    border-radius: 6px;
+    padding: 10px;
   }
   
   .form-input {
@@ -440,6 +594,31 @@
   font-weight: 500;
   color: #424242;
   pointer-events: none; /* 이 부분이 중요: 라벨에 클릭 이벤트 없애기 */
+}
+
+/* 오류 스타일 추가 */
+.input-wrapper.error {
+  border-color: #ff0000;
+}
+
+.error-message {
+  color: #ff0000;
+  font-size: 12px;
+  margin-top: 5px;
+  text-align: left;
+  padding-left: 5px;
+  z-index: 21;
+}
+
+/* 비활성화된 버튼 스타일 */
+.login-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+/* 입력 폼 너비 조정 */
+.input-wrapper {
+  width: 100%;
 }
   </style>
   

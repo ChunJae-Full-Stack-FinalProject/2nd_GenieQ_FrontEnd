@@ -156,6 +156,7 @@
     height: 44px;
     border: 1px solid #BDBDBD;
     border-radius: 6px;
+    padding: 10px;
   }
   
   .input-with-button {
