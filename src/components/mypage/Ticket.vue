@@ -127,25 +127,35 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="n in 5" :key="n">
-                    <td>{{ n }}</td>
-                    <td>지문/문항 생성 10회 이용권</td>
-                    <td>10,000원</td>
-                    <td>YYYY-MM-DD</td>
+                  <tr v-for="(item, index) in paginatedHistory" :key="item.id">
+                    <td>{{ (currentPage - 1) * itemsPerPage + index + 1 }}</td>
+                    <td>{{ item.title }}</td>
+                    <td>{{ item.price }}</td>
+                    <td>{{ item.date }}</td>
+                  </tr>
+                  <!-- 데이터가 없는 경우 표시할 행 -->
+                  <tr v-if="paginatedHistory.length === 0">
+                    <td colspan="4" style="text-align: center; padding: 20px;">결제 내역이 없습니다.</td>
                   </tr>
                 </tbody>
               </table>
             </div>
             
-            <div class="pagination">
-              <a href="#" class="page-active">1</a>
-              <a href="#">2</a>
-              <a href="#">3</a>
-              <a href="#">4</a>
-              <a href="#">5</a>
-              <a href="#" class="page-next">></a>
-              <a href="#" class="page-last">>></a>
+            <div class="pagination" v-if="totalPages > 0">
+              <button v-if="totalPages > 5" @click="prevPage" :disabled="currentPage === 1">&lt;</button>
+              
+              <span
+                v-for="page in visiblePages"
+                :key="page"
+                @click="changePage(page)"
+                :class="{ 'active-page': currentPage === page }">
+                {{ page }}
+              </span>
+              
+              <button v-if="totalPages > 5" @click="nextPage" :disabled="currentPage === totalPages">&gt;</button>
+              <button @click="lastPage" :disabled="currentPage === totalPages">&raquo;</button>
             </div>
+
           </div>
         </div>
       </div>
@@ -156,7 +166,7 @@
 </template>
   
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import UsageHistoryModal from '@/components/common/modal/type/mypage/UsageHistoryModal.vue';
 
 const showUsageHistoryModal = ref(false);
@@ -168,6 +178,86 @@ const activeTab = ref('usage');
 const selectedPeriod = ref('');
 const startDate = ref('');
 const endDate = ref('');
+
+// 페이지네이션 관련 상태 추가
+const currentPage = ref(1);
+const itemsPerPage = 10;
+const maxVisiblePages = 5;
+
+// 임시 결제 내역 데이터 (실제로는 API 요청으로 대체)
+const paymentHistory = ref([]);
+
+// 데이터 초기화 함수
+const initializeData = () => {
+  for (let i = 1; i <= 60; i++) {
+    paymentHistory.value.push({
+      id: i,
+      title: `지문/문항 생성 ${i % 3 === 0 ? 100 : i % 2 === 0 ? 50 : 10}회 이용권`,
+      price: i % 3 === 0 ? '70,000원' : i % 2 === 0 ? '40,000원' : '10,000원',
+      date: `2024-03-${String(31 - (i % 30)).padStart(2, '0')}`
+    });
+  }
+};
+
+// 필터링된 내역 계산
+const filteredHistory = computed(() => {
+  return paymentHistory.value;
+});
+
+// 총 페이지 수 계산
+const totalPages = computed(() => {
+  if (!filteredHistory.value || filteredHistory.value.length === 0) return 1;
+  return Math.ceil(filteredHistory.value.length / itemsPerPage);
+});
+
+// 페이지네이션된 내역 계산
+const paginatedHistory = computed(() => {
+  if (!filteredHistory.value || filteredHistory.value.length === 0) return [];
+  const start = (currentPage.value - 1) * itemsPerPage;
+  return filteredHistory.value.slice(start, start + itemsPerPage);
+});
+
+// 표시할 페이지 배열 계산
+const visiblePages = computed(() => {
+  const total = totalPages.value;
+  if (total <= 1) return [1];
+  
+  const startPage = Math.max(1, Math.floor((currentPage.value - 1) / maxVisiblePages) * maxVisiblePages + 1);
+  const endPage = Math.min(startPage + maxVisiblePages - 1, total);
+  
+  return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
+});
+
+// 페이지 변경 함수
+const changePage = (page) => {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page;
+  }
+};
+
+// 이전 페이지 이동
+const prevPage = () => {
+  if (currentPage.value > 1) {
+    currentPage.value--;
+  }
+};
+
+// 다음 페이지 이동
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++;
+  }
+};
+
+// 마지막 페이지 이동
+const lastPage = () => {
+  currentPage.value = totalPages.value;
+};
+
+const changeTab = (tab) => {
+  selectedTab.value = tab;
+  currentPage.value = 1; 
+};
 
 // 오늘 날짜를 YYYY-MM-DD 형식으로 반환
 const getTodayFormatted = () => {
@@ -197,42 +287,38 @@ const updateDateRange = () => {
   }
 };
 
-// 컴포넌트 마운트 시, 오늘 날짜로 종료일 설정
+// 컴포넌트 마운트 시 초기화
 onMounted(() => {
   endDate.value = getTodayFormatted();
+  initializeData();
 });
 </script>
   
-  <style scoped>
-
-  .ticket-container {
-    /* width: 1472px;  */
-    width: 100%;
-    padding: 20px 30px 80px 20px;
-    width: 1472px; 
-    position: absolute;
-    margin: 0 auto; 
-    padding: 20px;
-    top: 10px; 
-    left: 130px; 
-
-  }
-  
-  .ticket-title {
-    position: relative;
-
-    margin-bottom: 20px;
- 
-    font-family: 'Pretendard';
-    font-style: normal;
-    font-weight: 700;
-    font-size: 24px;
-    line-height: 150%;
-    letter-spacing: -0.02em;
-
-    color: #000000;
+<style scoped>
+.ticket-container {
+  /* width: 1472px;  */
+  width: 100%;
+  padding: 20px 30px 80px 20px;
+  width: 1472px; 
+  position: absolute;
+  margin: 0 auto; 
+  padding: 20px;
+  top: 10px; 
+  left: 130px; 
 }
+.ticket-title {
+  position: relative;
+  margin-bottom: 20px;
 
+  font-family: 'Pretendard';
+  font-style: normal;
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 150%;
+  letter-spacing: -0.02em;
+
+  color: #000000;
+}
 /* 정보 섹션 */
 .info-section {
   display: flex;
@@ -592,34 +678,36 @@ onMounted(() => {
 .pagination {
   display: flex;
   justify-content: center;
-  align-items: center;
-  gap: 8px;
+  align-items: center; 
+  width: 100%; 
   margin-top: 20px;
+  gap: 8px; 
 }
 
-.pagination a {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 4px;
+.pagination span {
+  display: inline-block;
+  min-width: 26px; 
+  text-align: center;
   font-size: 14px;
-  color: #333;
-  text-decoration: none;
+  cursor: pointer;
+  user-select: none; 
+  outline: none; 
 }
 
-.pagination a.page-active {
-  color: #ff9f40;
-  font-weight: 500;
+.pagination button {
+  border: none;
+  background: none;
+  padding: 5px 10px;
+  font-size: 14px;
+  cursor: pointer;
 }
 
-.pagination a.page-next, 
-.pagination a.page-last {
-  color: #666;
+.pagination button:hover {
+  font-weight: bold;
 }
 
-.pagination a:hover:not(.page-active) {
-  background-color: #f0f0f0;
+.active-page {
+  color: #FF9F40;
+  text-decoration: underline;
 }
 </style>
