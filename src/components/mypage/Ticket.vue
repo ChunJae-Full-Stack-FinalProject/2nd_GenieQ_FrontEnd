@@ -249,7 +249,6 @@ const activeTab = ref('usage');
 
 /* 구매 영역 전체 래퍼 */
 .purchase-wrapper {
-  background-color: white;
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
   overflow: hidden;
@@ -295,6 +294,7 @@ const activeTab = ref('usage');
 
 /* 구매 컨테이너 */
 .purchase-container {
+  background-color: white;
   padding: 24px;
 }
 
