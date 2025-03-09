@@ -35,14 +35,22 @@
 
             <div class="text-container">
                 <h2 id="text-head">지문 제재 입력</h2>
-                
-                <textarea placeholder="20자 이내의 원하는 지문의 제재, 필수 포함 키워드를 작성해 주세요. (ex : 인공지능과 기계학습)" id="input-text"></textarea>
+                <textarea placeholder="20자 이내의 원하는 지문의 제재, 필수 포함 키워드를 작성해 주세요. (ex : 인공지능과 기계학습)" 
+                    id="input-text" v-model="inputText" maxlength="20" @input="checkTextLength"></textarea>
             </div>
         </div>
     </div>
 </template>
 <script setup>
+import { ref } from 'vue';
 
+const inputText = ref('');
+
+const checkTextLength = () => {
+    if (inputText.value.length > 20) {
+        inputText.value = inputText.value.slice(0,20);
+    }
+};
 </script>
 <style scoped>
 #main-title {
