@@ -9,7 +9,7 @@
             <BaseButton id="save-button" text="저장하기" type="type2" width="248px" height="54px" @click="checkContentLength"/>
             <BaseButton id="download-button" text="추출하기" type="type2" width="248px" height="54px" disabled @click="checkContentLengthAndOpenFileModal()"/>
             <router-link to="/questions">
-                <BaseButton id="connect-create-button" text="이어서 문항 생성하기" type="type4" width="520px" height="54px" @click="checkContentLength"/>
+                <BaseButton id="connect-create-button" text="이어서 문항 생성하기" type="type4" width="520px" height="54px" @click="handleConnectCreate"/>
             </router-link>
             
             <PlainTooltip id="download-message" message="추출은 저장 후 가능해요" width="205px"/>
@@ -58,6 +58,21 @@ const checkContentLength = (event) => {
         return false;
     }
     return true;
+};
+
+// 이어서 문항 생성하기 버튼 클릭 시 데이터 저장
+const handleConnectCreate = (event) => {
+    if (checkContentLength(event)) {
+        // 지문 정보 수집
+        const passageData = {
+            title: passageTitleRef.value?.getTitle?.() || '',
+            content: passageContentRef.value?.getContent?.() || '',
+            summary: passageSummaryRef.value?.getSummary?.() || ''
+        };
+        
+        // 로컬 스토리지에 저장
+        localStorage.setItem('tempPassageData', JSON.stringify(passageData));
+    }
 };
 
 // 파일 모달 열기 함수

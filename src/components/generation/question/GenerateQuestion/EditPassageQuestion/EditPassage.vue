@@ -252,10 +252,21 @@ watch(contentText, (newValue) => {
     }
 });
 
+// 지문 내용 설정 메서드
+const setContent = (content) => {
+    console.log('EditPassage - setContent 호출됨:', content);
+    if (content) {
+        contentText.value = content;
+        console.log('EditPassage - contentText 설정 후:', contentText.value);
+    }
+};
+
+
 // 외부에서 접근할 메서드 노출
 defineExpose({
     validateTextLength,
-    getContent: () => contentText.value
+    getContent: () => contentText.value,
+    setContent
 });
 </script>
 <style scoped>
