@@ -10,7 +10,7 @@
         </div>
         <div class="item">
           <span class="label">이름</span>
-          <span class="value value-box">송겨울</span>
+          <input class="value value-box" value="송겨울"></input>
         </div>
         <div class="item">
           <span class="label">이메일</span>
@@ -19,7 +19,7 @@
         <div class="item">
           <span class="label">비밀번호</span>
           <span class="value">****</span>
-          <BaseButton text="비밀번호 변경" type="type3" id="pwd-change"width="125px" height="40px" />
+          <BaseButton text="비밀번호 변경" type="type3" id="pwd-change"width="125px" height="40px" @click="openPasswordModal"/>
         </div>
       </section>
 
@@ -53,9 +53,25 @@
       <span class="logout">로그아웃</span>
     </div>
   </div>
+  <changePasswordModal :isOpen="showPasswordModal" @close="closePasswordModal"/>
 </template>
 <script setup>
+import { ref } from 'vue';
 import BaseButton from '../common/button/BaseButton.vue';
+import changePasswordModal from '../common/modal/type/mypage/ChangePasswordModal.vue';
+
+// 비밀번호 변경 모달 상태 관리
+const showPasswordModal = ref(false);
+
+// 모달 열기
+const openPasswordModal = () => {
+  showPasswordModal.value = true;
+};
+
+// 모달 닫기
+const closePasswordModal = () => {
+  showPasswordModal.value = false;
+}
 </script>
 <style scoped>
 /* 전체 레이아웃 */
