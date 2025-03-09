@@ -121,21 +121,35 @@ const closeModal = () => {
   selectedQuestion.value = null;
 };
 
-// 문항 생성하기 버튼 클릭 핸들러
+// GenerateQuestion 페이지로 이동하면서 데이터 전달
 const handleGenerateQuestion = () => {
     if (selectedQuestion.value) {
-        // GenerateQuestion 페이지로 이동하면서 데이터 전달
+        // 로컬 스토리지에서 지문 데이터 가져오기
+        const savedPassageData = localStorage.getItem('tempPassageData');
+        let passageData = null;
+        
+        if (savedPassageData) {
+            try {
+                passageData = JSON.parse(savedPassageData);
+                
+                // 다음 화면에서도 사용할 수 있도록 로컬 스토리지에 다시 저장 (키 이름 변경)
+                localStorage.setItem('generateQuestionPassageData', savedPassageData);
+            } catch (error) {
+                console.error('저장된 지문 데이터를 불러오는 중 오류 발생:', error);
+            }
+        }
+
         router.push({
             path: '/questions/generate',
             query: {
                 pattern: activePattern.value,
                 type: activeType.value
             },
-
-            // params는 router.push에서 바로 쓰면 사라질 수 있어서 state로 전달
             state: {
-                questionData: selectedQuestion.value
-            }
+                questionData: selectedQuestion.value,
+                passageData: passageData
+            },
+            
         });
 
         // 모달 닫기

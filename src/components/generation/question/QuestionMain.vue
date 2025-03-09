@@ -41,6 +41,8 @@ const validateAndOpenModal = () => {
   if (!validatePassageLength()) {
     showLengthWarning();
   } else {
+    // 모달을 열기 전에 로컬 스토리지에 지문 데이터 저장
+    localStorage.setItem('tempPassageData', JSON.stringify(currentPassage.value));
     showGenerateQuestionModal.value = true;
   }
 };

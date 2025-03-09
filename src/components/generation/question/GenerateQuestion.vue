@@ -16,7 +16,7 @@
     </div>
 </template>
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, provide } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import EditPassageQuestion from './GenerateQuestion/EditPassageQuestion/EditPassageQuestion.vue';
 import PassageTitle from './GenerateQuestion/PassageTitle.vue';
@@ -29,6 +29,7 @@ const isEditingGlobal = ref(false);
 const pattern = ref(null);
 const type = ref(null);
 const questionData = ref(null);
+const passageData = ref(null);
 
 // EditPassageQuestion 컴포넌트 참조
 const editPassageQuestionRef = ref(null);
@@ -61,6 +62,37 @@ onMounted(() => {
   if (route.state && route.state.questionData) {
     questionData.value = route.state.questionData;
     console.log('전달받은 문항 데이터 : ', questionData.value);
+  }
+
+  // 1. 라우터 state에서 지문 데이터 가져오기
+  if (route.state && route.state.passageData) {
+    passageData.value = route.state.passageData;
+    console.log('라우터 state에서 전달받은 지문 데이터 : ', passageData.value);
+  } 
+  // 2. 로컬 스토리지에서 지문 데이터 확인
+  else {
+    const storedPassageData = localStorage.getItem('generateQuestionPassageData');
+    if (storedPassageData) {
+      try {
+        passageData.value = JSON.parse(storedPassageData);
+        console.log('로컬 스토리지에서 불러온 지문 데이터 : ', passageData.value);
+      } catch (error) {
+        console.error('저장된 지문 데이터를 불러오는 중 오류 발생:', error);
+      }
+    }
+  }
+});
+
+// provide 실행
+provide('passageData', {
+  passage: passageData,
+  updatePassage: (newContent) => {
+    if (passageData.value) {
+      passageData.value.content = newContent;
+    } else {
+      passageData.value = { content: newContent };
+    }
+    console.log('업데이트된 지문 데이터:', passageData.value);
   }
 });
 </script>
