@@ -8,7 +8,7 @@
             <BaseButton id="recreate-button" text="재생성하기(1회 차감)" type="type2" width="248px" height="54px" />
             <BaseButton id="save-button" text="저장하기" type="type2" width="248px" height="54px" />
             <BaseButton id="download-button" text="추출하기" type="type2" width="248px" height="54px" disabled @click="openFileModal()"/>
-            <router-link to="/question">
+            <router-link to="/questions">
                 <BaseButton id="connect-create-button" text="이어서 문항 생성하기" type="type4" width="520px" height="54px" />
             </router-link>
             
