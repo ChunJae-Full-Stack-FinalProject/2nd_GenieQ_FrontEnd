@@ -60,6 +60,8 @@
 </BaseModal>
 </template> 
 <script setup>
+import { defineEmits } from 'vue';
+
 import BaseModal from "../../BaseModal.vue";
 import BaseButton from "@/components/common/button/BaseButton.vue";
 
