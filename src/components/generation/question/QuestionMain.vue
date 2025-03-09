@@ -19,7 +19,7 @@
     />
 </template>
 <script setup>
-import { ref, provide } from 'vue';
+import { ref, provide, onMounted } from 'vue';
 import PaymentUsage from '../PaymentUsage.vue';
 import InsertPassage from './QuestionMain/InsertPassage.vue';
 import BaseButton from '@/components/common/button/BaseButton.vue';
@@ -81,6 +81,25 @@ const validatePassageLength = () => {
 const showLengthWarning = () => {
   isConfirmModalOpen.value = true;
 };
+
+// 컴포넌트 마운트 시 실행
+onMounted(() => {
+    // 로컬 스토리지에서 임시 저장된 지문 데이터 불러오기
+    const savedPassageData = localStorage.getItem('tempPassageData');
+    if (savedPassageData) {
+        try {
+            const passageData = JSON.parse(savedPassageData);
+            setPassage({
+                title: passageData.title || '',
+                content: passageData.content || ''
+            });
+            // 사용 후 삭제
+            localStorage.removeItem('tempPassageData');
+        } catch (error) {
+            console.error('저장된 지문 데이터를 불러오는 중 오류 발생:', error);
+        }
+    }
+});
 
 // provide를 통해 하위 컴포넌트에 상태와 메서드 제공
 provide('passageData', {
