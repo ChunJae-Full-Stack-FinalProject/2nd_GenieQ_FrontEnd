@@ -1,26 +1,37 @@
 <template>
     <div class="edit-passage-question">
-        <EditPassage/>
+        <EditPassage ref="editPassageRef"/>
         <EditQuestion @edit-mode-changed="forwardEditModeChange"/>
     </div>
 </template>
-<script>
+<script setup>
+import { ref } from 'vue';
 import EditPassage from './EditPassage.vue';
 import EditQuestion from './EditQuestion.vue';
 
-export default {
-    name: 'EditPassageQuestion',
-    components: {
-        EditPassage,
-        EditQuestion
-    },
-    methods: {
-        forwardEditModeChange(value) {
-            // EditQuestion에서 전달받은 이벤트를 부모 컴포넌트로 전달
-            this.$emit('edit-mode-changed', value);
-        }
-    }
-}
+// EditPassage 컴포넌트 참조
+const editPassageRef = ref(null);
+
+// 텍스트 길이 검증 메서드 추가
+const validatePassageLength = () => {
+  if (editPassageRef.value) {
+    return editPassageRef.value.validateTextLength();
+  }
+  return false;
+};
+
+// EditQuestion 이벤트 전달
+const forwardEditModeChange = (value) => {
+  emit('edit-mode-changed', value);
+};
+
+// 외부에서 접근할 메서드 노출
+defineExpose({
+  validatePassageLength
+});
+
+// 이벤트 정의
+const emit = defineEmits(['edit-mode-changed']);
 </script>
 <style scoped>
 .edit-passage-question {
