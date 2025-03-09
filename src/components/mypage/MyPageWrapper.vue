@@ -19,19 +19,25 @@
 import { ref ,onMounted} from "vue";
 import MyPageContent from './MyPageContent.vue';
 import { useRoute } from "vue-router";
-const route=useRoute();
-onMounted(()=> {
-  console.log("컴포넌트가 마운트되었습니다 !");
-   selectedTab.value=route.query.tab;
 
-})
-
-
-/* 현재 선택된 탭 (기본값: 회원정보) */
-const selectedTab = ref("회원정보");
+const route = useRoute();
 
 /* 탭 목록 */
 const tabs = ["회원정보", "이용권", "공지사항", "자주 묻는 질문"];
+
+// 현재 선택된 탭 (기본값 : 회원정보)
+const selectedTab = ref('회원정보');
+
+onMounted(()=> {
+  console.log("컴포넌트가 마운트되었습니다 !");
+  // 라우터 쿼리 파라미터가 있고, 유효한 탭 값인 경우에만 설정
+  if (route.query.tab && tabs.includes(route.query.tab)) {
+    selectedTab.value = route.query.tab;
+  } else {
+    // 쿼리 파라미터가 없거나 유효하지 않은 경우, 기본값 유지
+    selectedTab.value = "회원정보";
+  }
+});
 </script>
 
 <style scoped>
@@ -47,24 +53,25 @@ const tabs = ["회원정보", "이용권", "공지사항", "자주 묻는 질문
 
 /* "마이페이지" 제목 스타일 */
 .page-title {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 8px;
+  gap: 8px;
+
   position: absolute;
-  font-weight: 700;
-  font-size: 24px;
-  line-height: 150%;
-  letter-spacing: -0.02em;
-  color: #303030;
-  left: 40px; /* 왼쪽 간격 유지 */
-  top: 40px;
+  width: 120px;
+  height: 48px;
+  left: 28px;
+  top: 34px;
 
-  font-family: 'Pretendard';
   font-style: normal;
-  font-weight: 700;
-  font-size: 15.5px;
-  line-height: 150%;
+  font-weight: 600;
+  font-size: 24px;
+  line-height: 32px;
 
-  letter-spacing: -0.02em;
-
-  color: #303030;
+  color: #000000;
 }
 
 /* 상단 탭 메뉴 */
@@ -82,29 +89,36 @@ const tabs = ["회원정보", "이용권", "공지사항", "자주 묻는 질문
 
 /* 기본 탭 스타일 */
 .tab-menu span {
-  font-size: 16px;
-  padding: 10px 20px;
-  cursor: pointer;
+  width: auto;
+  height: 30px;
 
-  font-family: 'Pretendard';
   font-style: normal;
   font-weight: 400;
-  font-size: 12.9167px;
+  font-size: 20px;
   line-height: 150%;
 
   letter-spacing: -0.02em;
-
   color: #303030;
-
-  flex: none;
-  order: 0;
-  flex-grow: 0;
-
 }
 
 /* 선택된 탭 스타일 (볼드 + 밑줄) */
 .active-tab {
-  border-bottom: 2px solid #FF9F40;
   font-weight: bold !important;
+}
+
+.active-tab {
+  font-weight: bold !important;
+  position: relative; /* 포지션 설정 */
+}
+
+/* active-tab에 아래 border 적용 */
+.active-tab::after {
+  content: "";
+  position: absolute;
+  bottom: -11px; /* 탭 메뉴의 bottom border와 일치하도록 조정 */
+  left: -10%;
+  width: 120%;
+  height: 2px;
+  background-color: #FF9F40;
 }
 </style>
