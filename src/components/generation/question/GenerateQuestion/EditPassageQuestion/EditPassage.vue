@@ -36,134 +36,227 @@
                     v-model="contentText"
                     @select="onTextSelect"
                     @click="onTextSelect"
-                    @keyup="onTextSelect"></textarea>
+                    @keyup="onTextSelect">
+                </textarea>
             </div>
         </div>
     </div>
+    <ConfirmModalComponent
+        :isOpen="isConfirmModalOpen"
+        title="글자 수를 확인해 주세요."
+        message="500자 이하의 지문으로 정상적인 문항을 생성하기 어렵습니다. 충분한 지문을 입력해 주세요."
+        @close="isConfirmModalOpen = false"
+        @confirm="isConfirmModalOpen = false"
+    />
 </template>
-<script>
+<script setup>
+import { ref, watch, nextTick, computed } from 'vue';
 import SymbolTooltip from './SymbolTooltip.vue';
+import ConfirmModalComponent from '@/components/common/modal/type/ConfirmModalComponent.vue';
 
-export default {
-    name: 'EditPassage',
-    components: {
-        SymbolTooltip
-    },
-    data() {
-        return {
-            symbolList: [],
-            showTooltip: false,
-            contentText: '',
-            currentSymbolType: '㉠',
-            selectionStart: 0,
-            selectionEnd: 0
-        }
-    },
-    methods: {
-        getTextLength() {
-            // HTML 태그를 제외한 순수 텍스트 길이 계산
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = this.contentText;
-            return tempDiv.textContent.length;
-        },
-        onTextSelect() {
-            const textarea = document.getElementById('content-text');
-            this.selectionStart = textarea.selectionStart;
-            this.selectionEnd = textarea.selectionEnd;
-        },
-        showSymbolTooltip(symbol) {
-            // 이미 열려있는 같은 심볼 툴팁이면 닫기
-            if (this.showTooltip && this.currentSymbolType === symbol) {
-                this.showTooltip = false;
-                return;
-            }
+// 상수 정의
+const MIN_LENGTH = 500;
+const MAX_LENGTH = 1700;
 
-            this.currentSymbolType = symbol;
-            
-            // 각 심볼에 따른 목록 정의
-            const symbolSeries = {
-                '㉠': ['㉠', '㉡', '㉢', '㉣', '㉤'],
-                '㉮': ['㉮', '㉯', '㉰', '㉱', '㉲'],
-                'ⓐ': ['ⓐ', 'ⓑ', 'ⓒ', 'ⓓ', 'ⓔ'],
-                '①': ['①', '②', '③', '④', '⑤']
-            };
+// 상태 관리
+const symbolList = ref([]);
+const showTooltip = ref(false);
+const contentText = ref('');
+const currentSymbolType = ref('㉠');
+const selectionStart = ref(0);
+const selectionEnd = ref(0);
+const isConfirmModalOpen = ref(false);
 
-            // 선택된 심볼에 해당하는 시리즈 설정
-            this.symbolList = symbolSeries[symbol] || [];
+// 텍스트 길이 계산 함수
+const getTextLength = () => {
+    // HTML 태그를 제외한 순수 텍스트 길이 계산
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = contentText.value;
+    return tempDiv.textContent.length;
+};
 
-            // 툴팁 표시
-            this.showTooltip = true;
-        },
-        insertSymbol(symbol) {
-            const textarea = document.getElementById('content-text');
-            
-            // 현재 선택 위치 저장
-            const start = this.selectionStart;
-            const end = this.selectionEnd;
-            
-            // 선택 범위 앞뒤 텍스트
-            const beforeSelection = this.contentText.substring(0, start);
-            const afterSelection = this.contentText.substring(end);
-            
-            // 심볼 삽입
-            this.contentText = beforeSelection + symbol + afterSelection;
-            
-            // 심볼 삽입 후 커서 위치 설정
-            this.$nextTick(() => {
-                textarea.focus();
-                const newCursorPos = start + symbol.length;
-                textarea.setSelectionRange(newCursorPos, newCursorPos);
-                this.selectionStart = newCursorPos;
-                this.selectionEnd = newCursorPos;
-            });
-            
-            // 툴팁 닫기
-            this.showTooltip = false;
-        },
-        formatText(type) {
-            const textarea = document.getElementById('content-text');
-            
-            // 선택된 텍스트가 없으면 아무것도 하지 않음
-            if (this.selectionStart === this.selectionEnd) {
-                return;
-            }
-            
-            // 현재 선택 범위 가져오기
-            const selectedText = this.contentText.substring(this.selectionStart, this.selectionEnd);
-            const beforeText = this.contentText.substring(0, this.selectionStart);
-            const afterText = this.contentText.substring(this.selectionEnd);
-            
-            // 태그 생성
-            let formattedText;
-            switch(type) {
-                case 'bold':
-                    formattedText = `<b>${selectedText}</b>`;
-                    break;
-                case 'underline':
-                    formattedText = `<u>${selectedText}</u>`;
-                    break;
-                case 'strikethrough':
-                    formattedText = `<s>${selectedText}</s>`;
-                    break;
-                default:
-                    formattedText = selectedText;
-            }
-            
-            // 텍스트 업데이트
-            this.contentText = beforeText + formattedText + afterText;
-            
-            // 새 커서 위치 계산 및 설정
-            const newCursorPos = this.selectionStart + formattedText.length;
-            
-            this.$nextTick(() => {
-                textarea.focus();
-                textarea.setSelectionRange(newCursorPos, newCursorPos);
-                this.selectionStart = newCursorPos;
-                this.selectionEnd = newCursorPos;
-            });
-        }
+// 텍스트 길이 계산된 값
+const textLength = computed(() => getTextLength());
+
+// 모달 닫기
+const closeConfirmModal = () => {
+    isConfirmModalOpen.value = false;
+};
+
+// 텍스트 선택 처리
+const onTextSelect = () => {
+    const textarea = document.getElementById('content-text');
+    selectionStart.value = textarea.selectionStart;
+    selectionEnd.value = textarea.selectionEnd;
+};
+
+// 심볼 툴팁 표시
+const showSymbolTooltip = (symbol) => {
+    // 이미 열려있는 같은 심볼 툴팁이면 닫기
+    if (showTooltip.value && currentSymbolType.value === symbol) {
+        showTooltip.value = false;
+        return;
     }
-}
+
+    currentSymbolType.value = symbol;
+    
+    // 각 심볼에 따른 목록 정의
+    const symbolSeries = {
+        '㉠': ['㉠', '㉡', '㉢', '㉣', '㉤'],
+        '㉮': ['㉮', '㉯', '㉰', '㉱', '㉲'],
+        'ⓐ': ['ⓐ', 'ⓑ', 'ⓒ', 'ⓓ', 'ⓔ'],
+        '①': ['①', '②', '③', '④', '⑤']
+    };
+
+    // 선택된 심볼에 해당하는 시리즈 설정
+    symbolList.value = symbolSeries[symbol] || [];
+
+    // 툴팁 표시
+    showTooltip.value = true;
+};
+
+// HTML을 지정된 텍스트 길이로 자르는 함수
+const truncateHtmlToTextLength = (html, maxLength) => {
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = html;
+    
+    function truncateNode(node, length) {
+        if (length <= 0) return 0;
+        
+        if (node.nodeType === 3) { // 텍스트 노드
+            if (node.length > length) {
+                node.textContent = node.textContent.substr(0, length);
+                return 0;
+            }
+            return length - node.length;
+        }
+        
+        let remainingLength = length;
+        const childNodes = Array.from(node.childNodes);
+        
+        for (let i = 0; i < childNodes.length; i++) {
+            remainingLength = truncateNode(childNodes[i], remainingLength);
+            if (remainingLength <= 0) {
+                // 남은 노드 제거
+                while (i + 1 < node.childNodes.length) {
+                    node.removeChild(node.childNodes[i + 1]);
+                }
+                break;
+            }
+        }
+        
+        return remainingLength;
+    }
+    
+    truncateNode(tempDiv, maxLength);
+    return tempDiv.innerHTML;
+};
+
+// 심볼 삽입
+const insertSymbol = (symbol) => {
+    const textarea = document.getElementById('content-text');
+    
+    // 현재 선택 위치 저장
+    const start = selectionStart.value;
+    const end = selectionEnd.value;
+    
+    // 선택 범위 앞뒤 텍스트
+    const beforeSelection = contentText.value.substring(0, start);
+    const afterSelection = contentText.value.substring(end);
+    
+    // 심볼 삽입
+    contentText.value = beforeSelection + symbol + afterSelection;
+    
+    // 심볼 삽입 후 커서 위치 설정
+    nextTick(() => {
+        textarea.focus();
+        const newCursorPos = start + symbol.length;
+        textarea.setSelectionRange(newCursorPos, newCursorPos);
+        selectionStart.value = newCursorPos;
+        selectionEnd.value = newCursorPos;
+    });
+    
+    // 툴팁 닫기
+    showTooltip.value = false;
+};
+
+// 텍스트 서식 적용
+const formatText = (type) => {
+    const textarea = document.getElementById('content-text');
+    
+    // 선택된 텍스트가 없으면 아무것도 하지 않음
+    if (selectionStart.value === selectionEnd.value) {
+        return;
+    }
+    
+    // 현재 선택 범위 가져오기
+    const selectedText = contentText.value.substring(selectionStart.value, selectionEnd.value);
+    const beforeText = contentText.value.substring(0, selectionStart.value);
+    const afterText = contentText.value.substring(selectionEnd.value);
+    
+    // 태그 생성
+    let formattedText;
+    switch(type) {
+        case 'bold':
+            formattedText = `<b>${selectedText}</b>`;
+            break;
+        case 'underline':
+            formattedText = `<u>${selectedText}</u>`;
+            break;
+        case 'strikethrough':
+            formattedText = `<s>${selectedText}</s>`;
+            break;
+        default:
+            formattedText = selectedText;
+    }
+    
+    // 텍스트 업데이트
+    contentText.value = beforeText + formattedText + afterText;
+    
+    // 새 커서 위치 계산 및 설정
+    const newCursorPos = selectionStart.value + formattedText.length;
+    
+    nextTick(() => {
+        textarea.focus();
+        textarea.setSelectionRange(newCursorPos, newCursorPos);
+        selectionStart.value = newCursorPos;
+        selectionEnd.value = newCursorPos;
+    });
+};
+
+// 글자 수 검증 함수
+const validateTextLength = () => {
+    if (getTextLength() < MIN_LENGTH) {
+        isConfirmModalOpen.value = true;
+        return false;
+    }
+    return true;
+};
+
+// contentText 감시하여 글자 수 제한
+watch(contentText, (newValue) => {
+    // 최대 글자 수 제한
+    const length = getTextLength();
+    if (length > MAX_LENGTH) {
+        // HTML 태그를 유지하면서 텍스트만 자르는 로직
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = newValue;
+        const text = tempDiv.textContent;
+        
+        // 초과된 텍스트 계산
+        const excessLength = text.length - MAX_LENGTH;
+        const validText = text.substring(0, text.length - excessLength);
+        
+        // 유효 길이로 다시 설정
+        contentText.value = truncateHtmlToTextLength(newValue, validText.length);
+    }
+});
+
+// 외부에서 접근할 메서드 노출
+defineExpose({
+    validateTextLength,
+    getContent: () => contentText.value
+});
 </script>
 <style scoped>
 .edit-passage {

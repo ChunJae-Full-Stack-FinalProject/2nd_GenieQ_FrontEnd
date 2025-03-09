@@ -8,15 +8,29 @@ import { ref, inject, watch } from 'vue';
 
 const userInput = ref('');
 
+
 // 상위 컴포넌트에서 제공한 데이터 주입
-const { currentPassage } = inject('passageData');
+const { currentPassage, showLengthWarning } = inject('passageData');
+const MIN_LENGTH = 500;
+const MAX_LENGTH = 1700;
 
 // 부모 컴포넌트에서 전달받은 지문 상태 감시
 watch(() => currentPassage.value, (newPassage) => {
-    if (newPassage && newPassage.content) {
-        userInput.value = newPassage.content;
-    }
+  if (newPassage && newPassage.content) {
+    userInput.value = newPassage.content;
+  }
 }, { immediate: true, deep: true });
+
+// 사용자 입력 감시
+watch(userInput, (newValue) => {
+  // 최대 글자 수 제한
+  if (newValue.length > MAX_LENGTH) {
+    userInput.value = newValue.slice(0, MAX_LENGTH);
+  }
+  
+  // 현재 패시지 내용 업데이트
+  currentPassage.value.content = userInput.value;
+});
 </script>
 <style scoped>
 #user-passage-text {
