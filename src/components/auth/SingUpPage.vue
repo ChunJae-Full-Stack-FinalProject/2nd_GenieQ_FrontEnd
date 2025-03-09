@@ -106,18 +106,18 @@
         <div class="checkbox-section">
           <div class="checkbox-container">
             <div class="checkbox-wrapper">
-              <input type="checkbox" id="privacy" class="checkbox-input" />
+              <input type="checkbox" id="privacy" class="checkbox-input" v-model="privacyChecked" />
               <label for="privacy" class="custom-checkbox"></label>
               <span class="checkbox-label" @click="showPrivacyModal = true">개인정보 처리방침 동의</span>
             </div>
             <div class="checkbox-wrapper">
-              <input type="checkbox" id="terms" class="checkbox-input" />
+              <input type="checkbox" id="terms" class="checkbox-input" v-model="termsChecked" />
               <label for="terms" class="custom-checkbox"></label>
               <span class="checkbox-label" @click="showTermsModal = true">이용약관 동의</span>
             </div>
           </div>
         </div>
-        <BaseButton class="gray-button" text="완료" type="type3" width="389px" height="40px" @click="closeModal" :disabled="!isButtonEnabled" />
+        <BaseButton class="gray-button" text="완료" :type="isButtonEnabled ? 'type1' : 'type3'" width="389px" height="40px" @click="submitForm" :disabled="!isButtonEnabled" />
       </div>
     </div>
 </div>
@@ -289,6 +289,33 @@ const validateName = () => {
     gender.value = selectedGender;
 };
 
+
+// 폼 유효성 검사를 위한 계산된 속성
+const isButtonEnabled = computed(() => {
+  // 이메일, 비밀번호, 이름이 유효하고
+  const isEmailValid = email.value && !emailError.value;
+  const isPasswordValid = password.value && confirmPassword.value && 
+                         !passwordError.value && !confirmPasswordError.value;
+  const isNameValid = username.value && !nameError.value;
+  
+  // 개인정보처리방침, 이용약관 체크가 되었는지 확인
+  const isCheckboxesChecked = privacyChecked.value && termsChecked.value;
+  
+  // 모든 조건을 만족해야 true 반환
+  return isEmailValid && isPasswordValid && isNameValid && isCheckboxesChecked;
+});
+
+
+const submitForm = () => {
+  if (isButtonEnabled.value) {
+    // 여기에 폼 제출 로직 추가
+    console.log('폼 제출 성공!', {
+      email: email.value,
+      password: password.value,
+      name: username.value,
+    });
+  }
+};
 
   // 입력값 변경 시 유효성 검사
   watch(email, validateEmail);
