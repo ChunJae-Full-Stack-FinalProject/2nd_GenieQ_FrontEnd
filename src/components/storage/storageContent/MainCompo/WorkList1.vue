@@ -2,7 +2,9 @@
 <div class="card-container">
   <div class="storage-worklist-title">
     <p>최근 작업 내역</p>
-    <router-link to="/storage/worklistMina"><Icon icon="weui:arrow-outlined" width="24" height="24" id="arrow-icon" style="color: #303030" /></router-link>
+    <router-link to="/storage/worklistMina">
+      <Icon icon="weui:arrow-outlined" width="24" height="24" id="arrow-icon" style="color: #303030" />
+    </router-link>
   </div>
   <div class="storage-worklist-subtitle">
     <span>최대 150개까지 보관됩니다.</span>
@@ -43,11 +45,15 @@
      </table>
   </div>
   </div>
+
+  <!-- 파일 선택 모달 -->
+  <FileSelectModal :isOpen="isModalOpen" @close="closeFileModal" @confirm="handleFileSelection"/>
 </div>
 
 </template>
 <script setup>
 import { ref } from 'vue';
+import FileSelectModal from '@/components/common/modal/type/FileSelectModal.vue';
 
 // 데이터 정의 - ref로 감싸서 반응형으로 만듭니다
 const workItems = ref([
@@ -115,6 +121,29 @@ const extractItem = (item) => {
   // 추출 버튼 클릭 시 실행될 로직
   console.log('추출 버튼 클릭:', item);
 };
+
+// 모달 상태 관리
+const isModalOpen = ref(false);
+const selectedItem = ref(null);
+
+// 추출 버튼 클릭 시 모달 열기
+const openFileModal = (item) => {
+  selectedItem.value = item;
+  isModalOpen.value = true;
+};
+
+// 모달 닫기
+const closeFileModal = () => {
+  isModalOpen.value = false;
+}
+
+// 파일 형식 선택 후 처리
+const handleFileSelection = (fileType) => {
+  console.log('선택된 파일 형식:', fileType);
+  console.log('선택된 작업 아이템:', selectedItem.value);
+
+  // 파일 추출 로직 구현
+}
 
 const toggleFavorite = (index) => {
   // 즐겨찾기 토글 로직
