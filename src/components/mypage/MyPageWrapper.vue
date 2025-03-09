@@ -19,19 +19,25 @@
 import { ref ,onMounted} from "vue";
 import MyPageContent from './MyPageContent.vue';
 import { useRoute } from "vue-router";
-const route=useRoute();
-onMounted(()=> {
-  console.log("컴포넌트가 마운트되었습니다 !");
-   selectedTab.value=route.query.tab;
 
-})
-
-
-/* 현재 선택된 탭 (기본값: 회원정보) */
-const selectedTab = ref("회원정보");
+const route = useRoute();
 
 /* 탭 목록 */
 const tabs = ["회원정보", "이용권", "공지사항", "자주 묻는 질문"];
+
+// 현재 선택된 탭 (기본값 : 회원정보)
+const selectedTab = ref('회원정보');
+
+onMounted(()=> {
+  console.log("컴포넌트가 마운트되었습니다 !");
+  // 라우터 쿼리 파라미터가 있고, 유효한 탭 값인 경우에만 설정
+  if (route.query.tab && tabs.includes(route.query.tab)) {
+    selectedTab.value = route.query.tab;
+  } else {
+    // 쿼리 파라미터가 없거나 유효하지 않은 경우, 기본값 유지
+    selectedTab.value = "회원정보";
+  }
+});
 </script>
 
 <style scoped>
