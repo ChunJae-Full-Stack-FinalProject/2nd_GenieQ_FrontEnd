@@ -30,7 +30,7 @@
           
           <div class="form-group">
             <label class="input-label">비밀번호 입력*</label>
-            <div class="input-wrapper" :class="{ 'error': passwordError }">
+            <div class="input-wrapper" :class="{ 'error': passwordError, 'success': isPasswordMatch && confirmPassword && !passwordError }">
               <Icon icon="lucide:lock-keyhole" class="input-icon" />
               <input :type="showPassword ? 'text' : 'password'" placeholder="비밀번호를 입력해 주세요." v-model="password" class="form-input" @input="validatePassword" @blur="passwordTouched = true; validatePassword()" />
               <Icon :icon="showPassword ? 'ic:baseline-remove-red-eye' : 'ic:outline-remove-red-eye'" class="eye-icon" @click="toggleShowPassword"/>
@@ -40,13 +40,14 @@
           </div>
           
           <div class="form-group">
-            <div class="input-wrapper" :class="{ 'error': confirmPasswordError }">
+            <div class="input-wrapper" :class="{ 'error': confirmPasswordError, 'success': isPasswordMatch && confirmPassword && !passwordError }">
               <Icon icon="lucide:lock-keyhole" class="input-icon" />
-              <input :type="showConfirmPassword ? 'text' : 'password'" placeholder="비밀번호를 한 번 더 입력해 주세요." v-model="confirmPassword" class="form-input" @input="validateConfirmPassword" @blur="confirmPasswordTouched = true; validateConfirmPassword()" />              <Icon :icon="showConfirmPassword ? 'ic:baseline-remove-red-eye' : 'ic:outline-remove-red-eye'" class="eye-icon" @click="toggleShowConfirmPassword"/>
+              <input :type="showConfirmPassword ? 'text' : 'password'" placeholder="비밀번호를 한 번 더 입력해 주세요." v-model="confirmPassword" class="form-input" @input="validateConfirmPassword" @blur="confirmPasswordTouched = true; validateConfirmPassword()" />
+              <Icon :icon="showConfirmPassword ? 'ic:baseline-remove-red-eye' : 'ic:outline-remove-red-eye'" class="eye-icon" @click="toggleShowConfirmPassword"/>
             </div>
             <div v-if="confirmPasswordError" class="error-message">{{ confirmPasswordError }}</div>
+            <div v-else-if="isPasswordMatch && confirmPassword && !passwordError" class="success-message">비밀번호가 일치합니다!</div>
           </div>
-        </div>
         
         <div class="form-section">
           <h3 class="section-title">필수정보 입력</h3>
@@ -107,26 +108,35 @@
             <div class="checkbox-wrapper">
               <input type="checkbox" id="privacy" class="checkbox-input" />
               <label for="privacy" class="custom-checkbox"></label>
-              <span class="checkbox-label">개인정보 처리방침 동의</span>
+              <span class="checkbox-label" @click="showPrivacyModal = true">개인정보 처리방침 동의</span>
             </div>
             <div class="checkbox-wrapper">
               <input type="checkbox" id="terms" class="checkbox-input" />
               <label for="terms" class="custom-checkbox"></label>
-              <span class="checkbox-label">이용약관 동의</span>
+              <span class="checkbox-label" @click="showTermsModal = true">이용약관 동의</span>
             </div>
           </div>
         </div>
-        
-        <button class="button gray-button">완료</button>
-      </div> 
+        <BaseButton class="gray-button" text="완료" type="type3" width="389px" height="40px" @click="closeModal" :disabled="!isButtonEnabled" />
+      </div>
     </div>
+</div>
+    <!-- 개인정보 처리방침 모달 -->
+    <PrivacyModal :isOpen="showPrivacyModal" @close="showPrivacyModal = false" />
+    <!-- 이용 약관 모달 -->
+    <TermsModal :isOpen="showTermsModal" @close="showTermsModal = false" />
   </template>
   
   <script setup>
   import { Icon } from "@iconify/vue";
+  import { ref, watch, computed } from 'vue';
+  import PrivacyModal from "@/components/common/modal/type/auth/PrivacyModal.vue";
+  import TermsModal from "@/components/common/modal/type/auth/TermsModal.vue";
+import BaseButton from "../common/button/BaseButton.vue";
 
+  const showPrivacyModal = ref(false);
+  const showTermsModal = ref(false);
 
-  import { ref, watch } from 'vue';
   const email = ref('');
   const emailError = ref('');
   // 비밀번호 관련 상태
@@ -169,6 +179,8 @@ const toggleShowPassword = () => {
 const toggleShowConfirmPassword = () => {
   showConfirmPassword.value = !showConfirmPassword.value;
 };
+
+
 
 // 비밀번호 유효성 검사
 const validatePassword = () => {
@@ -229,6 +241,14 @@ const validateConfirmPassword = () => {
     confirmPasswordError.value = '';
   }
 };
+
+// 비밀번호 일치 여부를 확인하는 계산된 속성
+const isPasswordMatch = computed(() => {
+  return password.value && 
+         confirmPassword.value && 
+         password.value === confirmPassword.value && 
+         !passwordError.value;
+});
 
 // 이름 유효성 검사
 const validateName = () => {
@@ -593,7 +613,7 @@ const validateName = () => {
   font-size: 14px;
   font-weight: 500;
   color: #424242;
-  pointer-events: none; /* 이 부분이 중요: 라벨에 클릭 이벤트 없애기 */
+  pointer-events: auto; /* 이 부분이 중요: 라벨에 클릭 이벤트 없애기 */
 }
 
 /* 오류 스타일 추가 */
@@ -619,6 +639,24 @@ const validateName = () => {
 /* 입력 폼 너비 조정 */
 .input-wrapper {
   width: 100%;
+}
+
+.checkbox-label:hover{
+  text-decoration: underline;
+}
+
+/* 성공 스타일 추가 */
+.input-wrapper.success {
+  border-color: #64CA17;
+  border-width: 1px;
+}
+
+.success-message {
+  color: #64CA17;
+  font-size: 12px;
+  margin-top: 5px;
+  text-align: left;
+  padding-left: 5px;
 }
   </style>
   
