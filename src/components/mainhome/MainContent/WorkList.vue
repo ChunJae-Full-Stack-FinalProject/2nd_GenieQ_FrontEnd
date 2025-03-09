@@ -258,14 +258,14 @@ td{
   border-radius: 8px;
 }
 #btn-text {
-font-family: 'Pretendard';
-font-style: normal;
-font-weight: 600;
-font-size: 16px;
-line-height: 150%;
+  font-family: 'Pretendard';
+  font-style: normal;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 150%;
 
-letter-spacing: -0.02em;
-color: #FFFFFF;
+  letter-spacing: -0.02em;
+  color: #FFFFFF;
 }
 #btn-icon {
   width: 20px;

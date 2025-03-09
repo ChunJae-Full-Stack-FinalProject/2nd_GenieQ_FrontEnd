@@ -8,68 +8,194 @@
       <div class="history-filter">
         <div class="filter-group">
           <div class="select-container">
-            <select class="filter-select">
-              <option>기간 선택</option>
-              <option>최근 1개월</option>
-              <option>최근 3개월</option>
-              <option>최근 6개월</option>
-              <option>최근 12개월</option>
+            <select class="filter-select" v-model="selectedPeriod" @change="updateDateRange">
+              <option value="">기간 선택</option>
+              <option value="1">최근 1개월</option>
+              <option value="3">최근 3개월</option>
+              <option value="6">최근 6개월</option>
+              <option value="12">최근 12개월</option>
             </select>
-        </div>
+          </div>
           <div class="date-range">
-                <input type="date" class="date-input" value="2025-02-04">
-                  <span class="date-separator">-</span>
-                <input type="date" class="date-input" value="2025-03-04">
-              </div>
-            <button class="search-btn">검색</button>
+            <input type="date" class="date-input" v-model="startDate">
+              <span class="date-separator">-</span>
+            <input type="date" class="date-input" v-model="endDate">
           </div>
+          <button class="search-btn">검색</button>
         </div>
-          <div class="history-table">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th class="column-title">활동</th>
-                  <th class="column-history">내역</th>
-                  <th class="column-lastcount">남은 횟수</th>
-                  <th class="column-date">사용 날짜</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="n in 5" :key="n">
-                  <td>{{ n }}</td>
-                  <td>+1</td>
-                  <td>-1</td>
-                  <td>YYYY-MM-DD</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-            <div class="pagination">
-              <a href="#" class="page-active">1</a>
-              <a href="#">2</a>
-              <a href="#">3</a>
-              <a href="#">4</a>
-              <a href="#">5</a>
-              <a href="#" class="page-next">></a>
-              <a href="#" class="page-last">>></a>
-            </div>
-          </div>
-        <div class="close-btn-container">
-          <BaseButton class="close-btn" text="닫기" type="type3" width="90.42px" height="34.5px" @click="closeModal" />
       </div>
+
+      <div class="history-table">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th class="column-title">활동</th>
+              <th class="column-history">내역</th>
+              <th class="column-lastcount">남은 횟수</th>
+              <th class="column-date">사용 날짜</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(item, index) in paginatedUsageHistory" :key="item.id">
+              <td>{{ item.activity }}</td>
+              <td>{{ item.change }}</td>
+              <td>{{ item.remaining }}</td>
+              <td>{{ item.date }}</td>
+            </tr>
+            <!-- 데이터가 없는 경우 표시할 행 -->
+            <tr v-if="paginatedUsageHistory.length === 0">
+              <td colspan="4" style="text-align: center; padding: 20px;">사용 내역이 없습니다.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination" v-if="totalPages > 0">
+        <button v-if="totalPages > 5" @click="prevPage" :disabled="currentPage === 1">&lt;</button>
+        
+        <span
+          v-for="page in visiblePages"
+          :key="page"
+          @click="changePage(page)"
+          :class="{ 'active-page': currentPage === page }">
+          {{ page }}
+        </span>
+        
+        <button v-if="totalPages > 5" @click="nextPage" :disabled="currentPage === totalPages">&gt;</button>
+        <button @click="lastPage" :disabled="currentPage === totalPages">&raquo;</button>
+      </div>
+
+    </div>
+  <div class="close-btn-container">
+    <BaseButton class="close-btn" text="닫기" type="type3" width="90.42px" height="34.5px" @click="closeModal" />
+  </div>
 </BaseModal>
 </template> 
 <script setup>
-import { defineEmits } from 'vue';
-
+import { ref, computed, defineEmits, onMounted } from 'vue';
 import BaseModal from "../../BaseModal.vue";
 import BaseButton from "@/components/common/button/BaseButton.vue";
 
 const emit = defineEmits(['close']);
 
+// 날짜 관련 상태 관리
+const selectedPeriod = ref('');
+const startDate = ref('');
+const endDate = ref('');
+
+// 페이지네이션 관련 상태
+const currentPage = ref(1);
+const itemsPerPage = 6;
+const maxVisiblePages = 5;
+
+// 임시 사용 내역 데이터
+const usageHistory = ref([]);
+
+// 데이터 초기화 함수
+const initializeData = () => {
+  for (let i = 1; i <= 60; i++) {
+    usageHistory.value.push({
+      id: i,
+      activity: `지문 생성 ${i}`,
+      change: i % 3 === 0 ? "+10" : i % 2 === 0 ? "-1" : "+1",
+      remaining: 10 - (i % 10),
+      date: `2024-03-${String(31 - (i % 30)).padStart(2, '0')}`
+    });
+  }
+};
+
+// 총 페이지 수 계산
+const totalPages = computed(() => {
+  if (!usageHistory.value || usageHistory.value.length === 0) return 1;
+  return Math.ceil(usageHistory.value.length / itemsPerPage);
+});
+
+// 페이지네이션된 내역 계산
+const paginatedUsageHistory = computed(() => {
+  if (!usageHistory.value || usageHistory.value.length === 0) return [];
+  const start = (currentPage.value - 1) * itemsPerPage;
+  return usageHistory.value.slice(start, start + itemsPerPage);
+});
+
+// 표시할 페이지 배열 계산
+const visiblePages = computed(() => {
+  const total = totalPages.value;
+  if (total <= 1) return [1];
+  
+  const startPage = Math.max(1, Math.floor((currentPage.value - 1) / maxVisiblePages) * maxVisiblePages + 1);
+  const endPage = Math.min(startPage + maxVisiblePages - 1, total);
+  
+  return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
+});
+
+// 페이지 변경 함수
+const changePage = (page) => {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page;
+  }
+};
+
+// 이전 페이지 이동
+const prevPage = () => {
+  if (currentPage.value > 1) {
+    currentPage.value--;
+  }
+};
+
+// 다음 페이지 이동
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++;
+  }
+};
+
+// 마지막 페이지 이동
+const lastPage = () => {
+  currentPage.value = totalPages.value;
+};
+
+// 오늘 날짜를 YYYY-MM-DD 형식으로 반환
+const getTodayFormatted = () => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+// n개월 전 날짜를 YYYY-MM-DD 형식으로 반환
+const getMonthsAgoFormatted = (months) => {
+  const date = new Date();
+  date.setMonth(date.getMonth() - months);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+// 선택한 기간에 따라 날짜 범위 업데이트
+const updateDateRange = () => {
+  if (selectedPeriod.value) {
+    const months = parseInt(selectedPeriod.value);
+    endDate.value = getTodayFormatted();
+    startDate.value = getMonthsAgoFormatted(months);
+  }
+};
+
+// 컴포넌트 마운트 시 초기화
+onMounted(() => {
+  endDate.value = getTodayFormatted();
+  initializeData();
+});
+
 const closeModal = () => {
   emit("close");
 };
+
+// 컴포넌트 마운트 시 초기화
+onMounted(() => {
+  initializeData();
+});
 </script>
     
 <style scoped>
@@ -275,35 +401,37 @@ const closeModal = () => {
 .pagination {
   display: flex;
   justify-content: center;
-  align-items: center;
-  gap: 8px;
+  align-items: center; 
+  width: 100%; 
   margin-top: 20px;
+  gap: 8px; 
 }
 
-.pagination a {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 4px;
+.pagination span {
+  display: inline-block;
+  min-width: 26px; 
+  text-align: center;
   font-size: 14px;
-  color: #333;
-  text-decoration: none;
+  cursor: pointer;
+  user-select: none; 
+  outline: none; 
 }
 
-.pagination a.page-active {
-  color: #ff9f40;
-  font-weight: 500;
+.pagination button {
+  border: none;
+  background: none;
+  padding: 5px 10px;
+  font-size: 14px;
+  cursor: pointer;
 }
 
-.pagination a.page-next, 
-.pagination a.page-last {
-  color: #666;
+.pagination button:hover {
+  font-weight: bold;
 }
 
-.pagination a:hover:not(.page-active) {
-  background-color: #f0f0f0;
+.active-page {
+  color: #FF9F40;
+  text-decoration: underline;
 }
 
 

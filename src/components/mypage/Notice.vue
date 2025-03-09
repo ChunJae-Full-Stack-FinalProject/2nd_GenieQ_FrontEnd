@@ -385,9 +385,13 @@ td:nth-child(3) {
     flex-grow: 0;
 }
 
+.notice-link {
+  color: #424242;
+  text-decoration: none;
+}
   
-  /* 페이지네이션 */
-  .pagination {
+/* 페이지네이션 */
+.pagination {
     display: flex;
     justify-content: center;
     align-items: center; 

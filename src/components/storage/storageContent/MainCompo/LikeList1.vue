@@ -2,7 +2,9 @@
     <div class="card-container">
         <div class="storage-likelist-title">
             <p>즐겨찾기</p>
-            <router-link to="/storage/likelistMina"><Icon icon="weui:arrow-outlined" width="24" height="24" id="arrow-icon" style="color: #303030" /></router-link>
+            <router-link to="/storage/likelistMina">
+              <Icon icon="weui:arrow-outlined" width="24" height="24" id="arrow-icon" style="color: #303030" />
+            </router-link>
         </div>
        <div class="storage-likelist-table">
   <div class="table-container">
@@ -23,7 +25,12 @@
           <td class="work-title">{{ item.title }}</td>
           <td class="work-type"><span class="type-tag">{{ item.type }}</span></td>
           <td class="work-date">{{ item.date }}</td>
-          <td class="work-action"><button class="extract-btn" @click="extractItem(item)">추출 <i class="download-icon"></i></button></td>
+          <td class="work-action">
+            <button class="extract-btn" @click="openFileModal(item)">
+              <p id="btn-text">추출 </p>
+              <Icon icon="lucide:upload" id="btn-icon" style="color: #FFFFFF" />
+            </button>
+          </td>
           <td class="work-favorite">
             <span class="star-container" @click="toggleFavorite(index)">
               <Icon v-if="item.favorite" icon="mynaui:star-solid" width="24" height="24" style="color: #FF9F40" />
@@ -35,11 +42,15 @@
     </table>
   </div>
 </div>
+
+  <!-- 파일 선택 모달 -->
+  <FileSelectModal :isOpen="isModalOpen" @close="closeFileModal" @confirm="handleFileSelection"/>
 </div>
 
 </template>
 <script setup>
 import { ref } from 'vue';
+import FileSelectModal from '@/components/common/modal/type/FileSelectModal.vue';
 
 // 데이터 정의 - ref로 감싸서 반응형으로 만듭니다
 const workItems = ref([
@@ -107,6 +118,29 @@ const extractItem = (item) => {
   // 추출 버튼 클릭 시 실행될 로직
   console.log('추출 버튼 클릭:', item);
 };
+
+// 모달 상태 관리
+const isModalOpen = ref(false);
+const selectedItem = ref(null);
+
+// 추출 버튼 클릭 시 모달 열기
+const openFileModal = (item) => {
+  selectedItem.value = item;
+  isModalOpen.value = true;
+};
+
+// 모달 닫기
+const closeFileModal = () => {
+  isModalOpen.value = false;
+}
+
+// 파일 형식 선택 후 처리
+const handleFileSelection = (fileType) => {
+  console.log('선택된 파일 형식:', fileType);
+  console.log('선택된 작업 아이템:', selectedItem.value);
+
+  // 파일 추출 로직 구현
+}
 
 const toggleFavorite = (index) => {
   // 즐겨찾기 토글 로직
@@ -239,7 +273,7 @@ td{
   min-width: 50px;
   height: 28px;
   background-color: #f0f0f0;
-  border-radius: 4px;
+  border-radius: 12px;
   padding: 0 10px;
   font-size: 14px;
   color: #333;
@@ -254,18 +288,36 @@ td{
 /* 추출 버튼 */
 .extract-btn {
   display: flex;
-  align-items: center;
+  flex-direction: row;
   justify-content: center;
-  gap: 4px;
-  background-color: #333;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 6px 12px;
-  font-size: 13px;
-  cursor: pointer;
-}
+  align-items: center;
+  padding: 5px 8px;
+  gap: 8px;
 
+  width: 72px;
+  height: 34px;
+
+  background: #303030;
+  border-radius: 8px;
+}
+#btn-text {
+  font-family: 'Pretendard';
+  font-style: normal;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 150%;
+
+  letter-spacing: -0.02em;
+  color: #FFFFFF;
+}
+#btn-icon {
+  width: 20px;
+  height: 20px;
+
+  flex: none;
+  order: 1;
+  flex-grow: 0;
+}
 .download-icon:after {
   content: "↑";
   font-size: 12px;
