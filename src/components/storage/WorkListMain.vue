@@ -376,7 +376,6 @@ td{
   text-align: left;
   padding: 3.5px 20px;    
   border-bottom: 1px solid #e1e1e1;
-  font-weight: 500;
   color: #424242;
   white-space: nowrap; 
   overflow: hidden;  
