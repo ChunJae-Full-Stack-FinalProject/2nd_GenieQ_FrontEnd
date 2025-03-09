@@ -159,14 +159,13 @@ const changeTab = (tab) => {
   
   /* 공지사항 제목 */
   .notice-title {
-  position: relative;
-  top: 10px; 
-  left: 130px; 
+    position: relative;
+    top: 10px; 
+    left: 130px; 
  
-    font-family: 'Pretendard';
     font-style: normal;
     font-weight: 700;
-    font-size: 15.5px;
+    font-size: 24px;
     line-height: 150%;
     letter-spacing: -0.02em;
 
@@ -190,13 +189,13 @@ const changeTab = (tab) => {
     padding: 8px 16px;
     gap: 8px;
 
-    width: 60px; /* 버튼 크기 조정 */
+    width: auto; /* 버튼 크기 조정 */
     height: 40px;
 
     font-family: 'Pretendard'; /* 폰트 적용 */
     font-style: normal;
-    font-weight: 700;
-    font-size: 10.3333px;
+    font-weight: 500;
+    font-size: 16px;
     line-height: 150%; /* or 15px */
     color: #303030; /* 기본 폰트 색상 */
     
@@ -211,7 +210,7 @@ const changeTab = (tab) => {
 .sub-tabs .active-tab {
     background-color: #303030; 
     color: #FFFFFF; 
-    font-weight: bold;
+    font-weight: 700;
 }
   
  /* 테이블 위쪽 선 스타일 */
