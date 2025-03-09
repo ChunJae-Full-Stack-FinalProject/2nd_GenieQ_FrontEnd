@@ -176,8 +176,8 @@ const toggleFavorite = (index) => {
    overflow: hidden; /* 내부 요소가 border-radius를 넘지 않도록 */
 }
 
-.storage-likelist-title p {
-  font-size: 20px;
+.storage-likelist-title > p {
+  font-size: 24px;
   font-weight: 700;
   margin: 0;
 }
@@ -210,7 +210,6 @@ td{
   text-align: left;
   padding: 3.5px 20px;    
   border-bottom: 1px solid #e1e1e1;
-  font-weight: 500;
   color: #424242;
   white-space: nowrap; 
   overflow: hidden;  

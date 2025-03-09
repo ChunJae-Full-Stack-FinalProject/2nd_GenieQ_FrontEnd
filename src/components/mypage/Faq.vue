@@ -50,8 +50,8 @@ const toggleFAQ = (index) => {
   position: absolute;
   width: 133px;
   height: 36px;
-  left: 136px;
-  top: 40px;
+  left: 150px;
+  top: 30px;
 
   font-family: 'Pretendard';
   font-style: normal;

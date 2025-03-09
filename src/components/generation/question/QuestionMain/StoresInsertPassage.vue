@@ -21,7 +21,9 @@ import { ref, inject, computed, watch } from "vue";
 import LoadPassageModal from '@/components/common/modal/type/generation/LoadPassageModal.vue';
 
 // 부모 컴포넌트에서 제공하는 데이터 주입
-const { currentPassage, openLoadPassageModal } = inject('passageData');
+const { currentPassage, openLoadPassageModal, showLengthWarning } = inject('passageData');
+const MIN_LENGTH = 500;
+const MAX_LENGTH = 1700;
 
 // 지문 내용을 위한 반응형 변수
 const passageContent = computed({

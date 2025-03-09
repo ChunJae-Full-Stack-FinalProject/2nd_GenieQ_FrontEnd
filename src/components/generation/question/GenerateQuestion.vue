@@ -3,22 +3,21 @@
         <p id="main-head">문항 생성</p>
         <div class="main-content">
             <PassageTitle/>
-            <EditPassageQuestion @edit-mode-changed="updateEditingMode"/>
+            <EditPassageQuestion ref="editPassageQuestionRef" @edit-mode-changed="updateEditingMode"/>
             <PassageSummary/>
             <QuestionDescription :isEditing="isEditingGlobal" :questionData="questionData"/>
             <div class="button-container">
-                <BaseButton text="문항 추가하기" type="type2" id="add-button" width="248px" height="54px"/>
-                <BaseButton text="저장하기" type="type2" id="save-button" width="248px" height="54px"/>
-                <BaseButton text="추출하기" type="type2" id="download-button" width="248px" height="54px" disabled/>
+                <BaseButton text="문항 추가하기" type="type2" id="add-button" width="248px" height="54px" @click="handleButtonClick"/>
+                <BaseButton text="저장하기" type="type2" id="save-button" width="248px" height="54px" @click="handleButtonClick"/>
+                <BaseButton text="추출하기" type="type2" id="download-button" width="248px" height="54px" disabled @click="handleButtonClick"/>
             </div>
             <PlainTooltip id="download-tooltip" message="추출은 저장 후 가능해요" width="203px" />
         </div>
     </div>
 </template>
-<script>
-import { onMounted } from 'vue';
-import { useRoute } from 'vue-router';
-
+<script setup>
+import { ref, onMounted, provide } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import EditPassageQuestion from './GenerateQuestion/EditPassageQuestion/EditPassageQuestion.vue';
 import PassageTitle from './GenerateQuestion/PassageTitle.vue';
 import PassageSummary from '../passage/PassageContent/PassageSummary.vue';
@@ -26,46 +25,76 @@ import QuestionDescription from './GenerateQuestion/QuestionDescription.vue';
 import BaseButton from '@/components/common/button/BaseButton.vue';
 import PlainTooltip from '@/components/common/PlainTooltip.vue';
 
-export default {
-    name: 'GenerateQuestion',
-    components: {
-        EditPassageQuestion,
-        PassageTitle,
-        PassageSummary,
-        QuestionDescription,
-        BaseButton,
-        PlainTooltip
-    },
-    data() {
-        return {
-            isEditingGlobal: false,
-            pattern: null,
-            type: null,
-            questionData: null
-        }
-    },
-    methods: {
-        updateEditingMode(value) {
-            this.isEditingGlobal = value;
-        }
-    },
-    mounted() {
-        // 라우터에서 전달된 데이터 가져오기
-        const route = this.$router.currentRoute.value;
+const isEditingGlobal = ref(false);
+const pattern = ref(null);
+const type = ref(null);
+const questionData = ref(null);
+const passageData = ref(null);
 
-        // URL 쿼리 파라미터에서 문항 유형과 서술 방식 가져오기
-        if (route.query) {
-            this.pattern = route.query.pattern || null;
-            this.type = route.query.type || null;
-        }
+// EditPassageQuestion 컴포넌트 참조
+const editPassageQuestionRef = ref(null);
 
-        // 라우터 state에서 선택된 문항 데이터 가져오기
-        if (route.state && route.state.questionData) {
-            this.questionData = route.state.questionData;
-            console.log('전달받은 문항 데이터 : ', this.questionData);
-        }
+// 버튼 클릭 핸들러
+const handleButtonClick = () => {
+  // EditPassage의 글자 수 검증
+  if (editPassageQuestionRef.value) {
+    return editPassageQuestionRef.value.validatePassageLength();
+  }
+  return true;
+};
+
+const updateEditingMode = (value) => {
+  isEditingGlobal.value = value;
+};
+
+// 라우터 관련 정보 가져오기
+const route = useRoute();
+const router = useRouter();
+
+onMounted(() => {
+  // URL 쿼리 파라미터에서 문항 유형과 서술 방식 가져오기
+  if (route.query) {
+    pattern.value = route.query.pattern || null;
+    type.value = route.query.type || null;
+  }
+
+  // 라우터 state에서 선택된 문항 데이터 가져오기
+  if (route.state && route.state.questionData) {
+    questionData.value = route.state.questionData;
+    console.log('전달받은 문항 데이터 : ', questionData.value);
+  }
+
+  // 1. 라우터 state에서 지문 데이터 가져오기
+  if (route.state && route.state.passageData) {
+    passageData.value = route.state.passageData;
+    console.log('라우터 state에서 전달받은 지문 데이터 : ', passageData.value);
+  } 
+  // 2. 로컬 스토리지에서 지문 데이터 확인
+  else {
+    const storedPassageData = localStorage.getItem('generateQuestionPassageData');
+    if (storedPassageData) {
+      try {
+        passageData.value = JSON.parse(storedPassageData);
+        console.log('로컬 스토리지에서 불러온 지문 데이터 : ', passageData.value);
+      } catch (error) {
+        console.error('저장된 지문 데이터를 불러오는 중 오류 발생:', error);
+      }
     }
-}
+  }
+});
+
+// provide 실행
+provide('passageData', {
+  passage: passageData,
+  updatePassage: (newContent) => {
+    if (passageData.value) {
+      passageData.value.content = newContent;
+    } else {
+      passageData.value = { content: newContent };
+    }
+    console.log('업데이트된 지문 데이터:', passageData.value);
+  }
+});
 </script>
 <style scoped>
 .app-container {

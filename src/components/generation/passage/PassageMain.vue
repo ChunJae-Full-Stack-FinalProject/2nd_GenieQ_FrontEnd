@@ -1,20 +1,44 @@
 <template>
     <div class="app-container">
         <div class="main-content">
-            <CreatePassageMain/>
+            <CreatePassageMain @input-change="updateInputText"/>
             <PaymentUsage/>
             <BaseButton id="reset_button" text="초기화" type="type2" width="248px" height="54px" />
-            <router-link to="/passage/create">
-            <!-- front 작업할 때 disabled 속성 추가해야함 -->
-                <BaseButton id="create_button" text="지문 생성하기" type="type2" width="248px" height="54px"/>
+            <router-link to="/passage/create" v-if="isButtonEnabled">
+                <BaseButton 
+                    id="create_button" 
+                    text="지문 생성하기" 
+                    type="type2" 
+                    width="248px" 
+                    height="54px"
+                />
             </router-link>
+            <BaseButton 
+                v-else
+                id="create_button" 
+                text="지문 생성하기" 
+                type="type2" 
+                width="248px" 
+                height="54px"
+                disabled
+            />
         </div>
     </div>
 </template>
 <script setup>
+import { ref, computed } from 'vue';
 import CreatePassageMain from '@/components/generation/passage/PassageMain/CreatePassageMain.vue';
 import PaymentUsage from '@/components/generation/PaymentUsage.vue';
 import BaseButton from '@/components/common/button/BaseButton.vue';
+
+const inputText = ref('');
+const isButtonEnabled = computed(() => inputText.value.length >= 2);
+
+const updateInputText = (text) => {
+    inputText.value = text;
+    console.log('Text updated:', inputText.value, 'Length:', inputText.value.length);
+    console.log('Button enabled:', isButtonEnabled.value);
+};
 </script>
 <style scoped>
 .app-container {
