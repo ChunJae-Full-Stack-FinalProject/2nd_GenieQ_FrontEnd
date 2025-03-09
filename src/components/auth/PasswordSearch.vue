@@ -19,7 +19,7 @@
           <div class="form-group">
             <label class="input-label">인증코드 확인*</label>
             <div class="input-with-button">
-              <input type="text" placeholder="인증코드를 입력하세요." class="form-input input-with-margin" />
+              <input type="text" placeholder="인증코드를 입력하세요." class="form-input2" />
               <button class="button verify-button">인증</button>
             </div>
           </div>
@@ -103,7 +103,7 @@
     color: #424242;
     margin-bottom: 8px;
   }
-  
+
   .input-wrapper {
     position: relative;
     display: flex;
@@ -145,6 +145,17 @@
   
   .form-input:focus {
     outline: none;
+  }
+
+  .form-input2{
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    height: 44px;
+    border: 1px solid #BDBDBD;
+    border-radius: 6px;
   }
   
   .input-with-button {
