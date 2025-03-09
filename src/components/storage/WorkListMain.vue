@@ -1,86 +1,88 @@
 <template>
-    <div class="card-container">
-        <div class="storage-worklistmain-title">
-            <p>최근 작업 내역</p>
-        </div>
-        <div class="storage-worklistmain-subtitle">
-            <span>전체</span>
-            <P>(N개)</P>
-        </div>
-
-        <div class="storage-worklistmain-search">
-            <div class="search-container">
-                <input type="text" placeholder="검색어를 입력하세요." class="search-input">
-            </div>
-            <div class="search-icon">
-                <Icon icon="iconamoon:search-light" width="20" height="20"  style="color: #757575" />
-            </div>
-        </div>
-
-
-        <div class="storage-worklistmain-subtitle2">
-            <span>삭제</span>
-            <button style="border: 0; background-color: transparent;">
-                <Icon icon="cil:trash" class="trash" width="20" height="20"  style="color: #303030" />
-            </button>
-        </div>
-       <div class="storage-worklist-table">
-            <div class="table-container">
-                <table class="data-table">
-                <thead>
-                    <tr>
-                    <th>선택</th>
-                    <th>작업명</th>
-                    <th>제재</th>
-                    <th>유형</th>
-                    <th>최종 작업일</th>
-                    <th>추출하기</th>
-                    <th>즐겨찾기</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="(item, index) in workItems" :key="index" :class="{ 'row-checked': item.checked }">
-                        <td @contextmenu="showEditForm(index, $event)">
-                            <label class="custom-checkbox">
-                            <input type="checkbox" class="checkbox-input" v-model="item.checked">
-                            <span class="checkbox-custom"></span>
-                            </label>
-                        </td>
-                        <td class="work-name" @contextmenu="showEditForm(index, $event)">
-                            <div v-if="editingIndex === index">
-                            <input type="text" v-model="item.name" @blur="finishEditing" @keyup.enter="finishEditing" ref="editInput" class="edit-input"/>
-                            </div>
-                            <div v-else>
-                            {{ item.name }}
-                            </div>
-                        </td>
-                        <td class="work-title" @contextmenu="showEditForm(index, $event)">{{ item.title }}</td>
-                        <td class="work-type" @contextmenu="showEditForm(index, $event)">
-                            <span class="type-tag">{{ item.type }}</span>
-                        </td>
-                        <td class="work-date" @contextmenu="showEditForm(index, $event)">{{ item.date }}</td>
-                        <td class="work-action" @contextmenu="showEditForm(index, $event)">
-                            <button class="extract-btn" @click="extractItem(item)">추출 <i class="download-icon"></i></button>
-                        </td>
-                        <td class="work-favorite" @contextmenu="showEditForm(index, $event)">
-                            <span class="star-container" @click="toggleFavorite(index)">
-                            <Icon v-if="item.favorite" icon="mynaui:star-solid" width="24" height="24" style="color: #FF9F40" />
-                            <Icon v-else icon="mynaui:star" width="24" height="24" style="color: #FF9F40" />
-                            </span>
-                        </td>
-                    </tr>
-                </tbody>
-                </table>
-            </div>
-        </div>
+  <div class="card-container">
+    <div class="storage-worklistmain-title">
+      <p>최근 작업 내역</p>
     </div>
+    <div class="storage-worklistmain-subtitle">
+      <span>전체</span>
+      <P>(N개)</P>
+    </div>
+
+    <div class="storage-worklistmain-search">
+      <div class="search-container">
+        <input type="text" placeholder="검색어를 입력하세요." class="search-input">
+      </div>
+      <div class="search-icon">
+        <Icon icon="iconamoon:search-light" width="20" height="20"  style="color: #757575" />
+      </div>
+    </div>
+
+    <div class="storage-worklistmain-subtitle2">
+      <span>삭제</span>
+      <button style="border: 0; background-color: transparent;">
+        <Icon icon="cil:trash" class="trash" width="20" height="20"  style="color: #303030" />
+      </button>
+    </div>
+    <div class="storage-worklist-table">
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>선택</th>
+              <th>작업명</th>
+              <th>제재</th>
+              <th>유형</th>
+              <th>최종 작업일</th>
+              <th>추출하기</th>
+              <th>즐겨찾기</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(item, index) in workItems" :key="index" :class="{ 'row-checked': item.checked }">
+              <td @contextmenu="showEditForm(index, $event)">
+                <label class="custom-checkbox">
+                  <input type="checkbox" class="checkbox-input" v-model="item.checked">
+                  <span class="checkbox-custom"></span>
+                </label>
+              </td>
+              <td class="work-name" @contextmenu="showEditForm(index, $event)">
+                <div v-if="editingIndex === index">
+                  <input type="text" v-model="item.name" @blur="finishEditing" @keyup.enter="finishEditing" ref="editInput" class="edit-input"/>
+                </div>
+                <div v-else>
+                  {{ item.name }}
+                </div>
+              </td>
+              <td class="work-title" @contextmenu="showEditForm(index, $event)">{{ item.title }}</td>
+              <td class="work-type" @contextmenu="showEditForm(index, $event)">
+                <span class="type-tag">{{ item.type }}</span>
+              </td>
+              <td class="work-date" @contextmenu="showEditForm(index, $event)">{{ item.date }}</td>
+              <td class="work-action">
+                <button class="extract-btn" @click="openFileModal(item)">
+                  <p id="btn-text">추출 </p>
+                  <Icon icon="lucide:upload" id="btn-icon" style="color: #FFFFFF" />
+                </button>
+              </td>
+              <td class="work-favorite" @contextmenu="showEditForm(index, $event)">
+                <span class="star-container" @click="toggleFavorite(index)">
+                  <Icon v-if="item.favorite" icon="mynaui:star-solid" width="24" height="24" style="color: #FF9F40" />
+                  <Icon v-else icon="mynaui:star" width="24" height="24" style="color: #FF9F40" />
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 
     <!-- 컨텍스트 메뉴(우클릭시 나오는 박스) -->
-    <div v-if="showContextMenu" class="context-menu" :style="{ top: contextMenuPosition.y + 'px', left: contextMenuPosition.x + 'px' }">
-        <div class="menu-item" @click="startEditing">
-            <span>이름 변경</span>
-        </div>
+  <div v-if="showContextMenu" class="context-menu" :style="{ top: contextMenuPosition.y + 'px', left: contextMenuPosition.x + 'px' }">
+    <div class="menu-item" @click="startEditing">
+      <span>이름 변경</span>
     </div>
+  </div>
 
 </template>
 <script setup>
@@ -430,18 +432,36 @@ td{
 /* 추출 버튼 */
 .extract-btn {
   display: flex;
-  align-items: center;
+  flex-direction: row;
   justify-content: center;
-  gap: 4px;
-  background-color: #333;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 6px 12px;
-  font-size: 13px;
-  cursor: pointer;
-}
+  align-items: center;
+  padding: 5px 8px;
+  gap: 8px;
 
+  width: 72px;
+  height: 34px;
+
+  background: #303030;
+  border-radius: 8px;
+}
+#btn-text {
+  font-family: 'Pretendard';
+  font-style: normal;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 150%;
+
+  letter-spacing: -0.02em;
+  color: #FFFFFF;
+}
+#btn-icon {
+  width: 20px;
+  height: 20px;
+
+  flex: none;
+  order: 1;
+  flex-grow: 0;
+}
 .download-icon:after {
   content: "↑";
   font-size: 12px;

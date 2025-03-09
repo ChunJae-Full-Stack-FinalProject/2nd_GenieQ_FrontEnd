@@ -1,43 +1,48 @@
 <template>
-    <div class="card-container">
-        <div class="storage-worklist-title">
-            <p>최근 작업 내역</p>
-            <router-link to="/storage/worklistMina"><Icon icon="weui:arrow-outlined" width="24" height="24" id="arrow-icon" style="color: #303030" /></router-link>
-        </div>
-        <div class="storage-worklist-subtitle">
-            <span>최대 150개까지 보관됩니다.</span>
-        </div>
-       <div class="storage-worklist-table">
-  <div class="table-container">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>작업명</th>
-          <th>제재</th>
-          <th>유형</th>
-          <th>최종 작업일</th>
-          <th>추출하기</th>
-          <th>즐겨찾기</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(item, index) in workItems" :key="index">
-          <td class="work-name">{{ item.name }}</td>
-          <td class="work-title">{{ item.title }}</td>
-          <td class="work-type"><span class="type-tag">{{ item.type }}</span></td>
-          <td class="work-date">{{ item.date }}</td>
-          <td class="work-action"><button class="extract-btn" @click="extractItem(item)">추출 <i class="download-icon"></i></button></td>
-          <td class="work-favorite">
-            <span class="star-container" @click="toggleFavorite(index)">
-              <Icon v-if="item.favorite" icon="mynaui:star-solid" width="24" height="24" style="color: #FF9F40" />
-              <Icon v-else icon="mynaui:star" width="24" height="24" style="color: #FF9F40" />
-            </span>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+<div class="card-container">
+  <div class="storage-worklist-title">
+    <p>최근 작업 내역</p>
+    <router-link to="/storage/worklistMina"><Icon icon="weui:arrow-outlined" width="24" height="24" id="arrow-icon" style="color: #303030" /></router-link>
   </div>
-</div>
+  <div class="storage-worklist-subtitle">
+    <span>최대 150개까지 보관됩니다.</span>
+  </div>
+  <div class="storage-worklist-table">
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>작업명</th>
+            <th>제재</th>
+            <th>유형</th>
+            <th>최종 작업일</th>
+            <th>추출하기</th>
+            <th>즐겨찾기</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(item, index) in workItems" :key="index">
+            <td class="work-name">{{ item.name }}</td>
+            <td class="work-title">{{ item.title }}</td>
+            <td class="work-type"><span class="type-tag">{{ item.type }}</span></td>
+            <td class="work-date">{{ item.date }}</td>
+            <td class="work-action">
+              <button class="extract-btn" @click="openFileModal(item)">
+                <p id="btn-text">추출 </p>
+                <Icon icon="lucide:upload" id="btn-icon" style="color: #FFFFFF" />
+              </button>
+            </td>
+            <td class="work-favorite">
+              <span class="star-container" @click="toggleFavorite(index)">
+                <Icon v-if="item.favorite" icon="mynaui:star-solid" width="24" height="24" style="color: #FF9F40" />
+                <Icon v-else icon="mynaui:star" width="24" height="24" style="color: #FF9F40" />
+              </span>
+            </td>
+          </tr>
+        </tbody>
+     </table>
+  </div>
+  </div>
 </div>
 
 </template>
@@ -279,18 +284,36 @@ td{
 /* 추출 버튼 */
 .extract-btn {
   display: flex;
-  align-items: center;
+  flex-direction: row;
   justify-content: center;
-  gap: 4px;
-  background-color: #333;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 6px 12px;
-  font-size: 13px;
-  cursor: pointer;
-}
+  align-items: center;
+  padding: 5px 8px;
+  gap: 8px;
 
+  width: 72px;
+  height: 34px;
+
+  background: #303030;
+  border-radius: 8px;
+}
+#btn-text {
+  font-family: 'Pretendard';
+  font-style: normal;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 150%;
+
+  letter-spacing: -0.02em;
+  color: #FFFFFF;
+}
+#btn-icon {
+  width: 20px;
+  height: 20px;
+
+  flex: none;
+  order: 1;
+  flex-grow: 0;
+}
 .download-icon:after {
   content: "↑";
   font-size: 12px;
