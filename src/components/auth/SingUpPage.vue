@@ -20,20 +20,20 @@
         <button class="button email-button" style="margin-top: 10px;" @click="sendVerificationEmail" :disabled="!isEmailValid || isEmailSent" :style="buttonStyle">{{ buttonText }}</button>
       </div>
 
-        
+
       <div class="form-group">
-  <label class="input-label">인증코드 확인*</label>
-  <div class="input-with-button">
-    <div class="input-wrapper-with-timer" :class="{ 'success': isVerified }">
-      <input type="text" placeholder="인증코드를 입력하세요." class="form-input2" v-model="verificationCode" :disabled="!isEmailSent || isVerified || !isTimerRunning" />
-      <span v-if="isTimerRunning" class="timer">{{ formattedTime }}</span>
-    </div>
-    <button class="button verify-button" :class="{ 'active': verificationCode && !isVerified }" :disabled="!verificationCode || isVerified || !isTimerRunning" @click="verifyCode">
-      {{ isVerified ? '완료' : '인증' }}
-    </button>
-  </div>
-  <div v-if="verificationError" class="error-message">{{ verificationError }}</div>
-  <div v-if="isVerified" class="success-message">인증이 완료되었습니다!</div>
+        <label class="input-label">인증코드 확인*</label>
+        <div class="input-with-button">
+          <div class="input-wrapper-with-timer" :class="{ 'success': isVerified }">
+            <input type="text" placeholder="인증코드를 입력하세요." class="form-input2" v-model="verificationCode" :disabled="!isEmailSent || isVerified || !isTimerRunning" />
+            <span v-if="isTimerRunning" class="timer">{{ formattedTime }}</span>
+          </div>
+          <button class="button verify-button" :class="{ 'active': verificationCode && !isVerified }" :disabled="!verificationCode || isVerified || !isTimerRunning" @click="verifyCode">
+            {{ isVerified ? '완료' : '인증' }}
+          </button>
+        </div>
+        <div v-if="verificationError" class="error-message">{{ verificationError }}</div>
+        <div v-if="isVerified" class="success-message">인증이 완료되었습니다!</div>
       </div>
         
         <div class="form-group">

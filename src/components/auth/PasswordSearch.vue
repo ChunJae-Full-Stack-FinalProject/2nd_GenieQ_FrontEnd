@@ -14,29 +14,45 @@
                 <input type="text" placeholder="이메일을 입력하세요." v-model="email" class="form-input" @input="validateEmail">
               </div>
             <div v-if="emailError" class="error-message">{{ emailError }}</div>
-            <button class="button gray-button" style="margin-top: 10px;" @click="startTimer">인증메일 발송</button>
-          </div>  
+            <button class="button email-button" style="margin-top: 10px; margin-bottom: 10px;" @click="sendVerificationEmail" :disabled="!isEmailValid || isEmailSent" :style="buttonStyle">{{ buttonText }}</button>
           
           <div class="form-group">
             <label class="input-label">인증코드 확인*</label>
             <div class="input-with-button">
-              <div class="input-wrapper-with-timer">
-                <input type="text" placeholder="인증코드를 입력하세요." class="form-input2" />
+              <div class="input-wrapper-with-timer" :class="{ 'success': isVerified }">
+                <input type="text" placeholder="인증코드를 입력하세요." class="form-input2" v-model="verificationCode" :disabled="!isEmailSent || isVerified || !isTimerRunning" />
                 <span v-if="isTimerRunning" class="timer">{{ formattedTime }}</span>
               </div>
-              <button class="button verify-button">인증</button>
+              <button class="button verify-button" :class="{ 'active': verificationCode && !isVerified }" :disabled="!verificationCode || isVerified || !isTimerRunning" @click="verifyCode">
+                {{ isVerified ? '완료' : '인증' }}
+              </button>
             </div>
+            <div v-if="verificationError" class="error-message">{{ verificationError }}</div>
+            <div v-if="isVerified" class="success-message">인증이 완료되었습니다!</div>
           </div>
         <Router-link to="/temppasswordnotice" class="button gray-button">완료</Router-link>
       </div> 
     </div>
+  </div>
   </template>
   
   <script setup>
   import { Icon } from "@iconify/vue";
-  import { ref, watch , computed } from 'vue';
+  import { ref, watch, computed, onMounted, onUnmounted } from 'vue';
+  import emailjs from '@emailjs/browser';
   const email = ref('');
   const emailError = ref('');
+
+  // 이메일 인증 관련 변수
+  const isEmailSent = ref(false);
+  const verificationCode = ref('');
+  const verificationError = ref('');
+  const isVerified = ref(false);
+  const generatedCode = ref('');
+  const isSending = ref(false); // 이메일 전송 중 상태
+
+
+
   // 타이머 관련 상태
   const isTimerRunning = ref(false);
   const remainingTime = ref(180); // 3분(180초)
@@ -46,31 +62,147 @@
   return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 });
 
-  const startTimer = () => {
-    // 이메일 유효성 검사
-    validateEmail();
+let timerInterval = null; // 이 선언이 누락됨
+
+
+  // EmailJS 초기화
+onMounted(() => {
+  // EmailJS 대시보드에서 확인한 Public Key
+  emailjs.init("qaJXuBtmCey6I1KaF");
+});
+
+// 컴포넌트 언마운트시 타이머 정리
+onUnmounted(() => {
+  if (timerInterval) {
+    clearInterval(timerInterval);
+  }
+});
+
+// 계산된 속성들
+const isEmailValid = computed(() => { 
+  return email.value && !emailError.value; 
+});
+
+const buttonText = computed(() => { 
+  if (isSending.value) return '전송 중...';
+  return isEmailSent.value ? '인증메일이 발송되었습니다.' : '인증메일 발송'; 
+});
+
+const buttonStyle = computed(() => {
+  if (isSending.value || !isEmailValid.value || isEmailSent.value) { 
+    return { backgroundColor: '#BDBDBD', color: '#FFFFFF' }; 
+  } else { 
+    return { backgroundColor: '#303030', color: '#FFFFFF' }; 
+  }
+});
+
+const isPasswordMatch = computed(() => {
+  return password.value && 
+         confirmPassword.value && 
+         password.value === confirmPassword.value && 
+         !passwordError.value;
+});
+
+const isButtonEnabled = computed(() => {
+  // 이메일, 비밀번호, 이름이 유효하고
+  const isEmailValid = email.value && !emailError.value && isVerified.value; // 이메일 인증 확인 추가
+  // 모든 조건을 만족해야 true 반환
+  return isEmailValid ;
+});
+
+// 이메일 발송 함수
+const sendVerificationEmail = () => {
+  validateEmail();
+  if (isEmailValid.value && !isSending.value) {
+    generatedCode.value = generateVerificationCode();
     
-    // 이메일이 유효하면 타이머 시작
-    if (!emailError.value && email.value) {
-      isTimerRunning.value = true;
-      remainingTime.value = 180; // 3분으로 초기화
-      
-      // 타이머 시작
-      const timer = setInterval(() => {
-        remainingTime.value--;
-        
-        // 시간이 다 되면 타이머 중지
-        if (remainingTime.value <= 0) {
-          clearInterval(timer);
-          isTimerRunning.value = false;
-        }
-      }, 1000);
+    // 로딩 상태 표시
+    isSending.value = true;
+    
+    // EmailJS로 이메일 전송 - 수신자 이메일 명확하게 지정
+    const templateParams = {
+      to_name: email.value.split('@')[0],
+      from_name: "GenieQ",
+      message: `인증 코드: ${generatedCode.value}`, // 기존 메시지 유지
+      verification_code: generatedCode.value,      // 명시적으로 추가
+      to_email: email.value,
+      reply_to: "no-reply@genieq.com"
+    };
+    
+    console.log("전송 파라미터:", templateParams); // 디버깅용
+    
+    emailjs.send(
+      'service_gamja',   // 서비스 ID
+      'template_zcvkxgp',  // 템플릿 ID
+      templateParams
+    )
+    .then(() => {
+      console.log('이메일 발송 성공!', generatedCode.value);
+      console.log('수신자:', email.value);
+      isEmailSent.value = true;
+      isSending.value = false;
+      startTimer(); // 타이머 시작
+    })
+    .catch((error) => {
+      console.error('이메일 발송 실패:', error);
+      emailError.value = '인증 메일 발송에 실패했습니다. 다시 시도해주세요.';
+      isSending.value = false;
+    });
+  }
+};
+// 테스트용 인증코드 생성 함수
+const generateVerificationCode = () => { 
+  return Math.floor(100000 + Math.random() * 900000).toString(); 
+};
+
+// 인증코드 검증 함수
+const verifyCode = () => {
+  if (verificationCode.value === generatedCode.value) {
+    isVerified.value = true;
+    verificationError.value = '';
+  } else {
+    verificationError.value = '인증코드가 일치하지 않습니다.';
+  }
+};
+
+// 타이머 시작 함수
+const startTimer = () => {
+  isTimerRunning.value = true;
+  remainingTime.value = 180; // 3분으로 초기화
+  
+  // 기존 타이머가 있으면 정리
+  if (timerInterval) {
+    clearInterval(timerInterval);
+  }
+  
+  // 타이머 시작
+  timerInterval = setInterval(() => {
+    remainingTime.value--;
+    
+    // 시간이 다 되면 타이머 중지
+    if (remainingTime.value <= 0) {
+      clearInterval(timerInterval);
+      isTimerRunning.value = false;
+      isEmailSent.value = false; // 인증 시간 만료
+      generatedCode.value = ''; // 코드 초기화
+      verificationError.value = '인증 시간이 만료되었습니다. 다시 요청해주세요.';
     }
-  };
+  }, 1000);
+};
 
+// 인증코드 재발송 함수
+const resendVerificationCode = () => {
+  // 타이머가 실행 중이지 않을 때만 재발송 가능
+  if (!isTimerRunning.value) {
+    isEmailSent.value = false;
+    verificationCode.value = '';
+    verificationError.value = '';
+    sendVerificationEmail();
+  }
+};
 
-  // 이메일 유효성 검사
-  const validateEmail = () => {
+// 이메일 유효성 검사
+const validateEmail = () => {
   if (!email.value) {
     emailError.value = '이메일 형식으로 입력해 주세요';
     return;
@@ -85,12 +217,13 @@
   }
 };
 
-
-
- 
-
-
   watch(email, validateEmail);  
+  // 인증코드 입력 감시
+  watch(verificationCode, () => { 
+  if (verificationError.value) { 
+    verificationError.value = ''; 
+  } 
+});
   </script>
   
   <style scoped>
@@ -303,5 +436,38 @@
 .form-input2 {
   padding-right: 60px; /* 타이머가 입력 필드 내용을 가리지 않도록 */
 }
+/* 성공 스타일 추가 - PasswordSearch.vue에 추가 필요 */
+.success-message {
+  color: #64CA17;
+  font-size: 12px;
+  margin-top: 5px;
+  text-align: left;
+  padding-left: 5px;
+}
+
+.email-button { 
+  width: 100%; 
+  height: 40px; 
+  border-radius: 8px; 
+  font-size: 16px; 
+  font-weight: 600; 
+  transition: background-color 0.3s; 
+}
+
+/* 인증 버튼 스타일 - PasswordSearch.vue에서 완성 필요 */
+.verify-button.active { 
+  background-color: #303030 !important; 
+  color: #FFFFFF !important; 
+}
+
+/* 인증 관련 입력창 스타일 - PasswordSearch.vue에서 완성 필요 */
+.input-wrapper-with-timer.success { 
+  border-color: #64CA17; 
+}
+/* 이메일 인증관련  */
+.verify-button.active { background-color: #303030 !important; color: #FFFFFF !important; }
+.email-button { width: 100%; height: 40px; border-radius: 8px; font-size: 16px; font-weight: 600; transition: background-color 0.3s; }
+.input-wrapper-with-timer.success { border-color: #64CA17; }
+.input-wrapper.success { border-color: #64CA17; border-width: 1px; }
   </style>
   
