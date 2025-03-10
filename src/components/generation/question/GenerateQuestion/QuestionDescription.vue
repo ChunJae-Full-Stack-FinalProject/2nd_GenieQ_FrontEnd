@@ -10,23 +10,23 @@
                 <div id="input-answer">
                     <p>정답</p>
                     <div class="answer-option">
-                        <input type="radio" name="answer" value="1" checked v-model="selectedAnswer">
+                        <input type="radio" id="answer1" value="1" checked v-model="selectedAnswer">
                         <label for="answer1">①</label>
                     </div>
                     <div class="answer-option">
-                        <input type="radio" name="answer" value="2" v-model="selectedAnswer">
+                        <input type="radio" id="answer2" value="2" v-model="selectedAnswer">
                         <label for="answer2">②</label>
                     </div>
                     <div class="answer-option">
-                        <input type="radio" name="answer" value="3" v-model="selectedAnswer">
+                        <input type="radio" id="answer3" value="3" v-model="selectedAnswer">
                         <label for="answer3">③</label>
                     </div>
                     <div class="answer-option">
-                        <input type="radio" name="answer" value="4" v-model="selectedAnswer">
+                        <input type="radio" id="answer4" value="4" v-model="selectedAnswer">
                         <label for="answer4">④</label>
                     </div>
                     <div class="answer-option">
-                        <input type="radio" name="answer" value="5" v-model="selectedAnswer">
+                        <input type="radio" id="answer5" value="5" v-model="selectedAnswer">
                         <label for="answer5">⑤</label>
                     </div>
                 </div>
@@ -61,6 +61,7 @@ export default {
     },
     data() {
         return {
+            selectedAnswer: 1,
             // 내부적으로 관리할 정답 데이터
             answer: '',
             // 내부적으로 관리할 해설 데이터
