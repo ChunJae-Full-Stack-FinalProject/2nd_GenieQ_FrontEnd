@@ -22,11 +22,16 @@
         @close="isConfirmModalOpen = false"
         @confirm="isConfirmModalOpen = false"
       />
+      <WarningModalComponent :isOpen="isWarningModalOpen" 
+        title="저장되지 않은 변경사항이 있습니다." 
+        message="변경 사항을 저장하지 않고 이동하시겠습니까? 저장하지 않은 내용은 사라집니다." 
+        @close="cancleNavigation" @confirm="confirmNavigation"/>
+
   </div>
 </template>
 <script setup>
-import { ref, onMounted, provide } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { ref, onMounted, provide, onBeforeUnmount } from 'vue';
+import { useRoute, useRouter, onBeforeRouteLeave } from 'vue-router';
 import EditPassageQuestion from './GenerateQuestion/EditPassageQuestion/EditPassageQuestion.vue';
 import PassageTitle from './GenerateQuestion/PassageTitle.vue';
 import PassageSummary from '../passage/PassageContent/PassageSummary.vue';
@@ -34,6 +39,8 @@ import QuestionDescription from './GenerateQuestion/QuestionDescription.vue';
 import BaseButton from '@/components/common/button/BaseButton.vue';
 import PlainTooltip from '@/components/common/PlainTooltip.vue';
 import GenerateQuestionModal from '@/components/common/modal/type/generation/GenerateQuestionModal.vue';
+import ConfirmModalComponent from '@/components/common/modal/type/ConfirmModalComponent.vue';
+import WarningModalComponent from '@/components/common/modal/type/WarningModalComponent.vue';
 
 const isEditingGlobal = ref(false);
 const pattern = ref(null);
@@ -44,6 +51,11 @@ const isConfirmModalOpen = ref(false);
 const showGenerateQuestionModal = ref(false);
 const isSaved = ref(false); // 저장 상태를 추적하는 변수 추가
 const hasManualSave = ref(false); // 사용자가 직접 저장 버튼을 클릭했는지 추적
+const isContentChanged = ref(false); // 내용 변경 여부 추적
+const isWarningModalOpen = ref(false); // 경고 모달 상태
+
+// 네비게이션 관련 변수
+const pendingNavigation = ref(null);
 
 const currentPassage = ref({
   title: '',
@@ -73,6 +85,7 @@ const handleSaveButtonClick = () => {
       savePassageData();
       isSaved.value = true; // 저장 상태를 true로 설정
       hasManualSave.value = true; // 수동 저장 플래그 설정
+      isContentChanged.value = false; // 저장 후 변경사항 초기화
       return true;
     } else {
       showLengthWarning();
@@ -125,6 +138,45 @@ const validateAndOpenModal = () => {
 const route = useRoute();
 const router = useRouter();
 
+// 저장되지 않은 변경사항이 있는지 확인하는 함수
+const hasUnsavedChanges = () => {
+  return isContentChanged.value && !isSaved.value;
+};
+
+// 라우트 이동 전 확인
+onBeforeRouteLeave((to, from, next) => {
+  if (hasUnsavedChanges()) {
+    isWarningModalOpen.value = true;
+    pendingNavigation.value = next;
+  } else {
+    next();
+  }
+});
+
+// 페이지 이탈 시, 경고 (브라우저 새로고침, 닫기 등)
+const handleBeforeUnload = (e) => {
+  if (hasUnsavedChanges()) {
+    e.preventDefault();
+    e.returnValue = '';
+    return '';
+  }
+};
+
+// 이동 취소
+const cancleNavigation = () => {
+  isWarningModalOpen.value = false;
+  pendingNavigation.value = null;
+};
+
+// 이동 확인
+const confirmNavigation = () => {
+  isWarningModalOpen.value = false;
+  if (pendingNavigation.value) {
+    pendingNavigation.value();
+    pendingNavigation.value = null;
+  }
+}
+
 onMounted(() => {
   // URL 쿼리 파라미터에서 문항 유형과 서술 방식 가져오기
   if (route.query) {
@@ -135,23 +187,20 @@ onMounted(() => {
   // 라우터 state에서 선택된 문항 데이터 가져오기
   if (route.state && route.state.questionData) {
     questionData.value = route.state.questionData;
-    console.log('전달받은 문항 데이터 : ', questionData.value);
   }
 
-  // 1. 라우터 state에서 지문 데이터 가져오기
+  // 라우터 state에서 지문 데이터 가져오기
   if (route.state && route.state.passageData) {
     passageData.value = route.state.passageData;
-    console.log('라우터 state에서 전달받은 지문 데이터 : ', passageData.value);
     
     // 데이터는 로드하지만 버튼은 활성화하지 않음 (오직 저장 버튼 클릭만이 다른 버튼들을 활성화함)
   } 
-  // 2. 로컬 스토리지에서 지문 데이터 확인
+  // 로컬 스토리지에서 지문 데이터 확인
   else {
     const storedPassageData = localStorage.getItem('generateQuestionPassageData');
     if (storedPassageData) {
       try {
         passageData.value = JSON.parse(storedPassageData);
-        console.log('로컬 스토리지에서 불러온 지문 데이터 : ', passageData.value);
         
         // 데이터는 로드하지만 버튼은 활성화하지 않음 (오직 저장 버튼 클릭만이 다른 버튼들을 활성화함)
       } catch (error) {
@@ -159,6 +208,13 @@ onMounted(() => {
       }
     }
   }
+  // 브라우저 새로고침, 닫기 등에 대한 이벤트 리스너 추가
+  window.addEventListener('beforeunload', handleBeforeUnload);
+});
+
+onBeforeUnmount(() => {
+  // 컴포넌트 해제 시 이벤트 리스너 제거
+  window.removeEventListener('beforeunload', handleBeforeUnload);
 });
 
 // 내부 저장 상태만 체크하는 함수 (버튼 활성화와는 무관)
@@ -177,13 +233,13 @@ provide('passageData', {
       passageData.value.content = newContent;
       // 내용이 변경되면 저장 상태 초기화 및 수동 저장 플래그 초기화
       isSaved.value = false;
+      isContentChanged.value = true; // 내용이 변경됨을 표시
       hasManualSave.value = false; // 내용이 변경되면 수동 저장 플래그도 초기화
     } else {
       passageData.value = { content: newContent };
       isSaved.value = false;
       hasManualSave.value = false;
     }
-    console.log('업데이트된 지문 데이터:', passageData.value);
   }
 });
 </script>
