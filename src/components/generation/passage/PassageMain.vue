@@ -1,6 +1,8 @@
 <template>
     <div class="app-container">
         <div class="main-content">
+            <InputPassageTitle ref="passageTitleRef"/>
+            <CreatePassageMain @input-change="updateInputText"/>
             <CreatePassageMain ref="createPassageMainRef" @input-change="updateInputText" @category-change="updateCategory"/>
             <PaymentUsage/>
             <BaseButton id="reset_button" text="초기화" type="type2" width="248px" height="54px" :disabled="!hasContent" @click="resetText"/>
@@ -26,10 +28,11 @@
     </div>
 </template>
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed  } from 'vue';
 import CreatePassageMain from '@/components/generation/passage/PassageMain/CreatePassageMain.vue';
 import PaymentUsage from '@/components/generation/PaymentUsage.vue';
 import BaseButton from '@/components/common/button/BaseButton.vue';
+import InputPassageTitle from '@/components/generation/passage/PassageContent/InputPassageTitle.vue';
 
 const inputText = ref('');
 const selectedCategory = ref('human');
