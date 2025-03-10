@@ -17,13 +17,16 @@
               <input type="text" placeholder="이메일을 입력하세요." v-model="email" class="form-input" @input="validateEmail">
             </div>
             <div v-if="emailError" class="error-message">{{ emailError }}</div>
-            <button class="button gray-button" style="margin-top: 10px;">인증메일 발송</button>
+            <button class="button gray-button" style="margin-top: 10px;" @click="startTimer">인증메일 발송</button>
           </div> 
           
           <div class="form-group">
             <label class="input-label">인증코드 확인*</label>
             <div class="input-with-button">
-              <input type="text" placeholder="인증코드를 입력하세요." class="form-input2" />
+              <div class="input-wrapper-with-timer">
+                <input type="text" placeholder="인증코드를 입력하세요." class="form-input2" />
+                <span v-if="isTimerRunning" class="timer">{{ formattedTime }}</span>
+              </div>
               <button class="button verify-button">인증</button>
             </div>
           </div>
@@ -153,6 +156,36 @@ import BaseButton from "../common/button/BaseButton.vue";
   const nameError = ref('');
   const nameTouched = ref(false);
 
+// 타이머 관련 상태
+const isTimerRunning = ref(false);
+  const remainingTime = ref(180); // 3분(180초)
+  const formattedTime = computed(() => {
+  const minutes = Math.floor(remainingTime.value / 60);
+  const seconds = remainingTime.value % 60;
+  return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+});
+
+  const startTimer = () => {
+    // 이메일 유효성 검사
+    validateEmail();
+    
+    // 이메일이 유효하면 타이머 시작
+    if (!emailError.value && email.value) {
+      isTimerRunning.value = true;
+      remainingTime.value = 180; // 3분으로 초기화
+      
+      // 타이머 시작
+      const timer = setInterval(() => {
+        remainingTime.value--;
+        
+        // 시간이 다 되면 타이머 중지
+        if (remainingTime.value <= 0) {
+          clearInterval(timer);
+          isTimerRunning.value = false;
+        }
+      }, 1000);
+    }
+  };
 
 
   // 이메일 유효성 검사
@@ -684,6 +717,25 @@ const submitForm = () => {
   margin-top: 5px;
   text-align: left;
   padding-left: 5px;
+}
+
+/* 인풋창 타이머 c디자인. */
+.input-wrapper-with-timer {
+  position: relative;
+  width: 100%;
+}
+
+.timer {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #424242;
+  font-size: 14px;
+}
+
+.form-input2 {
+  padding-right: 60px; /* 타이머가 입력 필드 내용을 가리지 않도록 */
 }
   </style>
   
