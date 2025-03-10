@@ -97,9 +97,9 @@ export default {
 
     position: absolute;
     width: 520px;
-    height: 369px;
+    height: 407px;
     left: 1244px;
-    top: 929px;
+    top: 963px;
 }
 #description-head {
     display: flex;

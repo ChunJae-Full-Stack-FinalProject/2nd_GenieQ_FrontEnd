@@ -2,18 +2,16 @@
   <div class="app-container">
       <p id="main-head">문항 생성</p>
       <div class="main-content">
-          <InputPassageTitle ref="passageTitleRef"/>
-          <EditPassageQuestion ref="editPassageQuestionRef" @edit-mode-changed="updateEditingMode"/>
-          <PassageSummary/>
-          <QuestionDescription :isEditing="isEditingGlobal" :questionData="questionData"/>
-          <div class="button-container">
-              <BaseButton text="문항 추가하기" type="type2" id="add-button" width="248px" height="54px" :disabled="!hasManualSave" @click="validateAndOpenModal"/>
-              <BaseButton text="저장하기" type="type2" id="save-button" width="248px" height="54px" @click="handleSaveButtonClick"/>
-              <BaseButton text="추출하기" type="type2" id="download-button" width="248px" height="54px" :disabled="!hasManualSave" @click="handleButtonClick"/>
-          </div>
-          <PlainTooltip id="download-tooltip" message="추출은 저장 후 가능해요" width="203px" />
-          <PlainTooltip id="add-question-tooltip" message="문항 추가는 저장 후 가능해요" width="233px" />
-          <GenerateQuestionModal :isOpen="showGenerateQuestionModal" @close="showGenerateQuestionModal = false"/>
+        <p id="content-head">지문</p>
+        <EditPassageQuestion ref="editPassageQuestionRef" @edit-mode-changed="updateEditingMode"/>
+        <PassageSummary id="passage-summary"/>
+        <QuestionDescription :isEditing="isEditingGlobal" :questionData="questionData"/>
+        <div class="button-container">
+            <BaseButton text="문항 추가하기" type="type2" id="add-button" width="248px" height="54px" :disabled="!hasManualSave" @click="validateAndOpenModal"/>
+            <BaseButton text="저장하기" type="type2" id="save-button" width="248px" height="54px" @click="handleSaveButtonClick"/>
+            <BaseButton text="추출하기" type="type2" id="download-button" width="248px" height="54px" :disabled="!hasManualSave" @click="handleButtonClick"/>
+        </div>
+        <GenerateQuestionModal :isOpen="showGenerateQuestionModal" @close="showGenerateQuestionModal = false"/>
       </div>
       <ConfirmModalComponent
         :isOpen="isConfirmModalOpen"
@@ -37,11 +35,9 @@
 import { ref, onMounted, provide, onBeforeUnmount, getCurrentInstance } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import EditPassageQuestion from './GenerateQuestion/EditPassageQuestion/EditPassageQuestion.vue';
-import InputPassageTitle from '@/components/generation/passage/PassageContent/InputPassageTitle.vue';
 import PassageSummary from '../passage/PassageContent/PassageSummary.vue';
 import QuestionDescription from './GenerateQuestion/QuestionDescription.vue';
 import BaseButton from '@/components/common/button/BaseButton.vue';
-import PlainTooltip from '@/components/common/PlainTooltip.vue';
 import GenerateQuestionModal from '@/components/common/modal/type/generation/GenerateQuestionModal.vue';
 import ConfirmModalComponent from '@/components/common/modal/type/ConfirmModalComponent.vue';
 import WarningModalComponent from '@/components/common/modal/type/WarningModalComponent.vue';
@@ -316,18 +312,48 @@ provide('passageData', {
   letter-spacing: -0.02em;
   color: #16252D;
 }
-.button-container {
+#content-head {
+  position: absolute;
+  width: 928px;
+  height: 36px;
+  left: 292px;
+  top: 126px;
+
+  font-style: normal;
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 150%;
+  letter-spacing: -0.02em;
+  color: #000000;
+}
+#passage-summary {
   display: flex;
-  flex-direction: row;
-  align-items: center;
-  padding: 0px 154px 0px 272px;
-  gap: 24px;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0px;
+  gap: 20px;
 
   position: absolute;
-  width: 1762px;
-  height: 54px;
-  left: 160px;
-  top: 1326px;
+  width: 520px;
+  height: 739px;
+  left: 1244px;
+  top: 126px;
+}
+.button-container {
+/* Frame 1707484302 */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+align-items: center;
+padding: 0px 154px 0px 272px;
+gap: 24px;
+
+position: absolute;
+top: 1475px;
+left: 156px;
+width: 1762px;
+height: 54px;
 }
 #add-button {
   flex: none;
