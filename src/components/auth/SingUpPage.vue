@@ -22,16 +22,18 @@
 
         
       <div class="form-group">
-        <label class="input-label">인증코드 확인*</label>
-        <div class="input-with-button">
-          <div class="input-wrapper-with-timer" :class="{ 'success': isVerified }">
-            <input type="text" placeholder="인증코드를 입력하세요." class="form-input2" v-model="verificationCode" :disabled="!isEmailSent || isVerified" />
-            <span v-if="isTimerRunning" class="timer">{{ formattedTime }}</span>
-          </div>
-          <button class="button verify-button" :class="{ 'active': verificationCode && !isVerified }" :disabled="!verificationCode || isVerified" @click="verifyCode">{{ isVerified ? '완료' : '인증' }}</button>
-        </div>
-        <div v-if="verificationError" class="error-message">{{ verificationError }}</div>
-        <div v-if="isVerified" class="success-message">인증이 완료되었습니다!</div>
+  <label class="input-label">인증코드 확인*</label>
+  <div class="input-with-button">
+    <div class="input-wrapper-with-timer" :class="{ 'success': isVerified }">
+      <input type="text" placeholder="인증코드를 입력하세요." class="form-input2" v-model="verificationCode" :disabled="!isEmailSent || isVerified || !isTimerRunning" />
+      <span v-if="isTimerRunning" class="timer">{{ formattedTime }}</span>
+    </div>
+    <button class="button verify-button" :class="{ 'active': verificationCode && !isVerified }" :disabled="!verificationCode || isVerified || !isTimerRunning" @click="verifyCode">
+      {{ isVerified ? '완료' : '인증' }}
+    </button>
+  </div>
+  <div v-if="verificationError" class="error-message">{{ verificationError }}</div>
+  <div v-if="isVerified" class="success-message">인증이 완료되었습니다!</div>
       </div>
         
         <div class="form-group">
@@ -135,16 +137,17 @@
 
 <script setup>
 import { Icon } from "@iconify/vue";
-import { ref, watch, computed } from 'vue';
+import { ref, watch, computed, onMounted, onUnmounted } from 'vue';
 import PrivacyModal from "@/components/common/modal/type/auth/PrivacyModal.vue";
 import TermsModal from "@/components/common/modal/type/auth/TermsModal.vue";
 import BaseButton from "../common/button/BaseButton.vue";
+import emailjs from '@emailjs/browser';
 
+// 모달 관련 상태
 const showPrivacyModal = ref(false);
 const showTermsModal = ref(false);
 
-
-// 이메일 인증 관련 변수 추가
+// 이메일 인증 관련 변수
 const isEmailSent = ref(false);
 const verificationCode = ref('');
 const verificationError = ref('');
@@ -152,7 +155,7 @@ const isVerified = ref(false);
 const generatedCode = ref('');
 const email = ref('');
 const emailError = ref('');
-
+const isSending = ref(false); // 이메일 전송 중 상태
 
 // 비밀번호 관련 상태
 const password = ref('');
@@ -163,36 +166,120 @@ const showPassword = ref(false);
 const showConfirmPassword = ref(false);
 const passwordTouched = ref(false);
 const confirmPasswordTouched = ref(false);
+
 // 이름 관련 상태
 const username = ref('');
 const nameError = ref('');
 const nameTouched = ref(false);
 
-// 이메일 유효성 계산 속성
-const isEmailValid = computed(() => { return email.value && !emailError.value; });
+// 타이머 관련 상태
+let timerInterval = null;
+const isTimerRunning = ref(false);
+const remainingTime = ref(180); // 3분(180초)
 
-// 버튼 텍스트 계산 속성
-const buttonText = computed(() => { return isEmailSent.value ? '인증메일이 발송되었습니다.' : '인증메일 발송'; });
+// 성별 상태 관리
+const gender = ref('male'); // 기본값은 남성으로 설정
+const privacyChecked = ref(false);
+const termsChecked = ref(false);
 
-// 버튼 스타일 계산 속성
+// EmailJS 초기화
+onMounted(() => {
+  // EmailJS 대시보드에서 확인한 Public Key
+  emailjs.init("qaJXuBtmCey6I1KaF");
+});
+
+// 컴포넌트 언마운트시 타이머 정리
+onUnmounted(() => {
+  if (timerInterval) {
+    clearInterval(timerInterval);
+  }
+});
+
+// 계산된 속성들
+const isEmailValid = computed(() => { 
+  return email.value && !emailError.value; 
+});
+
+const buttonText = computed(() => { 
+  if (isSending.value) return '전송 중...';
+  return isEmailSent.value ? '인증메일이 발송되었습니다.' : '인증메일 발송'; 
+});
+
 const buttonStyle = computed(() => {
-  if (!isEmailValid.value || isEmailSent.value) { return { backgroundColor: '#BDBDBD', color: '#FFFFFF' }; } 
-  else { return { backgroundColor: '#303030', color: '#FFFFFF' }; }
+  if (isSending.value || !isEmailValid.value || isEmailSent.value) { 
+    return { backgroundColor: '#BDBDBD', color: '#FFFFFF' }; 
+  } else { 
+    return { backgroundColor: '#303030', color: '#FFFFFF' }; 
+  }
+});
+
+const formattedTime = computed(() => {
+  const minutes = Math.floor(remainingTime.value / 60);
+  const seconds = remainingTime.value % 60;
+  return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+});
+
+const isPasswordMatch = computed(() => {
+  return password.value && 
+         confirmPassword.value && 
+         password.value === confirmPassword.value && 
+         !passwordError.value;
+});
+
+const isButtonEnabled = computed(() => {
+  // 이메일, 비밀번호, 이름이 유효하고
+  const isEmailValid = email.value && !emailError.value && isVerified.value; // 이메일 인증 확인 추가
+  const isPasswordValid = password.value && confirmPassword.value && 
+                         !passwordError.value && !confirmPasswordError.value;
+  const isNameValid = username.value && !nameError.value;
+  
+  // 개인정보처리방침, 이용약관 체크가 되었는지 확인
+  const isCheckboxesChecked = privacyChecked.value && termsChecked.value;
+  
+  // 모든 조건을 만족해야 true 반환
+  return isEmailValid && isPasswordValid && isNameValid && isCheckboxesChecked;
 });
 
 // 이메일 발송 함수
 const sendVerificationEmail = () => {
   validateEmail();
-  if (isEmailValid.value) {
+  if (isEmailValid.value && !isSending.value) {
     generatedCode.value = generateVerificationCode();
-    console.log(`이메일 ${email.value}로 인증코드 ${generatedCode.value} 발송 (테스트)`);
-    isEmailSent.value = true;
-    startTimer();
+    
+    // 로딩 상태 표시
+    isSending.value = true;
+    
+    // EmailJS로 이메일 전송 (한 번만 호출)
+    const templateParams = {
+      to_name: email.value.split('@')[0],
+      from_name: "GenieQ",
+      message: `인증 코드: ${generatedCode.value}`,
+      reply_to: email.value,
+      verification_code: generatedCode.value // 인증 코드를 별도 변수로 전달
+    };
+    
+    emailjs.send(
+      'service_gamja',   // 실제 서비스 ID
+      'template_zcvkxgp',  // 실제 템플릿 ID
+      templateParams
+    )
+    .then(() => {
+      console.log('이메일 발송 성공!', generatedCode.value);
+      isEmailSent.value = true;
+      isSending.value = false;
+      startTimer(); // 타이머 시작
+    })
+    .catch((error) => {
+      console.error('이메일 발송 실패:', error);
+      emailError.value = '인증 메일 발송에 실패했습니다. 다시 시도해주세요.';
+      isSending.value = false;
+    });
   }
 };
-
 // 테스트용 인증코드 생성 함수
-const generateVerificationCode = () => { return Math.floor(100000 + Math.random() * 900000).toString(); };
+const generateVerificationCode = () => { 
+  return Math.floor(100000 + Math.random() * 900000).toString(); 
+};
 
 // 인증코드 검증 함수
 const verifyCode = () => {
@@ -204,199 +291,172 @@ const verifyCode = () => {
   }
 };
 
-
-// 타이머 관련 상태
-const isTimerRunning = ref(false);
-const remainingTime = ref(180); // 3분(180초)
-const formattedTime = computed(() => {
-const minutes = Math.floor(remainingTime.value / 60);
-const seconds = remainingTime.value % 60;
-return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-});
-
+// 타이머 시작 함수
 const startTimer = () => {
-  // 이메일 유효성 검사
-  validateEmail();
+  isTimerRunning.value = true;
+  remainingTime.value = 180; // 3분으로 초기화
   
-  // 이메일이 유효하면 타이머 시작
-  if (!emailError.value && email.value) {
-    isTimerRunning.value = true;
-    remainingTime.value = 180; // 3분으로 초기화
+  // 기존 타이머가 있으면 정리
+  if (timerInterval) {
+    clearInterval(timerInterval);
+  }
+  
+  // 타이머 시작
+  timerInterval = setInterval(() => {
+    remainingTime.value--;
     
-    // 타이머 시작
-    const timer = setInterval(() => {
-      remainingTime.value--;
-      
-      // 시간이 다 되면 타이머 중지
-      if (remainingTime.value <= 0) {
-        clearInterval(timer);
-        isTimerRunning.value = false;
-      }
-    }, 1000);
+    // 시간이 다 되면 타이머 중지
+    if (remainingTime.value <= 0) {
+      clearInterval(timerInterval);
+      isTimerRunning.value = false;
+      isEmailSent.value = false; // 인증 시간 만료
+      generatedCode.value = ''; // 코드 초기화
+      verificationError.value = '인증 시간이 만료되었습니다. 다시 요청해주세요.';
+    }
+  }, 1000);
+};
+
+// 인증코드 재발송 함수
+const resendVerificationCode = () => {
+  // 타이머가 실행 중이지 않을 때만 재발송 가능
+  if (!isTimerRunning.value) {
+    isEmailSent.value = false;
+    verificationCode.value = '';
+    verificationError.value = '';
+    sendVerificationEmail();
   }
 };
 
-
 // 이메일 유효성 검사
 const validateEmail = () => {
-if (!email.value) {
-  emailError.value = '이메일 형식으로 입력해 주세요';
-  return;
-}
-
-// @을 기준으로 한 구간이 알파벳 or 숫자 or 특수문자 조합으로 이루어져 있는지 체크
-const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-if (!emailRegex.test(email.value)) {
-  emailError.value = '이메일 형식으로 입력해 주세요';
-} else {
-  emailError.value = '';
-}
+  if (!email.value) {
+    emailError.value = '이메일 형식으로 입력해 주세요';
+    return;
+  }
+  
+  // @을 기준으로 한 구간이 알파벳 or 숫자 or 특수문자 조합으로 이루어져 있는지 체크
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  if (!emailRegex.test(email.value)) {
+    emailError.value = '이메일 형식으로 입력해 주세요';
+  } else {
+    emailError.value = '';
+  }
 };
 
 // 비밀번호 보이기/숨기기 토글
 const toggleShowPassword = () => {
-showPassword.value = !showPassword.value;
+  showPassword.value = !showPassword.value;
 };
 
 const toggleShowConfirmPassword = () => {
-showConfirmPassword.value = !showConfirmPassword.value;
+  showConfirmPassword.value = !showConfirmPassword.value;
 };
-
-
 
 // 비밀번호 유효성 검사
 const validatePassword = () => {
-// 입력값이 없고, 아직 사용자가 입력을 시작하지 않았다면 오류 표시하지 않음
-if (!password.value && !passwordTouched.value) {
-  passwordError.value = '';
-  return;
-}
+  // 입력값이 없고, 아직 사용자가 입력을 시작하지 않았다면 오류 표시하지 않음
+  if (!password.value && !passwordTouched.value) {
+    passwordError.value = '';
+    return;
+  }
+  
+  // 입력값이 없고, 사용자가 이미 입력을 시작했다면 오류 표시
+  if (!password.value && passwordTouched.value) {
+    passwordError.value = '비밀번호를 입력해 주세요.';
+    return;
+  }
 
-// 입력값이 없고, 사용자가 이미 입력을 시작했다면 오류 표시
-if (!password.value && passwordTouched.value) {
-  passwordError.value = '비밀번호를 입력해 주세요.';
-  return;
-}
+  // 8자리 이상 검사
+  if (password.value.length < 8) {
+    passwordError.value = '비밀번호를 조건에 맞게 입력해 주세요.';
+    return;
+  }
 
-// 8자리 이상 검사
-if (password.value.length < 8) {
-  passwordError.value = '비밀번호를 조건에 맞게 입력해 주세요.';
-  return;
-}
+  // 영문 포함 검사
+  const hasLetter = /[a-zA-Z]/.test(password.value);
+  // 숫자 포함 검사
+  const hasNumber = /[0-9]/.test(password.value);
+  // 특수문자 포함 검사
+  const hasSpecial = /[!@#$%^&*]/.test(password.value);
 
-// 영문 포함 검사
-const hasLetter = /[a-zA-Z]/.test(password.value);
-// 숫자 포함 검사
-const hasNumber = /[0-9]/.test(password.value);
-// 특수문자 포함 검사
-const hasSpecial = /[!@#$%^&*]/.test(password.value);
+  if (!hasLetter || !hasNumber || !hasSpecial) {
+    passwordError.value = '비밀번호를 조건에 맞게 입력해 주세요.';
+  } else {
+    passwordError.value = '';
+  }
 
-if (!hasLetter || !hasNumber || !hasSpecial) {
-  passwordError.value = '비밀번호를 조건에 맞게 입력해 주세요.';
-} else {
-  passwordError.value = '';
-}
-
-// 확인 비밀번호가 있을 경우 일치 여부 확인
-if (confirmPassword.value) {
-  validateConfirmPassword();
-}
+  // 확인 비밀번호가 있을 경우 일치 여부 확인
+  if (confirmPassword.value) {
+    validateConfirmPassword();
+  }
 };
 
 // 비밀번호 확인 유효성 검사
 const validateConfirmPassword = () => {
-// 입력값이 없고, 아직 사용자가 입력을 시작하지 않았다면 오류 표시하지 않음
-if (!confirmPassword.value && !confirmPasswordTouched.value) {
-  confirmPasswordError.value = '';
-  return;
-}
+  // 입력값이 없고, 아직 사용자가 입력을 시작하지 않았다면 오류 표시하지 않음
+  if (!confirmPassword.value && !confirmPasswordTouched.value) {
+    confirmPasswordError.value = '';
+    return;
+  }
+  
+  // 입력값이 없고, 사용자가 이미 입력을 시작했다면 오류 표시
+  if (!confirmPassword.value && confirmPasswordTouched.value) {
+    confirmPasswordError.value = '비밀번호를 확인해 주세요.';
+    return;
+  }
 
-// 입력값이 없고, 사용자가 이미 입력을 시작했다면 오류 표시
-if (!confirmPassword.value && confirmPasswordTouched.value) {
-  confirmPasswordError.value = '비밀번호를 확인해 주세요.';
-  return;
-}
-
-if (password.value !== confirmPassword.value) {
-  confirmPasswordError.value = '비밀번호를 확인해 주세요.';
-} else {
-  confirmPasswordError.value = '';
-}
+  if (password.value !== confirmPassword.value) {
+    confirmPasswordError.value = '비밀번호를 확인해 주세요.';
+  } else {
+    confirmPasswordError.value = '';
+  }
 };
-
-// 비밀번호 일치 여부를 확인하는 계산된 속성
-const isPasswordMatch = computed(() => {
-return password.value && 
-       confirmPassword.value && 
-       password.value === confirmPassword.value && 
-       !passwordError.value;
-});
 
 // 이름 유효성 검사
 const validateName = () => {
-// 입력값이 없고, 아직 사용자가 입력을 시작하지 않았다면 오류 표시하지 않음
-if (!username.value && !nameTouched.value) {
-  nameError.value = '';
-  return;
-}
+  // 입력값이 없고, 아직 사용자가 입력을 시작하지 않았다면 오류 표시하지 않음
+  if (!username.value && !nameTouched.value) {
+    nameError.value = '';
+    return;
+  }
+  
+  // 입력값이 없고, 사용자가 이미 입력을 시작했다면 오류 표시
+  if (!username.value && nameTouched.value) {
+    nameError.value = '이름을 입력해 주세요.';
+    return;
+  }
 
-// 입력값이 없고, 사용자가 이미 입력을 시작했다면 오류 표시
-if (!username.value && nameTouched.value) {
-  nameError.value = '이름을 입력해 주세요.';
-  return;
-}
-
-// 한글만 허용하는 정규식
-const koreanOnly = /^[가-힣]{2,8}$/;
-
-// 숫자, 특수문자, 공백 포함 검사
-const hasInvalidChar = /[\d\s!@#$%^&*(),.?":{}|<>]/.test(username.value);
-
-if (hasInvalidChar) {
-  nameError.value = '숫자, 특수문자, 공백은 입력할 수 없습니다.';
-} else if (!koreanOnly.test(username.value)) {
-  nameError.value = '이름은 2~8자의 한글만 입력 가능합니다.';
-} else {
-  nameError.value = '';
-}
+  // 한글만 허용하는 정규식
+  const koreanOnly = /^[가-힣]{2,8}$/;
+  
+  // 숫자, 특수문자, 공백 포함 검사
+  const hasInvalidChar = /[\d\s!@#$%^&*(),.?":{}|<>]/.test(username.value);
+  
+  if (hasInvalidChar) {
+    nameError.value = '숫자, 특수문자, 공백은 입력할 수 없습니다.';
+  } else if (!koreanOnly.test(username.value)) {
+    nameError.value = '이름은 2~8자의 한글만 입력 가능합니다.';
+  } else {
+    nameError.value = '';
+  }
 };
 
-
-// 성별 상태 관리
-const gender = ref('male'); // 기본값은 남성으로 설정
-const privacyChecked = ref(false);
-const termsChecked = ref(false);
 // 성별 선택 함수
 const selectGender = (selectedGender) => {
   gender.value = selectedGender;
 };
 
-
-// 폼 유효성 검사를 위한 계산된 속성
-const isButtonEnabled = computed(() => {
-// 이메일, 비밀번호, 이름이 유효하고
-const isEmailValid = email.value && !emailError.value;
-const isPasswordValid = password.value && confirmPassword.value && 
-                       !passwordError.value && !confirmPasswordError.value;
-const isNameValid = username.value && !nameError.value;
-
-// 개인정보처리방침, 이용약관 체크가 되었는지 확인
-const isCheckboxesChecked = privacyChecked.value && termsChecked.value;
-
-// 모든 조건을 만족해야 true 반환
-return isEmailValid && isPasswordValid && isNameValid && isCheckboxesChecked;
-});
-
-
+// 폼 제출 함수
 const submitForm = () => {
-if (isButtonEnabled.value) {
-  // 여기에 폼 제출 로직 추가
-  console.log('폼 제출 성공!', {
-    email: email.value,
-    password: password.value,
-    name: username.value,
-  });
-}
+  if (isButtonEnabled.value) {
+    // 여기에 폼 제출 로직 추가
+    console.log('폼 제출 성공!', {
+      email: email.value,
+      password: password.value,
+      name: username.value,
+      gender: gender.value
+    });
+  }
 };
 
 // 입력값 변경 시 유효성 검사
@@ -405,7 +465,11 @@ watch(password, validatePassword);
 watch(confirmPassword, validateConfirmPassword);  
 watch(username, validateName);
 // 인증코드 입력 감시
-watch(verificationCode, () => { if (verificationError.value) { verificationError.value = ''; } });
+watch(verificationCode, () => { 
+  if (verificationError.value) { 
+    verificationError.value = ''; 
+  } 
+});
 </script>
 
 <style scoped>
