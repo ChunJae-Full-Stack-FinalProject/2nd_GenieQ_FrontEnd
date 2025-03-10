@@ -163,7 +163,7 @@ td{
   text-align: left;
   padding: 3.5px 20px;    
   border-bottom: 1px solid #e1e1e1;
-  font-weight: 500;
+  font-weight: 300;
   font-family: 'Pretendard';
   color: #424242;
   white-space: nowrap; 
