@@ -46,7 +46,7 @@
            
            <div class="signup-section">
              <span class="notion">GenieQ가 처음이신가요?</span>
-             <router-link to="/singup" class="signup-link">계정 만들기</router-link>
+             <router-link to="/signup" class="signup-link">계정 만들기</router-link>
            </div>
          </div>
        </div>
