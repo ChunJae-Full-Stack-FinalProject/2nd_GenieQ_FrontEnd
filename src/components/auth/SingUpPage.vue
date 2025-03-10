@@ -249,22 +249,26 @@ const sendVerificationEmail = () => {
     // 로딩 상태 표시
     isSending.value = true;
     
-    // EmailJS로 이메일 전송 (한 번만 호출)
+    // EmailJS로 이메일 전송 - 수신자 이메일 명확하게 지정
     const templateParams = {
       to_name: email.value.split('@')[0],
       from_name: "GenieQ",
-      message: `인증 코드: ${generatedCode.value}`,
-      reply_to: email.value,
-      verification_code: generatedCode.value // 인증 코드를 별도 변수로 전달
+      message: `인증 코드: ${generatedCode.value}`, // 기존 메시지 유지
+      verification_code: generatedCode.value,      // 명시적으로 추가
+      to_email: email.value,
+      reply_to: "no-reply@genieq.com"
     };
     
+    console.log("전송 파라미터:", templateParams); // 디버깅용
+    
     emailjs.send(
-      'service_gamja',   // 실제 서비스 ID
-      'template_zcvkxgp',  // 실제 템플릿 ID
+      'service_gamja',   // 서비스 ID
+      'template_zcvkxgp',  // 템플릿 ID
       templateParams
     )
     .then(() => {
       console.log('이메일 발송 성공!', generatedCode.value);
+      console.log('수신자:', email.value);
       isEmailSent.value = true;
       isSending.value = false;
       startTimer(); // 타이머 시작
