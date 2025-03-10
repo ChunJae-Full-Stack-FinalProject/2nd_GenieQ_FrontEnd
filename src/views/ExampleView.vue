@@ -95,6 +95,6 @@ const showChangePwdModal = ref(false);
   flex: 1;
   padding: 20px;
   background-color: #f4f6f9;
-  overflow-y: auto;
+
 }
 </style>
