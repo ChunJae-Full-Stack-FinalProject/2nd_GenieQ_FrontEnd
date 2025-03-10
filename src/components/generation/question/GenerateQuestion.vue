@@ -12,6 +12,7 @@
               <BaseButton text="추출하기" type="type2" id="download-button" width="248px" height="54px" :disabled="!hasManualSave" @click="handleButtonClick"/>
           </div>
           <PlainTooltip id="download-tooltip" message="추출은 저장 후 가능해요" width="203px" />
+          <PlainTooltip id="add-question-tooltip" message="문항 추가는 저장 후 가능해요" width="233px" />
           <GenerateQuestionModal :isOpen="showGenerateQuestionModal" @close="showGenerateQuestionModal = false"/>
       </div>
       <ConfirmModalComponent
@@ -239,5 +240,10 @@ provide('passageData', {
   position: absolute;
   top: 1277px;
   left: 1070px;
+}
+#add-question-tooltip {
+  position: absolute;
+  top: 1277px;
+  left: 520px;
 }
 </style>
