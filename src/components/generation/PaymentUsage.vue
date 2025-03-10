@@ -34,7 +34,7 @@
     width: 520px;
     height: 584px;
     left: 1244px;
-    top: 118px;
+    top: 200px;
 
     background: #FFFFFF;
     border: 1px solid #BDBDBD;
