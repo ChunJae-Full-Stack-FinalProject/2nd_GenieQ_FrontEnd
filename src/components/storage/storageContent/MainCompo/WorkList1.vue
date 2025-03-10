@@ -297,7 +297,7 @@ td{
   min-width: 50px;
   height: 28px;
   background-color: #f0f0f0;
-  border-radius: 4px;
+  border-radius: 12px;
   padding: 0 10px;
   font-size: 14px;
   color: #333;
