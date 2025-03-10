@@ -8,8 +8,8 @@
             <BaseButton id="recreate-button" text="재생성하기(1회 차감)" type="type2" width="248px" height="54px"  @click="checkContentLength"/>
             <BaseButton id="save-button" text="저장하기" type="type2" width="248px" height="54px" @click="handleSaveButtonClick"/>
             <BaseButton id="download-button" text="추출하기" type="type2" width="248px" height="54px" :disabled="!hasManualSave" @click="checkContentLengthAndOpenFileModal()"/>
-            <router-link to="/questions">
-                <BaseButton id="connect-create-button" text="이어서 문항 생성하기" type="type4" width="520px" height="54px" @click="handleConnectCreate"/>
+            <router-link to="/questions" custom v-slot="{ navigate }">
+                <BaseButton id="connect-create-button" text="이어서 문항 생성하기" type="type4" width="520px" height="54px" @click="handleConnectCreate($event, navigate)"/>
             </router-link>
             
             <PlainTooltip id="download-message" message="추출은 저장 후 가능해요" width="205px"/>
@@ -27,6 +27,17 @@
             @close="closeConfirmModal"
             @confirm="closeConfirmModal"
         />
+
+        <!-- 저장하지 않고 페이지 이동 시 경고 모달 -->
+        <WarningModalComponent 
+            :isOpen="isWarningModalOpen" 
+            title="작업을 중단하시겠습니까?" 
+            message="마지막 편집 내용은 저장되지 않습니다." 
+            cancelText="취소하기"
+            confirmText="작업 중단하기"
+            @close="cancelNavigation" 
+            @confirm="confirmNavigation"
+        />
     </div>
 </template>
 <script setup>
@@ -37,18 +48,29 @@ import BaseButton from '@/components/common/button/BaseButton.vue';
 import PlainTooltip from '@/components/common/PlainTooltip.vue';
 import FileSelectModal from '@/components/common/modal/type/FileSelectModal.vue';
 import ConfirmModalComponent from '@/components/common/modal/type/ConfirmModalComponent.vue';
+import WarningModalComponent from '@/components/common/modal/type/WarningModalComponent.vue';
 
-import { ref } from 'vue';
+import { ref, onMounted, onBeforeUnmount, getCurrentInstance } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 // 모달 상태 관리
 const isFileModalOpen = ref(false);
 const isConfirmModalOpen = ref(false);
 const hasManualSave = ref(false); // 사용자가 직접 저장 버튼을 클릭했는지 추적
+const isContentChanged = ref(false); // 내용 변경 여부 추적
+const isWarningModalOpen = ref(false); // 경고 모달 상태
+
+// 네비게이션 관련 변수
+const pendingRoute = ref(null); // 대기 중인 라우트 정보 저장
 
 // 컴포넌트 참조
 const passageTitleRef = ref(null);
 const passageContentRef = ref(null);
 const passageSummaryRef = ref(null);
+
+// 라우터 관련 정보 가져오기
+const route = useRoute();
+const router = useRouter();
 
 // 글자 수 체크 함수
 const checkContentLength = (event) => {
@@ -68,6 +90,7 @@ const handleSaveButtonClick = (event) => {
         savePassageData();
         // 저장 버튼 클릭 플래그 설정 (추출하기 버튼 활성화)
         hasManualSave.value = true;
+        isContentChanged.value = false; // 저장 후 변경사항 초기화
         return true;
     }
     return false;
@@ -90,8 +113,26 @@ const savePassageData = () => {
 };
 
 // 이어서 문항 생성하기 버튼 클릭 시 데이터 저장
-const handleConnectCreate = (event) => {
+const handleConnectCreate = (event, navigate) => {
+    // 내용 길이 확인
     if (checkContentLength(event)) {
+        // 내용에 변경사항이 있고 저장되지 않은 상태라면 경고 모달 표시
+        if (hasUnsavedChanges()) {
+            // 지문 정보 수집 - 저장은 하지 않음
+            const passageData = {
+                title: passageTitleRef.value?.getTitle?.() || '',
+                content: passageContentRef.value?.getContent?.() || '',
+                summary: passageSummaryRef.value?.getSummary?.() || ''
+            };
+            
+            // 대기 중인 네비게이션 설정
+            isWarningModalOpen.value = true;
+            pendingRoute.value = '/questions';
+            event.preventDefault();
+            return;
+        }
+        
+        // 저장된 상태라면 그냥 이동
         // 지문 정보 수집
         const passageData = {
             title: passageTitleRef.value?.getTitle?.() || '',
@@ -101,6 +142,9 @@ const handleConnectCreate = (event) => {
         
         // 로컬 스토리지에 저장
         localStorage.setItem('tempPassageData', JSON.stringify(passageData));
+        navigate(event); // 네비게이션 실행
+    } else {
+        event.preventDefault(); // 글자 수가 충분하지 않으면 이동 방지
     }
 };
 
@@ -140,11 +184,106 @@ const handleFileSelect = (fileType) => {
     // 파일 추출 로직 구현
 }
 
+// 저장되지 않은 변경사항이 있는지 확인하는 함수
+const hasUnsavedChanges = () => {
+    // 편집 중인지 확인하고, 내용이 변경됐는데 저장되지 않았는지 확인
+    const hasContentChanged = isContentChanged.value && !hasManualSave.value;
+
+    // 지문이 있고, 저장 버튼이 활성화 되어있는 경우 (내용이 있지만 저장되지 않음)
+    const hasUnsavedContent = passageContentRef.value && 
+                            passageContentRef.value.getContent?.() && 
+                            passageContentRef.value.getContent?.().length > 0 && 
+                            !hasManualSave.value;
+                          
+    console.log('변경 감지 상태:', {
+        isContentChanged: isContentChanged.value,
+        hasManualSave: hasManualSave.value,
+        hasContentChanged,
+        hasUnsavedContent
+    });
+
+    return hasContentChanged || hasUnsavedContent;
+};
+
+// 이동 취소 - 현재 화면 유지
+const cancelNavigation = () => {
+    console.log('네비게이션 취소됨');
+    isWarningModalOpen.value = false;
+    pendingRoute.value = null;
+};
+
+// 이동 확인 - 타겟 페이지로 이동
+const confirmNavigation = () => {
+    console.log('네비게이션 승인됨, 이동 실행');
+    isWarningModalOpen.value = false;
+
+    // 변경 사항이 있었지만, 사용자가 이동을 확인했으므로 관련 상태 초기화
+    isContentChanged.value = false;
+    hasManualSave.value = true; // 사용자가 명시적으로 저장하지 않기로 함
+    
+    // 네비게이션 수행
+    if (pendingRoute.value) {
+        const targetPath = pendingRoute.value;
+        pendingRoute.value = null;
+        
+        // 저장했던 경로로 직접 이동 실행
+        router.push(targetPath);
+    }
+};
+
+// 페이지 이탈 시, 경고 (브라우저 새로고침, 닫기 등)
+const handleBeforeUnload = (e) => {
+    if (hasUnsavedChanges()) {
+        e.preventDefault();
+        e.returnValue = '';
+        return '';
+    }
+};
+
+// Vue 인스턴스 참조
+const instance = getCurrentInstance();
+let routerGuard = null;
+
+onMounted(() => {
+    // 브라우저 새로고침, 닫기 등에 대한 이벤트 리스너 추가
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    
+    // 전역 네비게이션 가드 설정
+    routerGuard = router.beforeEach((to, from, next) => {
+        console.log('라우터 가드 호출됨', { from: from.path, to: to.path, current: route.path });
+        
+        // 현재 라우트에서 다른 라우트로 이동하는 경우에만 확인
+        if (from.path === route.path && hasUnsavedChanges()) {
+            console.log('저장되지 않은 변경사항 감지됨, 네비게이션 중단 및 모달 표시');
+            
+            // 저장되지 않은 변경사항이 있다면 모달 표시하고 대기
+            isWarningModalOpen.value = true;
+            pendingRoute.value = to.fullPath; // 이동하려는 전체 경로 저장
+            
+            return false; // 네비게이션 중단
+        }
+        
+        console.log('네비게이션 계속 진행');
+        return next(); // 네비게이션 계속
+    });
+});
+
+onBeforeUnmount(() => {
+    // 컴포넌트 해제 시 이벤트 리스너 제거
+    window.removeEventListener('beforeunload', handleBeforeUnload);
+
+    // 라우터 가드 제거
+    if (routerGuard) {
+        routerGuard();
+    }
+});
+
 // 데이터가 변경될 때마다 호출될 콜백 함수
 // 이 함수를 자식 컴포넌트에서 호출하도록 구현하여 내용 변경 감지
 const handleContentChange = () => {
     // 내용이 변경되면 저장 플래그 초기화 (추출하기 버튼 비활성화)
     hasManualSave.value = false;
+    isContentChanged.value = true;
 };
 
 // 필요에 따라 자식 컴포넌트에 콜백 제공
