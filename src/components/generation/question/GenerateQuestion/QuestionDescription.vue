@@ -3,7 +3,30 @@
         <p id="description-head">문제 해설</p>
         <div class="description-main">
             <span v-if="!isEditing" id="correct-answer">정답 {{ answer }}</span>
-            <input v-else type="text" v-model="answer" id="input-answer"/>
+            <!-- <input v-else type="text" v-model="answer" id="input-answer"/> -->
+            <div v-else id="input-answer">
+                <p>정답</p>
+                <div class="answer-option">
+                    <input type="radio" name="answer" value="1" checked v-model="selectedAnswer">
+                    <label for="answer1">①</label>
+                </div>
+                <div class="answer-option">
+                    <input type="radio" name="answer" value="2" v-model="selectedAnswer">
+                    <label for="answer2">②</label>
+                </div>
+                <div class="answer-option">
+                    <input type="radio" name="answer" value="3" v-model="selectedAnswer">
+                    <label for="answer3">③</label>
+                </div>
+                <div class="answer-option">
+                    <input type="radio" name="answer" value="4" v-model="selectedAnswer">
+                    <label for="answer4">④</label>
+                </div>
+                <div class="answer-option">
+                    <input type="radio" name="answer" value="5" v-model="selectedAnswer">
+                    <label for="answer5">⑤</label>
+                </div>
+            </div>
 
             <span v-if="!isEditing" id="description-content">{{ content }}</span>
             <textarea v-else type="text" v-model="content" id="input-content"></textarea>
@@ -111,13 +134,12 @@ export default {
     align-self: stretch;
     flex-grow: 0;
 }
-#correct-answer, #input-answer {
+#correct-answer {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     padding: 0px;
     gap: 34px;
-    
     width: 480px;
 
     font-family: 'Pretendard';
@@ -159,5 +181,34 @@ export default {
     flex-grow: 0;
 
     resize: none;
+}
+#input-answer {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 0px;
+    gap: 19px;
+
+    width: 217px;
+    height: 20px;
+
+    flex: none;
+    order: 0;
+    flex-grow: 0;
+}
+input[type="radio"] {
+    display: none;
+}
+
+label {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+}
+input[type="radio"]:checked + label {
+  color: #FF9F40;
+  background-color: #FFEDDC;
+  border-radius: 50%;
 }
 </style>
