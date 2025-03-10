@@ -18,6 +18,16 @@
         @close="isConfirmModalOpen = false"
         @confirm="isConfirmModalOpen = false"
     />
+
+    <GenerateQuestionModal 
+    :isOpen="showGenerateQuestionModal" 
+    @close="closeGenerateQuestionModal"
+    @openPaymentModal="openPaymentModal"
+  />
+  <PaymentUsageModal 
+    :isOpen="showPaymentUsageModal" 
+    @close="closePaymentModal"
+  />
 </template>
 <script setup>
 import { ref, provide, onMounted, computed } from 'vue';
@@ -28,10 +38,11 @@ import GenerateQuestionModal from '@/components/common/modal/type/generation/Gen
 import LoadPassageModal from "@/components/common/modal/type/generation/LoadPassageModal.vue";
 import ConfirmModalComponent from '@/components/common/modal/type/ConfirmModalComponent.vue';
 import InputPassageTitle from '@/components/generation/passage/PassageContent/InputPassageTitle.vue';
+import PaymentUsageModal from '@/components/common/modal/type/generation/PaymentUsageModal.vue';
 
 const showGenerateQuestionModal = ref(false);
 const showLoadPassageModal = ref(false);
-const isConfirmModalOpen = ref(false);
+const isConfirmModalOpen = ref(false);  
 
 // 지문 상태 및 메서드
 const currentPassage = ref({
@@ -113,6 +124,23 @@ onMounted(() => {
 provide('passageData', {
     currentPassage, setPassage, resetPassage, openLoadPassageModal, validatePassageLength, showLengthWarning
 });
+
+
+
+const showPaymentUsageModal = ref(false);
+
+const openPaymentModal = () => {
+  showGenerateQuestionModal.value = false;
+  showPaymentUsageModal.value = true;
+};
+
+const closeGenerateQuestionModal = () => {
+  showGenerateQuestionModal.value = false;
+};
+
+const closePaymentModal = () => {
+  showPaymentUsageModal.value = false;
+};
 </script>
 <style scoped>
 .app-container {
