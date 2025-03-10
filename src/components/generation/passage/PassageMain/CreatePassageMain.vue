@@ -103,7 +103,7 @@ defineExpose({
     width: 928px;
     height: 584px;
     left: 292px;
-    top: 118px;
+    top: 200px;
 
     background: #FFFFFF;
     border: 1px solid #BDBDBD;

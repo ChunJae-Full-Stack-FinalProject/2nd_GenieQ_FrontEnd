@@ -2,7 +2,7 @@
   <div class="app-container">
       <p id="main-head">문항 생성</p>
       <div class="main-content">
-          <PassageTitle/>
+          <InputPassageTitle ref="passageTitleRef"/>
           <EditPassageQuestion ref="editPassageQuestionRef" @edit-mode-changed="updateEditingMode"/>
           <PassageSummary/>
           <QuestionDescription :isEditing="isEditingGlobal" :questionData="questionData"/>
@@ -37,7 +37,7 @@
 import { ref, onMounted, provide, onBeforeUnmount, getCurrentInstance } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import EditPassageQuestion from './GenerateQuestion/EditPassageQuestion/EditPassageQuestion.vue';
-import PassageTitle from './GenerateQuestion/PassageTitle.vue';
+import InputPassageTitle from '@/components/generation/passage/PassageContent/InputPassageTitle.vue';
 import PassageSummary from '../passage/PassageContent/PassageSummary.vue';
 import QuestionDescription from './GenerateQuestion/QuestionDescription.vue';
 import BaseButton from '@/components/common/button/BaseButton.vue';
