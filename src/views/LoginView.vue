@@ -11,28 +11,38 @@
            <h3 class="form-title">로그인</h3>
            
            <div class="form-group">
-             <div class="input-wrapper">
-               <span class="input-icon">
-                 <Icon icon="icon-park-outline:people" width="28" height="28"  style="color: #BDBDBD"/>
-               </span>
-               <input type="text" placeholder="이메일을 입력하세요." v-model="username" class="form-input">
-             </div>
-           </div>
+            <div class="input-wrapper" :class="{ 'error': emailError }">
+            <span class="input-icon">
+              <Icon icon="icon-park-outline:people" width="28" height="28" style="color: #BDBDBD"/>
+            </span>
+            <input type="text" placeholder="이메일을 입력하세요." v-model="email" class="form-input"@input="validateEmail">
+          </div>
+            <div v-if="emailError" class="error-message">{{ emailError }}</div>
+          </div>
            
            <div class="form-group">
-             <div class="input-wrapper">
-               <span class="input-icon">
-                 <Icon icon="mdi:password-outline" width="32" height="32"  style="color: #BDBDBD"/>
-               </span>
-               <input type="password" placeholder="비밀번호를 입력해 주세요." v-model="password" class="form-input">
-             </div>
-           </div>
+          <div class="input-wrapper" :class="{ 'error': passwordError }">
+            <span class="input-icon">
+              <Icon icon="mdi:password-outline" width="32" height="32" style="color: #BDBDBD"/>
+            </span>
+            <input 
+              type="password" 
+              placeholder="비밀번호를 입력해 주세요." 
+              v-model="password" 
+              class="form-input"
+              @input="validatePassword"
+            >
+          </div>
+          <div v-if="passwordError" class="error-message">{{ passwordError }}</div>
+        </div>
            
            <div class="login-options">
              <router-link to="/passwordsearch" class="find-account">비밀번호 찾기</router-link>
            </div>
            
-           <button @click="login" class="login-button">로그인하기</button>
+           <button @click="login" class="login-button" :disabled="emailError || passwordError || !email || !password">
+            로그인하기
+           </button>
            
            <div class="signup-section">
              <span class="notion">GenieQ가 처음이신가요?</span>
@@ -43,10 +53,65 @@
      </div>
    </template>
    
-   <script setup>
-   </script>
+<script setup>
+import { ref, watch } from 'vue';
+import { Icon } from '@iconify/vue'; // 또는 사용 중인 아이콘 라이브러리에 맞게 수정
+// 상태 관리
+const email = ref('');
+const password = ref('');
+const emailError = ref('');
+const passwordError = ref('');
+
+// 이메일 유효성 검사
+const validateEmail = () => {
+  if (!email.value) {
+    emailError.value = '이메일 형식으로 입력해 주세요';
+    return;
+  }
+  
+  // @을 기준으로 한 구간이 알파벳 or 숫자 or 특수문자 조합으로 이루어져 있는지 체크
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  if (!emailRegex.test(email.value)) {
+    emailError.value = '이메일 형식으로 입력해 주세요';
+  } else {
+    emailError.value = '';
+  }
+};
+
+// 비밀번호 유효성 검사
+const validatePassword = () => {
+  if (!password.value) {
+    passwordError.value = '이메일 또는 비밀번호가 일치하지 않습니다.';
+    return;
+  }
+  
+  // 임의의 비밀번호 검증 로직 (실제로는 서버 응답에 따라 처리)
+  if (password.value.length < 6) {
+    passwordError.value = '이메일 또는 비밀번호가 일치하지 않습니다.';
+  } else {
+    passwordError.value = '';
+  }
+};
+
+// 로그인 기능
+const login = () => {
+  // 유효성 검사 다시 확인
+  validateEmail();
+  validatePassword();
+  
+  // 오류가 없으면 로그인 시도
+  if (!emailError.value && !passwordError.value && email.value && password.value) {
+    // 여기에 실제 로그인 API 호출 로직 추가
+    console.log('로그인 시도:', { email: email.value, password: password.value });
+  }
+};
+
+// 입력값 변경 시 유효성 검사
+watch(email, validateEmail);
+watch(password, validatePassword);
+</script>
    
-   <style scoped>
+<style scoped>
    .login-container {
       width: 100%;
       display: flex;
@@ -207,4 +272,28 @@
    .signup-link:hover {
      text-decoration: underline;
    }
+
+   /* 오류 스타일 추가 */
+.input-wrapper.error {
+  border-color: #ff0000;
+}
+
+.error-message {
+  color: #ff0000;
+  font-size: 12px;
+  margin-top: 5px;
+  text-align: left;
+  padding-left: 5px;
+}
+
+/* 비활성화된 버튼 스타일 */
+.login-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+/* 입력 폼 너비 조정 */
+.input-wrapper {
+  width: 100%;
+}
    </style>

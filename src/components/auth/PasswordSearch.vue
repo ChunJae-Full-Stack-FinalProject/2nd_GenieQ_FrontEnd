@@ -9,17 +9,18 @@
       
           <div class="form-group">
             <label class="input-label">이메일*</label>
-            <div class="input-wrapper">
-              <Icon icon="lucide:user-round" class="input-icon" />
-              <input type="email" placeholder="이메일 주소를 입력해 주세요." class="form-input" />
-            </div>
-            <button class="button gray-button">인증메일 발송</button>
-          </div> 
+              <div class="input-wrapper" :class="{ 'error': emailError }">
+                <Icon icon="lucide:user-round" class="input-icon" />
+                <input type="text" placeholder="이메일을 입력하세요." v-model="email" class="form-input" @input="validateEmail">
+              </div>
+            <div v-if="emailError" class="error-message">{{ emailError }}</div>
+            <button class="button gray-button" style="margin-top: 10px;">인증메일 발송</button>
+          </div>  
           
           <div class="form-group">
             <label class="input-label">인증코드 확인*</label>
             <div class="input-with-button">
-              <input type="text" placeholder="인증코드를 입력하세요." class="form-input input-with-margin" />
+              <input type="text" placeholder="인증코드를 입력하세요." class="form-input2" />
               <button class="button verify-button">인증</button>
             </div>
           </div>
@@ -30,6 +31,28 @@
   
   <script setup>
   import { Icon } from "@iconify/vue";
+  import { ref, watch } from 'vue';
+  const email = ref('');
+  const emailError = ref('');
+
+  // 이메일 유효성 검사
+  const validateEmail = () => {
+  if (!email.value) {
+    emailError.value = '이메일 형식으로 입력해 주세요';
+    return;
+  }
+  
+  // @을 기준으로 한 구간이 알파벳 or 숫자 or 특수문자 조합으로 이루어져 있는지 체크
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  if (!emailRegex.test(email.value)) {
+    emailError.value = '이메일 형식으로 입력해 주세요';
+  } else {
+    emailError.value = '';
+  }
+};
+
+
+  watch(email, validateEmail);  
   </script>
   
   <style scoped>
@@ -103,7 +126,7 @@
     color: #424242;
     margin-bottom: 8px;
   }
-  
+
   .input-wrapper {
     position: relative;
     display: flex;
@@ -145,6 +168,18 @@
   
   .form-input:focus {
     outline: none;
+  }
+
+  .form-input2{
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    height: 44px;
+    border: 1px solid #BDBDBD;
+    border-radius: 6px;
+    padding: 10px;
   }
   
   .input-with-button {
@@ -191,5 +226,24 @@
     border-radius: 6px;
     color: #FFFFFF;
   }
+  .error-message {
+  color: #ff0000;
+  font-size: 12px;
+  margin-top: 5px;
+  text-align: left;
+  padding-left: 5px;
+  z-index: 21;
+}
+
+/* 비활성화된 버튼 스타일 */
+.login-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+/* 입력 폼 너비 조정 */
+.input-wrapper {
+  width: 100%;
+}
   </style>
   
