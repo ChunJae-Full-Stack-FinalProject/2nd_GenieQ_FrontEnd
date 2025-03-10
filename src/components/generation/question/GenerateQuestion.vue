@@ -24,8 +24,8 @@
       />
       <WarningModalComponent 
         :isOpen="isWarningModalOpen" 
-        title="저장되지 않은 변경사항이 있습니다." 
-        message="변경 사항을 저장하지 않고 이동하시겠습니까? 저장하지 않은 내용은 사라집니다." 
+        title="작업을 중단하시겠습니까?" 
+        message="마지막 편집 내용은 저장되지 않습니다." 
         @close="cancleNavigation" 
         @confirm="confirmNavigation"
       />
@@ -142,7 +142,7 @@ const router = useRouter();
 
 // 저장되지 않은 변경사항이 있는지 확인하는 함수
 const hasUnsavedChanges = () => {
-  // 편집 중인지 확인하고, 내용이 변경되고, 저장되지 않았는지 확인
+  // 편집 중인지 확인하고, 내용이 변경됐는데 저장되지 않았는지 확인
   const hasContentChanged = isContentChanged.value && !isSaved.value;
 
   // 지문이 있고, 저장 버튼이 활성화 되어있는 경우 ( 내용이 있지만 저장되지 않음 )
