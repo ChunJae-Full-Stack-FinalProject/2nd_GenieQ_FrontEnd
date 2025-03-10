@@ -1,8 +1,8 @@
 <template>
-    <div class="edit-passage-question">
-        <EditPassage ref="editPassageRef"/>
-        <EditQuestion @edit-mode-changed="forwardEditModeChange"/>
-    </div>
+  <div class="edit-passage-question">
+    <EditPassage ref="editPassageRef"/>
+    <EditQuestion @edit-mode-changed="forwardEditModeChange"/>
+  </div>
 </template>
 <script setup>
 // EditPassageQuestion.vue 수정 코드
@@ -60,16 +60,60 @@ const emit = defineEmits(['edit-mode-changed']);
 </script>
 <style scoped>
 .edit-passage-question {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 0px;
-    gap: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0px;
+  gap: 20px;
 
-    position: absolute;
-    width: 928px;
-    height: 1120px;
-    left: 292px;
-    top: 176px;
+  position: absolute;
+  width: 930px;
+  height: 1160px;
+  left: 292px;
+  top: 170px;
+}
+#passage-head {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0px;
+  gap: 12px;
+
+  width: 610px;
+  height: 30px;
+
+  font-style: normal;
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 150%;
+
+  letter-spacing: -0.02em;
+  color: #303030;
+
+  flex: none;
+  order: 0;
+  align-self: stretch;
+  flex-grow: 0;
+}
+#passage-title {
+box-sizing: border-box;
+
+display: flex;
+flex-direction: row;
+align-items: center;
+padding: 8px;
+gap: 8px;
+
+width: 848px;
+height: 46px;
+
+background: #FFFFFF;
+border: 1px solid #FF9F40;
+border-radius: 8px;
+
+flex: none;
+order: 1;
+align-self: stretch;
+flex-grow: 0;
 }
 </style>
