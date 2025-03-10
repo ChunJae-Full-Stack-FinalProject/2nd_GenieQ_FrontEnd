@@ -1,26 +1,29 @@
 <template>
     <div class="edit-question">
-        <div class="question-main">
-            <div class="question-header">
-                <div class="title-container">
-                    <span v-if="!isEditing" id="question-title">{{ title }}</span>
-                    <input v-else type="text" v-model="title" id="input-title" ref="titleInput"/>
-                </div>
-
-                <button class="edit-button" @click="toggleEditMode">
-                    <Icon icon="mingcute:pencil-fill" width="24" height="24" 
+        <p>문항</p>
+        <div class="edit-main">
+            <div class="question-main">
+                <div class="question-header">
+                    <div class="title-container">
+                        <span v-if="!isEditing" id="question-title">{{ title }}</span>
+                        <input v-else type="text" v-model="title" id="input-title" ref="titleInput"/>
+                    </div>
+                    
+                    <button class="edit-button" @click="toggleEditMode">
+                        <Icon icon="mingcute:pencil-fill" width="24" height="24" 
                         :style="{color: isEditing ? '#FF9F40' : '#303030' }" />
-                </button>
-            </div>
-            <div class="question-items">
-                <div v-for="(item, index) in items" :key="index" class="question-item">
-                    <span class="question-number">{{ circledNumbers[index] }}</span>
-                    <span v-if="!isEditing" class="question-text">{{ item }}</span>
-                    <input v-else type="text" v-model="items[index]" id="input-question"/>
+                    </button>
+                </div>
+                <div class="question-items">
+                    <div v-for="(item, index) in items" :key="index" class="question-item">
+                        <span class="question-number">{{ circledNumbers[index] }}</span>
+                        <span v-if="!isEditing" class="question-text">{{ item }}</span>
+                        <input v-else type="text" v-model="items[index]" id="input-question"/>
+                    </div>
                 </div>
             </div>
+            <BaseButton text="재생성하기" type="type4" id="recreate-button" width="200px" height="54px"/>
         </div>
-        <BaseButton text="재생성하기(1회차감)" type="type4" id="recreate-button" width="200px" height="54px"/>
     </div>
 </template>
 <script>
@@ -105,22 +108,43 @@ export default {
 </script>
 <style scoped>
 .edit-question {
-    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0px;
+    gap: 4px;
 
-    position: absolute;
-    width: 928px;
-    height: 365px;
-    left: calc(50% - 928px/2);
-    top: 760px;
-
-    background: #FFFFFF;
-    border: 1px solid #BDBDBD;
-    border-radius: 20px;
+    width: 930px;
+    height: 405px;
 
     flex: none;
     order: 1;
-    align-self: stretch;
     flex-grow: 0;
+}
+.edit-question > p {
+    width: 928px;
+    height: 36px;
+
+    font-style: normal;
+    font-weight: 700;
+    font-size: 24px;
+    line-height: 150%;
+
+    letter-spacing: -0.02em;
+    color: #000000;
+}
+.edit-main {
+    box-sizing: border-box;
+
+    width: 927px;
+    height: 365px;
+    left: 137px;
+    top: 0px;
+
+    background: #FFFFFF;
+    border: 1px solid #BDBDBD;
+    border-radius: 12px;
+
 }
 .question-main {
     display: flex;
@@ -128,13 +152,12 @@ export default {
     align-items: flex-start;
     padding: 0px;
     gap: 12px;
-    isolation: isolate;
 
-    position: absolute;
+    position: relative;
     width: 736.67px;
     height: 246px;
     left: calc(50% - 736.67px/2 - 71.67px);
-    top: 24px;
+    top: 25px;
 }
 .question-header {
     height: 36px;
@@ -249,8 +272,8 @@ export default {
     border: 1px solid #BDBDBD;
 }
 #recreate-button {
-    position: absolute;
+    position: relative;
     left: 704px;
-    top: 293px;
+    top: 40px;
 }
 </style>

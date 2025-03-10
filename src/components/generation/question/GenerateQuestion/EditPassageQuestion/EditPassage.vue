@@ -1,5 +1,6 @@
 <template>
     <div class="edit-passage">
+        <EditTitle/>
         <div class="edit-tool-bar">
             <p>편집 도구</p>
             <div class="edit-tool-bar-content">
@@ -53,6 +54,7 @@
 import { ref, watch, nextTick, computed } from 'vue';
 import SymbolTooltip from './SymbolTooltip.vue';
 import ConfirmModalComponent from '@/components/common/modal/type/ConfirmModalComponent.vue';
+import EditTitle from './EditTitle.vue';
 
 // 상수 정의
 const MIN_LENGTH = 500;
@@ -272,9 +274,8 @@ defineExpose({
 <style scoped>
 .edit-passage {
     box-sizing: border-box;
-
     width: 928px;
-    height: 735px;
+    height: 783px;
 
     background: #FFFFFF;
     border: 1px solid #BDBDBD;
@@ -296,7 +297,7 @@ defineExpose({
     width: 849px;
     height: 111px;
     left: 39px;
-    top: 32px;
+    top: 132px;
 }
 .edit-tool-bar > p {
     font-family: 'Pretendard';
@@ -316,6 +317,7 @@ defineExpose({
 }
 .edit-tool-bar-content {
     box-sizing: border-box;
+
     width: 849px;
     height: 73px;
 
@@ -323,7 +325,7 @@ defineExpose({
     border: 1px solid #757575;
     border-radius: 12px;
 
-    display: flex;
+    flex: none;
     order: 1;
     align-self: stretch;
     flex-grow: 0;
@@ -414,7 +416,7 @@ defineExpose({
     width: 35px;
     height: 30px;
     left: 39px;
-    top: 202px;
+    top: 255px;
 
     font-family: 'Pretendard';
     font-style: normal;
@@ -430,7 +432,7 @@ defineExpose({
     width: 76px;
     height: 24px;
     left: 811px;
-    top: 205px;
+    top: 273px;
 
     font-family: 'Pretendard';
     font-style: normal;
@@ -440,6 +442,7 @@ defineExpose({
 
     text-align: right;
     letter-spacing: -0.02em;
+
     color: #BDBDBD;
 }
 #passage-content-main {
@@ -449,15 +452,14 @@ defineExpose({
     flex-direction: row;
     justify-content: center;
     align-items: center;
-    padding: 32.5px 32px;
+    padding: 32px;
     gap: 8px;
-    isolation: isolate;
 
     position: absolute;
     width: 848px;
     height: 462px;
-    left: 39px;
-    top: 241px;
+    left: calc(50% - 848px/2 - 1px);
+    top: 297px;
 
     background: #FFFFFF;
     border: 1px solid #FF9F40;
