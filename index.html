@@ -15,9 +15,10 @@
         height: 100%;
         min-height: 100%;
         background-color: #F6F6F6; /* 배경색 추가 */
+        overflow-x: unset !important; /* 스크롤 제거 */
+        overflow-y: unset !important; /* 스크롤 제거 */
       }
       body { 
-        overflow-x: auto; /* 가로 스크롤 허용 */ 
         min-width: 1200px; /* 최소 너비 설정 */
       }
       #app {
@@ -26,7 +27,7 @@
         background-color: #F6F6F6; /* 배경색 추가 */
       }
       .sidebar { 
-        overflow-y: auto; /* 세로 스크롤 허용 */
+        overflow-y: auto; /* 스크롤 추가 */
       }
     </style>
   </head>

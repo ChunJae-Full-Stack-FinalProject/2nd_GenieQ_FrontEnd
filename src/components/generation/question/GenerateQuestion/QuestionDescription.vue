@@ -2,34 +2,40 @@
     <div class="question-description">
         <p id="description-head">문제 해설</p>
         <div class="description-main">
-            <span v-if="!isEditing" id="correct-answer">정답 {{ answer }}</span>
+            <!-- <div>
+            <span id="correct-answer">정답 {{ answer }}</span>
+            </div> -->
             <!-- <input v-else type="text" v-model="answer" id="input-answer"/> -->
-            <div v-else id="input-answer">
-                <p>정답</p>
-                <div class="answer-option">
-                    <input type="radio" name="answer" value="1" checked v-model="selectedAnswer">
-                    <label for="answer1">①</label>
-                </div>
-                <div class="answer-option">
-                    <input type="radio" name="answer" value="2" v-model="selectedAnswer">
-                    <label for="answer2">②</label>
-                </div>
-                <div class="answer-option">
-                    <input type="radio" name="answer" value="3" v-model="selectedAnswer">
-                    <label for="answer3">③</label>
-                </div>
-                <div class="answer-option">
-                    <input type="radio" name="answer" value="4" v-model="selectedAnswer">
-                    <label for="answer4">④</label>
-                </div>
-                <div class="answer-option">
-                    <input type="radio" name="answer" value="5" v-model="selectedAnswer">
-                    <label for="answer5">⑤</label>
+            <div class="select-answerbox">
+                <div id="input-answer">
+                    <p>정답</p>
+                    <div class="answer-option">
+                        <input type="radio" name="answer" value="1" checked v-model="selectedAnswer">
+                        <label for="answer1">①</label>
+                    </div>
+                    <div class="answer-option">
+                        <input type="radio" name="answer" value="2" v-model="selectedAnswer">
+                        <label for="answer2">②</label>
+                    </div>
+                    <div class="answer-option">
+                        <input type="radio" name="answer" value="3" v-model="selectedAnswer">
+                        <label for="answer3">③</label>
+                    </div>
+                    <div class="answer-option">
+                        <input type="radio" name="answer" value="4" v-model="selectedAnswer">
+                        <label for="answer4">④</label>
+                    </div>
+                    <div class="answer-option">
+                        <input type="radio" name="answer" value="5" v-model="selectedAnswer">
+                        <label for="answer5">⑤</label>
+                    </div>
                 </div>
             </div>
-
+            
+            <div class="content-box">
             <span v-if="!isEditing" id="description-content">{{ content }}</span>
             <textarea v-else type="text" v-model="content" id="input-content"></textarea>
+            </div>
         </div>
     </div>
 </template>
@@ -182,10 +188,25 @@ export default {
 
     resize: none;
 }
+.select-answerbox{
+    display: flex;
+    flex-direction: start;
+    align-items: center;
+    padding: 0px;
+    gap: 8px;
+
+    width: 480px;
+    height: 40px;
+
+    white-space: nowrap;
+    flex: none;
+    order: 0;
+    align-self: stretch;
+    flex-grow: 0;
+}
 #input-answer {
     display: flex;
     flex-direction: row;
-    justify-content: center;
     align-items: center;
     padding: 0px;
     gap: 19px;
@@ -203,12 +224,37 @@ input[type="radio"] {
 
 label {
     font-size: 20px;
-    width: 20px;
-    height: 20px;
 }
-input[type="radio"]:checked + label {
-  color: #FF9F40;
-  background-color: #FFEDDC;
-  border-radius: 50%;
+
+
+.answer-option {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.answer-option input[type="radio"] {
+    display: none; /* 기본 라디오 버튼 숨기기 */
+}
+
+.answer-option label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 12px; /* 정확한 너비 */
+    height: 12px; /* 정확한 높이 */
+    border-radius: 50%; /* 완전한 원 모양 */
+    font-size: 19px;
+    line-height: 32px;
+    text-align: center;
+}
+
+.answer-option input[type="radio"]:checked + label {
+    background-color: #FFEDDC; /* 연한 주황색 배경 */
+    color: #FF9F40; /* 진한 주황색 텍스트 */
+}
+
+.content-box{
+    border: 1px solid #BDBDBD;
 }
 </style>
