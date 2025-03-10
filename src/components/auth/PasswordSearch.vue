@@ -30,7 +30,7 @@
             <div v-if="verificationError" class="error-message">{{ verificationError }}</div>
             <div v-if="isVerified" class="success-message">인증이 완료되었습니다!</div>
           </div>
-        <Router-link to="/temppasswordnotice" class="button gray-button">완료</Router-link>
+          <button class="button gray-button" @click="sendTempPassword" :disabled="!isVerified" :style="isVerified ? { backgroundColor: '#303030', color: '#FFFFFF' } : { backgroundColor: '#BDBDBD', color: '#FFFFFF' }">완료</button>
       </div> 
     </div>
   </div>
@@ -39,6 +39,8 @@
   <script setup>
   import { Icon } from "@iconify/vue";
   import { ref, watch, computed, onMounted, onUnmounted } from 'vue';
+  import { useRouter } from 'vue-router';
+  const router = useRouter();
   import emailjs from '@emailjs/browser';
   const email = ref('');
   const emailError = ref('');
@@ -224,6 +226,85 @@ const validateEmail = () => {
     verificationError.value = ''; 
   } 
 });
+
+
+// 임시 비밀번호 생성 함수
+const generateTempPassword = () => {
+  // 8자리 이상, 영문 + 숫자 + 특수문자 조합
+  const letters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const numbers = '0123456789';
+  const specialChars = '!@#$%^&*';
+  
+  // 각 타입에서 최소 1개 이상 포함되도록
+  let password = '';
+  password += letters.charAt(Math.floor(Math.random() * letters.length));
+  password += letters.charAt(Math.floor(Math.random() * letters.length));
+  password += numbers.charAt(Math.floor(Math.random() * numbers.length));
+  password += numbers.charAt(Math.floor(Math.random() * numbers.length));
+  password += specialChars.charAt(Math.floor(Math.random() * specialChars.length));
+  
+  // 추가 랜덤 문자 (길이를 8자 이상으로)
+  const allChars = letters + numbers + specialChars;
+  for (let i = 0; i < 5; i++) {
+    password += allChars.charAt(Math.floor(Math.random() * allChars.length));
+  }
+  
+  // 문자열 섞기
+  return password.split('').sort(() => 0.5 - Math.random()).join('');
+};
+
+
+
+
+
+
+
+// 임시 비밀번호 발송 함수
+const sendTempPassword = () => {
+  // 이메일 인증이 완료되었는지 확인
+  if (!isVerified.value) {
+    alert('이메일 인증을 먼저 완료해주세요.');
+    return;
+  }
+  
+  // 임시 비밀번호 생성
+  const tempPassword = generateTempPassword();
+  
+  
+  // 로딩 상태 표시
+  isSending.value = true;
+  
+  // EmailJS로 이메일 전송
+  const templateParams = {
+    to_name: email.value.split('@')[0],
+    from_name: "GenieQ",
+    verification_code: tempPassword,  // 임시 비밀번호를 verification_code로 전달
+    to_email: email.value,
+    reply_to: "no-reply@genieq.com"
+};
+  
+  emailjs.send(
+    'service_gamja',
+    'template_r30leoh',
+    templateParams
+  )
+  .then(() => {
+    console.log('임시 비밀번호 발송 성공!');
+    console.log('이메일 발송 성공!', tempPassword);
+    isSending.value = false;
+    // 다음 페이지로 이동 (Router-link 대신 프로그래밍 방식으로 이동)
+    router.push('/temppasswordnotice');
+  })
+  .catch((error) => {
+    console.error('이메일 발송 실패:', error);
+    alert('임시 비밀번호 발송에 실패했습니다. 다시 시도해주세요.');
+    isSending.value = false;
+  });
+};
+
+
+
+
   </script>
   
   <style scoped>
