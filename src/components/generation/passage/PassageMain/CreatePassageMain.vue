@@ -7,27 +7,27 @@
                 <p id="select-category-head">지문 분야 선택</p>
                 <div class="select-category">
                     <div class="category-option">
-                        <input type="radio" id="human" name="category" checked>
+                        <input type="radio" id="human" name="category" checked @change="onCategoryChange('human')">
                         <label for="human">인문</label>
                     </div>
                     <div class="category-option">
-                        <input type="radio" id="art" name="category">
+                        <input type="radio" id="art" name="category" @change="onCategoryChange('art')">
                         <label for="art">예술</label>
                     </div>
                     <div class="category-option">
-                        <input type="radio" id="social" name="category">
+                        <input type="radio" id="social" name="category" @change="onCategoryChange('social')">
                         <label for="social">사회</label>
                     </div>
                     <div class="category-option">
-                        <input type="radio" id="culture" name="category">
+                        <input type="radio" id="culture" name="category" @change="onCategoryChange('culture')">
                         <label for="culture">문화</label>
                     </div>
                     <div class="category-option">
-                        <input type="radio" id="science" name="category">
+                        <input type="radio" id="science" name="category" @change="onCategoryChange('science')">
                         <label for="science">과학</label>
                     </div>
                     <div class="category-option">
-                        <input type="radio" id="other" name="category">
+                        <input type="radio" id="other" name="category" @change="onCategoryChange('other')">
                         <label for="other">기술</label>
                     </div>
                 </div>
@@ -42,10 +42,17 @@
     </div>
 </template>
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, defineExpose } from 'vue';
 
 const emit = defineEmits(['input-change']);
 const inputText = ref('');
+const selectedCategory = ref('human');
+
+// 카테고리 변경 함수 추가
+const onCategoryChange = (category) => {
+    selectedCategory.value = category;
+    emit('category-change', category);
+};
 
 const checkTextLength = () => {
     if (inputText.value.length > 20) {
@@ -62,6 +69,15 @@ const onInputChange = () => {
 watch(inputText, (newValue) => {
     emit('input-change', newValue);
 }, { immediate: true });
+
+defineExpose({
+    resetForm() {
+        inputText.value = '';
+        selectedCategory.value = 'human';
+        // DOM에 직접 접근하여 라디오 버튼 상태 변경
+        document.getElementById('human').checked = true;
+    }
+})
 </script>
 <style scoped>
 #main-title {

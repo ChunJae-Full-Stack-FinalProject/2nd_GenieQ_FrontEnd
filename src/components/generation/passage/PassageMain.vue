@@ -3,8 +3,9 @@
         <div class="main-content">
             <InputPassageTitle ref="passageTitleRef"/>
             <CreatePassageMain @input-change="updateInputText"/>
+            <CreatePassageMain ref="createPassageMainRef" @input-change="updateInputText" @category-change="updateCategory"/>
             <PaymentUsage/>
-            <BaseButton id="reset_button" text="초기화" type="type2" width="248px" height="54px" />
+            <BaseButton id="reset_button" text="초기화" type="type2" width="248px" height="54px" :disabled="!hasContent" @click="resetText"/>
             <router-link to="/passage/create" v-if="isButtonEnabled">
                 <BaseButton 
                     id="create_button" 
@@ -27,20 +28,37 @@
     </div>
 </template>
 <script setup>
-import { ref, computed , defineExpose } from 'vue';
+import { ref, computed  } from 'vue';
 import CreatePassageMain from '@/components/generation/passage/PassageMain/CreatePassageMain.vue';
 import PaymentUsage from '@/components/generation/PaymentUsage.vue';
 import BaseButton from '@/components/common/button/BaseButton.vue';
 import InputPassageTitle from '@/components/generation/passage/PassageContent/InputPassageTitle.vue';
 
 const inputText = ref('');
-const isButtonEnabled = computed(() => inputText.value.length >= 2);
+const selectedCategory = ref('human');
+const createPassageMainRef = ref(null);
+const isButtonEnabled = computed(() => inputText.value.length >= 1);
+
+// 지문 제재 초기화 함수
+const resetText = () => {
+    inputText.value = '';
+
+    if (createPassageMainRef.value) {
+        createPassageMainRef.value.resetForm();
+    }
+}
+
+const hasContent = computed(() => {
+    return inputText.value && inputText.value.trim().length > 0;
+})
 
 const updateInputText = (text) => {
     inputText.value = text;
-    console.log('Text updated:', inputText.value, 'Length:', inputText.value.length);
-    console.log('Button enabled:', isButtonEnabled.value);
 };
+
+const updateCategory = (category) => {
+    selectedCategory.value = category;
+}
 </script>
 <style scoped>
 .app-container {

@@ -4,7 +4,7 @@
     </div>
 </template>
 <script setup>
-import { ref, inject, watch } from 'vue';
+import { ref, inject, watch, onMounted } from 'vue';
 
 const userInput = ref('');
 
@@ -15,11 +15,9 @@ const MIN_LENGTH = 500;
 const MAX_LENGTH = 1700;
 
 // 부모 컴포넌트에서 전달받은 지문 상태 감시
-watch(() => currentPassage.value, (newPassage) => {
-  if (newPassage && newPassage.content) {
-    userInput.value = newPassage.content;
-  }
-}, { immediate: true, deep: true });
+watch(() => currentPassage.value.content, (newContent) => {
+  userInput.value = newContent || '';
+}, { immediate: true });
 
 // 사용자 입력 감시
 watch(userInput, (newValue) => {

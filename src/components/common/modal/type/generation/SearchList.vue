@@ -5,6 +5,7 @@
       :key="item.id"
       class="list-item"
       :class="{ active: activeItem === item.id }"
+      :data-id="item.id"
       @click="toggleActive(item.id)"
     >
       <div class="passage-title" :class="{ active: activeItem === item.id }">
@@ -25,17 +26,38 @@
 
    
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import BaseButton from '@/components/common/button/BaseButton.vue';
 
-const props = defineProps({ items: Array });
+const props = defineProps({ 
+  items: Array,
+  activeItemId: Number // 부모 컴포넌트에서 전달받은 활성화 ID
+});
+
 const emit = defineEmits(["preview"]);
 
 const activeItem = ref(null);
 
+watch(() => props.activeItemId, (newVal) => {
+  if (newVal) {
+    activeItem.value = newVal;
+
+    // 활성화된 항목으로 화면 포커싱
+    setTimeout(() => {
+      const activeElement = document.querySelector(`.list-item[data-id="${newVal}"]`);
+      if (activeElement) {
+        activeElement.scrollIntoView({ behavior:'smooth', block: 'center' });
+      }
+    }, 100);
+  }
+}, { immediate: true });
+
 // ✅ 첫 번째 항목을 기본 활성화
 onMounted(() => {
-  if (props.items.length > 0) {
+  // 부모에서 전달받은 activeItemId가 있다면 그 값을 사용, 없으면 첫 번째 항목 활성화
+  if (props.activeItemId) {
+    activeItem.value = props.activeItemId;
+  } else if (props.items.length > 0) {
     activeItem.value = props.items[0].id;
   }
 });
