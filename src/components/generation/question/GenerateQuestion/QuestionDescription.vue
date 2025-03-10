@@ -2,11 +2,9 @@
     <div class="question-description">
         <p id="description-head">문제 해설</p>
         <div class="description-main">
-            <!-- <div>
-            <span id="correct-answer">정답 {{ answer }}</span>
-            </div> -->
+            <span v-if="!isEditing" id="correct-answer">정답 {{ answer }}</span>
             <!-- <input v-else type="text" v-model="answer" id="input-answer"/> -->
-            <div class="select-answerbox">
+            <div v-else class="select-answerbox">
                 <div id="input-answer">
                     <p>정답</p>
                     <div class="answer-option">
@@ -130,7 +128,7 @@ export default {
     gap: 8px;
 
     width: 520px;
-    height: 317px;
+    height: 365px;
 
     background: #FFFFFF;
     border: 1px solid #BDBDBD;
@@ -171,7 +169,7 @@ export default {
     gap: 34px;
 
     width: 480px;
-    height: 230px;
+    height: 277px;
 
     font-family: 'Pretendard';
     font-style: normal;
