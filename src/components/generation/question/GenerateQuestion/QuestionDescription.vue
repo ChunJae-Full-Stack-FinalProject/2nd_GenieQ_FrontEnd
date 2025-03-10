@@ -254,8 +254,4 @@ label {
     background-color: #FFEDDC; /* 연한 주황색 배경 */
     color: #FF9F40; /* 진한 주황색 텍스트 */
 }
-
-.content-box{
-    border: 1px solid #BDBDBD;
-}
 </style>
