@@ -6,8 +6,8 @@
             <PassageContentMain ref="passageContentRef"/>   
             <PassageSummary ref="passageSummaryRef"/>
             <BaseButton id="recreate-button" text="재생성하기(1회 차감)" type="type2" width="248px" height="54px"  @click="checkContentLength"/>
-            <BaseButton id="save-button" text="저장하기" type="type2" width="248px" height="54px" @click="checkContentLength"/>
-            <BaseButton id="download-button" text="추출하기" type="type2" width="248px" height="54px" disabled @click="checkContentLengthAndOpenFileModal()"/>
+            <BaseButton id="save-button" text="저장하기" type="type2" width="248px" height="54px" @click="handleSaveButtonClick"/>
+            <BaseButton id="download-button" text="추출하기" type="type2" width="248px" height="54px" :disabled="!hasManualSave" @click="checkContentLengthAndOpenFileModal()"/>
             <router-link to="/questions">
                 <BaseButton id="connect-create-button" text="이어서 문항 생성하기" type="type4" width="520px" height="54px" @click="handleConnectCreate"/>
             </router-link>
@@ -43,6 +43,7 @@ import { ref } from 'vue';
 // 모달 상태 관리
 const isFileModalOpen = ref(false);
 const isConfirmModalOpen = ref(false);
+const hasManualSave = ref(false); // 사용자가 직접 저장 버튼을 클릭했는지 추적
 
 // 컴포넌트 참조
 const passageTitleRef = ref(null);
@@ -58,6 +59,34 @@ const checkContentLength = (event) => {
         return false;
     }
     return true;
+};
+
+// 저장 버튼 클릭 핸들러 추가
+const handleSaveButtonClick = (event) => {
+    if (checkContentLength(event)) {
+        // 지문 데이터 저장 로직
+        savePassageData();
+        // 저장 버튼 클릭 플래그 설정 (추출하기 버튼 활성화)
+        hasManualSave.value = true;
+        return true;
+    }
+    return false;
+};
+
+// 지문 데이터 저장 함수
+const savePassageData = () => {
+    // 지문 정보 수집
+    const passageData = {
+        title: passageTitleRef.value?.getTitle?.() || '',
+        content: passageContentRef.value?.getContent?.() || '',
+        summary: passageSummaryRef.value?.getSummary?.() || ''
+    };
+    
+    // 로컬 스토리지에 저장
+    localStorage.setItem('savedPassageData', JSON.stringify(passageData));
+    console.log('지문 데이터 저장 완료:', passageData);
+    
+    // 여기에 API 호출 등 다른 저장 로직 추가 가능
 };
 
 // 이어서 문항 생성하기 버튼 클릭 시 데이터 저장
@@ -109,8 +138,18 @@ const handleFileSelect = (fileType) => {
 
     console.log('파일 추출하기: ', passageData);
     // 파일 추출 로직 구현
-    
 }
+
+// 데이터가 변경될 때마다 호출될 콜백 함수
+// 이 함수를 자식 컴포넌트에서 호출하도록 구현하여 내용 변경 감지
+const handleContentChange = () => {
+    // 내용이 변경되면 저장 플래그 초기화 (추출하기 버튼 비활성화)
+    hasManualSave.value = false;
+};
+
+// 필요에 따라 자식 컴포넌트에 콜백 제공
+// 예: provide('contentChangeCallback', handleContentChange);
+// 또는 props로 전달
 </script>
 <style scoped>
 .app-container {

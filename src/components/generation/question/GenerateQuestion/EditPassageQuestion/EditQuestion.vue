@@ -167,7 +167,6 @@ export default {
     align-self: stretch;
 }
 #input-title {
-    width: calc(100% - 40px); /* 연필 아이콘 영역을 고려한 너비 */
     height: 36px;
     font-family: 'Pretendard';
     font-style: normal;
@@ -180,16 +179,16 @@ export default {
     align-self: stretch;
 
     border: none;
-    width: 500px;
+    width: 734px;
 }
 .edit-button {
     border: none;
     background: none;
     cursor: pointer;
     
-    position: relative;
+    position: absolute;
     top: 3px;
-    left: 6px;
+    left: 845px;
     width: 16.67px;
 }
 .question-items {
