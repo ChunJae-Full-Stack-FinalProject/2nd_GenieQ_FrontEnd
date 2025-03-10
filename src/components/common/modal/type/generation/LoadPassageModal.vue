@@ -38,28 +38,35 @@
         <!-- <SearchList v-else :items="filteredPassages" @select="selectItem" />
       </div> -->
 
-        <!-- 중간 영역 (리스트 or 상세보기) -->
-        <div :class="contentAreaClass">
-          <!-- ✅ 지문 미리보기 -->
-          <div v-if="selectedPassage" class="passage-detail">
-            <div class="preview-title">{{ selectedPassage.title }}</div>
-            <div class="preview-content">{{ selectedPassage.content }}</div>
-          </div>
+      <!-- 중간 영역 (리스트 or 상세보기) -->
+      <div :class="contentAreaClass">
+        <!-- ✅ 지문 미리보기 -->
+        <div v-if="selectedPassage" class="passage-detail">
+          <div class="preview-title">{{ selectedPassage.title }}</div>
+          <div class="preview-content">{{ selectedPassage.content }}</div>
+        </div>
 
-          <!-- ✅ 검색 결과가 없을 때 -->
-          <div v-else-if="filteredPassages.length === 0" class="no-results">
-            ‘{{ searchQuery }}’에 대한 검색 결과가 존재하지 않습니다.
-          </div>
+        <!-- ✅ 검색 결과가 없을 때 -->
+        <div v-else-if="filteredPassages.length === 0" class="no-results">
+          ‘{{ searchQuery }}’에 대한 검색 결과가 존재하지 않습니다.
+        </div>
 
-          <!-- ✅ 검색 결과가 있을 때 리스트 표시 -->
-          <SearchList v-else :items="filteredPassages" @preview="selectPassage" />
+        <!-- ✅ 검색 결과가 있을 때 리스트 표시 -->
+        <SearchList v-else :items="filteredPassages" :activeItemId="selectedPassageId" @preview="selectPassage" />
       </div>
 
 
       <!-- 버튼 영역 -->
       <div class="modal-footer">
-        <BaseButton :text="selectedPassage ? '이전으로' : '닫기'" type="type3" width="140px" height="54px" @click="handleBackOrClose" />
-        <BaseButton text="불러오기" type="type1" width="182px" height="54px" :disabled="!selectedPassage" @click="handleLoadPassage"/>
+        <!-- 미리보기 화면일 때는 "이전으로" 버튼 표시 -->
+        <template v-if="selectedPassage">
+          <BaseButton text="이전으로" type="type3" width="140px" height="54px" @click="handleBack"/>
+        </template>
+        <!-- 리스트 화면일 때는 "닫기" 버튼 표시 -->
+        <template v-else>
+          <BaseButton text="닫기" type="type3" width="140px" height="54px" @click="closeModal"/>
+        </template>
+        <BaseButton text="불러오기" type="type1" width="182px" height="54px" :disabled="!selectedPassage" @click.stop="handleLoadPassage"/>
       </div>
     </div>
   </BaseModal>
@@ -67,7 +74,6 @@
 
 <script setup>
 import { ref, computed  } from "vue";
-import { Icon } from "@iconify/vue";
 import BaseModal from "../../BaseModal.vue";
 import BaseButton from "@/components/common/button/BaseButton.vue";
 import SearchList from "./SearchList.vue";
@@ -124,7 +130,8 @@ const emit = defineEmits(["close", "loadPassage"]);
 
 const searchQuery = ref("");
 const activeTab = ref("recent");
-const selectedPassage = ref(null); // ✅ 선택된 지문 저장
+const selectedPassage = ref(null); // 선택된 지문 저장
+const selectedPassageId = ref(null); // 선택된 지문의 ID 저장 (활성화 상태 유지를 위해)
 
 // 불러오기 버튼 클릭 시 처리
 const handleLoadPassage = () => {
@@ -134,25 +141,31 @@ const handleLoadPassage = () => {
   }
 };
 
-// ✅ 미리보기 버튼을 클릭하면 지문 선택
+// 미리보기 버튼을 클릭하면 지문 선택
 const selectPassage = (passage) => {
   selectedPassage.value = passage;
+  selectedPassageId.value = passage.id;
 };
 
-// ✅ 닫기 버튼 클릭 시 초기화
-const handleBackOrClose = () => {
-  if (selectedPassage.value) {
-    selectedPassage.value = null; // '이전으로' 클릭 시 목록 화면으로 전환
-    selectedPassage = { ...selectedPassage };
-  } else {
-    closeModal(); // '닫기' 클릭 시 모달 닫기
-  }
+// "이전으로" 버튼 클릭 시 처리 - 미리보기에서 리스트로 돌아가기
+const handleBack = () => {
+  // 현재 선택된 ID 저장
+  const tempId = selectedPassageId.value;
+
+  // 미리보기 상태 해제
+  selectedPassage.value = null;
+
+  // ID 상태 유지 (활성화 상태 유지)
+  selectedPassageId.value = tempId;
 };
 
+// 닫기 버튼 클릭 시 모달 닫기 처리
 const closeModal = () => {
   emit("close");
   searchQuery.value = "";
   selectedPassage.value = null; // 선택된 지문 초기화
+  selectedPassageId.value = null; // 선택된 지문 ID 초기화
+  activeTab.value = "recent"; // 탭 초기화
 };
 
 // ✅ 검색어에 따라 목록 필터링
