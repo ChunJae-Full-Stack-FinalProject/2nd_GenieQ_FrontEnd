@@ -1,6 +1,5 @@
 <template>
     <div class="edit-question">
-        <p>문항</p>
         <div class="edit-main">
             <div class="question-main">
                 <div class="question-header">
@@ -120,18 +119,6 @@ export default {
     flex: none;
     order: 1;
     flex-grow: 0;
-}
-.edit-question > p {
-    width: 928px;
-    height: 36px;
-
-    font-style: normal;
-    font-weight: 700;
-    font-size: 24px;
-    line-height: 150%;
-
-    letter-spacing: -0.02em;
-    color: #000000;
 }
 .edit-main {
     box-sizing: border-box;
