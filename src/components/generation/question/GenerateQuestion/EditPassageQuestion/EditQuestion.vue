@@ -5,7 +5,7 @@
                 <div class="question-header">
                     <div class="title-container">
                         <span v-if="!isEditing" id="question-title">{{ title }}</span>
-                        <input v-else type="text" v-model="title" id="input-title" ref="titleInput"/>
+                        <input v-else type="text" v-model="title" id="input-title" ref="titleInput" @input="handleQuestionChanged"/>
                     </div>
                     
                     <button class="edit-button" @click="toggleEditMode">
@@ -17,7 +17,7 @@
                     <div v-for="(item, index) in items" :key="index" class="question-item">
                         <span class="question-number">{{ circledNumbers[index] }}</span>
                         <span v-if="!isEditing" class="question-text">{{ item }}</span>
-                        <input v-else type="text" v-model="items[index]" id="input-question"/>
+                        <input v-else type="text" v-model="items[index]" id="input-question" @input="handleQuestionChanged"/>
                     </div>
                 </div>
             </div>
@@ -82,6 +82,11 @@ export default {
                 this.$emit('update:questions', this.items);
                 this.$emit('update:questionTitle', this.title);
             }
+        },
+        
+        // 문항 변경 시 이벤트 발생
+        handleQuestionChanged() {
+            this.$emit('question-changed');
         }
     },
     created() {

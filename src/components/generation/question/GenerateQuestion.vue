@@ -6,7 +6,7 @@
       <p id="content-head">지문</p>
       <!-- EditPassage를 직접 사용 -->
       <div class="edit-content-container">
-        <EditPassage ref="editPassageRef"/>
+        <EditPassage ref="editPassageRef" @content-changed="handleContentChange"/>
       </div>
     </div>
         
@@ -19,6 +19,7 @@
             :questions="item.questions" 
             :questionTitle="item.title"
             @edit-mode-changed="updateEditingMode"
+            @question-changed="handleContentChange"
           />
         </div>
       </div>
@@ -35,6 +36,7 @@
             :isEditing="isEditingGlobal" 
             :correct="item.correct" 
             :description="item.description"
+            @description-changed="handleContentChange"
           />
         </div>
       </div>
@@ -54,9 +56,9 @@
     </div>
         
     <div class="button-container">
-        <BaseButton text="문항 추가하기" type="type2" id="add-button" width="248px" height="54px" :disabled="!hasManualSave" @click="validateAndOpenModal"/>
-        <BaseButton text="저장하기" type="type2" id="save-button" width="248px" height="54px" @click="handleSaveButtonClick"/>
-        <BaseButton text="추출하기" type="type2" id="download-button" width="248px" height="54px" :disabled="!hasManualSave" @click="handleButtonClick"/>
+        <BaseButton text="문항 추가하기" type="type2" id="add-button" width="248px" height="54px" :disabled="isContentChanged" @click="validateAndOpenModal"/>
+        <BaseButton text="저장하기" type="type2" id="save-button" width="248px" height="54px" :disabled="!isContentChanged" @click="handleSaveButtonClick"/>
+        <BaseButton text="추출하기" type="type2" id="download-button" width="248px" height="54px" :disabled="isContentChanged" @click="handleButtonClick"/>
     </div>
         
     <GenerateQuestionModal :isOpen="showGenerateQuestionModal" @close="showGenerateQuestionModal = false"/>
@@ -107,9 +109,9 @@ const passageData = ref(null);
 const isConfirmModalOpen = ref(false);
 const showGenerateQuestionModal = ref(false);
 const showPaymentModal = ref(false); // PaymentUsageModal 상태
-const isSaved = ref(false);
-const hasManualSave = ref(false);
-const isContentChanged = ref(false);
+const isSaved = ref(true); // 저장 상태 초기값을 true로 변경
+const hasManualSave = ref(true); // 처음에는 true로 설정하여 문항 추가하기와 추출하기 버튼 활성화
+const isContentChanged = ref(false); // 내용 변경 플래그 (false로 시작)
 const isWarningModalOpen = ref(false);
 
 // 캐러셀 관련 상태
@@ -154,6 +156,15 @@ const currentPassage = ref({
 // EditPassage 컴포넌트 참조
 const editPassageRef = ref(null);
 
+// 내용 변경 시 호출되는 함수
+const handleContentChange = () => {
+  // 내용이 변경되면 isContentChanged를 true로, hasManualSave를 false로 설정
+  isContentChanged.value = true;
+  hasManualSave.value = false;
+  isSaved.value = false;
+  console.log('내용이 변경되었습니다:', { isContentChanged: isContentChanged.value, hasManualSave: hasManualSave.value });
+};
+
 // 기존 버튼 클릭 핸들러
 const handleButtonClick = () => {
   if (editPassageRef.value) {
@@ -171,7 +182,8 @@ const handleSaveButtonClick = () => {
       savePassageData();
       isSaved.value = true;
       hasManualSave.value = true;
-      isContentChanged.value = false;
+      isContentChanged.value = false; // 저장 후 내용 변경 플래그를 false로 설정
+      console.log('내용이 저장되었습니다:', { isContentChanged: isContentChanged.value, hasManualSave: hasManualSave.value });
       return true;
     } else {
       showLengthWarning();
@@ -376,29 +388,18 @@ onBeforeUnmount(() => {
   }
 });
 
-// 내부 저장 상태만 체크하는 함수 (버튼 활성화와는 무관)
-const checkSavedState = () => {
-  if (passageData.value && passageData.value.content && passageData.value.content.length >= 500) {
-    // 내부 저장 상태만 업데이트하고 버튼은 활성화하지 않음
-    isSaved.value = true;
-  }
-};
-
 // provide 실행
 provide('passageData', {
   passage: passageData,
   updatePassage: (newContent) => {
     if (passageData.value) {
       passageData.value.content = newContent;
-      // 내용이 변경되면 저장 상태 초기화 및 수동 저장 플래그 초기화
-      isSaved.value = false;
-      isContentChanged.value = true; // 내용이 변경됨을 표시
-      hasManualSave.value = false; // 내용이 변경되면 수동 저장 플래그도 초기화
+      // 내용이 변경되었음을 표시
+      handleContentChange();
     } else {
       passageData.value = { content: newContent };
-      isSaved.value = false;
-      isContentChanged.value = true; // 내용이 변경됨을 표시
-      hasManualSave.value = false;
+      // 새로운 내용이 추가되었음을 표시
+      handleContentChange();
     }
   }
 });
