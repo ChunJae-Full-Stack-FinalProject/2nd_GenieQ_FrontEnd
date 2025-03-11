@@ -1,33 +1,60 @@
 <template>
-        <div id="payment-usage">
-            <div class="credit-container">
-                <p id="credit-head">결제</p>
-                <div class="credit-container-main">
-                    <div class="credit-row">
-                        <div class="credit-type">보유 이용권</div>
-                        <div class="credit-count">{{creditcount}}회</div>
-                    </div>
-                    
-                    <div class="credit-row">
-                        <div class="credit-type">사용 예정 이용권</div>
-                        <div class="credit-count"><span style="color: #FF9500;">1</span>회</div>
-                    </div>
-                    
-                    <div v-if="creditcount>0" class="credit-row accent-bg">
-                        <div class="credit-type">잔여 이용권</div>
-                        <div class="credit-count">{{creditcount-1}}회</div>
-                    </div>
-                    <div v-else="creditcount=0" class="credit-row accent-bg">
-                        <div class="credit-type">※ 보유하신 잔여 이용권이 모두 소진되었습니다.</div>
-                    </div>
+    <div id="payment-usage">
+        <div class="credit-container">
+            <p id="credit-head">결제</p>
+            <div class="credit-container-main">
+                <div class="credit-row">
+                    <div class="credit-type">보유 이용권</div>
+                    <div class="credit-count">{{creditcount}}회</div>
+                </div>
+                
+                <div class="credit-row">
+                    <div class="credit-type">사용 예정 이용권</div>
+                    <div class="credit-count"><span style="color: #FF9500;">1</span>회</div>
+                </div>
+                
+                <div v-if="creditcount > 0" class="credit-row accent-bg">
+                    <div class="credit-type">잔여 이용권</div>
+                    <div class="credit-count">{{creditcount-1}}회</div>
+                </div>
+                <div v-else class="credit-row accent-bg">
+                    <div class="credit-type">※ 보유하신 잔여 이용권이 모두 소진되었습니다.</div>
                 </div>
             </div>
-            <p id="note">※ 생성이 시작된 중단 및 취소가 불가능합니다.</p>
         </div>
+        <p id="note">※ 생성이 시작된 중단 및 취소가 불가능합니다.</p>
+    </div>
 </template>
+
 <script setup>
-import { ref } from "vue";
-const creditcount = ref(0);
+import { ref, watch, onMounted } from "vue";
+
+const creditcount = ref(0); // 초기값 0
+
+// 이벤트 정의
+const emit = defineEmits(['credit-update']);
+
+// creditcount 변경 감지
+watch(creditcount, (newValue) => {
+    emit('credit-update', newValue);
+});
+
+// creditcount를 외부에 노출
+const updateCreditCount = (count) => {
+  creditcount.value = count;
+  emit('credit-update', count);
+};
+
+// 컴포넌트 마운트 시 이벤트 발생
+onMounted(() => {
+    emit('credit-update', creditcount.value);
+});
+
+// 외부에서 사용할 수 있도록 defineExpose 사용
+defineExpose({
+  creditcount,
+  updateCreditCount
+});
 </script>
 <style scoped>
 #payment-usage {
