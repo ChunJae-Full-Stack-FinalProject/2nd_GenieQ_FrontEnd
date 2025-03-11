@@ -1,7 +1,7 @@
 <template>
     <div class="app-container">
+        <p id="main-title">지문 생성</p>
         <div class="main-content">
-            <InputPassageTitle ref="passageTitleRef"/>
             <CreatePassageMain ref="createPassageMainRef" @input-change="updateInputText" @category-change="updateCategory"/>
             <PaymentUsage/>
             <BaseButton id="reset_button" text="초기화" type="type2" width="248px" height="54px" :disabled="!hasContent" @click="resetText"/>
@@ -153,6 +153,22 @@ const saveDataAndNavigate = () => {
 .app-container {
     width: 100%;
     padding: 20px 30px 80px 20px;
+}
+#main-title {
+    position: absolute;
+    width: 87px;
+    height: 36px;
+    left: 292px;
+    top: 70px;
+
+    font-family: 'Pretendard';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 24px;
+    line-height: 150%;
+
+    letter-spacing: -0.02em;
+    color: #000000;
 }
 #reset_button {
     position: absolute;

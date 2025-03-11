@@ -1,10 +1,18 @@
 <template>
-    <div>
+<div class="input-container">
+    <div class="edit-title">
+        <p id="passage-head">작업이름</p>
+        <input type="text" id="passage-title" placeholder="작업 이름을 입력해주세요." v-model="title"/>
+    </div>
+
+    <div class="select-category-container">
+        <p id="sub-title">생성 결과</p>
         <div id="text-count"><span style="color: #FF9500;">{{ content.length }}</span>/1700</div>
         <div id="passage-content-main">
             <textarea id="content-text" placeholder="본문을 입력해주세요." v-model="content" @input="handleInput"></textarea>
         </div>
     </div>
+</div>
 </template>
 <script setup>
 import { ref, defineExpose, defineEmits } from 'vue';
@@ -49,12 +57,127 @@ defineExpose({
 });
 </script>
 <style scoped>
+#main-title {
+    position: absolute;
+    width: 87px;
+    height: 36px;
+    left: 292px;
+    top: 70px;
+    margin: 0px;
+
+    font-family: 'Pretendard';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 24px;
+    line-height: 150%;
+
+    letter-spacing: -0.02em;
+    color: #000000;
+}
+
+.input-container {
+    box-sizing: border-box;
+
+    position: absolute;
+    width: 928px;
+    height: 660px;
+    left: 292px;
+    top: 118px;
+
+    background: #FFFFFF;
+    border: 1px solid #BDBDBD;
+    border-radius: 12px;
+}
+
+.edit-title {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0px;
+    gap: 12px;
+
+    position: absolute;
+    width: 848px;
+    height: 88px;
+    left: 40px;
+    top: 24px;
+}
+
+#passage-head {
+    width: 610px;
+    height: 30px;
+
+    font-family: 'Pretendard';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 20px;
+    line-height: 150%;
+
+    letter-spacing: -0.02em;
+    color: #303030;
+}
+
+#passage-title {
+    box-sizing: border-box;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 8px;
+    gap: 8px;
+
+    width: 848px;
+    height: 46px;
+
+    background: #FFFFFF;
+    border: 1px solid #FF9F40;
+    border-radius: 8px;
+    
+    font-family: 'Pretendard';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+}
+
+.content-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0px;
+    gap: 12px;
+
+    position: absolute;
+    width: 848px;
+    height: 450px;
+    left: 40px;
+    top: 132px;
+}
+
+#sub-title {
+   
+    position: absolute;
+    width: 848px;
+    height: 450px;
+    left: 40px;
+    top: 180px;
+
+    font-family: 'Pretendard';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 20px;
+    line-height: 150%;
+
+    letter-spacing: -0.02em;
+    color: #303030;
+}
+
 #text-count {
     position: absolute;
     width: 76px;
     height: 24px;
-    left: 1135px;
-    top: 192px;
+    right: 0px;
+    left: 810px;
+    top: 190px;
 
     font-family: 'Pretendard';
     font-style: normal;
@@ -66,6 +189,7 @@ defineExpose({
     letter-spacing: -0.02em;
     color: #BDBDBD;
 }
+
 #passage-content-main {
     box-sizing: border-box;
 
@@ -78,18 +202,19 @@ defineExpose({
     isolation: isolate;
 
     position: absolute;
-    width: 928px;
-    height: 547px;
-    left: 292px;
+    width: 848px;
+    height: 400px;
+    left: 40px;
     top: 220px;
 
     background: #FFFFFF;
     border: 1px solid #FF9F40;
     border-radius: 12px;
 }
+
 #content-text {
-    width: 820px;
-    height: 476px;
+    width: 780px;
+    height: 335px;
 
     font-family: 'Pretendard';
     font-style: normal;
@@ -109,5 +234,16 @@ defineExpose({
     border: none;
     outline: none; /* 포커스 된 경우의 파란 테두리 삭제 */
     resize: none;
+}
+
+#content-text::placeholder {
+    font-family: 'Pretendard';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 150%;
+
+    letter-spacing: -0.02em;
+    color: #757575;
 }
 </style>
