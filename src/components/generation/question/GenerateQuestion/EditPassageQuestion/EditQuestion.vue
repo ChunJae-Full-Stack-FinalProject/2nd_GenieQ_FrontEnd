@@ -113,37 +113,28 @@ export default {
     padding: 0px;
     gap: 4px;
 
-    width: 930px;
-    height: 405px;
-
-    flex: none;
-    order: 1;
-    flex-grow: 0;
+    width: 100%;
+    height: 100%;
 }
 .edit-main {
     box-sizing: border-box;
-
-    width: 927px;
+    width: 100%;
     height: 365px;
-    left: 137px;
-    top: 0px;
-
+    
     background: #FFFFFF;
     border: 1px solid #BDBDBD;
     border-radius: 12px;
-
 }
 .question-main {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    padding: 0px;
+    padding-top: 7px;
     gap: 12px;
-
     position: relative;
-    width: 736.67px;
-    height: 246px;
-    left: calc(50% - 736.67px/2 - 71.67px);
+    width: 90%;
+    margin: 0 auto;
+    height: auto;
     top: 25px;
 }
 .question-header {
@@ -198,7 +189,7 @@ export default {
     
     position: absolute;
     top: 3px;
-    left: 845px;
+    left: 830px;
     width: 16.67px;
 }
 .question-items {
@@ -260,7 +251,7 @@ export default {
 }
 #recreate-button {
     position: relative;
-    left: 704px;
+    left: 703px;
     top: 40px;
 }
 </style>

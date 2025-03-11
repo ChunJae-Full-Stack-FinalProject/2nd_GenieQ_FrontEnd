@@ -93,32 +93,24 @@ export default {
     padding: 0px;
     gap: 4px;
 
-    position: absolute;
-    width: 520px;
-    height: 407px;
-    left: -21px;
-    top: -25px;
+    position: relative;
+    left: 0;
+    top: 0;
 }
 .description-main {
     box-sizing: border-box;
-
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 20px;
     gap: 8px;
 
-    width: 520px;
+    width: 100%;
     height: 365px;
 
     background: #FFFFFF;
     border: 1px solid #BDBDBD;
     border-radius: 12px;
-
-    flex: none;
-    order: 1;
-    align-self: stretch;
-    flex-grow: 0;
 }
 #correct-answer {
     display: flex;

@@ -10,7 +10,7 @@
       </div>
     </div>
         
-        <!-- 문항 캐러셀 -->
+      <!-- 문항 캐러셀 -->
     <div class="question-slide-container">
       <p>문항</p>
       <div class="carousel-slide" :style="{ transform: `translateX(-${currentSlide * 100}%)` }">
@@ -29,15 +29,13 @@
     <!-- 해설 캐러셀 -->
     <p id="description-head">문제 해설</p>
     <div class="description-container">
-      <div class="description-slide-container">
-        <div class="carousel-slide" :style="{ transform: `translateX(-${currentSlide * 100}%)` }">
-          <div v-for="(item, index) in questionsData" :key="index" class="carousel-item description-item">
-            <QuestionDescription 
-              :isEditing="isEditingGlobal" 
-              :correct="item.correct" 
-              :description="item.description"
-            />
-          </div>
+      <div class="carousel-slide" :style="{ transform: `translateX(-${currentSlide * 100}%)` }">
+        <div v-for="(item, index) in questionsData" :key="index" class="carousel-item description-item">
+          <QuestionDescription 
+            :isEditing="isEditingGlobal" 
+            :correct="item.correct" 
+            :description="item.description"
+          />
         </div>
       </div>
     </div>
@@ -48,7 +46,7 @@
         <Icon icon="ep:arrow-left-bold" width="18px" height="18px" class="arrow-left" style="color: #303030" />
       </button>
       <div class="pagination-text">
-        {{ currentSlide + 1 }}  /  {{ questionsData.length }}
+        <span style="color:#FF9F40; font-size:20px;">{{ currentSlide + 1 }}</span>  /  {{ questionsData.length }}
       </div>
       <button class="pagination-arrow" :disabled="currentSlide === questionsData.length - 1" @click="nextSlide">
         <Icon icon="ep:arrow-right-bold" width="18px" height="18px" class="arrow-right" style="color: #303030" />
@@ -116,7 +114,7 @@ const isWarningModalOpen = ref(false);
 
 // 캐러셀 관련 상태
 const currentSlide = ref(0);
-// 초기 상태에는 하나의 문항만 있음
+
 const questionsData = ref([
   {
     title: '다음 중 본문과 내용이 다른 것을 고르시오.',
@@ -243,7 +241,6 @@ const handleQuestionGeneration = () => {
     // 문항이 하나만 있었으면 새 문항 추가
     questionsData.value.push(newQuestion);
   }
-  
   // 새로운 문항이 표시되는 페이지로 이동
   currentSlide.value = questionsData.value.length - 1;
   
@@ -457,7 +454,7 @@ watch(currentSlide, (newSlide) => {
   width: 930px;
   height: 405px;
   left: 292px;
-  top: 970px;  /* EditPassage 아래에 위치 (170px + 783px + 간격) */
+  top: 970px;
   overflow: hidden;
 }
 .question-slide-container > p {
@@ -472,10 +469,23 @@ watch(currentSlide, (newSlide) => {
   letter-spacing: -0.02em;
   color: #000000;
 }
+.question-slide-container .carousel-slide {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  width: auto;
+}
+.question-slide-container .carousel-item {
+  flex: 0 0 100%;
+  min-width: 100%;
+  width: 100%;
+  height: 100%;
+}
 #description-head {
   position: absolute;
   top: 971px;
   left: 1244px;
+  width: 100px;
 
   font-style: normal;
   font-weight: 600;
@@ -485,32 +495,30 @@ watch(currentSlide, (newSlide) => {
 }
 .description-container {
   box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px;
-  gap: 8px;
-
   position: absolute;
   width: 520px;
   height: 367px;
   top: 1011px;
   left: 1244px;
+  overflow: hidden;
+  border-radius: 12px;
 }
-.description-slide-container {
-  width: 100%;
-  height: 100%;
-  position: relative;
-}
-.carousel-slide {
+.description-container .carousel-slide {
   display: flex;
-  transition: transform 0.5s ease;
+  width: 100%;
+}
+
+.description-container .carousel-item {
+  flex: 0 0 100%;
+  width: 100%;
+  min-width: 100%;
   height: 100%;
 }
 
-.carousel-item {
-  width: 100%;
-  height: 100%;
+.description-item {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
 }
 
 /* 페이지네이션 스타일 */
@@ -553,6 +561,9 @@ watch(currentSlide, (newSlide) => {
 
   width: 62px;
   height: 30px;
+
+  font-family: 'Pretendard';
+  font-size: 20px;
 }
 
 .button-container {
