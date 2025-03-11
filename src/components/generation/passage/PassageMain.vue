@@ -3,9 +3,8 @@
         <p id="main-title">지문 생성</p>
         <div class="main-content">
             <CreatePassageMain ref="createPassageMainRef" @input-change="updateInputText" @category-change="updateCategory"/>
-            <PaymentUsage/>
+            <PaymentUsage ref="paymentUsageRef" @credit-update="onCreditUpdate"/>
             <BaseButton id="reset_button" text="초기화" type="type2" width="248px" height="54px" :disabled="!hasContent" @click="resetText"/>
-            <!-- router-link를 제거하고 일반 버튼으로 변경 -->
             <BaseButton 
                 id="create_button" 
                 text="지문 생성하기" 
@@ -57,12 +56,25 @@ const inputText = ref('');
 const selectedCategory = ref('human');
 const passageTitleRef = ref(null);
 const createPassageMainRef = ref(null);
+const paymentUsageRef = ref(null);
+const creditCountValue = ref(0); // 별도의 ref로 이용권 상태 관리
 
 // 모달 상태 관리
 const isConfirmModalOpen = ref(false);
 const isWarningModalOpen = ref(false);
 
-const isButtonEnabled = computed(() => inputText.value.length >= 1);
+const isButtonEnabled = computed(() => {
+    // 입력 텍스트가 있고 보유 이용권이 0보다 커야 버튼 활성화
+    return inputText.value.length >= 1 && 
+           paymentUsageRef.value && 
+           paymentUsageRef.value.creditcount.value > 0;
+        });
+
+// PaymentUsage 컴포넌트에서 이용권 업데이트 시 호출될 함수
+const onCreditUpdate = (count) => {
+    creditCountValue.value = count;
+};
+
 
 // 지문 제재 초기화 함수
 const resetText = () => {
