@@ -119,6 +119,9 @@ provide('passageData', {
     currentPassage, setPassage, resetPassage, openLoadPassageModal, validatePassageLength, showLengthWarning
 });
 
+const closeGenerateQuestionModal = () => {
+  showGenerateQuestionModal.value = false;
+};
 </script>
 <style scoped>
 .app-container {
