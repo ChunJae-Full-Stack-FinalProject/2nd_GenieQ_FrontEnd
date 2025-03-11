@@ -27,7 +27,7 @@
 
             <div v-if="creditcount>0"class="btn-container">
                 <BaseButton text="닫기" type="type3" width="140px" height="54px" @click="closeModal"></BaseButton>
-                <BaseButton text="생성하기" width="300px" height="54px" @click="generateQuestion"></BaseButton>
+                <BaseButton :text="createText" width="300px" height="54px" @click="generateQuestion"></BaseButton>
             </div>
     
             <div v-else="creditcount=0"class="btn-container">
@@ -48,6 +48,7 @@ const emit = defineEmits(["close", "generate"]);
 
 const props = defineProps({
   isOpen: Boolean,
+  createText: {type: String, default: "생성하기"}
 });
 
 const creditcount = ref(10);

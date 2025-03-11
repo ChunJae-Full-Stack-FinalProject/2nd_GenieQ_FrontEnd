@@ -167,6 +167,9 @@ const truncateHtmlToTextLength = (html, maxLength) => {
 const insertSymbol = (symbol) => {
     const textarea = document.getElementById('content-text');
     
+    // 현재 스크롤 위치 저장
+    const scrollTop = textarea.scrollTop;
+
     // 현재 선택 위치 저장
     const start = selectionStart.value;
     const end = selectionEnd.value;
@@ -185,6 +188,9 @@ const insertSymbol = (symbol) => {
         textarea.setSelectionRange(newCursorPos, newCursorPos);
         selectionStart.value = newCursorPos;
         selectionEnd.value = newCursorPos;
+
+        // 스크롤 위치 복원
+        textarea.scrollTop = scrollTop;
     });
     
     // 툴팁 닫기
@@ -202,6 +208,9 @@ const formatText = (type) => {
     if (selectionStart.value === selectionEnd.value) {
         return;
     }
+
+    // 현재 스크롤 위치 저장
+    const scrollTop = textarea.scrollTop;
     
     // 현재 선택 범위 가져오기
     const selectedText = contentText.value.substring(selectionStart.value, selectionEnd.value);
@@ -223,7 +232,7 @@ const formatText = (type) => {
         default:
             formattedText = selectedText;
     }
-    
+
     // 텍스트 업데이트
     contentText.value = beforeText + formattedText + afterText;
     
@@ -235,6 +244,9 @@ const formatText = (type) => {
         textarea.setSelectionRange(newCursorPos, newCursorPos);
         selectionStart.value = newCursorPos;
         selectionEnd.value = newCursorPos;
+
+        // 스크롤 위치 복원
+        textarea.scrollTop = scrollTop;
     });
     
     // 내용 변경 이벤트 발생

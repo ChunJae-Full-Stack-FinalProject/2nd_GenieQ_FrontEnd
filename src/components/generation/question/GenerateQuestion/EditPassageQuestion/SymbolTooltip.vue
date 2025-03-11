@@ -36,9 +36,9 @@ export default {
             let translateX = '-230%';  // 기본값
             
             if (this.symbolType === '㉠') {
-                translateX = '-230%';
+                translateX = '-220%';
             } else if (this.symbolType === 'ⓐ') {
-                translateX = '-80%';
+                translateX = '-70%';
             } else if (this.symbolType === '㉮') {
                 translateX = '70%';
             } else if (this.symbolType === '①') {
@@ -62,7 +62,7 @@ export default {
 .symbol-tooltip-container {
     position: relative;
     top: 60px;
-    left: 133px;
+    left: 135px;
 }
 .symbol-tooltip {
     padding: 2px;
@@ -72,6 +72,7 @@ export default {
     align-items: center;
     justify-content: space-around;
     height: 33px;
+    width: 125px;
 }
 .symbol-item {
     display: flex;
