@@ -1,5 +1,5 @@
 <template>
-    <div class="frame">
+    <div>
         <p>ExView.vue 입니다</p>
         <p>side-nav-bar 컴포넌트 삽입</p>
         <p>footer-nav-bar 컴포넌트 삽입</p>
