@@ -11,7 +11,7 @@
                 <BaseButton id="connect-create-button" text="이어서 문항 생성하기" type="type4" width="520px" height="54px" @click="handleConnectCreate($event, navigate)" :disabled="isContentChanged"/>
             </router-link>
             
-            <PlainTooltip id="download-message" message="추출은 저장 후 가능해요" width="205px"/>
+       
             <PlainTooltip id="start-edit" message="필요한 부분을 클릭하고 편집을 시작하세요" width="316px"/>
         </div>
 
@@ -367,7 +367,7 @@ const handleContentChange = () => {
 }
 #start-edit {
     position: absolute;
-    top: 185px;
-    left: 800px;
+    top: 285px;
+    left: 670px;
 }
 </style>

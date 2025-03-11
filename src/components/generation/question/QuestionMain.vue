@@ -3,9 +3,17 @@
         <p id="main-head">문항 생성</p>
         <div class="main-content">
             <InsertPassage/>
-            <PaymentUsage/>
+            <PaymentUsage ref="paymentUsageRef" @credit-update="onCreditUpdate"/>
             <BaseButton id="reset_button" text="초기화" type="type2" width="248px" height="54px" :disabled="!hasContent" @click="resetPassage"/>
-            <BaseButton id="select-type" text="문항 유형 선택하기" type="type1" width="248px" height="54px" @click="validateAndOpenModal"/>
+            <BaseButton 
+                id="select-type" 
+                text="문항 유형 선택하기" 
+                type="type1" 
+                width="248px" 
+                height="54px" 
+                :disabled="!hasContent || creditCountValue <= 0"
+                @click="validateAndOpenModal"
+            />
             <GenerateQuestionModal :isOpen="showGenerateQuestionModal" @close="showGenerateQuestionModal = false"/>
             <LoadPassageModal :isOpen="showLoadPassageModal" @close="closeLoadPassageModal" @loadPassage="handleLoadPassage"/>
         </div>
@@ -36,7 +44,14 @@ import InputPassageTitle from '@/components/generation/passage/PassageContent/In
 
 const showGenerateQuestionModal = ref(false);
 const showLoadPassageModal = ref(false);
-const isConfirmModalOpen = ref(false);  
+const isConfirmModalOpen = ref(false);
+const paymentUsageRef = ref(null);
+const creditCountValue = ref(0); // 별도의 ref로 이용권 상태 관리
+
+// PaymentUsage 컴포넌트에서 이용권 업데이트 시 호출될 함수
+const onCreditUpdate = (count) => {
+    creditCountValue.value = count;
+};
 
 // 지문 상태 및 메서드
 const currentPassage = ref({
@@ -45,13 +60,18 @@ const currentPassage = ref({
 });
 
 const validateAndOpenModal = () => {
-  if (!validatePassageLength()) {
-    showLengthWarning();
-  } else {
-    // 모달을 열기 전에 로컬 스토리지에 지문 데이터 저장
-    localStorage.setItem('tempPassageData', JSON.stringify(currentPassage.value));
-    showGenerateQuestionModal.value = true;
-  }
+    // 이용권이 없는 경우 체크
+    if (creditCountValue.value <= 0) {
+        return;
+    }
+    
+    if (!validatePassageLength()) {
+        showLengthWarning();
+    } else {
+        // 모달을 열기 전에 로컬 스토리지에 지문 데이터 저장
+        localStorage.setItem('tempPassageData', JSON.stringify(currentPassage.value));
+        showGenerateQuestionModal.value = true;
+    }
 };
 
 // 지문 설정 함수
@@ -112,7 +132,13 @@ onMounted(() => {
             console.error('저장된 지문 데이터를 불러오는 중 오류 발생:', error);
         }
     }
+    setTimeout(() => {
+        if (paymentUsageRef.value && paymentUsageRef.value.creditcount) {
+            creditCountValue.value = paymentUsageRef.value.creditcount.value;
+        }
+    }, 0);
 });
+
 
 // provide를 통해 하위 컴포넌트에 상태와 메서드 제공
 provide('passageData', {
