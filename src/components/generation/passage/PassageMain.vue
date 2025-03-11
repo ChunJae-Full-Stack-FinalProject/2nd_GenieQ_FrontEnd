@@ -63,12 +63,11 @@ const creditCountValue = ref(0); // 별도의 ref로 이용권 상태 관리
 const isConfirmModalOpen = ref(false);
 const isWarningModalOpen = ref(false);
 
+// 수정 필요한 코드
 const isButtonEnabled = computed(() => {
     // 입력 텍스트가 있고 보유 이용권이 0보다 커야 버튼 활성화
-    return inputText.value.length >= 1 && 
-           paymentUsageRef.value && 
-           paymentUsageRef.value.creditcount.value > 0;
-        });
+    return inputText.value.length >= 1 && creditCountValue.value > 0;
+});
 
 // PaymentUsage 컴포넌트에서 이용권 업데이트 시 호출될 함수
 const onCreditUpdate = (count) => {
@@ -161,6 +160,17 @@ const saveDataAndNavigate = () => {
     
     // 다음 페이지로 이동
     router.push('/passage/create');
+
+    // 컴포넌트 마운트 시 실행
+    onMounted(() => {
+    // paymentUsageRef가 설정된 후 creditcount 값을 가져오기 위한 코드
+    setTimeout(() => {
+        if (paymentUsageRef.value && paymentUsageRef.value.creditcount) {
+            creditCountValue.value = paymentUsageRef.value.creditcount.value;
+        }
+    }, 0);
+});
+
 };
 </script>
 <style scoped>
