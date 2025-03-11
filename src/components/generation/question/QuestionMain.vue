@@ -2,7 +2,6 @@
     <div class="app-container">
         <p id="main-head">문항 생성</p>
         <div class="main-content">
-            <InputPassageTitle ref="passageTitleRef"/>
             <InsertPassage/>
             <PaymentUsage/>
             <BaseButton id="reset_button" text="초기화" type="type2" width="248px" height="54px" :disabled="!hasContent" @click="resetPassage"/>
@@ -12,22 +11,18 @@
         </div>
     </div>
     <ConfirmModalComponent
-        :isOpen="isConfirmModalOpen"
-        title="글자 수를 확인해 주세요."
-        message="500자 이하의 지문으로 정상적인 문항을 생성하기 어렵습니다. 충분한 지문을 입력해 주세요."
-        @close="isConfirmModalOpen = false"
-        @confirm="isConfirmModalOpen = false"
+      :isOpen="isConfirmModalOpen"
+      title="글자 수를 확인해 주세요."
+      message="500자 이하의 지문으로 정상적인 문항을 생성하기 어렵습니다. 충분한 지문을 입력해 주세요."
+      @close="isConfirmModalOpen = false"
+      @confirm="isConfirmModalOpen = false"
     />
 
     <GenerateQuestionModal 
-    :isOpen="showGenerateQuestionModal" 
-    @close="closeGenerateQuestionModal"
-    @openPaymentModal="openPaymentModal"
-  />
-  <PaymentUsageModal 
-    :isOpen="showPaymentUsageModal" 
-    @close="closePaymentModal"
-  />
+      :isOpen="showGenerateQuestionModal" 
+      @close="closeGenerateQuestionModal"
+      @openPaymentModal="openPaymentModal"
+    />
 </template>
 <script setup>
 import { ref, provide, onMounted, computed } from 'vue';
@@ -38,7 +33,6 @@ import GenerateQuestionModal from '@/components/common/modal/type/generation/Gen
 import LoadPassageModal from "@/components/common/modal/type/generation/LoadPassageModal.vue";
 import ConfirmModalComponent from '@/components/common/modal/type/ConfirmModalComponent.vue';
 import InputPassageTitle from '@/components/generation/passage/PassageContent/InputPassageTitle.vue';
-import PaymentUsageModal from '@/components/common/modal/type/generation/PaymentUsageModal.vue';
 
 const showGenerateQuestionModal = ref(false);
 const showLoadPassageModal = ref(false);
@@ -54,24 +48,9 @@ const validateAndOpenModal = () => {
   if (!validatePassageLength()) {
     showLengthWarning();
   } else {
-    // 모든 모달 명시적으로 닫기
-    showPaymentUsageModal.value = false;
-    showGenerateQuestionModal.value = false;
-    showLoadPassageModal.value = false;
-    
-    // 기존 데이터 전면 초기화
-    localStorage.removeItem('selectedQuestionData');
-    localStorage.removeItem('generateQuestionPassageData');
-    localStorage.removeItem('tempPassageData');
-    
-    // 지연을 주어 상태 초기화 보장
-    setTimeout(() => {
-      // 로컬 스토리지에 지문 데이터 저장
-      localStorage.setItem('tempPassageData', JSON.stringify(currentPassage.value));
-      
-      // GenerateQuestionModal만 열기
-      showGenerateQuestionModal.value = true;
-    }, 100);
+    // 모달을 열기 전에 로컬 스토리지에 지문 데이터 저장
+    localStorage.setItem('tempPassageData', JSON.stringify(currentPassage.value));
+    showGenerateQuestionModal.value = true;
   }
 };
 
@@ -89,7 +68,7 @@ const resetPassage = () => {
 };
 
 const hasContent = computed(() => {
-    return currentPassage.value.content && currentPassage.value.content.trim().length > 0;
+  return currentPassage.value.content && currentPassage.value.content.trim().length > 0;
 });
 
 // LoadPassageModal에서 지문 선택 시 호출될 함수
@@ -140,35 +119,9 @@ provide('passageData', {
     currentPassage, setPassage, resetPassage, openLoadPassageModal, validatePassageLength, showLengthWarning
 });
 
-
-
-const showPaymentUsageModal = ref(false);
-
-const openPaymentModal = () => {
-  // GenerateQuestionModal 닫기
-  showGenerateQuestionModal.value = false;
-  
-  // PaymentUsageModal 열기
-  showPaymentUsageModal.value = true;
-};
-
-
 const closeGenerateQuestionModal = () => {
   showGenerateQuestionModal.value = false;
 };
-
-const closePaymentModal = () => {
-  // PaymentUsageModal 닫기
-  showPaymentUsageModal.value = false;
-  
-  // localStorage 데이터 정리
-  localStorage.removeItem('selectedQuestionData');
-  localStorage.removeItem('generateQuestionPassageData');
-
-  // 모든 모달 상태 명시적 초기화
-  showGenerateQuestionModal.value = false;
-};
-
 </script>
 <style scoped>
 .app-container {
