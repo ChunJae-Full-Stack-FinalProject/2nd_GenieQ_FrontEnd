@@ -3,7 +3,10 @@
       <p id="main-head">문항 생성</p>
       <div class="main-content">
         <p id="content-head">지문</p>
-        <EditPassageQuestion ref="editPassageQuestionRef" @edit-mode-changed="updateEditingMode"/>
+        <div class="edit-content-container">
+          <EditPassage ref="editPassageRef"/>
+          <EditQuestion @edit-mode-changed="updateEditingMode"/>
+        </div>
         <PassageSummary id="passage-summary"/>
         <QuestionDescription :isEditing="isEditingGlobal" :questionData="questionData"/>
         <div class="button-container">
@@ -34,7 +37,9 @@
 <script setup>
 import { ref, onMounted, provide, onBeforeUnmount, getCurrentInstance } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import EditPassageQuestion from './GenerateQuestion/EditPassageQuestion/EditPassageQuestion.vue';
+// EditPassageQuestion 임포트 대신 직접 EditPassage와 EditQuestion 임포트
+import EditPassage from './GenerateQuestion/EditPassageQuestion/EditPassage.vue';
+import EditQuestion from './GenerateQuestion/EditPassageQuestion/EditQuestion.vue';
 import PassageSummary from '../passage/PassageContent/PassageSummary.vue';
 import QuestionDescription from './GenerateQuestion/QuestionDescription.vue';
 import BaseButton from '@/components/common/button/BaseButton.vue';
@@ -62,14 +67,14 @@ const currentPassage = ref({
   content: ''
 });
 
-// EditPassageQuestion 컴포넌트 참조
-const editPassageQuestionRef = ref(null);
+// EditPassage 컴포넌트 참조 (EditPassageQuestion 대신)
+const editPassageRef = ref(null);
 
 // 기존 버튼 클릭 핸들러
 const handleButtonClick = () => {
   // EditPassage의 글자 수 검증
-  if (editPassageQuestionRef.value) {
-    return editPassageQuestionRef.value.validatePassageLength();
+  if (editPassageRef.value) {
+    return editPassageRef.value.validateTextLength();
   }
   return true;
 };
@@ -77,8 +82,8 @@ const handleButtonClick = () => {
 // 저장 버튼 클릭 핸들러 추가
 const handleSaveButtonClick = () => {
   // EditPassage의 글자 수 검증
-  if (editPassageQuestionRef.value) {
-    const isValid = editPassageQuestionRef.value.validatePassageLength();
+  if (editPassageRef.value) {
+    const isValid = editPassageRef.value.validateTextLength();
     
     if (isValid) {
       // 유효성 검사에 통과하면 저장 처리 및 버튼 활성화
@@ -112,8 +117,8 @@ const updateEditingMode = (value) => {
 
 // validatePassageLength 함수 추가
 const validatePassageLength = () => {
-  if (passageData.value && passageData.value.content) {
-    return passageData.value.content.length >= 500;
+  if (editPassageRef.value) {
+    return editPassageRef.value.validateTextLength();
   }
   return false;
 };
@@ -215,7 +220,10 @@ onMounted(() => {
   if (route.state && route.state.passageData) {
     passageData.value = route.state.passageData;
     
-    // 데이터는 로드하지만 버튼은 활성화하지 않음 (오직 저장 버튼 클릭만이 다른 버튼들을 활성화함)
+    // EditPassage에 지문 내용 설정
+    if (editPassageRef.value && passageData.value && passageData.value.content) {
+      editPassageRef.value.setContent(passageData.value.content);
+    }
   } 
   // 로컬 스토리지에서 지문 데이터 확인
   else {
@@ -224,7 +232,10 @@ onMounted(() => {
       try {
         passageData.value = JSON.parse(storedPassageData);
         
-        // 데이터는 로드하지만 버튼은 활성화하지 않음 (오직 저장 버튼 클릭만이 다른 버튼들을 활성화함)
+        // EditPassage에 지문 내용 설정
+        if (editPassageRef.value && passageData.value && passageData.value.content) {
+          editPassageRef.value.setContent(passageData.value.content);
+        }
       } catch (error) {
         console.error('저장된 지문 데이터를 불러오는 중 오류 발생:', error);
       }
@@ -326,6 +337,20 @@ provide('passageData', {
   letter-spacing: -0.02em;
   color: #000000;
 }
+/* EditPassageQuestion의 스타일을 새로운 컨테이너에 적용 */
+.edit-content-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0px;
+  gap: 20px;
+
+  position: absolute;
+  width: 930px;
+  height: 1160px;
+  left: 292px;
+  top: 170px;
+}
 #passage-summary {
   display: flex;
   flex-direction: column;
@@ -340,20 +365,17 @@ provide('passageData', {
   top: 126px;
 }
 .button-container {
-/* Frame 1707484302 */
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0px 154px 80px 272px;
+  gap: 24px;
 
-/* Auto layout */
-display: flex;
-flex-direction: row;
-align-items: center;
-padding: 0px 154px 0px 272px;
-gap: 24px;
-
-position: absolute;
-top: 1475px;
-left: 156px;
-width: 1762px;
-height: 54px;
+  position: absolute;
+  top: 1475px;
+  left: 156px;
+  width: 1762px;
+  height: 54px;
 }
 #add-button {
   flex: none;
