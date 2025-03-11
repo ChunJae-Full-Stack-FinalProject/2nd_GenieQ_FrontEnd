@@ -3,11 +3,11 @@
         <div class="main-content">
             <p id="main-title">지문 생성</p>
             <InputPassageTitle ref="passageTitleRef"/>
-            <PassageContentMain ref="passageContentRef"/>   
+            <PassageContentMain ref="passageContentRef" @content-changed="handleContentChange"/>   
             <PassageSummary ref="passageSummaryRef"/>
-            <BaseButton id="recreate-button" text="재생성하기(1회 차감)" type="type2" width="248px" height="54px"  @click="checkContentLength"/>
-            <BaseButton id="save-button" text="저장하기" type="type2" width="248px" height="54px" @click="handleSaveButtonClick"/>
-            <BaseButton id="download-button" text="추출하기" type="type2" width="248px" height="54px" :disabled="!hasManualSave" @click="checkContentLengthAndOpenFileModal()"/>
+            <BaseButton id="recreate-button" text="재생성하기" type="type2" width="248px" height="54px" @click="openPaymentUsageModal" :disabled="isContentChanged"/>
+            <BaseButton id="save-button" text="저장하기" type="type2" width="248px" height="54px" @click="handleSaveButtonClick" :disabled="!isContentChanged"/>
+            <BaseButton id="download-button" text="추출하기" type="type2" width="248px" height="54px" :disabled="isContentChanged || !hasManualSave" @click="checkContentLengthAndOpenFileModal()"/>
             <router-link to="/questions" custom v-slot="{ navigate }">
                 <BaseButton id="connect-create-button" text="이어서 문항 생성하기" type="type4" width="520px" height="54px" @click="handleConnectCreate($event, navigate)"/>
             </router-link>
@@ -38,6 +38,13 @@
             @close="cancelNavigation" 
             @confirm="confirmNavigation"
         />
+        
+        <!-- 결제 사용 모달 -->
+        <PaymentUsageModal 
+            :isOpen="isPaymentUsageModalOpen"
+            @close="closePaymentUsageModal"
+            @generate="handleGenerate"
+        />
     </div>
 </template>
 <script setup>
@@ -49,6 +56,7 @@ import PlainTooltip from '@/components/common/PlainTooltip.vue';
 import FileSelectModal from '@/components/common/modal/type/FileSelectModal.vue';
 import ConfirmModalComponent from '@/components/common/modal/type/ConfirmModalComponent.vue';
 import WarningModalComponent from '@/components/common/modal/type/WarningModalComponent.vue';
+import PaymentUsageModal from '@/components/common/modal/type/generation/PaymentUsageModal.vue';
 
 import { ref, onMounted, onBeforeUnmount, getCurrentInstance } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -56,9 +64,10 @@ import { useRoute, useRouter } from 'vue-router';
 // 모달 상태 관리
 const isFileModalOpen = ref(false);
 const isConfirmModalOpen = ref(false);
-const hasManualSave = ref(false); // 사용자가 직접 저장 버튼을 클릭했는지 추적
-const isContentChanged = ref(false); // 내용 변경 여부 추적
+const hasManualSave = ref(true); // 초기값을 true로 설정 (초기 상태에서 추출하기 버튼 활성화)
+const isContentChanged = ref(false); // 내용 변경 여부 추적 (초기 상태는 변경되지 않음)
 const isWarningModalOpen = ref(false); // 경고 모달 상태
+const isPaymentUsageModalOpen = ref(false); // 결제 사용 모달 상태
 
 // 네비게이션 관련 변수
 const pendingRoute = ref(null); // 대기 중인 라우트 정보 저장
@@ -81,6 +90,31 @@ const checkContentLength = (event) => {
         return false;
     }
     return true;
+};
+
+// 결제 사용 모달 관련 함수
+const openPaymentUsageModal = () => {
+    if (checkContentLength(new Event('click'))) {
+        // 저장된 지문 데이터를 로컬 스토리지에 임시 저장
+        const passageData = {
+            title: passageTitleRef.value?.getTitle?.() || '',
+            content: passageContentRef.value?.getContent?.() || '',
+            summary: passageSummaryRef.value?.getSummary?.() || ''
+        };
+        localStorage.setItem('generateQuestionPassageData', JSON.stringify(passageData));
+        
+        // 결제 사용 모달 열기
+        isPaymentUsageModalOpen.value = true;
+    }
+};
+
+const closePaymentUsageModal = () => {
+    isPaymentUsageModalOpen.value = false;
+};
+
+const handleGenerate = () => {
+    console.log('지문 재생성 시작');
+    // 여기에 지문 재생성 관련 로직 추가
 };
 
 // 저장 버튼 클릭 핸들러 추가
@@ -187,22 +221,7 @@ const handleFileSelect = (fileType) => {
 // 저장되지 않은 변경사항이 있는지 확인하는 함수
 const hasUnsavedChanges = () => {
     // 편집 중인지 확인하고, 내용이 변경됐는데 저장되지 않았는지 확인
-    const hasContentChanged = isContentChanged.value && !hasManualSave.value;
-
-    // 지문이 있고, 저장 버튼이 활성화 되어있는 경우 (내용이 있지만 저장되지 않음)
-    const hasUnsavedContent = passageContentRef.value && 
-                            passageContentRef.value.getContent?.() && 
-                            passageContentRef.value.getContent?.().length > 0 && 
-                            !hasManualSave.value;
-                          
-    console.log('변경 감지 상태:', {
-        isContentChanged: isContentChanged.value,
-        hasManualSave: hasManualSave.value,
-        hasContentChanged,
-        hasUnsavedContent
-    });
-
-    return hasContentChanged || hasUnsavedContent;
+    return isContentChanged.value;
 };
 
 // 이동 취소 - 현재 화면 유지
@@ -266,6 +285,19 @@ onMounted(() => {
         console.log('네비게이션 계속 진행');
         return next(); // 네비게이션 계속
     });
+
+    // 로컬 스토리지에서 PassageMain에서 입력한 제목 데이터 로드
+    const savedTitle = localStorage.getItem('passageTitle');
+    if (savedTitle && passageTitleRef.value) {
+        // InputPassageTitle 컴포넌트에 저장된 제목 설정
+        passageTitleRef.value.setTitle(savedTitle);
+    }
+    
+    // 필요시 다른 데이터도 로드할 수 있음
+    // const savedPassageData = localStorage.getItem('passageInputText');
+    // if (savedPassageData && passageContentRef.value) {
+    //    passageContentRef.value.setContent(savedPassageData);
+    // }
 });
 
 onBeforeUnmount(() => {
@@ -285,10 +317,6 @@ const handleContentChange = () => {
     hasManualSave.value = false;
     isContentChanged.value = true;
 };
-
-// 필요에 따라 자식 컴포넌트에 콜백 제공
-// 예: provide('contentChangeCallback', handleContentChange);
-// 또는 props로 전달
 </script>
 <style scoped>
 .app-container {

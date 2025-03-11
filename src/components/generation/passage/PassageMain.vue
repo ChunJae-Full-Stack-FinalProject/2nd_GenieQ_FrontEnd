@@ -2,41 +2,64 @@
     <div class="app-container">
         <div class="main-content">
             <InputPassageTitle ref="passageTitleRef"/>
-            <CreatePassageMain @input-change="updateInputText"/>
             <CreatePassageMain ref="createPassageMainRef" @input-change="updateInputText" @category-change="updateCategory"/>
             <PaymentUsage/>
             <BaseButton id="reset_button" text="초기화" type="type2" width="248px" height="54px" :disabled="!hasContent" @click="resetText"/>
-            <router-link to="/passage/create" v-if="isButtonEnabled">
-                <BaseButton 
-                    id="create_button" 
-                    text="지문 생성하기" 
-                    type="type2" 
-                    width="248px" 
-                    height="54px"
-                />
-            </router-link>
+            <!-- router-link를 제거하고 일반 버튼으로 변경 -->
             <BaseButton 
-                v-else
                 id="create_button" 
                 text="지문 생성하기" 
                 type="type2" 
                 width="248px" 
                 height="54px"
-                disabled
+                :disabled="!isButtonEnabled"
+                @click="handleCreatePassage"
+            />
+            
+            <!-- 확인 모달 추가 -->
+            <ConfirmModalComponent
+                :isOpen="isConfirmModalOpen"
+                title="지문 생성"
+                message="지문을 생성하시겠습니까?"
+                @close="closeConfirmModal"
+                @confirm="confirmCreatePassage"
+            />
+            
+            <!-- 경고 모달 추가 -->
+            <WarningModalComponent
+                :isOpen="isWarningModalOpen"
+                title="작업 내역 초과"
+                message="최근 작업 내역이 가득 찼습니다. 이전 작업을 삭제하고 진행하시겠습니까?"
+                cancelText="취소하기"
+                confirmText="삭제 후 진행하기"
+                @close="closeWarningModal"
+                @confirm="confirmAfterWarning"
             />
         </div>
     </div>
 </template>
 <script setup>
-import { ref, computed  } from 'vue';
+import { ref, computed } from 'vue';
 import CreatePassageMain from '@/components/generation/passage/PassageMain/CreatePassageMain.vue';
 import PaymentUsage from '@/components/generation/PaymentUsage.vue';
 import BaseButton from '@/components/common/button/BaseButton.vue';
 import InputPassageTitle from '@/components/generation/passage/PassageContent/InputPassageTitle.vue';
+import ConfirmModalComponent from '@/components/common/modal/type/ConfirmModalComponent.vue';
+import WarningModalComponent from '@/components/common/modal/type/WarningModalComponent.vue';
+import { useRouter } from 'vue-router';
+
+// 라우터 추가
+const router = useRouter();
 
 const inputText = ref('');
 const selectedCategory = ref('human');
+const passageTitleRef = ref(null);
 const createPassageMainRef = ref(null);
+
+// 모달 상태 관리
+const isConfirmModalOpen = ref(false);
+const isWarningModalOpen = ref(false);
+
 const isButtonEnabled = computed(() => inputText.value.length >= 1);
 
 // 지문 제재 초기화 함수
@@ -59,6 +82,72 @@ const updateInputText = (text) => {
 const updateCategory = (category) => {
     selectedCategory.value = category;
 }
+
+// 지문 생성하기 버튼 클릭 핸들러
+const handleCreatePassage = () => {
+    // 최근 작업 내역이 가득 찼는지 확인하는 로직
+    const isWorkHistoryFull = checkWorkHistoryFull();
+    
+    if (isWorkHistoryFull) {
+        // 작업 내역이 가득 찬 경우 경고 모달 표시
+        isWarningModalOpen.value = true;
+    } else {
+        // 일반적인 경우 확인 모달 표시
+        isConfirmModalOpen.value = true;
+    }
+};
+
+// 최근 작업 내역이 가득 찼는지 확인하는 함수
+const checkWorkHistoryFull = () => {
+    // 여기에 작업 내역 확인 로직 구현
+    // 예: 로컬 스토리지에서 작업 내역 개수 확인 등
+    
+    // 현재는 테스트를 위해 임의의 값 반환 (실제로는 적절한 로직으로 대체)
+    // return Math.random() > 0.5; // 50% 확률로 가득 참/아님 반환
+    return false; // 기본값은 가득 차지 않음
+}
+
+// 확인 모달 관련 핸들러
+const closeConfirmModal = () => {
+    isConfirmModalOpen.value = false;
+};
+
+const confirmCreatePassage = () => {
+    saveDataAndNavigate();
+};
+
+// 경고 모달 관련 핸들러
+const closeWarningModal = () => {
+    isWarningModalOpen.value = false;
+};
+
+const confirmAfterWarning = () => {
+    // 여기서 이전 작업 삭제 로직 추가 가능
+    // 예: 로컬 스토리지에서 이전 작업 데이터 삭제
+    
+    saveDataAndNavigate();
+};
+
+// 데이터 저장 및 페이지 이동 함수
+const saveDataAndNavigate = () => {
+    // 필요한 데이터 수집
+    const passageData = {
+        title: passageTitleRef.value?.getTitle?.() || '',
+        content: inputText.value,
+        category: selectedCategory.value
+    };
+    
+    // 로컬 스토리지에 데이터 저장
+    localStorage.setItem('passageTitle', passageData.title);
+    localStorage.setItem('passageContent', passageData.content);
+    localStorage.setItem('passageCategory', passageData.category);
+    
+    // 통합 데이터도 저장 (다른 페이지에서 사용 가능)
+    localStorage.setItem('passageData', JSON.stringify(passageData));
+    
+    // 다음 페이지로 이동
+    router.push('/passage/create');
+};
 </script>
 <style scoped>
 .app-container {

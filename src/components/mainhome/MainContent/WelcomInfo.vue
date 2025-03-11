@@ -45,7 +45,6 @@ function getTicketCount() {
     })
     .catch(error => {
         console.error("티켓 조회 실패:", error);
-        alert("티켓 정보를 가져오는데 실패했습니다.");
     });
 }
 </script>
