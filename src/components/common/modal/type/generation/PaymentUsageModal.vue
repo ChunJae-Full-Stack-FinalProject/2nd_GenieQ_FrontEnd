@@ -27,12 +27,12 @@
 
             <div v-if="creditcount>0"class="btn-container">
                 <BaseButton text="닫기" type="type3" width="140px" height="54px" @click="closeModal"></BaseButton>
-                <BaseButton  text="생성하기" width="300px" height="54px" @click="continueToGenerateQuestion"></BaseButton>
+                <BaseButton text="생성하기" width="300px" height="54px" @click="generateQuestion"></BaseButton>
             </div>
     
             <div v-else="creditcount=0"class="btn-container">
                 <BaseButton text="닫기" type="type3" width="140px" height="54px" @click="closeModal"></BaseButton>
-                <BaseButton  text="이용권 구매하기" width="300px" height="54px" @click="continueToGenerateQuestion"></BaseButton>
+                <BaseButton text="이용권 구매하기" width="300px" height="54px" @click="continueToGenerateQuestion"></BaseButton>
             </div>
         </div>
     </BaseModal>
@@ -44,7 +44,7 @@ import BaseButton from "@/components/common/button/BaseButton.vue";
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
-const emit = defineEmits(["close"]);
+const emit = defineEmits(["close", "generate"]);
 
 const props = defineProps({
   isOpen: Boolean,
@@ -54,6 +54,23 @@ const creditcount = ref(10);
 
 const closeModal = () => {
   emit("close");
+}
+
+// 생성하기 버튼 클릭시 호출 - 수정된 부분
+const generateQuestion = () => {
+  // 이전 로직 유지
+  const savedPassageData = localStorage.getItem('generateQuestionPassageData');
+  const selectedQuestionData = localStorage.getItem('selectedQuestionData');
+
+  try {
+    // 생성 이벤트 발생 - 부모 컴포넌트에 알림
+    emit("generate");
+    
+    // 모달 닫기
+    emit("close");
+  } catch (error) {
+    console.error('문항 생성 중 오류:', error);
+  }
 }
 
 const continueToGenerateQuestion = () => {
