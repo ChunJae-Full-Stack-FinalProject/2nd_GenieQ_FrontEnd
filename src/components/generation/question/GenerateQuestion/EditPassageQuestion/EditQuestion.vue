@@ -21,7 +21,7 @@
                     </div>
                 </div>
             </div>
-            <BaseButton text="재생성하기" type="type4" id="recreate-button" width="200px" height="54px"/>
+            <BaseButton text="재생성하기" type="type4" id="recreate-button" width="200px" height="54px" @click="handleRecreate"/>
         </div>
     </div>
 </template>
@@ -56,7 +56,8 @@ const emit = defineEmits([
     'update:questions', 
     'update:questionTitle', 
     'question-changed',
-    'request-edit-mode'  // 편집 버튼 클릭 시 상위 컴포넌트에 알리는 이벤트 추가
+    'request-edit-mode',
+    'recreate-question'  // 재생성 버튼 클릭 시 이벤트 추가
 ]);
 
 // 반응형 상태 정의
@@ -67,6 +68,11 @@ const titleInput = ref(null);
 
 // 문항 번호 기호 배열
 const circledNumbers = ['①', '②', '③', '④', '⑤'];
+
+// 재생성 버튼 클릭 핸들러
+const handleRecreate = () => {
+    emit('recreate-question');
+};
 
 // 편집 버튼 클릭 핸들러 - 부모 컴포넌트에게 편집 요청을 알림
 const requestEditMode = () => {
