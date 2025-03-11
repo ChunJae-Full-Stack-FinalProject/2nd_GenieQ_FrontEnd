@@ -65,9 +65,14 @@ const loginFailed = ref(false);
 
 // 컴포넌트 마운트 시 이미 로그인되어 있으면 홈으로 리디렉션
 onMounted(() => {
+  console.log(authStore.isLoggedIn);
   if (authStore.isLoggedIn) {
     console.log('이미 로그인되어 있음, 홈으로 리디렉션');
     router.push('/home');
+  }
+  // 테스트 계정 정보 알림 - 처음 방문 시에만 표시
+  if (!authStore.isLoggedIn) {
+    alert('테스트 계정 정보:\n이메일: teacher@gmail.com\n비밀번호: 1234');
   }
 });
 
@@ -121,7 +126,7 @@ const loginHandler = () => {
     
     // 사용자 정보 상태 업데이트
     authStore.setUser(userData);
-    
+
     // 로컬 스토리지에 사용자 상태 저장 (새로고침 시 상태 유지)
     localStorage.setItem('authUser', JSON.stringify(userData));
     
