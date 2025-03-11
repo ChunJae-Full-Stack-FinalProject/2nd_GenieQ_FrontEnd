@@ -110,7 +110,7 @@
   
   .gray-button {
     width: 100%;
-    background: #303030;
+    background: #FF9F40;
     color: #FFFFFF;
   }
   

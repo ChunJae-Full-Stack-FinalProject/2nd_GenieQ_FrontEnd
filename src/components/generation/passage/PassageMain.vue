@@ -17,10 +17,12 @@
             />
             
             <!-- 확인 모달 추가 -->
-            <ConfirmModalComponent
+            <WarningModalComponent
                 :isOpen="isConfirmModalOpen"
-                title="지문 생성"
-                message="지문을 생성하시겠습니까?"
+                title="지문을 생성하시겠습니다?"
+                message="생성 시 이용권이 차감되며, 오타가 있을 경우 AI가 잘못된 지문을 생성할 수 있습니다."
+                cancelText="취소하기"
+                confirmText="생성하기"
                 @close="closeConfirmModal"
                 @confirm="confirmCreatePassage"
             />
