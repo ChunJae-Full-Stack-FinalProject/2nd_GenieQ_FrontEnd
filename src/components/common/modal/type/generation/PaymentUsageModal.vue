@@ -32,7 +32,7 @@
     
             <div v-else="creditcount=0"class="btn-container">
                 <BaseButton text="닫기" type="type3" width="140px" height="54px" @click="closeModal"></BaseButton>
-                <BaseButton text="이용권 구매하기" width="300px" height="54px" @click="continueToGenerateQuestion"></BaseButton>
+                <BaseButton text="이용권 구매하기" width="300px" height="54px" @click="goToTicketPage"></BaseButton>
             </div>
         </div>
     </BaseModal>
@@ -56,7 +56,7 @@ const closeModal = () => {
   emit("close");
 }
 
-// 생성하기 버튼 클릭시 호출 - 수정된 부분
+// 생성하기 버튼 클릭시 호출
 const generateQuestion = () => {
   // 이전 로직 유지
   const savedPassageData = localStorage.getItem('generateQuestionPassageData');
@@ -73,32 +73,19 @@ const generateQuestion = () => {
   }
 }
 
-const continueToGenerateQuestion = () => {
-  // 기존에 저장된 데이터 가져오기
-  const savedPassageData = localStorage.getItem('generateQuestionPassageData');
-  const selectedQuestionData = localStorage.getItem('selectedQuestionData');
-
+// 이용권 구매하기 버튼 클릭시 호출 - 변경된 부분
+const goToTicketPage = () => {
   try {
-    const passageData = savedPassageData ? JSON.parse(savedPassageData) : null;
-    const questionData = selectedQuestionData ? JSON.parse(selectedQuestionData) : null;
-
-    // 다음 화면으로 이동
+    // 마이페이지로 이동하면서 이용권 탭 선택
     router.push({
-      path: '/questions/generate',
-      query: {
-        pattern: questionData?.pattern,
-        type: questionData?.type
-      }
+      path: '/mypage',
+      query: { tab: '이용권' }
     });
-
-    // 저장된 데이터 초기화
-    localStorage.removeItem('selectedQuestionData');
-    localStorage.removeItem('generateQuestionPassageData');
-
+    
     // 모달 닫기
     emit("close");
   } catch (error) {
-    console.error('데이터 전달 중 오류:', error);
+    console.error('페이지 이동 중 오류:', error);
   }
 }
 </script>
