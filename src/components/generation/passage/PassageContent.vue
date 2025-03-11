@@ -5,14 +5,14 @@
             <InputPassageTitle ref="passageTitleRef"/>
             <PassageContentMain ref="passageContentRef" @content-changed="handleContentChange"/>   
             <PassageSummary ref="passageSummaryRef"/>
-            <BaseButton id="recreate-button" text="재생성하기" type="type2" width="248px" height="54px" @click="checkContentLength" :disabled="isContentChanged"/>
+            <BaseButton id="recreate-button" text="재생성하기" type="type2" width="248px" height="54px" @click="openPaymentUsageModal" :disabled="isContentChanged"/>
             <BaseButton id="save-button" text="저장하기" type="type2" width="248px" height="54px" @click="handleSaveButtonClick" :disabled="!isContentChanged"/>
             <BaseButton id="download-button" text="추출하기" type="type2" width="248px" height="54px" :disabled="isContentChanged || !hasManualSave" @click="checkContentLengthAndOpenFileModal()"/>
             <router-link to="/questions" custom v-slot="{ navigate }">
                 <BaseButton id="connect-create-button" text="이어서 문항 생성하기" type="type4" width="520px" height="54px" @click="handleConnectCreate($event, navigate)"/>
             </router-link>
             
-    
+            <PlainTooltip id="download-message" message="추출은 저장 후 가능해요" width="205px"/>
             <PlainTooltip id="start-edit" message="필요한 부분을 클릭하고 편집을 시작하세요" width="316px"/>
         </div>
 
@@ -38,8 +38,13 @@
             @close="cancelNavigation" 
             @confirm="confirmNavigation"
         />
-
-
+        
+        <!-- 결제 사용 모달 -->
+        <PaymentUsageModal 
+            :isOpen="isPaymentUsageModalOpen"
+            @close="closePaymentUsageModal"
+            @generate="handleGenerate"
+        />
     </div>
 </template>
 <script setup>
@@ -51,6 +56,7 @@ import PlainTooltip from '@/components/common/PlainTooltip.vue';
 import FileSelectModal from '@/components/common/modal/type/FileSelectModal.vue';
 import ConfirmModalComponent from '@/components/common/modal/type/ConfirmModalComponent.vue';
 import WarningModalComponent from '@/components/common/modal/type/WarningModalComponent.vue';
+import PaymentUsageModal from '@/components/common/modal/type/generation/PaymentUsageModal.vue';
 
 import { ref, onMounted, onBeforeUnmount, getCurrentInstance } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -61,6 +67,7 @@ const isConfirmModalOpen = ref(false);
 const hasManualSave = ref(true); // 초기값을 true로 설정 (초기 상태에서 추출하기 버튼 활성화)
 const isContentChanged = ref(false); // 내용 변경 여부 추적 (초기 상태는 변경되지 않음)
 const isWarningModalOpen = ref(false); // 경고 모달 상태
+const isPaymentUsageModalOpen = ref(false); // 결제 사용 모달 상태
 
 // 네비게이션 관련 변수
 const pendingRoute = ref(null); // 대기 중인 라우트 정보 저장
@@ -83,6 +90,31 @@ const checkContentLength = (event) => {
         return false;
     }
     return true;
+};
+
+// 결제 사용 모달 관련 함수
+const openPaymentUsageModal = () => {
+    if (checkContentLength(new Event('click'))) {
+        // 저장된 지문 데이터를 로컬 스토리지에 임시 저장
+        const passageData = {
+            title: passageTitleRef.value?.getTitle?.() || '',
+            content: passageContentRef.value?.getContent?.() || '',
+            summary: passageSummaryRef.value?.getSummary?.() || ''
+        };
+        localStorage.setItem('generateQuestionPassageData', JSON.stringify(passageData));
+        
+        // 결제 사용 모달 열기
+        isPaymentUsageModalOpen.value = true;
+    }
+};
+
+const closePaymentUsageModal = () => {
+    isPaymentUsageModalOpen.value = false;
+};
+
+const handleGenerate = () => {
+    console.log('지문 재생성 시작');
+    // 여기에 지문 재생성 관련 로직 추가
 };
 
 // 저장 버튼 클릭 핸들러 추가
