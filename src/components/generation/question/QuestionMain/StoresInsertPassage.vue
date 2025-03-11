@@ -109,7 +109,10 @@ const passageContent = computed({
     resize: none;
 }
 #stores-passage-text {
-    width: 756px;
+    position: absolute;
+    top: 32px;
+    left: 32px;
+    width: 776px;
     height: 358px;
 
     font-family: 'Pretendard';
@@ -120,11 +123,6 @@ const passageContent = computed({
 
     letter-spacing: -0.02em;
     color: #303030;
-
-    flex: none;
-    order: 0;
-    align-self: stretch;
-    flex-grow: 1;
 
     border: none;
     outline: none; /* 포커스 된 경우의 파란 테두리 삭제 */

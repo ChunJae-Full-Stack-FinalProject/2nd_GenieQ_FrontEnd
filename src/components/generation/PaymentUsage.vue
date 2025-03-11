@@ -35,9 +35,9 @@ const creditcount = ref(0);
 
     position: absolute;
     width: 520px;
-    height: 584px;
+    height: 660px;
     left: 1244px;
-    top: 200px;
+    top: 118px;
 
     background: #FFFFFF;
     border: 1px solid #BDBDBD;

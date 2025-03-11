@@ -1,7 +1,11 @@
 <template>
     <div class="insert-passage">
+        <div class="edit-title">
+            <p id="passage-head">작업이름</p>
+            <input type="text" id="passage-title"
+                placeholder="작업 이름을 입력해주세요." v-model="title"/>
+        </div>
         <p id="insert-head">지문 입력</p>
-        <p id="insert-subhead">입력한 지문을 바탕으로 문항을 생성합니다.</p>
         <div class="select-insert-type">
             <p id="user-passage" :class="{ active: activeTab === 'user'}" @click="setActiveTab('user')">
                 사용자 입력
@@ -55,19 +59,62 @@ watch (activeTab, () => {
 
     position: absolute;
     width: 928px;
-    height: 584px;
+    height: 660px;
     left: 292px;
-    top: 200px;
+    top: 118px;
 
     background: #FFFFFF;
     border: 1px solid #BDBDBD;
     border-radius: 12px;
 }
+.edit-title {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0px;
+    gap: 12px;
+
+    position: absolute;
+    width: 848px;
+    height: 88px;
+    left: 40px;
+    top: 24px;
+}
+#passage-head {
+    width: 610px;
+    height: 30px;
+
+    font-family: 'Pretendard';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 20px;
+    line-height: 150%;
+
+    letter-spacing: -0.02em;
+    color: #303030;
+}
+#passage-title {
+    box-sizing: border-box;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 8px;
+    gap: 8px;
+
+    width: 848px;
+    height: 46px;
+
+    background: #FFFFFF;
+    border: 1px solid #FF9F40;
+    border-radius: 8px;
+}
 #insert-head {
     position: absolute;
+    width: 75px;
     height: 30px;
     left: 40px;
-    top: 26px;
+    top: 136px;
 
     font-family: 'Pretendard';
     font-style: normal;
@@ -101,37 +148,32 @@ watch (activeTab, () => {
     gap: 36px;
 
     position: absolute;
-    width: 220px;
+    width: 200px;
     height: 24px;
     left: 40px;
-    top: 96px;
+    top: 178px;
 }
 .select-insert-type > p {
-    width: 92px;
-    height: 24px;
-
     font-family: 'Pretendard';
     font-style: normal;
-    font-weight: 500;
-    font-size: 20px;
-    line-height: 24px;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 150%;
 
+    letter-spacing: -0.02em;
     color: #424242;
-
-    flex: none;
-    order: 1;
-    flex-grow: 0;
 }
 /* 활성화된 탭 스타일 */
 .select-insert-type > p.active {
     color: #FF9F40;
+    text-decoration: underline;
 }
 #passage-count {
     position: absolute;
-    width: 76px;
+    width: 50px;
     height: 24px;
-    left: 812px;
-    top: 104px;
+    left: 830px;
+    top: 190px;
 
     font-family: 'Pretendard';
     font-style: normal;
@@ -141,24 +183,15 @@ watch (activeTab, () => {
 
     text-align: right;
     letter-spacing: -0.02em;
-
     color: #BDBDBD;
 }
 .insert-passage-main {
     box-sizing: border-box;
-
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    padding: 32px;
-    gap: 8px;
-
     position: absolute;
     width: 848px;
     height: 422px;
-    left: calc(50% - 848px/2);
-    top: 140px;
+    left: 40px;
+    top: 214px;
 
     background: #FFFFFF;
     border: 1px solid #FF9F40;
