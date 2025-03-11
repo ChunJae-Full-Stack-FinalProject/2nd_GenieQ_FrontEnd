@@ -64,7 +64,12 @@
         <BaseButton text="추출하기" type="type2" id="download-button" width="248px" height="54px" :disabled="isContentChanged" @click="openFileModal"/>
     </div>
         
-    <GenerateQuestionModal :isOpen="showGenerateQuestionModal" @close="showGenerateQuestionModal = false"/>
+    <GenerateQuestionModal 
+      :isOpen="showGenerateQuestionModal" 
+      mode="generate"
+      @close="showGenerateQuestionModal = false"
+      @openPaymentModal="showPaymentModal = true"
+    />
     <!-- PaymentUsageModal 컴포넌트 -->
     <PaymentUsageModal 
       :isOpen="showPaymentModal" 
@@ -383,8 +388,8 @@ const validateAndOpenModal = () => {
     showLengthWarning();
   } else {
     localStorage.setItem('tempPassageData', JSON.stringify(passageData.value));
-    // PaymentUsageModal 표시
-    showPaymentModal.value = true;
+    // GenerateQuestion 표시
+    showGenerateQuestionModal.value = true;
   }
 };
 
@@ -410,7 +415,7 @@ const handleFileSelect = (fileType) => {
   // 예: PDF, Word, TXT 파일 생성 및 다운로드 등
 };
 
-// 문항 생성 처리 함수 - 여기가 핵심입니다
+// 문항 생성 처리 함수
 const handleQuestionGeneration = () => {
   if (showPaymentModal.value === false) {
     return;
