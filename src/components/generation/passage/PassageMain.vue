@@ -1,11 +1,10 @@
 <template>
     <div class="app-container">
+        <p id="main-title">지문 생성</p>
         <div class="main-content">
-            <InputPassageTitle ref="passageTitleRef"/>
             <CreatePassageMain ref="createPassageMainRef" @input-change="updateInputText" @category-change="updateCategory"/>
-            <PaymentUsage/>
+            <PaymentUsage ref="paymentUsageRef" @credit-update="onCreditUpdate"/>
             <BaseButton id="reset_button" text="초기화" type="type2" width="248px" height="54px" :disabled="!hasContent" @click="resetText"/>
-            <!-- router-link를 제거하고 일반 버튼으로 변경 -->
             <BaseButton 
                 id="create_button" 
                 text="지문 생성하기" 
@@ -17,10 +16,12 @@
             />
             
             <!-- 확인 모달 추가 -->
-            <ConfirmModalComponent
+            <WarningModalComponent
                 :isOpen="isConfirmModalOpen"
-                title="지문 생성"
-                message="지문을 생성하시겠습니까?"
+                title="지문을 생성하시겠습니다?"
+                message="생성 시 이용권이 차감되며, 오타가 있을 경우 AI가 잘못된 지문을 생성할 수 있습니다."
+                cancelText="취소하기"
+                confirmText="생성하기"
                 @close="closeConfirmModal"
                 @confirm="confirmCreatePassage"
             />
@@ -43,7 +44,6 @@ import { ref, computed } from 'vue';
 import CreatePassageMain from '@/components/generation/passage/PassageMain/CreatePassageMain.vue';
 import PaymentUsage from '@/components/generation/PaymentUsage.vue';
 import BaseButton from '@/components/common/button/BaseButton.vue';
-import InputPassageTitle from '@/components/generation/passage/PassageContent/InputPassageTitle.vue';
 import ConfirmModalComponent from '@/components/common/modal/type/ConfirmModalComponent.vue';
 import WarningModalComponent from '@/components/common/modal/type/WarningModalComponent.vue';
 import { useRouter } from 'vue-router';
@@ -55,12 +55,24 @@ const inputText = ref('');
 const selectedCategory = ref('human');
 const passageTitleRef = ref(null);
 const createPassageMainRef = ref(null);
+const paymentUsageRef = ref(null);
+const creditCountValue = ref(0); // 별도의 ref로 이용권 상태 관리
 
 // 모달 상태 관리
 const isConfirmModalOpen = ref(false);
 const isWarningModalOpen = ref(false);
 
-const isButtonEnabled = computed(() => inputText.value.length >= 1);
+// 수정 필요한 코드
+const isButtonEnabled = computed(() => {
+    // 입력 텍스트가 있고 보유 이용권이 0보다 커야 버튼 활성화
+    return inputText.value.length >= 1 && creditCountValue.value > 0;
+});
+
+// PaymentUsage 컴포넌트에서 이용권 업데이트 시 호출될 함수
+const onCreditUpdate = (count) => {
+    creditCountValue.value = count;
+};
+
 
 // 지문 제재 초기화 함수
 const resetText = () => {
@@ -147,12 +159,39 @@ const saveDataAndNavigate = () => {
     
     // 다음 페이지로 이동
     router.push('/passage/create');
+
+    // 컴포넌트 마운트 시 실행
+    onMounted(() => {
+    // paymentUsageRef가 설정된 후 creditcount 값을 가져오기 위한 코드
+    setTimeout(() => {
+        if (paymentUsageRef.value && paymentUsageRef.value.creditcount) {
+            creditCountValue.value = paymentUsageRef.value.creditcount.value;
+        }
+    }, 0);
+});
+
 };
 </script>
 <style scoped>
 .app-container {
     width: 100%;
     padding: 20px 30px 80px 20px;
+}
+#main-title {
+    position: absolute;
+    width: 87px;
+    height: 36px;
+    left: 292px;
+    top: 70px;
+
+    font-family: 'Pretendard';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 24px;
+    line-height: 150%;
+
+    letter-spacing: -0.02em;
+    color: #000000;
 }
 #reset_button {
     position: absolute;

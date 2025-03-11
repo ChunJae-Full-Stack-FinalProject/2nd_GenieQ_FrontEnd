@@ -102,10 +102,14 @@ import PlainTooltip from '@/components/common/PlainTooltip.vue';
 import questionExample from '@/assets/data/questionExample.json';
 
 const router = useRouter();
-const emit = defineEmits(["close"]);
+const emit = defineEmits(["close", "openPaymentModal"]);
 
 const props = defineProps({
   isOpen: Boolean,
+  mode: {
+    type: String,
+    default: 'navigate' //'navigate' 또는 'generate'
+  }
 });
 
 const activePattern = ref(null); // 문항 유형 선택값
@@ -125,30 +129,38 @@ const closeModal = () => {
 const handleGenerateQuestion = () => {
     if (selectedQuestion.value) {
        // 로컬 스토리지에서 지문 데이터 가져오기
-       const savedPassageData = localStorage.getItem('tempPassageData');
-       let passageData = null;
+        const savedPassageData = localStorage.getItem('tempPassageData');
+        let passageData = null;
 
         if (savedPassageData) {
             try {
                 passageData = JSON.parse(savedPassageData);
+                
                 localStorage.setItem('generateQuestionPassageData', savedPassageData);
+                localStorage.setItem('selectedQuestionData', JSON.stringify(selectedQuestion.value));
             } catch (error) {
-                console.error('저장된 지문 데이터를 불러오는 중 오류 발생:', error);
+                console.error('저장된 지문 데이터를 불러오는 중 오류 발생 : ', error);
             }
         }
 
-        router.push({
-            path: '/questions/generate',
-            query: {
-                pattern: activePattern.value,
-                type: activeType.value
-            },
-            state: {
-                questionData: selectedQuestion.value,
-                passageData: passageData
-            }
-        });
-
+        // mode에 따라 다른 동작 수행
+        if (props.mode === 'generate') {
+            // GenerationQuestion 페이지에서 호출 (PaymentUsageModal 표시)
+            emit("openPaymentModal");
+        } else {
+            // QuestionMain 페이지에서 호출 (페이지 이동)
+            router.push({
+                path: '/questions/generate',
+                query: {
+                    pattern: activePattern.value,
+                    type: activeType.value
+                },
+                state: {
+                    questionData: selectedQuestion.value,
+                    passageData: passageData
+                }
+            });
+        }
         // 모달 닫기
         emit("close");
 

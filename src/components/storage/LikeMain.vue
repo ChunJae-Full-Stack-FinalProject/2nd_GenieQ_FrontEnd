@@ -492,7 +492,7 @@ cursor: pointer;
 
 /* 행 hover 효과 */
 .data-table tbody tr:hover {
-background-color: #f5f5f5;
+background-color: #EAEAEA;
 }
 
 /* 추출하기 열(5번째 열) 스타일링 */
@@ -603,6 +603,6 @@ margin-left: 4px;
 }
 
 .menu-item:hover {
-  background-color: #f5f5f5;
+  background-color: #EAEAEA;
 }
 </style>

@@ -63,7 +63,7 @@ defineExpose({
     width: 522px;
     height: 591px;
     left: 1244px;
-    top: 176px;
+    top: 70px;
 }
 
 .passage-type-container {
@@ -74,7 +74,7 @@ defineExpose({
     gap: 8px;
 
     width: 522px;
-    height: 152px;
+    height: 180px;
 
     flex: none;
     order: 0;
@@ -254,7 +254,7 @@ defineExpose({
     gap: 8px;
 
     width: 522px;
-    height: 355px;
+    height: 442px;
 
     background: #FFFFFF;
     border: 1px solid #BDBDBD;
