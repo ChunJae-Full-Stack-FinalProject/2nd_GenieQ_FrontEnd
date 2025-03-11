@@ -58,7 +58,7 @@
     <div class="button-container">
         <BaseButton text="문항 추가하기" type="type2" id="add-button" width="248px" height="54px" :disabled="isContentChanged" @click="validateAndOpenModal"/>
         <BaseButton text="저장하기" type="type2" id="save-button" width="248px" height="54px" :disabled="!isContentChanged" @click="handleSaveButtonClick"/>
-        <BaseButton text="추출하기" type="type2" id="download-button" width="248px" height="54px" :disabled="isContentChanged" @click="handleButtonClick"/>
+        <BaseButton text="추출하기" type="type2" id="download-button" width="248px" height="54px" :disabled="isContentChanged" @click="openFileModal"/>
     </div>
         
     <GenerateQuestionModal :isOpen="showGenerateQuestionModal" @close="showGenerateQuestionModal = false"/>
@@ -85,6 +85,9 @@
       @close="cancelNavigation" 
       @confirm="confirmNavigation"
     />
+
+    <!-- 파일 선택 모달 -->
+    <FileSelectModal :isOpen="isFileModalOpen" @close="closeFileModal" @confirm="handleFileSelect"/>
   </div>
 </template>
 <script setup>
@@ -100,6 +103,7 @@ import GenerateQuestionModal from '@/components/common/modal/type/generation/Gen
 import ConfirmModalComponent from '@/components/common/modal/type/ConfirmModalComponent.vue';
 import WarningModalComponent from '@/components/common/modal/type/WarningModalComponent.vue';
 import PaymentUsageModal from '@/components/common/modal/type/generation/PaymentUsageModal.vue';
+import FileSelectModal from '@/components/common/modal/type/FileSelectModal.vue';
 
 const isEditingGlobal = ref(false);
 const pattern = ref(null);
@@ -113,6 +117,7 @@ const isSaved = ref(true); // 저장 상태 초기값을 true로 변경
 const hasManualSave = ref(true); // 처음에는 true로 설정하여 문항 추가하기와 추출하기 버튼 활성화
 const isContentChanged = ref(false); // 내용 변경 플래그 (false로 시작)
 const isWarningModalOpen = ref(false);
+const isFileModalOpen = ref(false); // 파일 선택 모달 상태 추가
 
 // 캐러셀 관련 상태
 const currentSlide = ref(0);
@@ -165,7 +170,7 @@ const handleContentChange = () => {
   console.log('내용이 변경되었습니다:', { isContentChanged: isContentChanged.value, hasManualSave: hasManualSave.value });
 };
 
-// 기존 버튼 클릭 핸들러
+// 기존 버튼 클릭 핸들러 (이제는 사용되지 않음)
 const handleButtonClick = () => {
   if (editPassageRef.value) {
     return editPassageRef.value.validateTextLength();
@@ -227,6 +232,28 @@ const validateAndOpenModal = () => {
     // PaymentUsageModal 표시
     showPaymentModal.value = true;
   }
+};
+
+// 파일 선택 모달 열기 함수
+const openFileModal = () => {
+  // 지문 길이 검증
+  if (!validatePassageLength()) {
+    showLengthWarning();
+  } else {
+    isFileModalOpen.value = true;
+  }
+};
+
+// 파일 선택 모달 닫기 함수
+const closeFileModal = () => {
+  isFileModalOpen.value = false;
+};
+
+// 파일 선택 처리 함수
+const handleFileSelect = (fileType) => {
+  console.log('선택된 파일 형식:', fileType);
+  // 여기에 선택된 파일 형식에 따른 추출 로직 구현
+  // 예: PDF, Word, TXT 파일 생성 및 다운로드 등
 };
 
 // 문항 생성 처리 함수 - 여기가 핵심입니다
