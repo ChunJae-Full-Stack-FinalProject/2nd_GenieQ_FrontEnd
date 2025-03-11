@@ -175,6 +175,7 @@ watch(email, validateEmail);
      text-align: center;
      margin-top: 246px;
      margin-bottom: 39px;
+     font-weight: bold;
    }
    
    .title {
@@ -188,6 +189,7 @@ watch(email, validateEmail);
      font-size: 48px;
      color: #000000;
      margin-bottom: 20px;
+     font-weight: bold;
    }
    
    .highlight {
@@ -290,6 +292,7 @@ watch(email, validateEmail);
    .notion {
      font-size: 13px;
      color: #757575;
+     margin-right: 45px;
    }
  
    .notion:hover {
