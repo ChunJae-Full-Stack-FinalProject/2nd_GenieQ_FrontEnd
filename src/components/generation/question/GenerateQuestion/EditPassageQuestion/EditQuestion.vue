@@ -5,7 +5,7 @@
                 <div class="question-header">
                     <div class="title-container">
                         <span v-if="!isEditing" id="question-title">{{ title }}</span>
-                        <input v-else type="text" v-model="title" id="input-title" ref="titleInput"/>
+                        <input v-else type="text" v-model="title" id="input-title" ref="titleInput" @input="handleQuestionChanged"/>
                     </div>
                     
                     <button class="edit-button" @click="toggleEditMode">
@@ -17,7 +17,7 @@
                     <div v-for="(item, index) in items" :key="index" class="question-item">
                         <span class="question-number">{{ circledNumbers[index] }}</span>
                         <span v-if="!isEditing" class="question-text">{{ item }}</span>
-                        <input v-else type="text" v-model="items[index]" id="input-question"/>
+                        <input v-else type="text" v-model="items[index]" id="input-question" @input="handleQuestionChanged"/>
                     </div>
                 </div>
             </div>
@@ -82,6 +82,11 @@ export default {
                 this.$emit('update:questions', this.items);
                 this.$emit('update:questionTitle', this.title);
             }
+        },
+        
+        // 문항 변경 시 이벤트 발생
+        handleQuestionChanged() {
+            this.$emit('question-changed');
         }
     },
     created() {
@@ -113,37 +118,28 @@ export default {
     padding: 0px;
     gap: 4px;
 
-    width: 930px;
-    height: 405px;
-
-    flex: none;
-    order: 1;
-    flex-grow: 0;
+    width: 100%;
+    height: 100%;
 }
 .edit-main {
     box-sizing: border-box;
-
-    width: 927px;
+    width: 100%;
     height: 365px;
-    left: 137px;
-    top: 0px;
-
+    
     background: #FFFFFF;
     border: 1px solid #BDBDBD;
     border-radius: 12px;
-
 }
 .question-main {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    padding: 0px;
+    padding-top: 7px;
     gap: 12px;
-
     position: relative;
-    width: 736.67px;
-    height: 246px;
-    left: calc(50% - 736.67px/2 - 71.67px);
+    width: 90%;
+    margin: 0 auto;
+    height: auto;
     top: 25px;
 }
 .question-header {
@@ -198,7 +194,7 @@ export default {
     
     position: absolute;
     top: 3px;
-    left: 845px;
+    left: 830px;
     width: 16.67px;
 }
 .question-items {
@@ -260,7 +256,7 @@ export default {
 }
 #recreate-button {
     position: relative;
-    left: 704px;
+    left: 703px;
     top: 40px;
 }
 </style>

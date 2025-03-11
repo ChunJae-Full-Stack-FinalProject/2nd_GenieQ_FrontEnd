@@ -7,23 +7,23 @@
                 <div id="input-answer">
                     <p>정답</p>
                     <div class="answer-option">
-                        <input type="radio" id="answer1" value="1" checked v-model="selectedAnswer">
+                        <input type="radio" id="answer1" value="1" checked v-model="selectedAnswer" @change="handleDescriptionChanged">
                         <label for="answer1">①</label>
                     </div>
                     <div class="answer-option">
-                        <input type="radio" id="answer2" value="2" v-model="selectedAnswer">
+                        <input type="radio" id="answer2" value="2" v-model="selectedAnswer" @change="handleDescriptionChanged">
                         <label for="answer2">②</label>
                     </div>
                     <div class="answer-option">
-                        <input type="radio" id="answer3" value="3" v-model="selectedAnswer">
+                        <input type="radio" id="answer3" value="3" v-model="selectedAnswer" @change="handleDescriptionChanged">
                         <label for="answer3">③</label>
                     </div>
                     <div class="answer-option">
-                        <input type="radio" id="answer4" value="4" v-model="selectedAnswer">
+                        <input type="radio" id="answer4" value="4" v-model="selectedAnswer" @change="handleDescriptionChanged">
                         <label for="answer4">④</label>
                     </div>
                     <div class="answer-option">
-                        <input type="radio" id="answer5" value="5" v-model="selectedAnswer">
+                        <input type="radio" id="answer5" value="5" v-model="selectedAnswer" @change="handleDescriptionChanged">
                         <label for="answer5">⑤</label>
                     </div>
                 </div>
@@ -31,7 +31,7 @@
             
             <div class="content-box">
             <span v-if="!isEditing" id="description-content">{{ content }}</span>
-            <textarea v-else type="text" v-model="content" id="input-content"></textarea>
+            <textarea v-else type="text" v-model="content" id="input-content" @input="handleDescriptionChanged"></textarea>
             </div>
         </div>
     </div>
@@ -48,7 +48,7 @@ export default {
         // 해설
         description: {
             type: String,
-            default: "연구 커뮤니티는 이러한 모델의 규모를 확장하면 성능이 향상된다고 인정한다고 했으므로, \n① ‘LLMs의 성능은 모델의 크기를 줄일수록 향상된다.’ 는 글의 내용과 일치하지 않는다."
+            default: "연구 커뮤니티는 이러한 모델의 규모를 확장하면 성능이 향상된다고 인정한다고 했으므로, \n① 'LLMs의 성능은 모델의 크기를 줄일수록 향상된다.' 는 글의 내용과 일치하지 않는다."
         },
         // 편집 모드 상태를 props로 받음
         isEditing: {
@@ -63,6 +63,12 @@ export default {
             answer: '',
             // 내부적으로 관리할 해설 데이터
             content: '',
+        }
+    },
+    methods: {
+        // 해설 변경 시 이벤트 발생
+        handleDescriptionChanged() {
+            this.$emit('description-changed');
         }
     },
     created() {
@@ -93,32 +99,24 @@ export default {
     padding: 0px;
     gap: 4px;
 
-    position: absolute;
-    width: 520px;
-    height: 407px;
-    left: -21px;
-    top: -25px;
+    position: relative;
+    left: 0;
+    top: 0;
 }
 .description-main {
     box-sizing: border-box;
-
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 20px;
     gap: 8px;
 
-    width: 520px;
+    width: 100%;
     height: 365px;
 
     background: #FFFFFF;
     border: 1px solid #BDBDBD;
     border-radius: 12px;
-
-    flex: none;
-    order: 1;
-    align-self: stretch;
-    flex-grow: 0;
 }
 #correct-answer {
     display: flex;

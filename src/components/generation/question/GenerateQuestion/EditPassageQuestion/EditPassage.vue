@@ -37,7 +37,8 @@
                     v-model="contentText"
                     @select="onTextSelect"
                     @click="onTextSelect"
-                    @keyup="onTextSelect">
+                    @keyup="onTextSelect"
+                    @input="onContentChange">
                 </textarea>
             </div>
         </div>
@@ -68,6 +69,14 @@ const currentSymbolType = ref('㉠');
 const selectionStart = ref(0);
 const selectionEnd = ref(0);
 const isConfirmModalOpen = ref(false);
+
+// 사용자 정의 이벤트 발생
+const emit = defineEmits(['content-changed']);
+
+// 내용이 변경될 때 이벤트 발생
+const onContentChange = () => {
+    emit('content-changed');
+};
 
 // 텍스트 길이 계산 함수
 const getTextLength = () => {
@@ -180,6 +189,9 @@ const insertSymbol = (symbol) => {
     
     // 툴팁 닫기
     showTooltip.value = false;
+    
+    // 내용 변경 이벤트 발생
+    emit('content-changed');
 };
 
 // 텍스트 서식 적용
@@ -224,6 +236,9 @@ const formatText = (type) => {
         selectionStart.value = newCursorPos;
         selectionEnd.value = newCursorPos;
     });
+    
+    // 내용 변경 이벤트 발생
+    emit('content-changed');
 };
 
 // 글자 수 검증 함수
@@ -262,7 +277,6 @@ const setContent = (content) => {
         console.log('EditPassage - contentText 설정 후:', contentText.value);
     }
 };
-
 
 // 외부에서 접근할 메서드 노출
 defineExpose({
