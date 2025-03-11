@@ -274,16 +274,16 @@ defineExpose({
 <style scoped>
 .edit-passage {
     box-sizing: border-box;
+
+    position: absolute;
+    top: 170px;
+    left: 292px;
     width: 928px;
     height: 783px;
 
     background: #FFFFFF;
     border: 1px solid #BDBDBD;
     border-radius: 12px;
-
-    flex: none;
-    order: 0;
-    flex-grow: 0;
 }
 .edit-tool-bar {
     display: flex;

@@ -1,87 +1,90 @@
 <template>
   <div class="app-container">
-      <p id="main-head">문항 생성</p>
-      <div class="main-content">
-        <p id="content-head">지문</p>
-        
-        <!-- EditPassage를 직접 사용 -->
-        <div class="edit-content-container">
-          <EditPassage ref="editPassageRef"/>
-        </div>
+    <p id="main-head">문항 생성</p>
+
+    <div class="passage-content">
+      <p id="content-head">지문</p>
+      <!-- EditPassage를 직접 사용 -->
+      <div class="edit-content-container">
+        <EditPassage ref="editPassageRef"/>
+      </div>
+    </div>
         
         <!-- 문항 캐러셀 -->
-        <div class="question-slide-container">
-          <div class="carousel-slide" :style="{ transform: `translateX(-${currentSlide * 100}%)` }">
-            <div v-for="(item, index) in questionsData" :key="index" class="carousel-item">
-              <EditQuestion 
-                :questions="item.questions" 
-                :questionTitle="item.title"
-                @edit-mode-changed="updateEditingMode"
-              />
-            </div>
-          </div>
+    <div class="question-slide-container">
+      <p>문항</p>
+      <div class="carousel-slide" :style="{ transform: `translateX(-${currentSlide * 100}%)` }">
+        <div v-for="(item, index) in questionsData" :key="index" class="carousel-item">
+          <EditQuestion 
+            :questions="item.questions" 
+            :questionTitle="item.title"
+            @edit-mode-changed="updateEditingMode"
+          />
         </div>
-        
-        <PassageSummary id="passage-summary"/>
-        
-        <!-- 해설 캐러셀 -->
-        <div class="description-slide-container">
-          <div class="carousel-slide" :style="{ transform: `translateX(-${currentSlide * 100}%)` }">
-            <div v-for="(item, index) in questionsData" :key="index" class="carousel-item">
-              <QuestionDescription 
-                :isEditing="isEditingGlobal" 
-                :correct="item.correct || '①'" 
-                :description="item.description || ''"
-              />
-            </div>
-          </div>
-        </div>
-        
-        <!-- 페이지네이션 추가 -->
-        <div class="pagination-container">
-          <button class="pagination-arrow" :disabled="currentSlide === 0" @click="prevSlide">
-            <span class="arrow-left">&#10094;</span>
-          </button>
-          <div class="pagination-text">
-            {{ currentSlide + 1 }} / {{ questionsData.length }}
-          </div>
-          <button class="pagination-arrow" :disabled="currentSlide === questionsData.length - 1" @click="nextSlide">
-            <span class="arrow-right">&#10095;</span>
-          </button>
-        </div>
-        
-        <div class="button-container">
-            <BaseButton text="문항 추가하기" type="type2" id="add-button" width="248px" height="54px" :disabled="!hasManualSave" @click="validateAndOpenModal"/>
-            <BaseButton text="저장하기" type="type2" id="save-button" width="248px" height="54px" @click="handleSaveButtonClick"/>
-            <BaseButton text="추출하기" type="type2" id="download-button" width="248px" height="54px" :disabled="!hasManualSave" @click="handleButtonClick"/>
-        </div>
-        
-        <GenerateQuestionModal :isOpen="showGenerateQuestionModal" @close="showGenerateQuestionModal = false"/>
       </div>
-      
-      <!-- PaymentUsageModal 컴포넌트 -->
-      <PaymentUsageModal 
-        :isOpen="showPaymentModal" 
-        @close="showPaymentModal = false"
-        @generate="handleQuestionGeneration"
-      />
-      
-      <ConfirmModalComponent
-        :isOpen="isConfirmModalOpen"
-        title="글자 수를 확인해 주세요."
-        message="500자 이하의 지문으로 정상적인 문항을 생성하기 어렵습니다. 충분한 지문을 입력해 주세요."
-        @close="isConfirmModalOpen = false"
-        @confirm="isConfirmModalOpen = false"
-      />
-      <WarningModalComponent 
-        :isOpen="isWarningModalOpen" 
-        title="작업을 중단하시겠습니까?" 
-        message="마지막 편집 내용은 저장되지 않습니다." 
-        cancelText="취소하기"
-        confirmText="작업 중단하기"
-        @close="cancelNavigation" 
-        @confirm="confirmNavigation"
-      />
+    </div>
+        
+    <PassageSummary id="passage-summary"/>
+        
+    <!-- 해설 캐러셀 -->
+    <p id="description-head">문제 해설</p>
+    <div class="description-container">
+      <div class="description-slide-container">
+        <div class="carousel-slide" :style="{ transform: `translateX(-${currentSlide * 100}%)` }">
+          <div v-for="(item, index) in questionsData" :key="index" class="carousel-item description-item">
+            <QuestionDescription 
+              :isEditing="isEditingGlobal" 
+              :correct="item.correct" 
+              :description="item.description"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+        
+    <!-- 페이지네이션 추가 -->
+    <div class="pagination-container">
+      <button class="pagination-arrow" :disabled="currentSlide === 0" @click="prevSlide">
+        <Icon icon="ep:arrow-left-bold" width="18px" height="18px" class="arrow-left" style="color: #303030" />
+      </button>
+      <div class="pagination-text">
+        {{ currentSlide + 1 }}  /  {{ questionsData.length }}
+      </div>
+      <button class="pagination-arrow" :disabled="currentSlide === questionsData.length - 1" @click="nextSlide">
+        <Icon icon="ep:arrow-right-bold" width="18px" height="18px" class="arrow-right" style="color: #303030" />
+      </button>
+    </div>
+        
+    <div class="button-container">
+        <BaseButton text="문항 추가하기" type="type2" id="add-button" width="248px" height="54px" :disabled="!hasManualSave" @click="validateAndOpenModal"/>
+        <BaseButton text="저장하기" type="type2" id="save-button" width="248px" height="54px" @click="handleSaveButtonClick"/>
+        <BaseButton text="추출하기" type="type2" id="download-button" width="248px" height="54px" :disabled="!hasManualSave" @click="handleButtonClick"/>
+    </div>
+        
+    <GenerateQuestionModal :isOpen="showGenerateQuestionModal" @close="showGenerateQuestionModal = false"/>
+    <!-- PaymentUsageModal 컴포넌트 -->
+    <PaymentUsageModal 
+      :isOpen="showPaymentModal" 
+      @close="showPaymentModal = false"
+      @generate="handleQuestionGeneration"
+    />
+    
+    <ConfirmModalComponent
+      :isOpen="isConfirmModalOpen"
+      title="글자 수를 확인해 주세요."
+      message="500자 이하의 지문으로 정상적인 문항을 생성하기 어렵습니다. 충분한 지문을 입력해 주세요."
+      @close="isConfirmModalOpen = false"
+      @confirm="isConfirmModalOpen = false"
+    />
+    <WarningModalComponent 
+      :isOpen="isWarningModalOpen" 
+      title="작업을 중단하시겠습니까?" 
+      message="마지막 편집 내용은 저장되지 않습니다." 
+      cancelText="취소하기"
+      confirmText="작업 중단하기"
+      @close="cancelNavigation" 
+      @confirm="confirmNavigation"
+    />
   </div>
 </template>
 <script setup>
@@ -222,18 +225,17 @@ const handleQuestionGeneration = () => {
   const newQuestion = {
     title: '새로운 문항: 다음 중 본문과 내용이 일치하는 것을 고르시오.',
     questions: [
-      'LLMs의 성능은 모델의 크기를 확장할수록 향상된다.',
+      '문제가 바뀌는지 확인해보자',
       'LLMs는 다른 AI 기술들과 전혀 다른 접근 방식을 사용한다.',
       'ChatGPT는 LLMs의 가장 초기 모델 중 하나이다.',
       'LLMs는 기업 환경에서만 사용되는 전문적인 도구이다.',
       '연구자들은 LLMs의 성능을 줄이기 위해 노력하고 있다.'
     ],
     correct: '①',
-    description: "본문에서 \"연구 커뮤니티는 이러한 모델의 규모를 확장하면 성능이 향상된다고 인정한다\"고 언급했으므로,\n① 'LLMs의 성능은 모델의 크기를 확장할수록 향상된다'는 글의 내용과 일치한다."
+    description: "으아아아아아아아아악 너무 힘들어요오오오오오오 살려줘 제에에에에ㅔㅇ바라라아ㅏ아아라"
   };
 
   // 여러 개의 문항이 있었던 배열을 초기화하고 기존 문항과 새 문항만 저장
-  // 이렇게 하면 두 개의 문항만 존재하게 됩니다
   if (questionsData.value.length > 1) {
     // 기존 문항이 여러 개 있었으면 초기 문항과 새 문항만 유지
     questionsData.value = [questionsData.value[0], newQuestion];
@@ -444,6 +446,11 @@ watch(currentSlide, (newSlide) => {
   letter-spacing: -0.02em;
   color: #000000;
 }
+#passage-summary {
+  position: absolute;
+  top: 126px;
+  left: 1244px;
+}
 /* 슬라이드 컨테이너 스타일 */
 .question-slide-container {
   position: absolute;
@@ -453,47 +460,77 @@ watch(currentSlide, (newSlide) => {
   top: 970px;  /* EditPassage 아래에 위치 (170px + 783px + 간격) */
   overflow: hidden;
 }
+.question-slide-container > p {
+  width: 928px;
+  height: 36px;
 
-.description-slide-container {
+  font-style: normal;
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 150%;
+
+  letter-spacing: -0.02em;
+  color: #000000;
+}
+#description-head {
+  position: absolute;
+  top: 971px;
+  left: 1244px;
+
+  font-style: normal;
+  font-weight: 600;
+  font-size: 24px;
+  line-height: 32px;
+  color: #000000;
+}
+.description-container {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  gap: 8px;
+
   position: absolute;
   width: 520px;
-  height: 407px;
+  height: 367px;
+  top: 1011px;
   left: 1244px;
-  top: 963px;
-  overflow: hidden;
 }
-
+.description-slide-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
 .carousel-slide {
   display: flex;
   transition: transform 0.5s ease;
-  width: 100%;
   height: 100%;
 }
 
 .carousel-item {
-  min-width: 100%;
+  width: 100%;
   height: 100%;
 }
 
 /* 페이지네이션 스타일 */
 .pagination-container {
   display: flex;
-  justify-content: center;
+  flex-direction: row;
   align-items: center;
+  padding: 0px;
+  gap: 12px;
+
   position: absolute;
-  width: 200px;
-  height: 50px;
-  left: calc(50% - 100px);
-  top: 1400px;
-  gap: 20px;
+  width: 134px;
+  height: 30px;
+  left: 971px;
+  top: 1390px;
 }
 
 .pagination-arrow {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: white;
-  border: 1px solid #BDBDBD;
+  background: none;
+  border: none;
   cursor: pointer;
   display: flex;
   justify-content: center;
@@ -507,12 +544,29 @@ watch(currentSlide, (newSlide) => {
 }
 
 .pagination-text {
-  font-family: 'Pretendard';
-  font-style: normal;
-  font-weight: 500;
-  font-size: 18px;
-  line-height: 150%;
-  color: #FF9500;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 0px 8px;
+  gap: 8px;
+
+  width: 62px;
+  height: 30px;
+}
+
+.button-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0px 154px 80px 272px;
+  gap: 24px;
+
+  position: absolute;
+  width: 1762px;
+  height: 54px;
+  left: 155px;
+  top: 1475px;
 }
 #add-button {
   flex: none;

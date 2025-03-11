@@ -1,6 +1,5 @@
 <template>
     <div class="question-description">
-        <p id="description-head">문제 해설</p>
         <div class="description-main">
             <span v-if="!isEditing" id="correct-answer">정답 {{ answer }}</span>
             <!-- <input v-else type="text" v-model="answer" id="input-answer"/> -->
@@ -97,26 +96,8 @@ export default {
     position: absolute;
     width: 520px;
     height: 407px;
-    left: 1244px;
-    top: 963px;
-}
-#description-head {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    padding: 8px;
-    gap: 8px;
-
-    width: 105px;
-    height: 48px;
-
-    font-family: 'Pretendard';
-    font-style: normal;
-    font-weight: 600;
-    font-size: 24px;
-    line-height: 32px;
-    color: #000000;
+    left: -21px;
+    top: -25px;
 }
 .description-main {
     box-sizing: border-box;
