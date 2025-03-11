@@ -24,10 +24,16 @@
                 </div>
             </div>
             <p id="note">※ 생성이 시작된 중단 및 취소가 불가능합니다.</p>
-        </div>
-        <div class="btn-container">
-            <BaseButton text="닫기" @click="closeModal"></BaseButton>
-            <BaseButton text="계속하기" @click="continueToGenerateQuestion"></BaseButton>
+
+            <div v-if="creditcount>0"class="btn-container">
+                <BaseButton text="닫기" type="type3" width="140px" height="54px" @click="closeModal"></BaseButton>
+                <BaseButton  text="생성하기" width="300px" height="54px" @click="continueToGenerateQuestion"></BaseButton>
+            </div>
+    
+            <div v-else="creditcount=0"class="btn-container">
+                <BaseButton text="닫기" type="type3" width="140px" height="54px" @click="closeModal"></BaseButton>
+                <BaseButton  text="이용권 구매하기" width="300px" height="54px" @click="continueToGenerateQuestion"></BaseButton>
+            </div>
         </div>
     </BaseModal>
 </template> 
@@ -44,7 +50,7 @@ const props = defineProps({
   isOpen: Boolean,
 });
 
-const creditcount = ref(0);
+const creditcount = ref(10);
 
 const closeModal = () => {
   emit("close");
@@ -52,7 +58,7 @@ const closeModal = () => {
 
 const continueToGenerateQuestion = () => {
   // 기존에 저장된 데이터 가져오기
-  const savedPassageData = localStorage.getItem('tempPassageData');
+  const savedPassageData = localStorage.getItem('generateQuestionPassageData');
   const selectedQuestionData = localStorage.getItem('selectedQuestionData');
 
   try {
@@ -65,15 +71,12 @@ const continueToGenerateQuestion = () => {
       query: {
         pattern: questionData?.pattern,
         type: questionData?.type
-      },
-      state: {
-        questionData: questionData,
-        passageData: passageData
       }
     });
 
     // 저장된 데이터 초기화
     localStorage.removeItem('selectedQuestionData');
+    localStorage.removeItem('generateQuestionPassageData');
 
     // 모달 닫기
     emit("close");
@@ -89,7 +92,6 @@ const continueToGenerateQuestion = () => {
     position: absolute;
     width: 520px;
     height: 584px;
-
 
     background: #FFFFFF;
     border: 1px solid #BDBDBD;
@@ -221,11 +223,12 @@ const continueToGenerateQuestion = () => {
 }
 .btn-container{
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     position: absolute;
-    width: 480px;
-    height: 64px;
-    left: calc(50% - 480px/2);
+    width: 100%;
+    gap: 20px;
+    height: 60px;
+    /* left: calc(50% - 480px/2); */
     top: 520px;
 }
 </style>

@@ -128,25 +128,26 @@ const showPaymentUsageModal = ref(false);
 // GenerateQuestion 페이지로 이동하면서 데이터 전달
 const handleGenerateQuestion = () => {
     if (selectedQuestion.value) {
-        // 로컬 스토리지에 선택된 문항 데이터 저장
-        localStorage.setItem('selectedQuestionData', JSON.stringify({
+       // 로컬 스토리지에 선택된 문항 데이터 저장
+       localStorage.setItem('selectedQuestionData', JSON.stringify({
             pattern: activePattern.value,
             type: activeType.value,
             ...selectedQuestion.value
         }));
 
 
-        // 로컬 스토리지에서 지문 데이터 가져오기
-        const savedPassageData = localStorage.getItem('tempPassageData');
+       // 로컬 스토리지에서 지문 데이터 가져오기
+       const savedPassageData = localStorage.getItem('tempPassageData');
         if (savedPassageData) {
             try {
                 const passageData = JSON.parse(savedPassageData);
-                localStorage.setItem('generateQuestionPassageData', savedPassageData);
+                localStorage.setItem('generateQuestionPassageData', JSON.stringify(passageData));
             } catch (error) {
                 console.error('저장된 지문 데이터를 불러오는 중 오류 발생:', error);
             }
         }
 
+        
         // 부모 컴포넌트에 이벤트 전달
         emit('openPaymentModal');
         
