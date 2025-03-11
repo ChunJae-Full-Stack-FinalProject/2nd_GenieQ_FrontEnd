@@ -91,6 +91,7 @@
                 @click="handleGenerateQuestion"/>
             </div>
         </div>
+        <PaymentUsageModal :isOpen="showPaymentUsageModal" @close="showPaymentUsageModal = false"/>
     </BaseModal>
 </template>
 <script setup>
@@ -100,6 +101,7 @@ import BaseModal from "../../BaseModal.vue";
 import BaseButton from "@/components/common/button/BaseButton.vue";
 import PlainTooltip from '@/components/common/PlainTooltip.vue';
 import questionExample from '@/assets/data/questionExample.json';
+import PaymentUsageModal from '@/components/common/modal/type/generation/PaymentUsageModal.vue';
 
 const router = useRouter();
 const emit = defineEmits(["close"]);
@@ -121,36 +123,36 @@ const closeModal = () => {
   selectedQuestion.value = null;
 };
 
+const showPaymentUsageModal = ref(false);
+
 // GenerateQuestion 페이지로 이동하면서 데이터 전달
 const handleGenerateQuestion = () => {
     if (selectedQuestion.value) {
-        // 로컬 스토리지에서 지문 데이터 가져오기
-        const savedPassageData = localStorage.getItem('tempPassageData');
-        let passageData = null;
-        
+       // 로컬 스토리지에 선택된 문항 데이터 저장
+       localStorage.setItem('selectedQuestionData', JSON.stringify({
+            pattern: activePattern.value,
+            type: activeType.value,
+            ...selectedQuestion.value
+        }));
+
+
+       // 로컬 스토리지에서 지문 데이터 가져오기
+       const savedPassageData = localStorage.getItem('tempPassageData');
         if (savedPassageData) {
             try {
-                passageData = JSON.parse(savedPassageData);
-                
-                // 다음 화면에서도 사용할 수 있도록 로컬 스토리지에 다시 저장 (키 이름 변경)
-                localStorage.setItem('generateQuestionPassageData', savedPassageData);
+                const passageData = JSON.parse(savedPassageData);
+                localStorage.setItem('generateQuestionPassageData', JSON.stringify(passageData));
             } catch (error) {
                 console.error('저장된 지문 데이터를 불러오는 중 오류 발생:', error);
             }
         }
 
-        router.push({
-            path: '/questions/generate',
-            query: {
-                pattern: activePattern.value,
-                type: activeType.value
-            },
-            state: {
-                questionData: selectedQuestion.value,
-                passageData: passageData
-            },
-            
-        });
+        
+        // 부모 컴포넌트에 이벤트 전달
+        emit('openPaymentModal');
+        
+        // PaymentUsageModal 열기
+        showPaymentUsageModal.value = true;
 
         // 모달 닫기
         emit("close");
