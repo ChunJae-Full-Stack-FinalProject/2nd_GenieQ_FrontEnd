@@ -2,7 +2,6 @@
     <div class="app-container">
         <p id="main-head">문항 생성</p>
         <div class="main-content">
-            <InputPassageTitle ref="passageTitleRef"/>
             <InsertPassage/>
             <PaymentUsage/>
             <BaseButton id="reset_button" text="초기화" type="type2" width="248px" height="54px" :disabled="!hasContent" @click="resetPassage"/>
