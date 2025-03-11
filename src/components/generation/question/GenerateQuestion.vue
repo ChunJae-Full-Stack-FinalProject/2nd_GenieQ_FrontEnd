@@ -16,10 +16,12 @@
       <div class="carousel-slide" :style="{ transform: `translateX(-${currentSlide * 100}%)` }">
         <div v-for="(item, index) in questionsData" :key="index" class="carousel-item">
           <EditQuestion 
+            ref="editQuestionRefs"
             :questions="item.questions" 
             :questionTitle="item.title"
             @edit-mode-changed="updateEditingMode"
             @question-changed="handleContentChange"
+            @request-edit-mode="openEditWarningModal"
           />
         </div>
       </div>
@@ -86,12 +88,34 @@
       @confirm="confirmNavigation"
     />
 
+    <!-- 문항 편집을 위한 경고 모달 추가 -->
+    <WarningModalComponent 
+      :isOpen="isEditWarningModalOpen" 
+      title="문항 수정 시 최초 생성된 해설은 적용되지 않습니다." 
+      message="해설 수정을 원하실 경우, 직접 수정도 가능합니다." 
+      cancelText="취소하기" 
+      confirmText="수정하기" 
+      @close="closeEditWarningModal" 
+      @confirm="confirmEditWarningModal" 
+    />
+
+    <!-- 여러 개의 문항 저장을 막기 위한 경고 모달 추가 -->
+    <WarningModalComponent 
+      :isOpen="isSaveWarningModalOpen" 
+      title="다른 문항 수정은 저장 후 가능합니다." 
+      message="저장하기 버튼을 클릭하면 현재 문항 수정이 저장됩니다." 
+      cancelText="취소하기" 
+      confirmText="저장하기" 
+      @close="closeSaveWarningModal" 
+      @confirm="saveQuestion" 
+    />
+
     <!-- 파일 선택 모달 -->
     <FileSelectModal :isOpen="isFileModalOpen" @close="closeFileModal" @confirm="handleFileSelect"/>
   </div>
 </template>
 <script setup>
-import { ref, onMounted, provide, onBeforeUnmount, getCurrentInstance, watch } from 'vue';
+import { ref, onMounted, provide, onBeforeUnmount, getCurrentInstance, watch, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 // 직접 컴포넌트 임포트
 import EditPassage from './GenerateQuestion/EditPassageQuestion/EditPassage.vue';
@@ -118,6 +142,12 @@ const hasManualSave = ref(true); // 처음에는 true로 설정하여 문항 추
 const isContentChanged = ref(false); // 내용 변경 플래그 (false로 시작)
 const isWarningModalOpen = ref(false);
 const isFileModalOpen = ref(false); // 파일 선택 모달 상태 추가
+const isEditWarningModalOpen = ref(false); // 문항 편집 경고 모달 상태 추가
+const isSaveWarningModalOpen = ref(false); // 저장 경고 모달 상태 추가
+const editingQuestionIndex = ref(null); // 현재 편집 중인 문항 인덱스
+
+// EditQuestion 컴포넌트 참조
+const editQuestionRefs = ref([]);
 
 // 캐러셀 관련 상태
 const currentSlide = ref(0);
@@ -137,14 +167,85 @@ const questionsData = ref([
   }
 ]);
 
+// 저장 경고 모달 닫기 함수
+const closeSaveWarningModal = () => {
+  isSaveWarningModalOpen.value = false;
+};
+
+// 문항 저장 함수 (백엔드 연동 시 구현 예정)
+const saveQuestion = () => {
+  // 백엔드 연동 로직이 구현될 예정
+  console.log('현재 문항 저장 예정:', currentSlide.value);
+  
+  // 편집 모드 해제
+  updateEditingMode(false);
+  
+  // 현재 EditQuestion 컴포넌트의 편집 모드 해제
+  if (editQuestionRefs.value && editQuestionRefs.value[currentSlide.value]) {
+    editQuestionRefs.value[currentSlide.value].toggleEditMode(false);
+  }
+  
+  // 모달 닫기
+  closeSaveWarningModal();
+  
+  // 내용 변경 플래그 갱신
+  handleContentChange();
+};
+
+// 편집 경고 모달 열기
+const openEditWarningModal = () => {
+  isEditWarningModalOpen.value = true;
+};
+
+// 편집 경고 모달 닫기
+const closeEditWarningModal = () => {
+  isEditWarningModalOpen.value = false;
+};
+
+// 편집 경고 모달 확인 시 처리
+const confirmEditWarningModal = () => {
+  isEditWarningModalOpen.value = false;
+  
+  // 먼저 전역 편집 상태를 true로 설정
+  updateEditingMode(true);
+  
+  // 현재 슬라이드의 EditQuestion 컴포넌트에서 편집 모드를 true로 강제 설정
+  nextTick(() => {
+    if (editQuestionRefs.value && editQuestionRefs.value[currentSlide.value]) {
+      console.log('수정 모드 활성화: 현재 슬라이드', currentSlide.value);
+      const currentEditQuestion = editQuestionRefs.value[currentSlide.value];
+      currentEditQuestion.toggleEditMode(true); // true를 명시적으로 전달
+    } else {
+      console.error('에러: 현재 슬라이드의 EditQuestion 컴포넌트를 찾을 수 없습니다.', { 
+        slideIndex: currentSlide.value, 
+        refsLength: editQuestionRefs.value ? editQuestionRefs.value.length : 0
+      });
+    }
+  });
+};
+
 // 슬라이드 네비게이션 함수
 const nextSlide = () => {
+  // 편집 모드인 경우 경고 모달 표시
+  if (isEditingGlobal.value) {
+    isSaveWarningModalOpen.value = true;
+    return;
+  }
+  
+  // 정상 이동 처리
   if (currentSlide.value < questionsData.value.length - 1) {
     currentSlide.value++;
   }
 };
 
 const prevSlide = () => {
+  // 편집 모드인 경우 경고 모달 표시
+  if (isEditingGlobal.value) {
+    isSaveWarningModalOpen.value = true;
+    return;
+  }
+  
+  // 정상 이동 처리
   if (currentSlide.value > 0) {
     currentSlide.value--;
   }
@@ -207,6 +308,7 @@ const savePassageData = () => {
 };
 
 const updateEditingMode = (value) => {
+  console.log('전역 편집 모드 변경:', value);
   isEditingGlobal.value = value;
 };
 
