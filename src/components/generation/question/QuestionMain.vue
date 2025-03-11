@@ -67,6 +67,10 @@ const resetPassage = () => {
     };
 };
 
+const hasContent = computed(() => {
+  return currentPassage.value.content && currentPassage.value.content.trim().length > 0;
+});
+
 // LoadPassageModal에서 지문 선택 시 호출될 함수
 const handleLoadPassage = (passage) => {
     setPassage(passage);

@@ -172,7 +172,7 @@ watch (activeTab, () => {
     position: absolute;
     width: 50px;
     height: 24px;
-    left: 810px;
+    left: 830px;
     top: 190px;
 
     font-family: 'Pretendard';
