@@ -13,26 +13,28 @@
               <span class="input-icon">
                 <Icon icon="icon-park-outline:people" width="28" height="28" style="color: #BDBDBD"/>
               </span>
-              <input type="text" placeholder="이메일을 입력하세요." v-model="email" class="form-input"@input="validateEmail">
+              <input type="text" placeholder="이메일을 입력하세요." v-model="email" class="form-input" @input="validateEmail">
             </div>
             <div v-if="emailError" class="error-message">{{ emailError }}</div>
           </div>
  
           <div class="form-group">
-            <div class="input-wrapper" :class="{ 'error': passwordError }">
+            <div class="input-wrapper">
               <span class="input-icon">
                 <Icon icon="mdi:password-outline" width="32" height="32" style="color: #BDBDBD"/>
               </span>
-              <input type="password" placeholder="비밀번호를 입력해 주세요." v-model="password" class="form-input" @input="validatePassword">
+              <input type="password" placeholder="비밀번호를 입력해 주세요." v-model="password" class="form-input">
             </div>
-            <div v-if="passwordError" class="error-message">{{ passwordError }}</div>
+            <div v-if="loginFailed" class="error-message">
+              {{ loginFailed ? '이메일 또는 비밀번호가 일치하지 않습니다.' : ''}}
+            </div>
           </div>
 
           <div class="login-options">
             <router-link to="/passwordsearch" class="find-account">비밀번호 찾기</router-link>
           </div>
 
-          <button @click="loginHandler" class="login-button" :disabled="emailError || passwordError || !email || !password">
+          <button @click="loginHandler" class="login-button" :disabled="emailError || !email || !password">
           로그인하기
           </button>
 
@@ -57,9 +59,9 @@ const authStore = useAuthStore();
 const email = ref('');
 const password = ref('');
 const emailError = ref('');
-const passwordError = ref('');
 const loginError = ref(''); // (추가) 로그인 오류 메시지
 const isLoading = ref(false); // (추가) 로딩 상태
+const loginFailed = ref(false);
 
 // 컴포넌트 마운트 시 이미 로그인되어 있으면 홈으로 리디렉션
 onMounted(() => {
@@ -71,11 +73,6 @@ onMounted(() => {
 
 // 이메일 유효성 검사
 const validateEmail = () => {
-  if (!email.value) {
-    emailError.value = '이메일 형식으로 입력해 주세요';
-    return;
-  }
-  
   // @을 기준으로 한 구간이 알파벳 or 숫자 or 특수문자 조합으로 이루어져 있는지 체크
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   if (!emailRegex.test(email.value)) {
@@ -85,29 +82,13 @@ const validateEmail = () => {
   }
 };
 
-// 비밀번호 유효성 검사
-const validatePassword = () => {
-  if (!password.value) {
-    passwordError.value = '이메일 또는 비밀번호가 일치하지 않습니다.';
-    return;
-  }
-  
-  // 임의의 비밀번호 검증 로직 (실제로는 서버 응답에 따라 처리)
-  if (password.value.length < 4) {
-    passwordError.value = '이메일 또는 비밀번호가 일치하지 않습니다.';
-  } else {
-    passwordError.value = '';
-  }
-};
-
 // 로그인 기능
 const loginHandler = () => {
   // 유효성 검사 다시 확인
   validateEmail();
-  validatePassword();
   
   // 오류가 있으면 로그인 중단
-  if (emailError.value || passwordError.value || !email.value || !password.value) return;
+  if (emailError.value || !email.value || !password.value) return;
 
   console.log('로그인 시도:', { email: email.value, password: password.value });
   // 로그인 진행
@@ -150,7 +131,7 @@ const loginHandler = () => {
   })
   .catch(error => {
     console.error('로그인 오류:', error); // (추가) 로그: 로그인 오류
-    loginError.value = error.message || '로그인 중 오류가 발생했습니다.';
+    loginFailed.value = true; // 로그인 실패 상태 활성화
   })
   .finally(() => {
     isLoading.value = false;
@@ -159,7 +140,7 @@ const loginHandler = () => {
 
 // 입력값 변경 시 유효성 검사
 watch(email, validateEmail);
-watch(password, validatePassword);
+// watch(password, validatePassword);
 </script>
    
 <style scoped>
