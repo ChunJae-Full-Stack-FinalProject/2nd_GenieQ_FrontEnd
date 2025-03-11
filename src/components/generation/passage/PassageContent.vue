@@ -3,16 +3,16 @@
         <div class="main-content">
             <p id="main-title">지문 생성</p>
             <InputPassageTitle ref="passageTitleRef"/>
-            <PassageContentMain ref="passageContentRef"/>   
+            <PassageContentMain ref="passageContentRef" @content-changed="handleContentChange"/>   
             <PassageSummary ref="passageSummaryRef"/>
-            <BaseButton id="recreate-button" text="재생성하기(1회 차감)" type="type2" width="248px" height="54px"  @click="checkContentLength"/>
-            <BaseButton id="save-button" text="저장하기" type="type2" width="248px" height="54px" @click="handleSaveButtonClick"/>
-            <BaseButton id="download-button" text="추출하기" type="type2" width="248px" height="54px" :disabled="!hasManualSave" @click="checkContentLengthAndOpenFileModal()"/>
+            <BaseButton id="recreate-button" text="재생성하기" type="type2" width="248px" height="54px" @click="checkContentLength" :disabled="isContentChanged"/>
+            <BaseButton id="save-button" text="저장하기" type="type2" width="248px" height="54px" @click="handleSaveButtonClick" :disabled="!isContentChanged"/>
+            <BaseButton id="download-button" text="추출하기" type="type2" width="248px" height="54px" :disabled="isContentChanged || !hasManualSave" @click="checkContentLengthAndOpenFileModal()"/>
             <router-link to="/questions" custom v-slot="{ navigate }">
                 <BaseButton id="connect-create-button" text="이어서 문항 생성하기" type="type4" width="520px" height="54px" @click="handleConnectCreate($event, navigate)"/>
             </router-link>
             
-            <PlainTooltip id="download-message" message="추출은 저장 후 가능해요" width="205px"/>
+    
             <PlainTooltip id="start-edit" message="필요한 부분을 클릭하고 편집을 시작하세요" width="316px"/>
         </div>
 
@@ -38,6 +38,8 @@
             @close="cancelNavigation" 
             @confirm="confirmNavigation"
         />
+
+
     </div>
 </template>
 <script setup>
@@ -56,8 +58,8 @@ import { useRoute, useRouter } from 'vue-router';
 // 모달 상태 관리
 const isFileModalOpen = ref(false);
 const isConfirmModalOpen = ref(false);
-const hasManualSave = ref(false); // 사용자가 직접 저장 버튼을 클릭했는지 추적
-const isContentChanged = ref(false); // 내용 변경 여부 추적
+const hasManualSave = ref(true); // 초기값을 true로 설정 (초기 상태에서 추출하기 버튼 활성화)
+const isContentChanged = ref(false); // 내용 변경 여부 추적 (초기 상태는 변경되지 않음)
 const isWarningModalOpen = ref(false); // 경고 모달 상태
 
 // 네비게이션 관련 변수
@@ -187,22 +189,7 @@ const handleFileSelect = (fileType) => {
 // 저장되지 않은 변경사항이 있는지 확인하는 함수
 const hasUnsavedChanges = () => {
     // 편집 중인지 확인하고, 내용이 변경됐는데 저장되지 않았는지 확인
-    const hasContentChanged = isContentChanged.value && !hasManualSave.value;
-
-    // 지문이 있고, 저장 버튼이 활성화 되어있는 경우 (내용이 있지만 저장되지 않음)
-    const hasUnsavedContent = passageContentRef.value && 
-                            passageContentRef.value.getContent?.() && 
-                            passageContentRef.value.getContent?.().length > 0 && 
-                            !hasManualSave.value;
-                          
-    console.log('변경 감지 상태:', {
-        isContentChanged: isContentChanged.value,
-        hasManualSave: hasManualSave.value,
-        hasContentChanged,
-        hasUnsavedContent
-    });
-
-    return hasContentChanged || hasUnsavedContent;
+    return isContentChanged.value;
 };
 
 // 이동 취소 - 현재 화면 유지
@@ -285,10 +272,6 @@ const handleContentChange = () => {
     hasManualSave.value = false;
     isContentChanged.value = true;
 };
-
-// 필요에 따라 자식 컴포넌트에 콜백 제공
-// 예: provide('contentChangeCallback', handleContentChange);
-// 또는 props로 전달
 </script>
 <style scoped>
 .app-container {
