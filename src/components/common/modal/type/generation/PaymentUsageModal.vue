@@ -1,5 +1,5 @@
 <template>
-    <BaseModal :isOpen="isOpen" width="520px" height="584px" @close="closeModal">
+    <BaseModal :isOpen="isOpen" width="435px" height="600px" @close="closeModal">
         <div id="payment-usage">
             <div class="credit-container">
                 <p id="credit-head">결제</p>
@@ -91,17 +91,6 @@ const goToTicketPage = () => {
 }
 </script>
 <style scoped>
-#payment-usage {
-    box-sizing: border-box;
-
-    position: absolute;
-    width: 520px;
-    height: 584px;
-
-    background: #FFFFFF;
-    border: 1px solid #BDBDBD;
-    border-radius: 12px;
-}
 .credit-container {
     display: flex;
     flex-direction: column;
@@ -110,17 +99,10 @@ const goToTicketPage = () => {
     gap: 20px;
 
     position: absolute;
-    width: 480px;
-    height: 248px;
-    left: calc(50% - 480px/2);
-    top: 20px;
+    left: 19px;
+    top: 52px;
 }
 #credit-head {
-    width: 480px;
-    height: 36px;
-    margin: 0px;
-
-    font-family: 'Pretendard';
     font-style: normal;
     font-weight: 700;
     font-size: 24px;
@@ -128,34 +110,22 @@ const goToTicketPage = () => {
 
     letter-spacing: -0.02em;
     color: #303030;
-
-    flex: none;
-    order: 0;
-    align-self: stretch;
-    flex-grow: 0;
 }
 .credit-container-main {
     box-sizing: border-box;
-
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
     padding: 0px;
 
-    width: 480px;
+    width: 397px;
     height: 192px;
 
     border: 1px solid #FF9F40;
     border-radius: 8px;
-
-    flex: none;
-    order: 1;
-    align-self: stretch;
-    flex-grow: 0;
- }
+}
 .credit-row {
     box-sizing: border-box;
-
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -163,9 +133,8 @@ const goToTicketPage = () => {
     padding: 20px 13px;
     gap: 225px;
 
-    width: 480px;
+    width: 397px;
     height: 64px;
-
     border-bottom: 1px solid #FF9F40;
 
     flex: none;
@@ -215,7 +184,7 @@ const goToTicketPage = () => {
     width: 238px;
     height: 20px;
     left: 20px;
-    top: 280px;
+    top: 308px;
 
     font-family: 'Pretendard';
     font-style: normal;
@@ -228,12 +197,15 @@ const goToTicketPage = () => {
 }
 .btn-container{
     display: flex;
-    justify-content: center;
-    position: absolute;
-    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    padding: 0px;
     gap: 20px;
-    height: 60px;
-    /* left: calc(50% - 480px/2); */
-    top: 520px;
+
+    position: absolute;
+    width: 395px;
+    height: 54px;
+    left: 20px;
+    top: 519px;
 }
 </style>

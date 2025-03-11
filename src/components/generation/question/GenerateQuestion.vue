@@ -64,7 +64,12 @@
         <BaseButton text="추출하기" type="type2" id="download-button" width="248px" height="54px" :disabled="isContentChanged" @click="openFileModal"/>
     </div>
         
-    <GenerateQuestionModal :isOpen="showGenerateQuestionModal" @close="showGenerateQuestionModal = false"/>
+    <GenerateQuestionModal 
+      :isOpen="showGenerateQuestionModal" 
+      mode="generate"
+      @close="showGenerateQuestionModal = false"
+      @openPaymentModal="showPaymentModal = true"
+    />
     <!-- PaymentUsageModal 컴포넌트 -->
     <PaymentUsageModal 
       :isOpen="showPaymentModal" 
@@ -236,8 +241,6 @@ const closeSaveWarningModal = () => {
 
 // 문항 저장 함수 (백엔드 연동 시 구현 예정)
 const saveQuestion = () => {
-  // 백엔드 연동 로직이 구현될 예정
-  console.log('현재 문항 저장 예정:', currentSlide.value);
   
   // 편집 모드 해제
   updateEditingMode(false);
@@ -250,8 +253,8 @@ const saveQuestion = () => {
   // 모달 닫기
   closeSaveWarningModal();
   
-  // 내용 변경 플래그 갱신
-  handleContentChange();
+  // 기존의 저장하기 버튼의 핸들러 함수 호출
+  handleSaveButtonClick();
 };
 
 // 편집 경고 모달 열기
@@ -333,14 +336,6 @@ const handleContentChange = () => {
   console.log('내용이 변경되었습니다:', { isContentChanged: isContentChanged.value, hasManualSave: hasManualSave.value });
 };
 
-// 기존 버튼 클릭 핸들러 (이제는 사용되지 않음)
-const handleButtonClick = () => {
-  if (editPassageRef.value) {
-    return editPassageRef.value.validateTextLength();
-  }
-  return true;
-};
-
 // 저장 버튼 클릭 핸들러
 const handleSaveButtonClick = () => {
   if (editPassageRef.value) {
@@ -393,8 +388,8 @@ const validateAndOpenModal = () => {
     showLengthWarning();
   } else {
     localStorage.setItem('tempPassageData', JSON.stringify(passageData.value));
-    // PaymentUsageModal 표시
-    showPaymentModal.value = true;
+    // GenerateQuestion 표시
+    showGenerateQuestionModal.value = true;
   }
 };
 
@@ -420,7 +415,7 @@ const handleFileSelect = (fileType) => {
   // 예: PDF, Word, TXT 파일 생성 및 다운로드 등
 };
 
-// 문항 생성 처리 함수 - 여기가 핵심입니다
+// 문항 생성 처리 함수
 const handleQuestionGeneration = () => {
   if (showPaymentModal.value === false) {
     return;
