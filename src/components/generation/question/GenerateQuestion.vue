@@ -219,6 +219,10 @@ const validateAndOpenModal = () => {
 
 // 문항 생성 처리 함수 - 여기가 핵심입니다
 const handleQuestionGeneration = () => {
+  if (showPaymentModal.value === false) {
+    return;
+  }
+
   // 새 문항 데이터
   const newQuestion = {
     title: '새로운 문항: 다음 중 본문과 내용이 일치하는 것을 고르시오.',
@@ -233,19 +237,15 @@ const handleQuestionGeneration = () => {
     description: "으아아아아아아아아악 너무 힘들어요오오오오오오 살려줘 제에에에에ㅔㅇ바라라아ㅏ아아라"
   };
 
-  // 여러 개의 문항이 있었던 배열을 초기화하고 기존 문항과 새 문항만 저장
-  if (questionsData.value.length > 1) {
-    // 기존 문항이 여러 개 있었으면 초기 문항과 새 문항만 유지
-    questionsData.value = [questionsData.value[0], newQuestion];
-  } else {
-    // 문항이 하나만 있었으면 새 문항 추가
-    questionsData.value.push(newQuestion);
-  }
+  // 기존 배열을 유지하면서 새 문항 추가
+  questionsData.value.push(newQuestion);
+
   // 새로운 문항이 표시되는 페이지로 이동
   currentSlide.value = questionsData.value.length - 1;
   
   // 모달 닫기
   showPaymentModal.value = false;
+  console.log(questionsData);
 };
 
 // 라우터 관련 정보 가져오기
@@ -556,10 +556,9 @@ watch(currentSlide, (newSlide) => {
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  padding: 0px 8px;
   gap: 8px;
 
-  width: 62px;
+  width: 100px;
   height: 30px;
 
   font-family: 'Pretendard';
