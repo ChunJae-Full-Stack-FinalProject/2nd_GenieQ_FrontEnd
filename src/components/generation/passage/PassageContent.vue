@@ -285,6 +285,19 @@ onMounted(() => {
         console.log('네비게이션 계속 진행');
         return next(); // 네비게이션 계속
     });
+
+    // 로컬 스토리지에서 PassageMain에서 입력한 제목 데이터 로드
+    const savedTitle = localStorage.getItem('passageTitle');
+    if (savedTitle && passageTitleRef.value) {
+        // InputPassageTitle 컴포넌트에 저장된 제목 설정
+        passageTitleRef.value.setTitle(savedTitle);
+    }
+    
+    // 필요시 다른 데이터도 로드할 수 있음
+    // const savedPassageData = localStorage.getItem('passageInputText');
+    // if (savedPassageData && passageContentRef.value) {
+    //    passageContentRef.value.setContent(savedPassageData);
+    // }
 });
 
 onBeforeUnmount(() => {

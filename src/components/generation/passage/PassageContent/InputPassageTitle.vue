@@ -14,10 +14,18 @@ const getTitle = () => {
     return title.value;
 }
 
-// 외부에 노출할 메소드 정의
-defineExpose ({
-    getTitle
+// InputPassageTitle.vue 수정
+// 외부에서 제목을 설정할 수 있는 메서드 추가
+const setTitle = (newTitle) => {
+  title.value = newTitle;
+}
+
+// 외부에 노출할 메소드 정의 업데이트
+defineExpose({
+  getTitle,
+  setTitle  // 추가
 });
+
 </script>
 <style scoped>
 #passage-title {
