@@ -125,7 +125,7 @@
           </div>
         </div>
       </div>
-      <BaseButton class="gray-button" text="완료" :type="isButtonEnabled ? 'type1' : 'type3'" width="389px" height="40px" @click="submitForm" :disabled="!isButtonEnabled" />
+      <BaseButton text="완료" type="type1" width="389px" height="40px" @click="submitForm" :disabled="!isButtonEnabled"/>
     </div>
   </div>
 </div>
@@ -650,12 +650,6 @@ watch(verificationCode, () => {
   line-height: 150%;
   letter-spacing: -0.02em;
   cursor: pointer;
-}
-
-.gray-button {
-  width: 100%;
-  background: #BDBDBD;
-  color: #FFFFFF;
 }
 
 .verify-button {
