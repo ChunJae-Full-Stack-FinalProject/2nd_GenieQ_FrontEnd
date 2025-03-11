@@ -16,8 +16,11 @@
             <div class="email-value">songwinter@naver.com</div>
           </div>
       
-        
-        <button class="button gray-button">완료</button>
+      
+          <router-link to="/login" custom v-slot="{ navigate }">
+            <button class="button gray-button" @click="navigate">완료</button>
+          </router-link>
+          
       </div> 
     </div>
    
@@ -107,7 +110,7 @@
   
   .gray-button {
     width: 100%;
-    background: #BDBDBD;
+    background: #303030;
     color: #FFFFFF;
   }
   
