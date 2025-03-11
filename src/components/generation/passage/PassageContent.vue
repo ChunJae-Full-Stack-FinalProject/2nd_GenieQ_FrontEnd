@@ -1,8 +1,8 @@
 <template>
     <div class="app-container">
+        <p id="main-title">지문 생성</p>
         <div class="main-content">
             <PassageContentMain ref="passageContentRef" @content-changed="handleContentChange"/>   
-            <InputPassageTitle ref="passageTitleRef"/>
             <PassageSummary ref="passageSummaryRef"/>
             <BaseButton id="recreate-button" text="재생성하기" type="type2" width="248px" height="54px" @click="openPaymentUsageModal" :disabled="isContentChanged"/>
             <BaseButton id="save-button" text="저장하기" type="type2" width="248px" height="54px" @click="handleSaveButtonClick" :disabled="!isContentChanged"/>

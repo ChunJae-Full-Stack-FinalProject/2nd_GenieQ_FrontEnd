@@ -1,8 +1,11 @@
 <template>
     <div id="create-passage-main">
-        <p id="main-title">지문 생성</p>
         <div class="input-container">
-            <p id="input-head">사용자 입력</p>
+            <div class="edit-title">
+                <p id="passage-head">작업이름</p>
+                <input type="text" id="passage-title"
+                    placeholder="작업 이름을 입력해주세요." v-model="title"/>
+            </div>
             <div class="select-category-container">
                 <p id="select-category-head">지문 분야 선택</p>
                 <div class="select-category">
@@ -80,34 +83,60 @@ defineExpose({
 })
 </script>
 <style scoped>
-#main-title {
-    position: absolute;
-    width: 87px;
-    height: 36px;
-    left: 292px;
-    top: 70px;
-
-    font-family: 'Pretendard';
-    font-style: normal;
-    font-weight: 700;
-    font-size: 24px;
-    line-height: 150%;
-
-    letter-spacing: -0.02em;
-    color: #000000;
-}
 .input-container {
     box-sizing: border-box;
 
     position: absolute;
     width: 928px;
-    height: 584px;
+    height: 660px;
     left: 292px;
-    top: 200px;
+    top: 118px;
 
     background: #FFFFFF;
     border: 1px solid #BDBDBD;
     border-radius: 12px;
+}
+#passage-head {
+    width: 610px;
+    height: 30px;
+
+    font-family: 'Pretendard';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 20px;
+    line-height: 150%;
+
+    letter-spacing: -0.02em;
+    color: #303030;
+}
+#passage-title {
+    box-sizing: border-box;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 8px;
+    gap: 8px;
+
+    width: 848px;
+    height: 46px;
+
+    background: #FFFFFF;
+    border: 1px solid #FF9F40;
+    border-radius: 8px;
+}
+.edit-title {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0px;
+    gap: 12px;
+
+    position: absolute;
+    width: 848px;
+    height: 88px;
+    left: 40px;
+    top: 24px;
 }
 #input-head {
     position: absolute;
@@ -141,11 +170,11 @@ defineExpose({
 #select-category-head {
     width: 610px;
     height: 30px;
-    margin: 0px;
+    margin-top: 30px;
 
     font-family: 'Pretendard';
     font-style: normal;
-    font-weight: 400;
+    font-weight: 700;
     font-size: 20px;
     line-height: 150%;
 
@@ -253,17 +282,18 @@ defineExpose({
 
     position: absolute;
     width: 848px;
-    height: 339px;
+    height: 360px;
     left: 40px;
     top: 221px;
 }
 #text-head {
     width: 848px;
     height: 30px;
+    margin-top: 30px;
 
     font-family: 'Pretendard';
     font-style: normal;
-    font-weight: 400;
+    font-weight: 700;
     font-size: 20px;
     line-height: 30%;
 
@@ -285,9 +315,9 @@ defineExpose({
 
     position: absolute;
     width: 848px;
-    height: 297px;
+    height: 330px;
     left: 0px;
-    top: 42px;
+    top: 62px;
 
     padding-top: 21px;
     padding-left: 20px;
