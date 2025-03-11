@@ -6,11 +6,11 @@
       <p id="content-head">지문</p>
       <!-- EditPassage를 직접 사용 -->
       <div class="edit-content-container">
-        <EditPassage ref="editPassageRef"/>
+        <EditPassage ref="editPassageRef" @content-changed="handleContentChange"/>
       </div>
     </div>
         
-        <!-- 문항 캐러셀 -->
+      <!-- 문항 캐러셀 -->
     <div class="question-slide-container">
       <p>문항</p>
       <div class="carousel-slide" :style="{ transform: `translateX(-${currentSlide * 100}%)` }">
@@ -19,6 +19,7 @@
             :questions="item.questions" 
             :questionTitle="item.title"
             @edit-mode-changed="updateEditingMode"
+            @question-changed="handleContentChange"
           />
         </div>
       </div>
@@ -29,15 +30,14 @@
     <!-- 해설 캐러셀 -->
     <p id="description-head">문제 해설</p>
     <div class="description-container">
-      <div class="description-slide-container">
-        <div class="carousel-slide" :style="{ transform: `translateX(-${currentSlide * 100}%)` }">
-          <div v-for="(item, index) in questionsData" :key="index" class="carousel-item description-item">
-            <QuestionDescription 
-              :isEditing="isEditingGlobal" 
-              :correct="item.correct" 
-              :description="item.description"
-            />
-          </div>
+      <div class="carousel-slide" :style="{ transform: `translateX(-${currentSlide * 100}%)` }">
+        <div v-for="(item, index) in questionsData" :key="index" class="carousel-item description-item">
+          <QuestionDescription 
+            :isEditing="isEditingGlobal" 
+            :correct="item.correct" 
+            :description="item.description"
+            @description-changed="handleContentChange"
+          />
         </div>
       </div>
     </div>
@@ -48,7 +48,7 @@
         <Icon icon="ep:arrow-left-bold" width="18px" height="18px" class="arrow-left" style="color: #303030" />
       </button>
       <div class="pagination-text">
-        {{ currentSlide + 1 }}  /  {{ questionsData.length }}
+        <span style="color:#FF9F40; font-size:20px;">{{ currentSlide + 1 }}</span>  /  {{ questionsData.length }}
       </div>
       <button class="pagination-arrow" :disabled="currentSlide === questionsData.length - 1" @click="nextSlide">
         <Icon icon="ep:arrow-right-bold" width="18px" height="18px" class="arrow-right" style="color: #303030" />
@@ -56,9 +56,9 @@
     </div>
         
     <div class="button-container">
-        <BaseButton text="문항 추가하기" type="type2" id="add-button" width="248px" height="54px" :disabled="!hasManualSave" @click="validateAndOpenModal"/>
-        <BaseButton text="저장하기" type="type2" id="save-button" width="248px" height="54px" @click="handleSaveButtonClick"/>
-        <BaseButton text="추출하기" type="type2" id="download-button" width="248px" height="54px" :disabled="!hasManualSave" @click="handleButtonClick"/>
+        <BaseButton text="문항 추가하기" type="type2" id="add-button" width="248px" height="54px" :disabled="isContentChanged" @click="validateAndOpenModal"/>
+        <BaseButton text="저장하기" type="type2" id="save-button" width="248px" height="54px" :disabled="!isContentChanged" @click="handleSaveButtonClick"/>
+        <BaseButton text="추출하기" type="type2" id="download-button" width="248px" height="54px" :disabled="isContentChanged" @click="openFileModal"/>
     </div>
         
     <GenerateQuestionModal :isOpen="showGenerateQuestionModal" @close="showGenerateQuestionModal = false"/>
@@ -85,6 +85,9 @@
       @close="cancelNavigation" 
       @confirm="confirmNavigation"
     />
+
+    <!-- 파일 선택 모달 -->
+    <FileSelectModal :isOpen="isFileModalOpen" @close="closeFileModal" @confirm="handleFileSelect"/>
   </div>
 </template>
 <script setup>
@@ -100,6 +103,7 @@ import GenerateQuestionModal from '@/components/common/modal/type/generation/Gen
 import ConfirmModalComponent from '@/components/common/modal/type/ConfirmModalComponent.vue';
 import WarningModalComponent from '@/components/common/modal/type/WarningModalComponent.vue';
 import PaymentUsageModal from '@/components/common/modal/type/generation/PaymentUsageModal.vue';
+import FileSelectModal from '@/components/common/modal/type/FileSelectModal.vue';
 
 const isEditingGlobal = ref(false);
 const pattern = ref(null);
@@ -109,14 +113,15 @@ const passageData = ref(null);
 const isConfirmModalOpen = ref(false);
 const showGenerateQuestionModal = ref(false);
 const showPaymentModal = ref(false); // PaymentUsageModal 상태
-const isSaved = ref(false);
-const hasManualSave = ref(false);
-const isContentChanged = ref(false);
+const isSaved = ref(true); // 저장 상태 초기값을 true로 변경
+const hasManualSave = ref(true); // 처음에는 true로 설정하여 문항 추가하기와 추출하기 버튼 활성화
+const isContentChanged = ref(false); // 내용 변경 플래그 (false로 시작)
 const isWarningModalOpen = ref(false);
+const isFileModalOpen = ref(false); // 파일 선택 모달 상태 추가
 
 // 캐러셀 관련 상태
 const currentSlide = ref(0);
-// 초기 상태에는 하나의 문항만 있음
+
 const questionsData = ref([
   {
     title: '다음 중 본문과 내용이 다른 것을 고르시오.',
@@ -156,7 +161,16 @@ const currentPassage = ref({
 // EditPassage 컴포넌트 참조
 const editPassageRef = ref(null);
 
-// 기존 버튼 클릭 핸들러
+// 내용 변경 시 호출되는 함수
+const handleContentChange = () => {
+  // 내용이 변경되면 isContentChanged를 true로, hasManualSave를 false로 설정
+  isContentChanged.value = true;
+  hasManualSave.value = false;
+  isSaved.value = false;
+  console.log('내용이 변경되었습니다:', { isContentChanged: isContentChanged.value, hasManualSave: hasManualSave.value });
+};
+
+// 기존 버튼 클릭 핸들러 (이제는 사용되지 않음)
 const handleButtonClick = () => {
   if (editPassageRef.value) {
     return editPassageRef.value.validateTextLength();
@@ -173,7 +187,8 @@ const handleSaveButtonClick = () => {
       savePassageData();
       isSaved.value = true;
       hasManualSave.value = true;
-      isContentChanged.value = false;
+      isContentChanged.value = false; // 저장 후 내용 변경 플래그를 false로 설정
+      console.log('내용이 저장되었습니다:', { isContentChanged: isContentChanged.value, hasManualSave: hasManualSave.value });
       return true;
     } else {
       showLengthWarning();
@@ -219,8 +234,34 @@ const validateAndOpenModal = () => {
   }
 };
 
+// 파일 선택 모달 열기 함수
+const openFileModal = () => {
+  // 지문 길이 검증
+  if (!validatePassageLength()) {
+    showLengthWarning();
+  } else {
+    isFileModalOpen.value = true;
+  }
+};
+
+// 파일 선택 모달 닫기 함수
+const closeFileModal = () => {
+  isFileModalOpen.value = false;
+};
+
+// 파일 선택 처리 함수
+const handleFileSelect = (fileType) => {
+  console.log('선택된 파일 형식:', fileType);
+  // 여기에 선택된 파일 형식에 따른 추출 로직 구현
+  // 예: PDF, Word, TXT 파일 생성 및 다운로드 등
+};
+
 // 문항 생성 처리 함수 - 여기가 핵심입니다
 const handleQuestionGeneration = () => {
+  if (showPaymentModal.value === false) {
+    return;
+  }
+
   // 새 문항 데이터
   const newQuestion = {
     title: '새로운 문항: 다음 중 본문과 내용이 일치하는 것을 고르시오.',
@@ -235,20 +276,15 @@ const handleQuestionGeneration = () => {
     description: "으아아아아아아아아악 너무 힘들어요오오오오오오 살려줘 제에에에에ㅔㅇ바라라아ㅏ아아라"
   };
 
-  // 여러 개의 문항이 있었던 배열을 초기화하고 기존 문항과 새 문항만 저장
-  if (questionsData.value.length > 1) {
-    // 기존 문항이 여러 개 있었으면 초기 문항과 새 문항만 유지
-    questionsData.value = [questionsData.value[0], newQuestion];
-  } else {
-    // 문항이 하나만 있었으면 새 문항 추가
-    questionsData.value.push(newQuestion);
-  }
-  
+  // 기존 배열을 유지하면서 새 문항 추가
+  questionsData.value.push(newQuestion);
+
   // 새로운 문항이 표시되는 페이지로 이동
   currentSlide.value = questionsData.value.length - 1;
   
   // 모달 닫기
   showPaymentModal.value = false;
+  console.log(questionsData);
 };
 
 // 라우터 관련 정보 가져오기
@@ -379,29 +415,18 @@ onBeforeUnmount(() => {
   }
 });
 
-// 내부 저장 상태만 체크하는 함수 (버튼 활성화와는 무관)
-const checkSavedState = () => {
-  if (passageData.value && passageData.value.content && passageData.value.content.length >= 500) {
-    // 내부 저장 상태만 업데이트하고 버튼은 활성화하지 않음
-    isSaved.value = true;
-  }
-};
-
 // provide 실행
 provide('passageData', {
   passage: passageData,
   updatePassage: (newContent) => {
     if (passageData.value) {
       passageData.value.content = newContent;
-      // 내용이 변경되면 저장 상태 초기화 및 수동 저장 플래그 초기화
-      isSaved.value = false;
-      isContentChanged.value = true; // 내용이 변경됨을 표시
-      hasManualSave.value = false; // 내용이 변경되면 수동 저장 플래그도 초기화
+      // 내용이 변경되었음을 표시
+      handleContentChange();
     } else {
       passageData.value = { content: newContent };
-      isSaved.value = false;
-      isContentChanged.value = true; // 내용이 변경됨을 표시
-      hasManualSave.value = false;
+      // 새로운 내용이 추가되었음을 표시
+      handleContentChange();
     }
   }
 });
@@ -457,7 +482,7 @@ watch(currentSlide, (newSlide) => {
   width: 930px;
   height: 405px;
   left: 292px;
-  top: 970px;  /* EditPassage 아래에 위치 (170px + 783px + 간격) */
+  top: 970px;
   overflow: hidden;
 }
 .question-slide-container > p {
@@ -472,10 +497,23 @@ watch(currentSlide, (newSlide) => {
   letter-spacing: -0.02em;
   color: #000000;
 }
+.question-slide-container .carousel-slide {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  width: auto;
+}
+.question-slide-container .carousel-item {
+  flex: 0 0 100%;
+  min-width: 100%;
+  width: 100%;
+  height: 100%;
+}
 #description-head {
   position: absolute;
   top: 971px;
   left: 1244px;
+  width: 100px;
 
   font-style: normal;
   font-weight: 600;
@@ -485,32 +523,30 @@ watch(currentSlide, (newSlide) => {
 }
 .description-container {
   box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px;
-  gap: 8px;
-
   position: absolute;
   width: 520px;
   height: 367px;
   top: 1011px;
   left: 1244px;
+  overflow: hidden;
+  border-radius: 12px;
 }
-.description-slide-container {
-  width: 100%;
-  height: 100%;
-  position: relative;
-}
-.carousel-slide {
+.description-container .carousel-slide {
   display: flex;
-  transition: transform 0.5s ease;
+  width: 100%;
+}
+
+.description-container .carousel-item {
+  flex: 0 0 100%;
+  width: 100%;
+  min-width: 100%;
   height: 100%;
 }
 
-.carousel-item {
-  width: 100%;
-  height: 100%;
+.description-item {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
 }
 
 /* 페이지네이션 스타일 */
@@ -548,11 +584,13 @@ watch(currentSlide, (newSlide) => {
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  padding: 0px 8px;
   gap: 8px;
 
-  width: 62px;
+  width: 100px;
   height: 30px;
+
+  font-family: 'Pretendard';
+  font-size: 20px;
 }
 
 .button-container {
