@@ -1,15 +1,14 @@
 <template>
     <div class="app-container">
         <div class="main-content">
-            <p id="main-title">지문 생성</p>
-            <InputPassageTitle ref="passageTitleRef"/>
             <PassageContentMain ref="passageContentRef" @content-changed="handleContentChange"/>   
+            <InputPassageTitle ref="passageTitleRef"/>
             <PassageSummary ref="passageSummaryRef"/>
             <BaseButton id="recreate-button" text="재생성하기" type="type2" width="248px" height="54px" @click="openPaymentUsageModal" :disabled="isContentChanged"/>
             <BaseButton id="save-button" text="저장하기" type="type2" width="248px" height="54px" @click="handleSaveButtonClick" :disabled="!isContentChanged"/>
             <BaseButton id="download-button" text="추출하기" type="type2" width="248px" height="54px" :disabled="isContentChanged || !hasManualSave" @click="checkContentLengthAndOpenFileModal()"/>
             <router-link to="/questions" custom v-slot="{ navigate }">
-                <BaseButton id="connect-create-button" text="이어서 문항 생성하기" type="type4" width="520px" height="54px" @click="handleConnectCreate($event, navigate)"/>
+                <BaseButton id="connect-create-button" text="이어서 문항 생성하기" type="type4" width="520px" height="54px" @click="handleConnectCreate($event, navigate)" :disabled="isContentChanged"/>
             </router-link>
             
             <PlainTooltip id="download-message" message="추출은 저장 후 가능해요" width="205px"/>
