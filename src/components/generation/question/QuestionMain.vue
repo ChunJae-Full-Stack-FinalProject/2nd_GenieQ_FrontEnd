@@ -18,6 +18,16 @@
         @close="isConfirmModalOpen = false"
         @confirm="isConfirmModalOpen = false"
     />
+
+    <GenerateQuestionModal 
+    :isOpen="showGenerateQuestionModal" 
+    @close="closeGenerateQuestionModal"
+    @openPaymentModal="openPaymentModal"
+  />
+  <PaymentUsageModal 
+    :isOpen="showPaymentUsageModal" 
+    @close="closePaymentModal"
+  />
 </template>
 <script setup>
 import { ref, provide, onMounted, computed } from 'vue';
@@ -28,10 +38,11 @@ import GenerateQuestionModal from '@/components/common/modal/type/generation/Gen
 import LoadPassageModal from "@/components/common/modal/type/generation/LoadPassageModal.vue";
 import ConfirmModalComponent from '@/components/common/modal/type/ConfirmModalComponent.vue';
 import InputPassageTitle from '@/components/generation/passage/PassageContent/InputPassageTitle.vue';
+import PaymentUsageModal from '@/components/common/modal/type/generation/PaymentUsageModal.vue';
 
 const showGenerateQuestionModal = ref(false);
 const showLoadPassageModal = ref(false);
-const isConfirmModalOpen = ref(false);
+const isConfirmModalOpen = ref(false);  
 
 // 지문 상태 및 메서드
 const currentPassage = ref({
@@ -43,9 +54,24 @@ const validateAndOpenModal = () => {
   if (!validatePassageLength()) {
     showLengthWarning();
   } else {
-    // 모달을 열기 전에 로컬 스토리지에 지문 데이터 저장
-    localStorage.setItem('tempPassageData', JSON.stringify(currentPassage.value));
-    showGenerateQuestionModal.value = true;
+    // 모든 모달 명시적으로 닫기
+    showPaymentUsageModal.value = false;
+    showGenerateQuestionModal.value = false;
+    showLoadPassageModal.value = false;
+    
+    // 기존 데이터 전면 초기화
+    localStorage.removeItem('selectedQuestionData');
+    localStorage.removeItem('generateQuestionPassageData');
+    localStorage.removeItem('tempPassageData');
+    
+    // 지연을 주어 상태 초기화 보장
+    setTimeout(() => {
+      // 로컬 스토리지에 지문 데이터 저장
+      localStorage.setItem('tempPassageData', JSON.stringify(currentPassage.value));
+      
+      // GenerateQuestionModal만 열기
+      showGenerateQuestionModal.value = true;
+    }, 100);
   }
 };
 
@@ -113,6 +139,36 @@ onMounted(() => {
 provide('passageData', {
     currentPassage, setPassage, resetPassage, openLoadPassageModal, validatePassageLength, showLengthWarning
 });
+
+
+
+const showPaymentUsageModal = ref(false);
+
+const openPaymentModal = () => {
+  // GenerateQuestionModal 닫기
+  showGenerateQuestionModal.value = false;
+  
+  // PaymentUsageModal 열기
+  showPaymentUsageModal.value = true;
+};
+
+
+const closeGenerateQuestionModal = () => {
+  showGenerateQuestionModal.value = false;
+};
+
+const closePaymentModal = () => {
+  // PaymentUsageModal 닫기
+  showPaymentUsageModal.value = false;
+  
+  // localStorage 데이터 정리
+  localStorage.removeItem('selectedQuestionData');
+  localStorage.removeItem('generateQuestionPassageData');
+
+  // 모든 모달 상태 명시적 초기화
+  showGenerateQuestionModal.value = false;
+};
+
 </script>
 <style scoped>
 .app-container {

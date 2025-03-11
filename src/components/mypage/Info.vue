@@ -50,28 +50,56 @@
 
     <div class="account">
       <span class="withdrawal">회원 탈퇴</span>
-      <span class="logout">로그아웃</span>
+      <span class="logout" @click="handleLogout">로그아웃</span>
     </div>
   </div>
   <changePasswordModal :isOpen="showPasswordModal" @close="closePasswordModal"/>
 </template>
 <script setup>
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
 import BaseButton from '../common/button/BaseButton.vue';
 import changePasswordModal from '../common/modal/type/mypage/ChangePasswordModal.vue';
 
 // 비밀번호 변경 모달 상태 관리
 const showPasswordModal = ref(false);
-
 // 모달 열기
 const openPasswordModal = () => {
   showPasswordModal.value = true;
 };
-
 // 모달 닫기
 const closePasswordModal = () => {
   showPasswordModal.value = false;
 }
+const router = useRouter();
+const authStore = useAuthStore(); 
+
+// 로그아웃 처리 함수
+const handleLogout = () => {
+  fetch('http://localhost:9090/api/auth/select/logout', {
+    method: 'POST',
+    credentials: 'include'
+  })
+  .then(response => {
+    // console.log("로컬 스토리지에서 인증 정보 제거");
+    localStorage.removeItem('authUser');
+    
+    // console.log("pinia store 저장 공강 상태 초기화")
+    authStore.user = null;
+    authStore.isAuthenticated = false;
+    
+    // console.log('로그아웃 성공, 로그인 페이지로 이동');
+    router.push('/login');
+  })
+  .catch(error => {
+    console.error('로그아웃 중 오류 발생, store 저장정보 강제 삭제', error);
+    localStorage.removeItem('authUser');
+    authStore.user = null;
+    authStore.isAuthenticated = false;
+    router.push('/login');
+  });
+};
 </script>
 <style scoped>
 /* 전체 레이아웃 */
@@ -295,5 +323,6 @@ color: #424242;
 
   letter-spacing: -0.02em;
   color: #FF9F40;
+  cursor: pointer;
 }
 </style>

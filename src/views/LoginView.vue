@@ -1,66 +1,73 @@
 <template>
-    <div class="login-container">
-       <div class="login-header">
-         <h2 class="title">문제 출제를 <span class="highlight">더 쉽고, 빠르고, 정확하게!</span></h2>
-         <p class="subtitle">Genie<span class="highlight-orange">Q</span>와 함께 새로운 차원의 문제 생성을 경험하세요.</p>
+  <div class="login-container">
+    <div class="login-header">
+      <h2 class="title">문제 출제를 <span class="highlight">더 쉽고, 빠르고, 정확하게!</span></h2>
+        <p class="subtitle">Genie<span class="highlight-orange">Q</span>와 함께 새로운 차원의 문제 생성을 경험하세요.</p>
      
-       </div>
-       <div class="login-box">
-         
-         <div class="login-form">
-           <h3 class="form-title">로그인</h3>
-           
-           <div class="form-group">
+    </div>
+    <div class="login-box">
+      <div class="login-form">
+        <h3 class="form-title">로그인</h3>
+          <div class="form-group">
             <div class="input-wrapper" :class="{ 'error': emailError }">
-            <span class="input-icon">
-              <Icon icon="icon-park-outline:people" width="28" height="28" style="color: #BDBDBD"/>
-            </span>
-            <input type="text" placeholder="이메일을 입력하세요." v-model="email" class="form-input"@input="validateEmail">
-          </div>
+              <span class="input-icon">
+                <Icon icon="icon-park-outline:people" width="28" height="28" style="color: #BDBDBD"/>
+              </span>
+              <input type="text" placeholder="이메일을 입력하세요." v-model="email" class="form-input"@input="validateEmail">
+            </div>
             <div v-if="emailError" class="error-message">{{ emailError }}</div>
           </div>
-           
-           <div class="form-group">
-          <div class="input-wrapper" :class="{ 'error': passwordError }">
-            <span class="input-icon">
-              <Icon icon="mdi:password-outline" width="32" height="32" style="color: #BDBDBD"/>
-            </span>
-            <input 
-              type="password" 
-              placeholder="비밀번호를 입력해 주세요." 
-              v-model="password" 
-              class="form-input"
-              @input="validatePassword"
-            >
+ 
+          <div class="form-group">
+            <div class="input-wrapper" :class="{ 'error': passwordError }">
+              <span class="input-icon">
+                <Icon icon="mdi:password-outline" width="32" height="32" style="color: #BDBDBD"/>
+              </span>
+              <input type="password" placeholder="비밀번호를 입력해 주세요." v-model="password" class="form-input" @input="validatePassword">
+            </div>
+            <div v-if="passwordError" class="error-message">{{ passwordError }}</div>
           </div>
-          <div v-if="passwordError" class="error-message">{{ passwordError }}</div>
+
+          <div class="login-options">
+            <router-link to="/passwordsearch" class="find-account">비밀번호 찾기</router-link>
+          </div>
+
+          <button @click="loginHandler" class="login-button" :disabled="emailError || passwordError || !email || !password">
+          로그인하기
+          </button>
+
+          <div class="signup-section">
+            <span class="notion">GenieQ가 처음이신가요?</span>
+            <router-link to="/signup" class="signup-link">계정 만들기</router-link>
         </div>
-           
-           <div class="login-options">
-             <router-link to="/passwordsearch" class="find-account">비밀번호 찾기</router-link>
-           </div>
-           
-           <button @click="login" class="login-button" :disabled="emailError || passwordError || !email || !password">
-            로그인하기
-           </button>
-           
-           <div class="signup-section">
-             <span class="notion">GenieQ가 처음이신가요?</span>
-             <router-link to="/signup" class="signup-link">계정 만들기</router-link>
-           </div>
-         </div>
-       </div>
-     </div>
-   </template>
+      </div>
+    </div>
+  </div>
+</template>
    
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import { Icon } from '@iconify/vue'; // 또는 사용 중인 아이콘 라이브러리에 맞게 수정
+import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/stores/auth'; // Auth 스토어 가져오기
+// 라우터와 스토어 초기화
+const router = useRouter();
+const authStore = useAuthStore();
 // 상태 관리
 const email = ref('');
 const password = ref('');
 const emailError = ref('');
 const passwordError = ref('');
+const loginError = ref(''); // (추가) 로그인 오류 메시지
+const isLoading = ref(false); // (추가) 로딩 상태
+
+// 컴포넌트 마운트 시 이미 로그인되어 있으면 홈으로 리디렉션
+onMounted(() => {
+  if (authStore.isLoggedIn) {
+    console.log('이미 로그인되어 있음, 홈으로 리디렉션');
+    router.push('/home');
+  }
+});
 
 // 이메일 유효성 검사
 const validateEmail = () => {
@@ -86,7 +93,7 @@ const validatePassword = () => {
   }
   
   // 임의의 비밀번호 검증 로직 (실제로는 서버 응답에 따라 처리)
-  if (password.value.length < 6) {
+  if (password.value.length < 4) {
     passwordError.value = '이메일 또는 비밀번호가 일치하지 않습니다.';
   } else {
     passwordError.value = '';
@@ -94,16 +101,60 @@ const validatePassword = () => {
 };
 
 // 로그인 기능
-const login = () => {
+const loginHandler = () => {
   // 유효성 검사 다시 확인
   validateEmail();
   validatePassword();
   
-  // 오류가 없으면 로그인 시도
-  if (!emailError.value && !passwordError.value && email.value && password.value) {
-    // 여기에 실제 로그인 API 호출 로직 추가
-    console.log('로그인 시도:', { email: email.value, password: password.value });
-  }
+  // 오류가 있으면 로그인 중단
+  if (emailError.value || passwordError.value || !email.value || !password.value) return;
+
+  console.log('로그인 시도:', { email: email.value, password: password.value });
+  // 로그인 진행
+  loginError.value = ''; // 이전 오류 초기화
+  isLoading.value = true;
+  
+  console.log('로그인 핸들러: 로그인 시작'); // (추가) 로그: 로그인 시작
+  
+  const loginData = {
+    memEmail: email.value,
+    memPassword: password.value
+  };
+  
+  // fetch를 이용한 로그인 요청
+  fetch('http://localhost:9090/api/auth/select/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include', // 쿠키를 포함시켜 세션 유지
+    body: JSON.stringify(loginData)
+  })
+  .then(response => {
+    console.log("요청 시도");
+    if (!response.ok) {
+      return response.text().then(text => { throw new Error(text || '로그인에 실패했습니다.'); });
+    }
+    return response.json();
+  })
+  .then(userData => {
+    console.log('로그인 성공:', userData); // (추가) 로그: 로그인 성공
+    
+    // 사용자 정보 상태 업데이트
+    authStore.setUser(userData);
+    
+    // 로컬 스토리지에 사용자 상태 저장 (새로고침 시 상태 유지)
+    localStorage.setItem('authUser', JSON.stringify(userData));
+    
+    // 홈으로 리디렉션
+    console.log('로그인 성공, 홈으로 리디렉션'); // (추가) 로그: 로그인 성공
+    router.push('/home');
+  })
+  .catch(error => {
+    console.error('로그인 오류:', error); // (추가) 로그: 로그인 오류
+    loginError.value = error.message || '로그인 중 오류가 발생했습니다.';
+  })
+  .finally(() => {
+    isLoading.value = false;
+  });
 };
 
 // 입력값 변경 시 유효성 검사
