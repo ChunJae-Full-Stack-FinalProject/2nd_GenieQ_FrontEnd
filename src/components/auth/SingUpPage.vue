@@ -125,7 +125,7 @@
           </div>
         </div>
       </div>
-      <BaseButton class="gray-button" text="완료" :type="isButtonEnabled ? 'type1' : 'type3'" width="389px" height="40px" @click="submitForm" :disabled="!isButtonEnabled" />
+      <BaseButton text="완료" type="type1" width="389px" height="40px" @click="submitForm" :disabled="!isButtonEnabled"/>
     </div>
   </div>
 </div>
@@ -138,6 +138,7 @@
 <script setup>
 import { Icon } from "@iconify/vue";
 import { ref, watch, computed, onMounted, onUnmounted } from 'vue';
+import { useRouter } from 'vue-router';
 import PrivacyModal from "@/components/common/modal/type/auth/PrivacyModal.vue";
 import TermsModal from "@/components/common/modal/type/auth/TermsModal.vue";
 import BaseButton from "../common/button/BaseButton.vue";
@@ -181,6 +182,9 @@ const remainingTime = ref(180); // 3분(180초)
 const gender = ref('male'); // 기본값은 남성으로 설정
 const privacyChecked = ref(false);
 const termsChecked = ref(false);
+
+// 로그인 완료후 페이지 이동
+const router = useRouter();
 
 // EmailJS 초기화
 onMounted(() => {
@@ -453,14 +457,43 @@ const selectGender = (selectedGender) => {
 // 폼 제출 함수
 const submitForm = () => {
   if (isButtonEnabled.value) {
-    // 여기에 폼 제출 로직 추가
-    console.log('폼 제출 성공!', {
+    // API 요청에 필요한 데이터 구성
+    const signUpData = {
       email: email.value,
       password: password.value,
       name: username.value,
       gender: gender.value
-    });
+    };
   }
+  // 회원가입 API 요청
+  fetch('http://localhost:9090/api/auth/insert/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(signUpData)
+    })
+    .then(response => {
+      if (!response.ok) {
+        // 서버 응답이 OK가 아닌 경우 에러 처리
+        return response.text().then(errorText => { throw new Error(errorText); });
+      }
+      return response.text(); // 성공 메시지가 응답으로 오는 경우
+    })
+    .then(data => {
+      console.log('회원가입 성공:', data);
+      alert('회원가입이 완료되었습니다. 로그인 페이지로 이동합니다.');
+      router.push('/login'); // 로그인 페이지로 이동
+    })
+    .catch(error => {
+      console.error('회원가입 오류:', error);
+      
+      // 에러 메시지 표시
+      if (error.message.includes('이미 존재하는 이메일')) {
+        alert('이미 등록된 이메일입니다.');
+      } else {
+        alert('회원가입 처리 중 오류가 발생했습니다: ' + error.message);
+      }
+    }
+  );
 };
 
 // 입력값 변경 시 유효성 검사
@@ -650,12 +683,6 @@ watch(verificationCode, () => {
   line-height: 150%;
   letter-spacing: -0.02em;
   cursor: pointer;
-}
-
-.gray-button {
-  width: 100%;
-  background: #BDBDBD;
-  color: #FFFFFF;
 }
 
 .verify-button {
