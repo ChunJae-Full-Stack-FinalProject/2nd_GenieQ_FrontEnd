@@ -156,8 +156,6 @@ watch(email, validateEmail);
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      background: url("@/assets/images/login_bg.png") no-repeat;
-      background-position: center;
       padding: 20px;
    }
    
