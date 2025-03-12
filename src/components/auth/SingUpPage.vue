@@ -465,8 +465,9 @@ const submitForm = () => {
       gender: gender.value
     };
   }
+  const apiUrl = import.meta.env.VITE_API_URL;
   // 회원가입 API 요청
-  fetch('http://localhost:9090/api/auth/insert/signup', {
+  fetch(`${apiUrl}/api/auth/insert/signup`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(signUpData)

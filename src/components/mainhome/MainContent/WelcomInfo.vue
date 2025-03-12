@@ -23,8 +23,9 @@ onMounted(() => {
 });
 // 티켓 정보 조회 함수
 function getTicketCount() {
+    const apiUrl = import.meta.env.VITE_API_URL;
     // fetch를 사용한 티켓 정보 조회 요청
-    fetch('http://localhost:9090/api/info/select/ticket', {
+    fetch(`${apiUrl}/api/info/select/ticket`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
