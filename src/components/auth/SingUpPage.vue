@@ -78,14 +78,14 @@
             <button 
               class="button gender-button" 
               :class="{ active: gender === '남성' }" 
-              @click="selectGender('male')"
+              @click="selectGender('남성')"
             >
               남성
             </button>
             <button 
               class="button gender-button" 
               :class="{ active: gender === '여성' }" 
-              @click="selectGender('female')"
+              @click="selectGender('여성')"
             >
               여성
             </button>
@@ -459,7 +459,7 @@ const selectGender = (selectedGender) => {
 // 폼 제출 함수
 const submitForm = () => 
 { if (isButtonEnabled.value) {
-    // API 요청에 필요한 데이터 구성
+  // API 요청에 필요한 데이터 구성
   const signUpData = {
     "memEmail": email.value,
     "memPassword": password.value,
@@ -467,9 +467,11 @@ const submitForm = () =>
     "memGender": gender.value,
     "memType": selectedOption.value
   };
-  console.log(signUpData);
+  // console.log(signUpData);
+
+  const apiUrl = import.meta.env.VITE_API_URL;
   // 회원가입 API 요청
-  fetch('http://localhost:9090/api/auth/insert/signup', {
+  fetch(`${apiUrl}/api/auth/insert/signup`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(signUpData)

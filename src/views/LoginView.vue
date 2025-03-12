@@ -107,8 +107,9 @@ const loginHandler = () => {
     memPassword: password.value
   };
   
+  const apiUrl = import.meta.env.VITE_API_URL;
   // fetch를 이용한 로그인 요청
-  fetch('http://localhost:9090/api/auth/select/login', {
+  fetch(`${apiUrl}/api/auth/select/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include', // 쿠키를 포함시켜 세션 유지
