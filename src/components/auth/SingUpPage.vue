@@ -77,14 +77,14 @@
           <div class="gender-buttons">
             <button 
               class="button gender-button" 
-              :class="{ active: gender === 'male' }" 
+              :class="{ active: gender === '남성' }" 
               @click="selectGender('male')"
             >
               남성
             </button>
             <button 
               class="button gender-button" 
-              :class="{ active: gender === 'female' }" 
+              :class="{ active: gender === '여성' }" 
               @click="selectGender('female')"
             >
               여성
@@ -95,16 +95,16 @@
         <div class="form-group">
           <label class="input-label">소속</label>
           <div class="select-wrapper">
-            <select class="form-select">
-              <option selected>고등교사</option>
-              <option selected>초등교사</option>
-              <option selected>중등교사</option>
-              <option selected>학원</option>
-              <option selected>기업</option>
-              <option selected>학부모</option>
-              <option selected>학생</option>
-              <option selected>기타</option>
-              <option disabled selected>소속을 선택해 주세요.</option>
+            <select class="form-select" v-model="selectedOption">
+              <option>소속을 선택해 주세요.</option>
+              <option>고등교사</option>
+              <option>초등교사</option>
+              <option>중등교사</option>
+              <option>학원</option>
+              <option>기업</option>
+              <option>학부모</option>
+              <option>학생</option>
+              <option>기타</option>
             </select>
             <span class="dropdown-arrow">▼</span>
           </div>
@@ -114,12 +114,12 @@
       <div class="checkbox-section">
         <div class="checkbox-container">
           <div class="checkbox-wrapper">
-            <input type="checkbox" id="privacy" class="checkbox-input" v-model="privacyChecked" />
+            <input type="checkbox" id="privacy" checked class="checkbox-input" v-model="privacyChecked" />
             <label for="privacy" class="custom-checkbox"></label>
             <span class="checkbox-label" @click="showPrivacyModal = true">개인정보 처리방침 동의</span>
           </div>
           <div class="checkbox-wrapper">
-            <input type="checkbox" id="terms" class="checkbox-input" v-model="termsChecked" />
+            <input type="checkbox" id="terms" checked class="checkbox-input" v-model="termsChecked" />
             <label for="terms" class="custom-checkbox"></label>
             <span class="checkbox-label" @click="showTermsModal = true">이용약관 동의</span>
           </div>
@@ -182,6 +182,8 @@ const remainingTime = ref(180); // 3분(180초)
 const gender = ref('male'); // 기본값은 남성으로 설정
 const privacyChecked = ref(false);
 const termsChecked = ref(false);
+
+const selectedOption = ref('');
 
 // 로그인 완료후 페이지 이동
 const router = useRouter();
@@ -455,16 +457,17 @@ const selectGender = (selectedGender) => {
 };
 
 // 폼 제출 함수
-const submitForm = () => {
-  if (isButtonEnabled.value) {
+const submitForm = () => 
+{ if (isButtonEnabled.value) {
     // API 요청에 필요한 데이터 구성
-    const signUpData = {
-      email: email.value,
-      password: password.value,
-      name: username.value,
-      gender: gender.value
-    };
-  }
+  const signUpData = {
+    "memEmail": email.value,
+    "memPassword": password.value,
+    "memName": username.value,
+    "memGender": gender.value,
+    "memType": selectedOption.value
+  };
+  console.log(signUpData);
   // 회원가입 API 요청
   fetch('http://localhost:9090/api/auth/insert/signup', {
       method: 'POST',
@@ -494,6 +497,7 @@ const submitForm = () => {
       }
     }
   );
+  }
 };
 
 // 입력값 변경 시 유효성 검사
