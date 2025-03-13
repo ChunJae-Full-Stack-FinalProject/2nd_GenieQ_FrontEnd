@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div v-if="!currentPassage.content" class="stores-passage-empty">
+        <div v-if="!currentPassage.PAS_CONTENT" class="stores-passage-empty">
             <button class="stores-passage" @click="openLoadPassageModal">
                 <Icon icon="material-symbols:bookmark" id="bookmark-icon" style="color: #424242" />
                 <p id="text">자료실에서 지문 불러오기</p>
@@ -25,11 +25,13 @@ const { currentPassage, openLoadPassageModal, showLengthWarning } = inject('pass
 const MIN_LENGTH = 500;
 const MAX_LENGTH = 1700;
 
+console.log("currentPassage:", currentPassage.value.PAS_CONTENT);
+
 // 지문 내용을 위한 반응형 변수
 const passageContent = computed({
-    get: () => currentPassage.value.content || '',
+    get: () => currentPassage.value.PAS_CONTENT || '',
     set: (newValue) => {
-        currentPassage.value.content = newValue;
+        currentPassage.value.PAS_CONTENT = newValue;
     }
 });
 </script>

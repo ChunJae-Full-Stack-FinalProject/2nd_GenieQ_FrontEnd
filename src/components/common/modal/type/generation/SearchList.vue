@@ -2,14 +2,14 @@
   <div class="search-list">
     <div
       v-for="item in items"
-      :key="item.id"
+      :key="item.PAS_CODE"
       class="list-item"
-      :class="{ active: activeItem === item.id }"
-      :data-id="item.id"
-      @click="toggleActive(item.id)"
+      :class="{ active: activeItem === item.PAS_CODE }"
+      :data-id="item.PAS_CODE"
+      @click="toggleActive(item.PAS_CODE)"
     >
-      <div class="passage-title" :class="{ active: activeItem === item.id }">
-        {{ item.title }}
+      <div class="passage-title" :class="{ active: activeItem === item.PAS_CODE }">
+        {{ item.PAS_TITLE }}
       </div>
       <BaseButton
         class="preview-button"
@@ -17,8 +17,8 @@
         type="type3"
         width="87px"
         height="56px"
-        :class="{ active: activeItem === item.id }"
-        :disabled="activeItem !== item.id" 
+        :class="{ active: activeItem === item.PAS_CODE }"
+        :disabled="activeItem !== item.PAS_CODE" 
         @click.stop="previewPassage(item)" />
     </div>
   </div>
@@ -52,19 +52,26 @@ watch(() => props.activeItemId, (newVal) => {
   }
 }, { immediate: true });
 
+// ✅ 탭이 변경될 때 첫 번째 항목 활성화 처리
+watch(() => props.items, (newItems) => {
+  if (newItems.length > 0) {
+    activeItem.value = newItems[0].PAS_CODE;
+  }
+}, { immediate: true });
+
 // ✅ 첫 번째 항목을 기본 활성화
 onMounted(() => {
   // 부모에서 전달받은 activeItemId가 있다면 그 값을 사용, 없으면 첫 번째 항목 활성화
   if (props.activeItemId) {
     activeItem.value = props.activeItemId;
   } else if (props.items.length > 0) {
-    activeItem.value = props.items[0].id;
+    activeItem.value = props.items[0].PAS_CODE;
   }
 });
 
-const toggleActive = (id) => {
-  if (activeItem.value !== id) {
-    activeItem.value = id;
+const toggleActive = (PAS_CODE) => {
+  if (activeItem.value !== PAS_CODE) {
+    activeItem.value = PAS_CODE;
   }
 };
 

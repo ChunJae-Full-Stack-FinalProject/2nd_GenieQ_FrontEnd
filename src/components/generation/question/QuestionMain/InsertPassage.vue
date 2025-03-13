@@ -3,7 +3,7 @@
         <div class="edit-title">
             <p id="passage-head">작업이름</p>
             <input type="text" id="passage-title"
-                placeholder="작업 이름을 입력해주세요." v-model="title"/>
+                placeholder="작업 이름을 입력해주세요." v-model="passageTitle"/>
         </div>
         <p id="insert-head">지문 입력</p>
         <div class="select-insert-type">
@@ -30,10 +30,11 @@
 import StoresInsertPassage from './StoresInsertPassage.vue';
 import UserInsertPassage from './UserInsertPassage.vue';
 
-import { ref, inject, computed, watch } from 'vue';
+import { ref, inject, computed, watch, defineExpose} from 'vue';
 
 // 현재 활성화된 탭 상태 관리
 const activeTab = ref('user');
+const passageTitle = ref('');
 
 // provide로 제공된 데이터 주입
 const { currentPassage, openLoadPassageModal } = inject('passageData');
@@ -44,7 +45,13 @@ const setActiveTab = (tab) => {
 
 // 현재 입력된 글자 수 계산
 const currentLength = computed(() => {
-    return currentPassage.value?.content?.length || 0;
+    return currentPassage.value?.PAS_CONTENT?.length || 0;
+});
+
+
+// 제목이 입력될 때 currentPassage 값 업데이트
+watch(passageTitle, (newVal) => {
+    currentPassage.value.PAS_TITLE = newVal;
 });
 
 // 탭 변경 시 currentLength 업데이트를 위한 감시자
@@ -52,6 +59,8 @@ watch (activeTab, () => {
     // 탭이 변경될 때 글자 수 재계산
     currentLength.value;
 })
+
+defineExpose({ passageTitle });
 </script>
 <style scoped>
 .insert-passage {
