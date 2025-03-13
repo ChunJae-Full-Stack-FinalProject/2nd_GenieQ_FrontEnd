@@ -114,17 +114,6 @@
       @confirm="confirmEditWarningModal" 
     />
 
-    <!-- 여러 개의 문항 저장을 막기 위한 경고 모달 추가 -->
-    <WarningModalComponent 
-      :isOpen="isSaveWarningModalOpen" 
-      title="다른 문항 수정은 저장 후 가능합니다." 
-      message="저장하기 버튼을 클릭하면 현재 문항 수정이 저장됩니다." 
-      cancelText="취소하기" 
-      confirmText="저장하기" 
-      @close="closeSaveWarningModal" 
-      @confirm="saveQuestion" 
-    />
-
     <!-- 파일 선택 모달 -->
     <FileSelectModal :isOpen="isFileModalOpen" @close="closeFileModal" @confirm="handleFileSelect"/>
   </div>
@@ -159,8 +148,6 @@ const isContentChanged = ref(false); // 내용 변경 플래그 (false로 시작
 const isWarningModalOpen = ref(false);
 const isFileModalOpen = ref(false); // 파일 선택 모달 상태 추가
 const isEditWarningModalOpen = ref(false); // 문항 편집 경고 모달 상태 추가
-const isSaveWarningModalOpen = ref(false); // 저장 경고 모달 상태 추가
-const editingQuestionIndex = ref(null); // 현재 편집 중인 문항 인덱스
 const currentRecreateIndex = ref(null); // 현재 재생성하려는 문항 인덱스 추가
 
 // EditQuestion 컴포넌트 참조
@@ -234,11 +221,6 @@ const handleRecreateGeneration = () => {
   showRecreateModal.value = false;
 };
 
-// 저장 경고 모달 닫기 함수
-const closeSaveWarningModal = () => {
-  isSaveWarningModalOpen.value = false;
-};
-
 // 문항 저장 함수 (백엔드 연동 시 구현 예정)
 const saveQuestion = () => {
   
@@ -249,9 +231,6 @@ const saveQuestion = () => {
   if (editQuestionRefs.value && editQuestionRefs.value[currentSlide.value]) {
     editQuestionRefs.value[currentSlide.value].toggleEditMode(false);
   }
-  
-  // 모달 닫기
-  closeSaveWarningModal();
   
   // 기존의 저장하기 버튼의 핸들러 함수 호출
   handleSaveButtonClick();
@@ -291,12 +270,6 @@ const confirmEditWarningModal = () => {
 
 // 슬라이드 네비게이션 함수
 const nextSlide = () => {
-  // 편집 모드인 경우 경고 모달 표시
-  if (isEditingGlobal.value) {
-    isSaveWarningModalOpen.value = true;
-    return;
-  }
-  
   // 정상 이동 처리
   if (currentSlide.value < questionsData.value.length - 1) {
     currentSlide.value++;
@@ -304,12 +277,6 @@ const nextSlide = () => {
 };
 
 const prevSlide = () => {
-  // 편집 모드인 경우 경고 모달 표시
-  if (isEditingGlobal.value) {
-    isSaveWarningModalOpen.value = true;
-    return;
-  }
-  
   // 정상 이동 처리
   if (currentSlide.value > 0) {
     currentSlide.value--;

@@ -35,7 +35,6 @@
         <p v-for="(line, index) in contentLines" :key="index">
           {{ line }}
         </p>
-        <p>예시 : {{ noticeDetails.NOT_CONTENT }}</p>
       </div>
 
       <div class="notice-actions">
@@ -80,6 +79,12 @@ const handleTabClick = (tab) => {
     backToNoticeList();
   }
 };
+
+// 줄바꿈 기준으로 콘텐츠를 분리
+const contentLines = computed(() => {
+  if (!noticeDetails.value || !noticeDetails.value.NOT_CONTENT) return [];
+  return noticeDetails.value.NOT_CONTENT.split('\\n');
+});
 
 /* 공지사항 목록으로 돌아가기 */
 const backToNoticeList = () => {
