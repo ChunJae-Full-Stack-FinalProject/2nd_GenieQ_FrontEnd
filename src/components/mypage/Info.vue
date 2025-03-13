@@ -56,22 +56,34 @@
       <span class="logout" @click="handleLogout">로그아웃</span>
     </div>
   </div>
-  <changePasswordModal :isOpen="showPasswordModal" @close="closePasswordModal"/>
+  <changePasswordModal :isOpen="showPasswordModal" @close="closePasswordModal" @success-message="handleSuccessMessage" @error-message="handleErrorMessage"/>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import { useAuthStore } from '@/stores/auth';
 import BaseButton from '../common/button/BaseButton.vue';
 import changePasswordModal from '../common/modal/type/mypage/ChangePasswordModal.vue';
+import { useRouter, useRoute } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
 
 // 비밀번호 변경 모달 상태 관리
 const showPasswordModal = ref(false);
 const isLoading = ref(false);
 const error = ref(null);
+
+
+// 라우터와 스토어 초기화
 const router = useRouter();
+const route = useRoute();
 const authStore = useAuthStore();
+
+
+
+// 원본 사용자 데이터 저장 (변경 감지용)
+const originalUserData = ref({
+  name: '',
+  memType: ''
+});
 
 // 반응형 userData 객체 생성
 const userData = ref({
@@ -89,6 +101,15 @@ const openPasswordModal = () => {
 // 모달 닫기
 const closePasswordModal = () => {
   showPasswordModal.value = false;
+};
+
+// 모달 알림 메시지 처리
+const handleSuccessMessage = (message) => {
+  alert(message);
+};
+
+const handleErrorMessage = (message) => {
+  alert(message);
 };
 
 // 사용자 정보 가져오는 함수
@@ -128,6 +149,12 @@ const fetchUserInfo = () => {
       memType: data.memType || '',
     };
     
+    // 원본 데이터 저장
+    originalUserData.value = {
+      name: data.name || '',
+      memType: data.memType || ''
+    };
+    
     console.log('데이터 매핑 후:', userData.value);
   })
   .catch(error => {
@@ -141,47 +168,186 @@ const fetchUserInfo = () => {
   });
 };
 
-// 사용자 정보 저장하는 함수
-const saveUserInfo = () => {
-  isLoading.value = true;
-  error.value = null;
-
+// 이름 업데이트 함수
+const updateName = () => {
+  // 이름이 변경되지 않았으면 업데이트 하지 않음
+  if (userData.value.name === originalUserData.value.name) {
+    return Promise.resolve();
+  }
+  
   const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:9090';
   
-  // 업데이트할 정보
-  const updateData = {
-    name: userData.value.name,
-    memType: userData.value.memType
+  // 요청 데이터
+  const nameData = {
+    "memName": userData.value.name
   };
-
-  fetch(`${apiUrl}/api/info/update/profile`, {
-    method: 'PUT',
+  
+  console.log('이름 업데이트 요청 데이터:', nameData);
+  
+  return fetch(`${apiUrl}/api/info/update/name`, {
+    method: 'PATCH',
     credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(updateData)
+    headers: { 
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
+    },
+    body: JSON.stringify(nameData)
   })
   .then(response => {
     if (!response.ok) {
-      return response.text().then(errorText => { throw new Error(errorText); });
+      return response.text().then(errorText => { throw new Error(errorText || '이름 업데이트에 실패했습니다'); });
     }
-    return response.json();
+    
+    // 응답이 JSON인지 확인하고 적절히 처리
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      return response.json();
+    } else {
+      return response.text();
+    }
   })
   .then(data => {
-    console.log('사용자 정보 업데이트 성공:', data);
-    alert('정보가 성공적으로 저장되었습니다.');
-  })
-  .catch(error => {
-    console.error('사용자 정보 업데이트 오류:', error);
-    console.error('에러 유형:', error.name);
-    console.error('에러 메시지:', error.message);
-    error.value = `정보를 저장하는 중 오류가 발생했습니다: ${error.message}`;
-    alert('정보 저장에 실패했습니다.');
-  })
-  .finally(() => {
-    isLoading.value = false;
+    console.log('이름 업데이트 성공:', data);
+    originalUserData.value.name = userData.value.name;
+    return true;
   });
 };
 
+// 소속 업데이트 함수
+const updateType = () => {
+  // 소속이 변경되지 않았으면 업데이트 하지 않음
+  if (userData.value.memType === originalUserData.value.memType) {
+    return Promise.resolve();
+  }
+  
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:9090';
+  
+  // 요청 데이터
+  const typeData = {
+    "memType": userData.value.memType
+  };
+  
+  console.log('소속 업데이트 요청 데이터:', typeData);
+  
+  return fetch(`${apiUrl}/api/info/update/type`, {
+    method: 'PATCH',
+    credentials: 'include',
+    headers: { 
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
+    },
+    body: JSON.stringify(typeData)
+  })
+  .then(response => {
+    if (!response.ok) {
+      return response.text().then(errorText => { throw new Error(errorText || '소속 업데이트에 실패했습니다'); });
+    }
+    
+    // 응답이 JSON인지 확인하고 적절히 처리
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      return response.json();
+    } else {
+      return response.text();
+    }
+  })
+  .then(data => {
+    console.log('소속 업데이트 성공:', data);
+    originalUserData.value.memType = userData.value.memType;
+    return true;
+  });
+};
+
+// 사용자 정보 저장하는 함수 (이름과 소속을 각각 업데이트)
+// 이벤트 중복 실행 방지 플래그
+let isSaving = false;
+
+const saveUserInfo = () => {
+  // 이미 저장 중이면 실행하지 않음
+  if (isSaving) {
+    console.log('이미 저장 중입니다.');
+    return;
+  }
+  
+  isSaving = true;
+  isLoading.value = true;
+  error.value = null;
+  
+  // 로그인 상태 확인
+  if (!authStore.isAuthenticated) {
+    alert('로그인이 필요합니다. 다시 로그인해주세요.');
+    router.push('/login');
+    isSaving = false;
+    isLoading.value = false;
+    return;
+  }
+    
+    // 변경된 항목이 있는지 확인
+  const isNameChanged = userData.value.name !== originalUserData.value.name;
+  const isTypeChanged = userData.value.memType !== originalUserData.value.memType;
+  
+    
+    // 변경된 항목이 없으면 알림만 표시
+    if (!isNameChanged && !isTypeChanged) {
+      alert('변경된 정보가 없습니다.');
+      return;
+    }
+    
+    console.log('변경할 정보:', {
+    name: isNameChanged ? userData.value.name : '변경 없음',
+    memType: isTypeChanged ? userData.value.memType : '변경 없음'
+  });
+    
+    // 성공 여부 추적
+  let successCount = 0;
+  const updateCount = (isNameChanged ? 1 : 0) + (isTypeChanged ? 1 : 0);
+  let namePromise = Promise.resolve();
+  let typePromise = Promise.resolve();
+  
+  // 이름 변경이 필요한 경우
+  if (isNameChanged) {
+    namePromise = updateName()
+      .then(() => {
+        successCount++;
+      })
+      .catch(nameError => {
+        console.error('이름 업데이트 중 오류:', nameError);
+        throw nameError;
+      });
+  }
+  
+  // 소속 변경이 필요한 경우
+  if (isTypeChanged) {
+    typePromise = updateType()
+      .then(() => {
+        successCount++;
+      })
+      .catch(typeError => {
+        console.error('소속 업데이트 중 오류:', typeError);
+        throw typeError;
+      });
+  }
+  
+  // 모든 업데이트 완료 대기
+  Promise.all([namePromise, typePromise])
+    .then(() => {
+      // 모든 업데이트가 성공한 경우에만 성공 메시지 표시
+      if (successCount === updateCount) {
+        alert('정보가 성공적으로 저장되었습니다.');
+      }
+    })
+    .catch(err => {
+      console.error('사용자 정보 업데이트 오류:', err);
+      console.error('에러 유형:', err.name);
+      console.error('에러 메시지:', err.message);
+      error.value = `정보를 저장하는 중 오류가 발생했습니다: ${err.message}`;
+      alert('정보 저장에 실패했습니다. ' + err.message);
+    })
+    .finally(() => {
+      isLoading.value = false;
+      isSaving = false; // 저장 상태 초기화
+    });
+};
 // 로그아웃 처리 함수
 const handleLogout = () => {
   const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:9090';
@@ -202,6 +368,7 @@ const handleLogout = () => {
     authStore.user = null;
     authStore.isAuthenticated = false;
     router.push('/login');
+    
   });
 };
 
@@ -383,7 +550,7 @@ onMounted(() => {
   display: flex;
   flex-direction: row;
   align-items: center;
-  padding: 0px;
+  padding-bottom: 30px;
   gap: 16px;
   position: absolute;
   width: 240px;
