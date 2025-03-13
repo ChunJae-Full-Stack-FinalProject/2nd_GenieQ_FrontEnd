@@ -58,7 +58,13 @@
   
   <script setup>
   import { ref, computed, onMounted } from "vue";
+  import { useRouter, useRoute } from 'vue-router';
+  import { useAuthStore } from '@/stores/auth';
 
+  // 라우터와 스토어 초기화
+  const router = useRouter();
+  const route = useRoute();
+  const authStore = useAuthStore();
   
   /* 공지사항 필터 */
   const tabs = [
@@ -86,11 +92,31 @@ const fetchNotices = () => {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json'
-    }
+    },
+    credentials: 'include'
   })
   .then(response => {
     if (!response.ok) {
-      throw new Error('서버 응답이 올바르지 않습니다.');
+      // 인증 오류 처리 (401)
+      if (response.status === 401) {
+        // (추가) 로그 - 인증 오류 감지
+        console.error('인증 오류(401): 로그인이 필요합니다');
+
+        // 인증 상태 초기화
+        authStore.user = null;
+        authStore.isAuthenticated = false;
+        localStorage.removeItem('authUser');
+
+        // 로그인 페이지로 리다이렉트
+        router.push({ 
+        path: '/login', 
+        query: { redirect: route.fullPath }
+        });
+
+        // 추가 처리를 중단하기 위한 에러 발생
+        throw new Error('인증이 필요합니다');
+      }
+      return response.text().then(text => { throw new Error(text); });
     }
     return response.json();
   })
