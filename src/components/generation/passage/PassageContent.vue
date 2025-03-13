@@ -2,10 +2,11 @@
     <div class="app-container">
         <p id="main-title">지문 생성</p>
         <div class="main-content">
+            <InputPassageTitle ref="passageTitleRef" />
             <PassageContentMain ref="passageContentRef" @content-changed="handleContentChange"/>   
             <PassageSummary ref="passageSummaryRef"/>
             <BaseButton id="recreate-button" text="재생성하기" type="type2" width="248px" height="54px" @click="openPaymentUsageModal" :disabled="isContentChanged"/>
-            <BaseButton id="save-button" text="저장하기" type="type2" width="248px" height="54px" @click="handleSaveButtonClick" :disabled="!isContentChanged"/>
+            <BaseButton id="save-button" text="저장하기" type="type2" width="248px" height="54px" @click="handleSaveButtonClick" :disabled="!isContentChanged || passageStore.isLoading"/>
             <BaseButton id="download-button" text="추출하기" type="type2" width="248px" height="54px" :disabled="isContentChanged || !hasManualSave" @click="checkContentLengthAndOpenFileModal()"/>
             <router-link to="/questions" custom v-slot="{ navigate }">
                 <BaseButton id="connect-create-button" text="이어서 문항 생성하기" type="type4" width="520px" height="54px" @click="handleConnectCreate($event, navigate)" :disabled="isContentChanged"/>
@@ -57,8 +58,10 @@ import ConfirmModalComponent from '@/components/common/modal/type/ConfirmModalCo
 import WarningModalComponent from '@/components/common/modal/type/WarningModalComponent.vue';
 import PaymentUsageModal from '@/components/common/modal/type/generation/PaymentUsageModal.vue';
 
-import { ref, onMounted, onBeforeUnmount, getCurrentInstance } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount, getCurrentInstance } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+
+import { usePassageStore } from '@/stores/passage';
 
 // 모달 상태 관리
 const isFileModalOpen = ref(false);
@@ -117,17 +120,58 @@ const handleGenerate = () => {
 };
 
 // 저장 버튼 클릭 핸들러 추가
-const handleSaveButtonClick = (event) => {
-    if (checkContentLength(event)) {
-        // 지문 데이터 저장 로직
-        savePassageData();
-        // 저장 버튼 클릭 플래그 설정 (추출하기 버튼 활성화)
-        hasManualSave.value = true;
-        isContentChanged.value = false; // 저장 후 변경사항 초기화
-        return true;
-    }
-    return false;
+// const handleSaveButtonClick = (event) => {
+//     if (checkContentLength(event)) {
+//         // 지문 데이터 저장 로직
+//         savePassageData();
+//         // 저장 버튼 클릭 플래그 설정 (추출하기 버튼 활성화)
+//         hasManualSave.value = true;
+//         isContentChanged.value = false; // 저장 후 변경사항 초기화
+//         return true;
+//     }
+//     return false;
+// };
+const passageStore = usePassageStore();
+
+const handleSaveButtonClick = async () => {
+    console.log('passageTitleRef:', passageTitleRef.value); 
+  console.log('passageTitleRef.getTitle:', passageTitleRef.value?.getTitle?.()); 
+  console.log('passageContentRef.getContent:', passageContentRef.value?.getContent?.());
+
+  // 컴포넌트 참조가 준비되었는지 확인 후 데이터 가져오기
+  if (!passageTitleRef.value) {
+    console.error('참조 컴포넌트가 준비되지 않았습니다.');
+    return;
+  }
+  
+  // 직접 DOM에 접근하여 값 가져오기 (대안)
+  const titleInput = document.getElementById('passage-title');
+  const titleValue = titleInput ? titleInput.value : '';
+
+  // 제목, 내용, 요약 정보 수집
+  const passageData = {
+    title: titleValue || passageTitleRef.value.getTitle() || '',
+    content: passageContentRef.value?.getContent?.() || '',
+    summary: passageSummaryRef.value?.getSummary?.() || ''
+  };
+
+  if (!passageData.title || !passageData.content) {
+    alert('제목과 내용을 입력해주세요.');
+    return;
+  }
+
+  // savePassage 호출
+  const result = await passageStore.savePassage(passageData);
+
+  if (result.success) {
+    alert('지문이 성공적으로 저장되었습니다.');
+    hasManualSave.value = true;
+    isContentChanged.value = false; // 저장 후 변경 플래그 초기화
+  } else {
+    alert('지문 저장 중 오류가 발생했습니다: ' + result.error);
+  }
 };
+
 
 // 지문 데이터 저장 함수
 const savePassageData = () => {
@@ -262,7 +306,34 @@ const handleBeforeUnload = (e) => {
 const instance = getCurrentInstance();
 let routerGuard = null;
 
+// 지문 저장 함수
+const savePassage = async () => {
+  // 저장할 지문 데이터 구성
+  const passageData = {
+    // title: passageTitle.value,
+    // content: passageContent.value,
+    // 필요한 추가 데이터가 있다면 여기에 추가
+    title: passageTitleRef.value?.getTitle?.() || '',
+    content: passageContentRef.value?.getContent?.() || '',
+    summary: passageSummaryRef.value?.getSummary?.() || ''
+  };
+  
+  // passageStore의 savePassage 액션 호출
+  const result = await passageStore.savePassage(passageData);
+  
+  if (result.success) {
+    alert('지문이 성공적으로 저장되었습니다.');
+    router.push('/storage'); // 저장 후 이동할 페이지
+  } else {
+    alert('지문 저장 중 오류가 발생했습니다: ' + result.error);
+  }
+};
+
 onMounted(() => {
+
+    console.log('passageTitleRef:', passageTitleRef.value); 
+    console.log('passageContentRef:', passageContentRef.value);
+
     // 브라우저 새로고침, 닫기 등에 대한 이벤트 리스너 추가
     window.addEventListener('beforeunload', handleBeforeUnload);
     

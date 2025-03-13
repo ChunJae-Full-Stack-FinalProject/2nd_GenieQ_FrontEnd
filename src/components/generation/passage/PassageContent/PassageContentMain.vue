@@ -53,7 +53,11 @@ const getContent = () => {
 
 // 노출할 메소드 정의
 defineExpose({
-    getContent, validateContent
+    // getContent, validateContent
+    getContent: () => content.value,
+    validateContent: () => {
+    return content.value.length >= 10; // 최소 10자 이상 입력
+  }
 });
 </script>
 <style scoped>
