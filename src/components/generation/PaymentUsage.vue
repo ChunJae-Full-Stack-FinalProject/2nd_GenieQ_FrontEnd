@@ -29,7 +29,7 @@
 <script setup>
 import { ref, watch, onMounted } from "vue";
 
-const creditcount = ref(10);//수정하기
+const creditcount = ref(10); // 초기값 0
 
 // 이벤트 정의
 const emit = defineEmits(['credit-update']);
