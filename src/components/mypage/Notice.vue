@@ -57,8 +57,14 @@
   </template>
   
   <script setup>
-  import { ref, computed } from "vue";
+  import { ref, computed, onMounted } from "vue";
+  import { useRouter, useRoute } from 'vue-router';
+  import { useAuthStore } from '@/stores/auth';
 
+  // 라우터와 스토어 초기화
+  const router = useRouter();
+  const route = useRoute();
+  const authStore = useAuthStore();
   
   /* 공지사항 필터 */
   const tabs = [
@@ -72,14 +78,63 @@
   
   /* 공지사항 데이터 */
   const notices = ref([]);
-for (let i = 1; i <= 60; i++) {
-  notices.value.push({
-    NOT_CODE: i,
-    NOT_TYPE: i % 2 === 0 ? "서비스" : "작업",
-    NOT_TITLE: `공지사항 제목 ${i}`,  
-    NOT_DATE: `2024-03-${String(31 - i).padStart(2, '0')}`,
-    NOT_CONTENT: `공지사항의 ${i}번 상세(Detail)내용입니다. `,
-  });
+
+// 컴포넌트 마운트 시, 데이터 로드
+onMounted(() => {
+  fetchNotices();
+});
+
+// 공지사항 데이터 가져오기
+const fetchNotices = () => {
+  const apiUrl = import.meta.env.VITE_API_URL;
+
+  fetch(`${apiUrl}/noti/select/list`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    credentials: 'include'
+  })
+  .then(response => {
+    if (!response.ok) {
+      // 인증 오류 처리 (401)
+      if (response.status === 401) {
+        // (추가) 로그 - 인증 오류 감지
+        console.error('인증 오류(401): 로그인이 필요합니다');
+
+        // 인증 상태 초기화
+        authStore.user = null;
+        authStore.isAuthenticated = false;
+        localStorage.removeItem('authUser');
+
+        // 로그인 페이지로 리다이렉트
+        router.push({ 
+        path: '/login', 
+        query: { redirect: route.fullPath }
+        });
+
+        // 추가 처리를 중단하기 위한 에러 발생
+        throw new Error('인증이 필요합니다');
+      }
+      return response.text().then(text => { throw new Error(text); });
+    }
+    return response.json();
+  })
+  .then(data => {
+    console.log('공지사항 데이터 불러오기 성공:', data);
+
+    // 응답 데이터 구조에 맞게 매핑
+    notices.value = data.map(item => ({
+      NOT_CODE: item.notCode,
+      NOT_TYPE: item.type,
+      NOT_TITLE: item.title,
+      NOT_DATE: item.date,
+      NOT_CONTENT: item.content || ''
+    }));
+  })
+  .catch(error => {
+    console.error('공지사항 데이터 불러오기 실패:', error);
+  })
 }
 
 /* 필터링된 공지사항 목록 */
@@ -101,7 +156,6 @@ const paginatedNotices = computed(() => {
     const start = (currentPage.value - 1) * itemsPerPage;
     return filteredNotices.value.slice(start, start + itemsPerPage);
 });
-
 
 /*  표시할 페이지 목록 */
 const visiblePages = computed(() => {
@@ -129,7 +183,6 @@ const prevPage = () => {
     }
 };
 
-
 /* 다음 페이지 이동 (한 칸 이동) */
 const nextPage = () => {
     if (currentPage.value < totalPages.value) {
@@ -146,7 +199,6 @@ const changeTab = (tab) => {
     selectedTab.value = tab;
     currentPage.value = 1; 
 };
-
   </script>
   
   <style scoped>
