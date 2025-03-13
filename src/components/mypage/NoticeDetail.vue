@@ -35,6 +35,7 @@
         <p v-for="(line, index) in contentLines" :key="index">
           {{ line }}
         </p>
+        <p>예시 : {{ noticeDetails.NOT_CONTENT }}</p>
       </div>
 
       <div class="notice-actions">
@@ -80,12 +81,6 @@ const handleTabClick = (tab) => {
   }
 };
 
-// 공지사항의 \n을 개행으로 변경
-const formattedContent = computed(() => {
-  if (!noticeDetails.value || !noticeDetails.value.NOT_CONTENT) return [];
-  return noticeDetails.value.NOT_CONTENT.split('\n');
-});
-
 /* 공지사항 목록으로 돌아가기 */
 const backToNoticeList = () => {
   isNoticeDetailVisible.value = false;
@@ -103,7 +98,8 @@ const fetchNoticeDetails = () => {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json'
-    }
+    },
+    credentials: 'include'
   })
   .then(response => {
     if (!response.ok) {
@@ -273,10 +269,10 @@ const fetchNoticeDetails = () => {
 
 .notice-table th:last-child {
   text-align: right;
-  width: 180px;
+  width: 200px;
   color: #424242;
   font-size: 16px;
-  
+  padding-right: 35px;
 }
 
 .notice-content {
