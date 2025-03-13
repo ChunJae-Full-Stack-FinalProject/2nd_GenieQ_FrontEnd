@@ -7,24 +7,24 @@
                 <div id="input-answer">
                     <p>정답</p>
                     <div class="answer-option">
-                        <input type="radio" id="answer1" value="1" checked v-model="selectedAnswer" @change="handleDescriptionChanged">
-                        <label for="answer1">①</label>
+                        <input type="radio" :id="`answer1-${uniqueId}`" value="①" v-model="localAnswer" @change="handleDescriptionChanged">
+                        <label :for="`answer1-${uniqueId}`">①</label>
                     </div>
                     <div class="answer-option">
-                        <input type="radio" id="answer2" value="2" v-model="selectedAnswer" @change="handleDescriptionChanged">
-                        <label for="answer2">②</label>
+                        <input type="radio" :id="`answer2-${uniqueId}`" value="②" v-model="localAnswer" @change="handleDescriptionChanged">
+                        <label :for="`answer2-${uniqueId}`">②</label>
                     </div>
                     <div class="answer-option">
-                        <input type="radio" id="answer3" value="3" v-model="selectedAnswer" @change="handleDescriptionChanged">
-                        <label for="answer3">③</label>
+                        <input type="radio" :id="`answer3-${uniqueId}`" value="③" v-model="localAnswer" @change="handleDescriptionChanged">
+                        <label :for="`answer3-${uniqueId}`">③</label>
                     </div>
                     <div class="answer-option">
-                        <input type="radio" id="answer4" value="4" v-model="selectedAnswer" @change="handleDescriptionChanged">
-                        <label for="answer4">④</label>
+                        <input type="radio" :id="`answer4-${uniqueId}`" value="④" v-model="localAnswer" @change="handleDescriptionChanged">
+                        <label :for="`answer4-${uniqueId}`">④</label>
                     </div>
                     <div class="answer-option">
-                        <input type="radio" id="answer5" value="5" v-model="selectedAnswer" @change="handleDescriptionChanged">
-                        <label for="answer5">⑤</label>
+                        <input type="radio" :id="`answer5-${uniqueId}`" value="⑤" v-model="localAnswer" @change="handleDescriptionChanged">
+                        <label :for="`answer5-${uniqueId}`">⑤</label>
                     </div>
                 </div>
             </div>
@@ -36,60 +36,72 @@
         </div>
     </div>
 </template>
-<script>
-export default {
-    name: 'QuestionDescription',
-    props: {
-        // 정답
-        correct: {
-            type: String,
-            default: '①'
-        },
-        // 해설
-        description: {
-            type: String,
-            default: "연구 커뮤니티는 이러한 모델의 규모를 확장하면 성능이 향상된다고 인정한다고 했으므로, \n① 'LLMs의 성능은 모델의 크기를 줄일수록 향상된다.' 는 글의 내용과 일치하지 않는다."
-        },
-        // 편집 모드 상태를 props로 받음
-        isEditing: {
-            type: Boolean,
-            default: false
-        }
+<script setup>
+import { ref, computed, onMounted, watch } from 'vue';
+
+// props 정의
+const props = defineProps({
+    // 정답
+    correct: {
+        type: String,
+        default: '①'
     },
-    data() {
-        return {
-            selectedAnswer: 1,
-            // 내부적으로 관리할 정답 데이터
-            answer: '',
-            // 내부적으로 관리할 해설 데이터
-            content: '',
-        }
+    // 해설
+    description: {
+        type: String,
+        default: "연구 커뮤니티는 이러한 모델의 규모를 확장하면 성능이 향상된다고 인정한다고 했으므로, \n① 'LLMs의 성능은 모델의 크기를 줄일수록 향상된다.' 는 글의 내용과 일치하지 않는다."
     },
-    methods: {
-        // 해설 변경 시 이벤트 발생
-        handleDescriptionChanged() {
-            this.$emit('description-changed');
-        }
+    // 편집 모드 상태를 props로 받음
+    isEditing: {
+        type: Boolean,
+        default: false
     },
-    created() {
-        // props로 받은 데이터를 내부 상태로 복사
-        this.answer = this.correct;
-        this.content = this.description;
-    },
-    watch: {
-        // props가 외부에서 변경될 경우, 내부 상태도 업데이트
-        correct: {
-            handler(newVal) {
-                this.answer = newVal;
-            }
-        },
-        description: {
-            handler(newVal) {
-                this.content = newVal;
-            }
-        }
+    // 현재 슬라이드 인덱스
+    slideIndex: {
+        type: Number,
+        default: 0
     }
-}
+});
+
+// emits 정의
+const emit = defineEmits(['description-changed']);
+
+// 내부적으로 관리할 정답 데이터 (v-model에 연결)
+const localAnswer = ref('');
+// 내부적으로 관리할 해설 데이터
+const content = ref('');
+
+// 고유 ID 계산 (slideIndex 기반)
+const uniqueId = computed(() => `desc-${props.slideIndex}`);
+
+// 해설 변경 시 이벤트 발생
+const handleDescriptionChanged = () => {
+    // 변경사항을 부모 컴포넌트에 알림
+    emit('description-changed', {
+        correct: localAnswer.value,
+        description: content.value,
+        slideIndex: props.slideIndex
+    });
+};
+
+// 초기 상태 설정
+onMounted(() => {
+    localAnswer.value = props.correct;
+    content.value = props.description;
+});
+
+// props 변경 감시
+watch(() => props.correct, (newVal) => {
+    localAnswer.value = newVal;
+});
+
+watch(() => props.description, (newVal) => {
+    content.value = newVal;
+});
+
+watch(() => props.isEditing, (newVal) => {
+    console.log('편집 모드 변경 : ', newVal);
+});
 </script>
 <style scoped>
 .question-description {
