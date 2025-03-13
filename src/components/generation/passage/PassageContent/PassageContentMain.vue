@@ -22,7 +22,6 @@
     
     // 본문 내용 ref로 관리
     const content = ref('');
-    const title = ref('');
     const MIN_LENGTH = 500;
     const MAX_LENGTH = 1700;
     
@@ -38,11 +37,8 @@
             content.value = content.value.slice(0, MAX_LENGTH);
         }
         
-        // 부모 컴포넌트로 변경 사항 emit
-        emit('content-changed', {
-            title: title.value,
-            content: content.value
-        });
+        // 내용 변경 이벤트 발생
+        emit('content-changed');
     };
     
     // 본문 길이 검증
@@ -51,15 +47,13 @@
     };
     
     // 외부에서 접근할 수 있도록 함수 노출
-    // const getContent = () => {
-    //     return content.value;
-    // };
+    const getContent = () => {
+        return content.value;
+    };
     
     // 노출할 메소드 정의
     defineExpose({
-        getContent: () => content.value,
-        getTitle: () => title.value, 
-        validateContent
+        getContent, validateContent
     });
     </script>
     <style scoped>
