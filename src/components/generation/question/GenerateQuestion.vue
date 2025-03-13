@@ -19,8 +19,9 @@
             ref="editQuestionRefs"
             :questions="item.questions" 
             :questionTitle="item.title"
+            :isEditing="isEditingGlobal"
             @edit-mode-changed="updateEditingMode"
-            @question-changed="handleContentChange"
+            @question-changed="handleContentChange($event, index)"
             @request-edit-mode="openEditWarningModal"
             @recreate-question="handleRecreateButtonClick(index)"
           />
@@ -39,7 +40,8 @@
             :isEditing="isEditingGlobal" 
             :correct="item.correct" 
             :description="item.description"
-            @description-changed="handleContentChange"
+            :slideIndex="index"
+            @description-changed="handleContentChange($event, index)"
           />
         </div>
       </div>
@@ -411,6 +413,29 @@ const handleQuestionGeneration = () => {
   // 모달 닫기
   showPaymentModal.value = false;
   console.log(questionsData);
+};
+
+const handleQuestionChange = (event, index) => {
+  handleContentChange();
+  // 필요한 경우, 특정 인덱스의 문항 데이터 업데이트
+}
+
+const handleDescriptionChange = (event, index) => {
+  handleContentChange();
+
+  // 해당 인덱스의 문항 데이터 업데이트
+  if (event && index !== undefined) {
+    const targetIndex = index;
+
+    if (event.correct) {
+      console.log(`문항 ${targetIndex+1}의 정답을 ${event.correct}로 업데이트`);
+      questionsData.value[targetIndex].correct = event.correct;
+    }
+    if (event.description) {
+      console.log(`문항 ${targetIndex+1}의 해설 업데이트`);
+      questionsData.value[targetIndex].description = event.description;
+    }
+  }
 };
 
 // 라우터 관련 정보 가져오기
