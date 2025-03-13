@@ -26,7 +26,7 @@
         <div class="input-with-button">
           <div class="input-wrapper-with-timer" :class="{ 'success': isVerified }">
             <input type="text" placeholder="인증코드를 입력하세요." class="form-input2" v-model="verificationCode" :disabled="!isEmailSent || isVerified || !isTimerRunning" />
-            <span v-if="isTimerRunning" class="timer">{{ formattedTime }}</span>
+            <span v-if="isTimerRunning && !isVerified" class="timer">{{ formattedTime }}</span>
           </div>
           <button class="button verify-button" :class="{ 'active': verificationCode && !isVerified }" :disabled="!verificationCode || isVerified || !isTimerRunning" @click="verifyCode">
             {{ isVerified ? '완료' : '인증' }}
@@ -296,6 +296,13 @@ const verifyCode = () => {
   if (verificationCode.value === generatedCode.value) {
     isVerified.value = true;
     verificationError.value = '';
+
+    // 인증 성공 시 타이머 정지 & 정리
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+    isTimerRunning.value = false; // 타이머 상태 업데이트
   } else {
     verificationError.value = '인증코드가 일치하지 않습니다.';
   }

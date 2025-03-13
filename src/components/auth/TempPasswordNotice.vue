@@ -13,12 +13,12 @@
 
           <div class="email-display-container">
             <div class="email-label">이메일 주소</div>
-            <div class="email-value">songwinter@naver.com</div>
+            <div class="email-value">{{ userEmail }}</div>
           </div>
       
       
           <router-link to="/login" custom v-slot="{ navigate }">
-            <button class="button gray-button" @click="navigate">완료</button>
+            <button class="button gray-button" @click="navigate">로그인하기</button>
           </router-link>
           
       </div> 
@@ -27,7 +27,18 @@
   </template>
   
   <script setup>
-  import { Icon } from "@iconify/vue";
+  import { ref, onMounted } from 'vue';
+  import { useRoute } from 'vue-router';
+
+  const route = useRoute();
+  const userEmail = ref('');
+
+  // 컴포넌트가 마운트 될 때 이메일 값을 가져옴
+  onMounted(() => {
+    if (route.query.email) {
+      userEmail.value = route.query.email;
+    }
+  });
   </script>
   
   <style scoped>
