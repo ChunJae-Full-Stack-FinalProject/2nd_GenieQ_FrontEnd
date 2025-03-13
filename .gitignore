@@ -28,3 +28,11 @@ coverage
 *.sw?
 
 *.tsbuildinfo
+
+# .git/
+# src/assets/
+# src/components/common/modal
+# src/components/generation
+# src/components/test
+# src/components/mypage
+# src/components/storage

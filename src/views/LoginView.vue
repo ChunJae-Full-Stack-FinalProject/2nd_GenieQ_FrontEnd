@@ -71,9 +71,9 @@ onMounted(() => {
     router.push('/home');
   }
   // 테스트 계정 정보 알림 - 처음 방문 시에만 표시
-  if (!authStore.isLoggedIn) {
-    alert('테스트 계정 정보:\n이메일: teacher@gmail.com\n비밀번호: 1234');
-  }
+  // if (!authStore.isLoggedIn) {
+  //   alert('테스트 계정 정보:\n이메일: teacher@gmail.com\n비밀번호: 1234');
+  // }
 });
 
 // 이메일 유효성 검사
@@ -107,8 +107,9 @@ const loginHandler = () => {
     memPassword: password.value
   };
   
+  const apiUrl = import.meta.env.VITE_API_URL;
   // fetch를 이용한 로그인 요청
-  fetch('http://localhost:9090/api/auth/select/login', {
+  fetch(`${apiUrl}/api/auth/select/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include', // 쿠키를 포함시켜 세션 유지

@@ -35,7 +35,8 @@ export const useAuthStore = defineStore('auth', {
       console.log('로그인 시도:', credentials); // (추가) 로그: 로그인 시도
       
       return new Promise((resolve, reject) => {
-        fetch('http://localhost:9090/api/auth/select/login', {
+        const apiUrl = import.meta.env.VITE_API_URL;
+        fetch(`${apiUrl}/api/auth/select/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include', // 쿠키를 포함시켜 세션 유지
@@ -77,7 +78,8 @@ export const useAuthStore = defineStore('auth', {
       console.log('로그아웃 시도'); // (추가) 로그: 로그아웃 시도
       
       return new Promise((resolve, reject) => {
-        fetch('http://localhost:9090/api/auth/select/logout', {
+        const apiUrl = import.meta.env.VITE_API_URL;
+        fetch(`${apiUrl}/api/auth/select/logout`, {
           method: 'POST',
           credentials: 'include'
         })

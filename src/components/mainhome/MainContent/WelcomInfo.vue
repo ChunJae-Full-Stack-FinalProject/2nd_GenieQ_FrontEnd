@@ -2,7 +2,7 @@
      <div class="card-container">
         <div class="card">
             <div>
-                <p class="card-title">문제 출제를 더 쉽고, 빠르고, 정확하게 <br> 안녕하세요. 유저이름님</p>
+                <p class="card-title">문제 출제를 더 쉽고, 빠르고, 정확하게 <br> 안녕하세요. {{ authStore.user?.name || '회원' }}님</p>
                 <p class="sub-text">현재 보유 이용권 <span class="highlight">{{ ticketCount }}</span>회</p>
             </div>
             <router-link :to="{ name: 'my-page-wrapper', query: { 'tab': '이용권' } }">
@@ -13,6 +13,14 @@
 </template>
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
+
+// 라우터와 스토어 초기화
+const router = useRouter();
+const route = useRoute();
+const authStore = useAuthStore();
+
 // 티켓 카운트를 저장할 반응형 변수 선언
 const ticketCount = ref("n");
 
@@ -23,8 +31,9 @@ onMounted(() => {
 });
 // 티켓 정보 조회 함수
 function getTicketCount() {
+    const apiUrl = import.meta.env.VITE_API_URL;
     // fetch를 사용한 티켓 정보 조회 요청
-    fetch('http://localhost:9090/api/info/select/ticket', {
+    fetch(`${apiUrl}/api/info/select/ticket`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
@@ -34,6 +43,25 @@ function getTicketCount() {
     .then(response => {
         console.log("서버 응답 상태 코드:", response.status);
         if (!response.ok) {
+            // 인증 오류 처리 (401)
+            if (response.status === 401) {
+                // (추가) 로그 - 인증 오류 감지
+                console.error('인증 오류(401): 로그인이 필요합니다');
+                
+                // 인증 상태 초기화
+                authStore.user = null;
+                authStore.isAuthenticated = false;
+                localStorage.removeItem('authUser');
+                
+                // 로그인 페이지로 리다이렉트
+                router.push({ 
+                path: '/login', 
+                query: { redirect: route.fullPath }
+                });
+                
+                // 추가 처리를 중단하기 위한 에러 발생
+                throw new Error('인증이 필요합니다');
+            }
             return response.text().then(text => { throw new Error(text); });
         }
         return response.text();
