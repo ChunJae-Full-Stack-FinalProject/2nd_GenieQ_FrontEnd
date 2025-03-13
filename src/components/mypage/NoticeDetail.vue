@@ -24,15 +24,18 @@
       <div class="notice-header">
         <table class="notice-table">
           <tr>
-            <th>서비스</th>
-            <th>{{ noticeDetails ? noticeDetails.NOT_TITLE : '자나감 베리베이션 판매 안내' }}</th>
-            <th class="date-column">{{ noticeDetails ? noticeDetails.NOT_DATE : '등록일: YYYY-MM-DD' }}</th>
+            <th>{{ noticeDetails?.NOT_TYPE || '서비스' }}</th>
+            <th>{{ noticeDetails?.NOT_TITLE || '제목 없음' }}</th>
+            <th class="date-column">등록일 : {{ noticeDetails?.NOT_DATE || 'YYYY-MM-DD' }}</th>
           </tr>
         </table>
       </div>
       
       <div class="notice-content" v-if="noticeDetails">
-        <p>{{ noticeDetails.NOT_CONTENT }}</p>
+        <p v-for="(line, index) in contentLines" :key="index">
+          {{ line }}
+        </p>
+        <p>예시 : {{ noticeDetails.NOT_CONTENT }}</p>
       </div>
 
       <div class="notice-actions">
@@ -42,13 +45,17 @@
   </div>
 </template>
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
 import MyPageContent from '@/components/mypage/MyPageContent.vue';
 
+// 라우터와 스토어 초기화
 const route = useRoute();
 const router = useRouter();
-const noticeId = parseInt(route.params.id);
+const authStore = useAuthStore();
+
+const notCode = parseInt(route.params.id);
 const noticeDetails = ref(null);
 
 /* 현재 선택된 탭 (기본값: 공지사항) */
@@ -85,18 +92,55 @@ onMounted(() => {
 });
 
 const fetchNoticeDetails = () => {
-  setTimeout(() => {
-    noticeDetails.value = {
-      NOT_CODE: noticeId,
-      NOT_TYPE: "서비스",
-      NOT_TITLE: "자나감 베리베이션 판매 안내",
-      NOT_DATE: "2024-03-04",
-      NOT_CONTENT: `안녕하세요, 지니큐 운영팀 감자입니다.
-        지니큐을 이용해 주셔서 감사합니다. 또 봐요🥔✌️
+  const apiUrl = import.meta.env.VITE_API_URL;
 
-        공지글 확인용 id(숫자) = ${noticeId} 번째 공지.` 
+  fetch(`${apiUrl}/noti/select/each?notCode=${notCode}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    credentials: 'include'
+  })
+  .then(response => {
+    if (!response.ok) {
+      // 인증 오류 처리 (401)
+      if (response.status === 401) {
+        // (추가) 로그 - 인증 오류 감지
+        console.error('인증 오류(401): 로그인이 필요합니다');
+
+        // 인증 상태 초기화
+        authStore.user = null;
+        authStore.isAuthenticated = false;
+        localStorage.removeItem('authUser');
+
+        // 로그인 페이지로 리다이렉트
+        router.push({ 
+        path: '/login', 
+        query: { redirect: route.fullPath }
+        });
+
+        // 추가 처리를 중단하기 위한 에러 발생
+        throw new Error('인증이 필요합니다');
+      }
+      return response.text().then(text => { throw new Error(text); });
+    }
+    return response.json();
+  })
+  .then(data => {
+    console.log('공지사항 데이터 불러오기 성공:', data);
+
+    // 응답 데이터 구조에 맞게 매핑
+    noticeDetails.value = {
+      NOT_CODE: data.notCode,
+      NOT_TYPE: data.type,
+      NOT_TITLE: data.title,
+      NOT_DATE: data.date,
+      NOT_CONTENT: data.content || ''
     };
-  });
+  })
+  .catch(error => {
+    console.error('공지사항 데이터 불러오기 실패:', error);
+  })
 };
 </script>
 <style scoped>
@@ -112,24 +156,25 @@ const fetchNoticeDetails = () => {
 
 /* "마이페이지" 제목 스타일 */
 .page-title {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 8px;
+  gap: 8px;
+
   position: absolute;
-  font-weight: 700;
-  font-size: 24px;
-  line-height: 150%;
-  letter-spacing: -0.02em;
-  color: #303030;
-  left: 40px; /* 왼쪽 간격 유지 */
-  top: 40px;
+  width: 120px;
+  height: 48px;
+  left: 28px;
+  top: 34px;
 
-  font-family: 'Pretendard';
   font-style: normal;
-  font-weight: 700;
-  font-size: 15.5px;
-  line-height: 150%;
+  font-weight: 600;
+  font-size: 24px;
+  line-height: 32px;
 
-  letter-spacing: -0.02em;
-
-  color: #303030;
+  color: #000000;
 }
 
 /* 상단 탭 메뉴 */
@@ -147,32 +192,34 @@ const fetchNoticeDetails = () => {
 
 /* 기본 탭 스타일 */
 .tab-menu span {
-  font-size: 16px;
-  padding: 10px 20px;
-  cursor: pointer;
+  width: auto;
+  height: 30px;
 
-  font-family: 'Pretendard';
   font-style: normal;
   font-weight: 400;
-  font-size: 12.9167px;
+  font-size: 20px;
   line-height: 150%;
 
   letter-spacing: -0.02em;
-
   color: #303030;
-
-  flex: none;
-  order: 0;
-  flex-grow: 0;
-
 }
 
 /* 선택된 탭 스타일 (볼드 + 밑줄) */
 .active-tab {
-  border-bottom: 2px solid #FF9F40;
   font-weight: bold !important;
+  position: relative; /* 포지션 설정 */
 }
 
+/* active-tab에 아래 border 적용 */
+.active-tab::after {
+  content: "";
+  position: absolute;
+  bottom: -11px; /* 탭 메뉴의 bottom border와 일치하도록 조정 */
+  left: -10%;
+  width: 120%;
+  height: 2px;
+  background-color: #FF9F40;
+}
 
  /* 공지글 부분 .. */
 .notice-detail-container {
@@ -187,16 +234,15 @@ const fetchNoticeDetails = () => {
 
  /* 공지사항 제목 */
 .notice-title {
-    position: relative;
-    font-family: 'Pretendard';
-    font-style: normal;
-    font-weight: 700;
-    font-size: 15px;
-    line-height: 150%;
-    letter-spacing: -0.02em;
-    margin-bottom: 20px;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 150%;
 
-    color: #000000;
+  margin: 15px 0px 10px 20px;
+
+  letter-spacing: -0.02em;
+  color: #000000;
 }
 
 .notice-table {
@@ -204,7 +250,7 @@ const fetchNoticeDetails = () => {
   /* height: 150px; */
   border-collapse: collapse;
   table-layout: fixed;
- 
+  padding: 20px;
 }
 
 .notice-table th {
@@ -218,46 +264,65 @@ const fetchNoticeDetails = () => {
 
 .notice-table th:first-child {
   width: 250px;
+  padding-left: 35px;
 }
 
 .notice-table th:last-child {
   text-align: right;
-  width: 180px;
+  width: 200px;
   color: #424242;
   font-size: 16px;
-  
+  padding-right: 35px;
 }
 
 .notice-content {
   min-height: 50px;
   height: 530px;
-  padding: 20px 10px;
+  padding: 8px;
+  gap: 8px;
   line-height: 1.6;
   color: #424242;
   border-bottom: 1px solid #ddd;
-  white-space: pre-line;
   background-color: #FFFFFF;
 }
 
 .notice-content p {
-  margin: 0 0 5px 0;
+  padding-left: 36px;
+  margin-bottom:5px;
+
+  font-size: 16px;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  color: #424242;
 }
 
 .notice-actions {
-  text-align: center;
-  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 30px 162px;
+  gap: 8px;
+
+  width: 1472px;
+  height: 46px;
 }
 
 .back-button {
-  display: inline-block;
-  background-color: #f8f8f8;
-  width: 20%;
-  color: #424242;
-  padding: 8px 20px;
-  border: 1px solid #ddd;
-  text-decoration: none;
+  box-sizing: border-box;
+
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 8px;
+  gap: 8px;
+
+  width: 248px;
+  height: 46px;
+
+  border: 1px solid #757575;
   border-radius: 8px;
-  font-size: 20px;
 }
 
 .back-button:hover {
