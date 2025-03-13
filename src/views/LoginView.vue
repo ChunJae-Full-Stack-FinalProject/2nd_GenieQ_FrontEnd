@@ -71,9 +71,9 @@ onMounted(() => {
     router.push('/home');
   }
   // 테스트 계정 정보 알림 - 처음 방문 시에만 표시
-  if (!authStore.isLoggedIn) {
-    alert('테스트 계정 정보:\n이메일: teacher@gmail.com\n비밀번호: 1234');
-  }
+  // if (!authStore.isLoggedIn) {
+  //   alert('테스트 계정 정보:\n이메일: teacher@gmail.com\n비밀번호: 1234');
+  // }
 });
 
 // 이메일 유효성 검사
