@@ -59,6 +59,7 @@ import PaymentUsageModal from '@/components/common/modal/type/generation/Payment
 
 import { ref, onMounted, onBeforeUnmount, getCurrentInstance } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { usePassageStore } from '@/stores/passage';
 
 // 모달 상태 관리
 const isFileModalOpen = ref(false);
@@ -76,9 +77,15 @@ const passageTitleRef = ref(null);
 const passageContentRef = ref(null);
 const passageSummaryRef = ref(null);
 
+const title = ref('');
+const content = ref('');
+const summary = ref('');
+
 // 라우터 관련 정보 가져오기
 const route = useRoute();
 const router = useRouter();
+
+const passageStore = usePassageStore();
 
 // 글자 수 체크 함수
 const checkContentLength = (event) => {
@@ -117,16 +124,34 @@ const handleGenerate = () => {
 };
 
 // 저장 버튼 클릭 핸들러 추가
-const handleSaveButtonClick = (event) => {
-    if (checkContentLength(event)) {
-        // 지문 데이터 저장 로직
-        savePassageData();
-        // 저장 버튼 클릭 플래그 설정 (추출하기 버튼 활성화)
-        hasManualSave.value = true;
-        isContentChanged.value = false; // 저장 후 변경사항 초기화
-        return true;
+const handleSaveButtonClick = () => {
+    
+    if (!content.value || content.value.length < 500) {
+        alert('500자 이상 입력해주세요.');
+        return;
     }
-    return false;
+
+    const passageData = {
+        title: title.value,
+        content: content.value
+    };
+
+    console.log('Saving data:', passageData);
+
+    passageStore.savePassage(passageData)
+        .then(response => {
+            if (response.success) {
+                alert('지문 저장 성공');
+                isContentChanged.value = false;
+                hasManualSave.value = true;
+            } else {
+                alert(`저장 실패: ${response.error}`);
+            }
+        })
+        .catch(error => {
+            console.error('저장 중 오류 발생:', error);
+            alert('지문 저장 중 오류가 발생했습니다.');
+        });
 };
 
 // 지문 데이터 저장 함수
@@ -292,11 +317,11 @@ onMounted(() => {
         passageTitleRef.value.setTitle(savedTitle);
     }
     
-    // 필요시 다른 데이터도 로드할 수 있음
-    // const savedPassageData = localStorage.getItem('passageInputText');
-    // if (savedPassageData && passageContentRef.value) {
-    //    passageContentRef.value.setContent(savedPassageData);
-    // }
+    //필요시 다른 데이터도 로드할 수 있음
+    const savedPassageData = localStorage.getItem('passageInputText');
+    if (savedPassageData && passageContentRef.value) {
+       passageContentRef.value.setContent(savedPassageData);
+    }
 });
 
 onBeforeUnmount(() => {
@@ -311,7 +336,9 @@ onBeforeUnmount(() => {
 
 // 데이터가 변경될 때마다 호출될 콜백 함수
 // 이 함수를 자식 컴포넌트에서 호출하도록 구현하여 내용 변경 감지
-const handleContentChange = () => {
+const handleContentChange = (data) => {
+    title.value = data.title;
+    content.value = data.content;
     // 내용이 변경되면 저장 플래그 초기화 (추출하기 버튼 비활성화)
     hasManualSave.value = false;
     isContentChanged.value = true;

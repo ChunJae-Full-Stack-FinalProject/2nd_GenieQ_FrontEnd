@@ -3,10 +3,6 @@ import { defineStore } from "pinia";
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 
-  // 라우터와 스토어 초기화
-  const router = useRouter();
-  const route = useRoute();
-  const authStore = useAuthStore();
 
 export const usePassageStore = defineStore('passage', {
     state: () => ({
@@ -49,9 +45,15 @@ export const usePassageStore = defineStore('passage', {
                         console.error('인증 오류(401): 로그인이 필요합니다');
         
                         // 인증 상태 초기화
+                        const authStore = useAuthStore();
                         authStore.user = null;
                         authStore.isAuthenticated = false;
                         localStorage.removeItem('authUser');
+
+                        // 라우터와 스토어 초기화
+                        const router = useRouter();
+                        const route = useRoute();
+  
         
                         // 로그인 페이지로 리다이렉트
                         router.push({ 

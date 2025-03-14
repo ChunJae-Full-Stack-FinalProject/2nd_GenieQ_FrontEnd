@@ -22,6 +22,7 @@ const emit = defineEmits(['content-changed']);
 
 // 본문 내용 ref로 관리
 const content = ref('');
+const title = ref('');
 const MIN_LENGTH = 500;
 const MAX_LENGTH = 1700;
 
