@@ -21,7 +21,7 @@
               <span class="date-separator">-</span>
             <input type="date" class="date-input" v-model="endDate">
           </div>
-          <button class="search-btn">검색</button>
+          <button class="search-btn" @click="loadUsageList">검색</button>
         </div>
       </div>
 
@@ -36,11 +36,11 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(item, index) in paginatedUsageHistory" :key="item.id">
-              <td>{{ item.activity }}</td>
-              <td>{{ item.change }}</td>
-              <td>{{ item.remaining }}</td>
-              <td>{{ item.date }}</td>
+            <tr v-for="(item, index) in paginatedUsageHistory" :key="item.USA_CODE">
+              <td>{{ item.USA_TYPE }}</td>
+              <td>{{ item.USA_COUNT }}</td>
+              <td>{{ item.USA_BALANCE }}</td>
+              <td>{{ item.USA_DATE }}</td>
             </tr>
             <!-- 데이터가 없는 경우 표시할 행 -->
             <tr v-if="paginatedUsageHistory.length === 0">
@@ -51,7 +51,10 @@
       </div>
 
       <div class="pagination" v-if="totalPages > 0">
-        <button v-if="totalPages > 5" @click="prevPage" :disabled="currentPage === 1">&lt;</button>
+        <button @click="firstPage" :disabled="currentPage === 1" v-if="currentPage > 1">
+          &laquo;
+        </button>
+        <button @click="prevPage" :disabled="currentPage === 1">&lt;</button>
         
         <span
           v-for="page in visiblePages"
@@ -61,8 +64,8 @@
           {{ page }}
         </span>
         
-        <button v-if="totalPages > 5" @click="nextPage" :disabled="currentPage === totalPages">&gt;</button>
-        <button @click="lastPage" :disabled="currentPage === totalPages">&raquo;</button>
+        <button v-if="currentPage < totalPages" @click="nextPage" :disabled="currentPage === totalPages">&gt;</button>
+        <button @click="lastPage" :disabled="currentPage === totalPages" v-if="currentPage < totalPages">&raquo;</button>
       </div>
 
     </div>
@@ -72,11 +75,22 @@
 </BaseModal>
 </template> 
 <script setup>
-import { ref, computed, defineEmits, onMounted } from 'vue';
+import { ref, computed, defineEmits, watch } from 'vue';
 import BaseModal from "../../BaseModal.vue";
 import BaseButton from "@/components/common/button/BaseButton.vue";
+import { useRouter, useRoute } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
 
 const emit = defineEmits(['close']);
+
+const props = defineProps({
+        isOpen: Boolean
+    });
+
+// 라우터와 스토어 초기화
+const router = useRouter();
+const route = useRoute();
+const authStore = useAuthStore();
 
 // 날짜 관련 상태 관리
 const selectedPeriod = ref('');
@@ -90,19 +104,6 @@ const maxVisiblePages = 5;
 
 // 임시 사용 내역 데이터
 const usageHistory = ref([]);
-
-// 데이터 초기화 함수
-const initializeData = () => {
-  for (let i = 1; i <= 60; i++) {
-    usageHistory.value.push({
-      id: i,
-      activity: `지문 생성 ${i}`,
-      change: i % 3 === 0 ? "+10" : i % 2 === 0 ? "-1" : "+1",
-      remaining: 10 - (i % 10),
-      date: `2024-03-${String(31 - (i % 30)).padStart(2, '0')}`
-    });
-  }
-};
 
 // 총 페이지 수 계산
 const totalPages = computed(() => {
@@ -149,6 +150,11 @@ const nextPage = () => {
   }
 };
 
+// 맨 처음 페이지 이동
+const firstPage = () => {
+  currentPage.value = 1;
+};
+
 // 마지막 페이지 이동
 const lastPage = () => {
   currentPage.value = totalPages.value;
@@ -182,20 +188,80 @@ const updateDateRange = () => {
   }
 };
 
-// 컴포넌트 마운트 시 초기화
-onMounted(() => {
-  endDate.value = getTodayFormatted();
-  initializeData();
+// 🔥 모달이 열릴 때 실행되도록 watch 추가
+watch(() => props.isOpen, (newValue) => {
+  if (newValue) {
+    console.log('모달 열림 상태 감지');
+    initialState(); // 상태 초기화
+    loadUsageList(); // 데이터 로드
+  }
 });
 
 const closeModal = () => {
+  //initialState();
   emit("close");
 };
 
-// 컴포넌트 마운트 시 초기화
-onMounted(() => {
-  initializeData();
-});
+const initialState = () => {
+  selectedPeriod.value = '';
+  startDate.value = '';
+  endDate.value = getTodayFormatted();
+  currentPage.value = 1;
+  usageHistory.value = [];
+};
+
+const loadUsageList = () =>{
+  const start = startDate.value || '1970-01-01';
+  const end = endDate.value || getTodayFormatted();
+
+  const apiUrl = import.meta.env.VITE_API_URL;
+
+  fetch(`${apiUrl}/api/usag/select/list?startDate=${start}&endDate=${end}`,{
+    method: "GET",
+    headers: { 'Content-Type': 'application/json' },
+    credentials: "include"
+  })
+  .then(response => {
+    // 인증 오류 처리 (401)
+    if (!response.ok) {
+      if (response.status === 401) {
+          // (추가) 로그 - 인증 오류 감지
+          console.error('인증 오류(401): 로그인이 필요합니다');
+
+          // 인증 상태 초기화
+          authStore.user = null;
+          authStore.isAuthenticated = false;
+          localStorage.removeItem('authUser');
+
+          // 로그인 페이지로 리다이렉트
+          router.push({ 
+          path: '/login', 
+          query: { redirect: route.fullPath }
+          });
+
+          // 추가 처리를 중단하기 위한 에러 발생
+          throw new Error('인증이 필요합니다');
+      }
+      return response.text().then(text => { throw new Error(text); });
+    }
+    return response.json();
+  })
+  .then(data => {
+    console.log('이용내역 데이터 불러오기 성공:', data);
+
+    // 응답 데이터 구조에 맞게 매핑
+    usageHistory.value = data.map(item => ({
+      USA_CODE: item.usaCode,
+      USA_TYPE: item.usaType,
+      USA_COUNT: item.usaCount,
+      USA_BALANCE: item.usaBalance,
+      USA_DATE: item.usaDate
+    }));
+  })
+  .catch(error => {
+    console.error('이용내역 데이터 불러오기 실패:', error);
+  })
+};
 </script>
     
 <style scoped>
@@ -338,9 +404,9 @@ onMounted(() => {
   cursor: pointer;
 }
 
-
 /* 결제 내역 테이블 */
 .history-table {
+  height: 286px;
   margin-bottom: 20px;
   /* border: 1px solid #e0e0e0; */
   border-radius: 4px;
@@ -378,8 +444,6 @@ onMounted(() => {
 .data-table tr:last-child td {
   border-bottom: none;
 }
-
-
 
 .column-title {
   width: 50px;
@@ -445,5 +509,4 @@ onMounted(() => {
   font-size:12.92px;
   font-weight: 700;
 }
-
 </style>

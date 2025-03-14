@@ -349,6 +349,7 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   gap: 6px;
+  cursor: pointer;
 }
 
 .info-label {
