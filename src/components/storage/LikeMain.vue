@@ -5,7 +5,7 @@
     </div>
     <div class="storage-likemain-subtitle">
       <span>전체</span>
-      <P>(N개)</P>
+      <P>({{ computedWorkItems.length }}개)</P>
     </div>
     <div class="storage-likemain-subtitle2">
     <span>삭제</span>
@@ -40,17 +40,17 @@
               </td>
               <td class="work-name" @contextmenu="showEditForm(index, $event)">
                 <div v-if="editingIndex === index">
-                  <input type="text" v-model="item.name" @blur="finishEditing" @keyup.enter="finishEditing" ref="editInput" class="edit-input"/>
+                  <input type="text" v-model="item.PAS_TITLE" @blur="finishEditing" @keyup.enter="finishEditing" ref="editInput" class="edit-input"/>
                 </div>
                 <div v-else>
-                  {{ item.name }}
+                  {{ item.PAS_TITLE }}
                 </div>
               </td>
-              <td class="work-title" @contextmenu="showEditForm(index, $event)">{{ item.title }}</td>
+              <td class="work-title" @contextmenu="showEditForm(index, $event)">{{ item.PAS_KEYWORD }}</td>
               <td class="work-type" @contextmenu="showEditForm(index, $event)">
-                <span class="type-tag">{{ item.type }}</span>
+                <span class="type-tag">{{ item.PAS_IS_GENERATED }}</span>
               </td>
-              <td class="work-date" @contextmenu="showEditForm(index, $event)">{{ item.date }}</td>
+              <td class="work-date" @contextmenu="showEditForm(index, $event)">{{ item.PAS_DATE }}</td>
               <td class="work-action">
                 <button class="extract-btn" @click="openFileModal(item)">
                   <p id="btn-text">추출 </p>
@@ -59,7 +59,7 @@
               </td>
               <td class="work-favorite" @contextmenu="showEditForm(index, $event)">
                 <span class="star-container" @click="toggleFavorite(index)">
-                  <Icon v-if="item.favorite" icon="mynaui:star-solid" width="24" height="24" style="color: #FF9F40" />
+                  <Icon v-if="item.PAS_IS_FAVORITE" icon="mynaui:star-solid" width="24" height="24" style="color: #FF9F40" />
                   <Icon v-else icon="mynaui:star" width="24" height="24" style="color: #FF9F40" />
                 </span>
               </td>
@@ -69,7 +69,7 @@
       </div>
     </div>
      <!-- 페이지네이션 -->
-     <div class="pagination" v-if="totalPages > 0">
+     <div class="pagination" v-if="totalPages > 0 && filteredWorkItems.length > 0">
           <button @click="prevPage" :disabled="currentPage === 1">&lt;</button>
           
           <span
@@ -108,142 +108,76 @@
 </template>
 <script setup>
 import { ref, computed, nextTick, onMounted, onUnmounted } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
 import WarningModalComponent from '@/components/common/modal/type/WarningModalComponent.vue';
-import { useRouter } from 'vue-router';
+import FileSelectModal from '../common/modal/type/FileSelectModal.vue';
 
-// 데이터 정의 - ref로 감싸서 반응형으로 만듭니다
-const workItems = ref([
-  // 기존 데이터 유지
-  {
-    name: '수능특강 기반 문제생성saasasdsadasdsadads',
-    title: '메이드투메이드의 건배',
-    type: '지문',
-    date: '2025-02-28',
-    favorite: false,
-    checked: false 
-  },
-  {
-    name: '수능특강 기반 문제생성saasasdsadasdsadads',
-    title: '메이드투메이드의 건배',
-    type: '지문',
-    date: '2025-02-28',
-    favorite: false,
-    checked: false,
-  },
-  {
-    name: '수능특강 기반 문제생성saasasdsadasdsadads',
-    title: '메이드투메이드의 건배',
-    type: '지문',
-    date: '2025-02-28',
-    favorite: false,
-    checked: false
-  },
-  {
-    name: '수능특강 기반 문제생성saasasdsadasdsadads',
-    title: '메이드투메이드의 건배',
-    type: '지문',
-    date: '2025-02-28',
-    favorite: false,
-    checked: false
-  },
-  {
-    name: '수능특강 기반 문제생성saasasdsadasdsadads',
-    title: '메이드투메이드의 건배',
-    type: '지문',
-    date: '2025-02-28',
-    favorite: false,
-    checked: false
-  },
-  {
-    name: '수능특강 기반 문제생성saasasdsadasdsadads',
-    title: '메이드투메이드의 건배',
-    type: '지문',
-    date: '2025-02-28',
-    favorite: false,
-    checked: false
-  },
-  {
-    name: '수능특강 기반 문제생성saasasdsadasdsadads',
-    title: '메이드투메이드의 건배',
-    type: '지문',
-    date: '2025-02-28',
-    favorite: false,
-    checked: false
-  },
-  {
-    name: '수능특강 기반 문제생성saasasdsadasdsadads',
-    title: '메이드투메이드의 건배',
-    type: '지문',
-    date: '2025-02-28',
-    favorite: false,
-    checked: false
-  },
-  {
-    name: '수능특강 기반 문제생성saasasdsadasdsadads',
-    title: '메이드투메이드의 건배',
-    type: '지문',
-    date: '2025-02-28',
-    favorite: false,
-    checked: false
-  },
-  {
-    name: '수능특강 기반 문제생성saasasdsadasdsadads',
-    title: '메이드투메이드의 건배',
-    type: '지문',
-    date: '2025-02-28',
-    favorite: false,
-    checked: false
-  },
-  {
-    name: '수능특강 기반 문제생성saasasdsadasdsadads',
-    title: '메이드투메이드의 건배',
-    type: '지문',
-    date: '2025-02-28',
-    favorite: false,
-    checked: false
-  },
-  {
-    name: '수능특강 기반 문제생성saasasdsadasdsadads',
-    title: '메이드투메이드의 건배',
-    type: '지문',
-    date: '2025-02-28',
-    favorite: false,
-    checked: false
-  },
-  {
-    name: '수능특강 기반 문제생성saasasdsadasdsadads',
-    title: '메이드투메이드의 건배',
-    type: '지문',
-    date: '2025-02-28',
-    favorite: false,
-    checked: false
-  },
-  {
-    name: '수능특강 기반 문제생성saasasdsadasdsadads',
-    title: '메이드투메이드의 건배',
-    type: '지문',
-    date: '2025-02-28',
-    favorite: false,
-    checked: false
-  },
-  {
-    name: '수능특강 기반 문제생성saasasdsadasdsadads',
-    title: '메이드투메이드의 건배',
-    type: '지문',
-    date: '2025-02-28',
-    favorite: false,
-    checked: false
-  },
-  {
-    name: '수능특강 기반 문제생성saasasdsadasdsadads',
-    title: '메이드투메이드의 건배',
-    type: '지문',
-    date: '2025-02-28',
-    favorite: false,
-    checked: false
-  },
+// 라우터와 스토어 초기화
+const router = useRouter();
+const route = useRoute();
+const authStore = useAuthStore();
 
-]);
+// 작업 아이템 상태
+const workItems = ref([]);
+
+// 컴포넌트 마운트 시, 데이터 로드
+onMounted(() => {
+  fetchWorkItems();
+});
+
+// 최근 작업 내역 리스트 가져오기
+const fetchWorkItems = () => {
+  const apiUrl = import.meta.env.VITE_API_URL;
+
+  fetch(`${apiUrl}/pass/select/favolist`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    credentials: 'include'
+  })
+  .then(response => {
+    if (!response.ok) {
+      // 인증 오류 처리 (401)
+      if (response.status === 401) {
+        // (추가) 로그 - 인증 오류 감지
+        console.error('인증 오류(401): 로그인이 필요합니다');
+
+        // 인증 상태 초기화
+        authStore.user = null;
+        authStore.isAuthenticated = false;
+        localStorage.removeItem('authUser');
+
+        // 로그인 페이지로 리다이렉트
+        router.push({ 
+        path: '/login', 
+        query: { redirect: route.fullPath }
+        });
+
+        // 추가 처리를 중단하기 위한 에러 발생
+        throw new Error('인증이 필요합니다');
+      }
+      return response.text().then(text => { throw new Error(text); });
+    }
+    return response.json();
+  })
+  .then(data => {
+    // 응답 데이터 구조에 맞게 매핑
+    workItems.value = data.map(item => ({
+      PAS_CODE: item.pasCode,
+      PAS_TITLE: item.title,
+      PAS_KEYWORD: item.keyword,
+      PAS_IS_GENERATED: item.isGenerated === 1 ? '생성' : '직접입력',
+      PAS_DATE: item.date,
+      PAS_IS_FAVORITE: item.isFavorite === 1,
+      checked: false // 체크박스 상태 추가
+    }));
+  })
+  .catch(error => {
+    console.error('최근 작업 리스트 불러오기 실패: ', error);
+  })
+}
 
 // 컨텍스트 메뉴 상태 관리
 const showContextMenu = ref(false);
@@ -345,8 +279,44 @@ const handleFileSelection = (fileType) => {
 }
 
 const toggleFavorite = (index) => {
+  const item = workItems.value[index];
+  const apiUrl = import.meta.env.VITE_API_URL;
+
   // 즐겨찾기 토글 로직
-  workItems.value[index].favorite = !workItems.value[index].favorite;
+  const newFavoriteStatus = !item.PAS_IS_FAVORITE;
+
+  // API 호출
+   fetch(`${apiUrl}/pass/favo`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    credentials: 'include',
+    body: JSON.stringify({
+      pasCode: item.PAS_CODE
+    })
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('즐겨찾기 업데이트 실패');
+    }
+    return response.json();
+  })
+  .then(data => {
+    console.log('즐겨찾기 업데이트 성공:', data);
+    
+    // 서버에서 반환한 업데이트된 데이터로 항목 상태 갱신
+    if (data.isFavorite !== undefined) {
+      item.PAS_IS_FAVORITE = data.isFavorite === 1;
+    } else {
+      // 서버에서 업데이트된 상태를 반환하지 않는 경우, 로컬에서 토글
+      item.PAS_IS_FAVORITE = newFavoriteStatus;
+    }
+  })
+  .catch(error => {
+    console.error('즐겨찾기 업데이트 실패:', error);
+    // 에러 시 사용자에게 알림을 표시할 수 있습니다
+  });
 };
 
 // 페이지네이션 관련 상태
@@ -406,7 +376,6 @@ const lastPage = () => {
 
 // 삭제 모달 상태 관리
 const isDeleteModalOpen = ref(false);
-const router = useRouter();
 
 // 선택된 아이템들 찾기
 const selectedItems = computed(() => {
