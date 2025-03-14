@@ -55,7 +55,7 @@
                   <span class="package-title">지문/문항 생성 10회 이용권</span>
                   <span class="package-price">10,000원</span>
                 </div>
-                <button class="purchase-btn">구매하기</button>
+                <button class="purchase-btn" @click="openPurchaseWarningModal(10)">구매하기</button>
               </div>
               
               <!-- 50회 이용권 -->
@@ -68,7 +68,7 @@
                     <span class="package-price">40,000원</span>
                   </div>
                 </div>
-                <button class="purchase-btn">구매하기</button>
+                <button class="purchase-btn" @click="openPurchaseWarningModal(50)">구매하기</button>
               </div>
               
               <!-- 100회 이용권 -->
@@ -81,7 +81,7 @@
                     <span class="package-price">70,000원</span>
                   </div>
                 </div>
-                <button class="purchase-btn">구매하기</button>
+                <button class="purchase-btn" @click="openPurchaseWarningModal(100)">구매하기</button>
               </div>
             </div>
           </div>
@@ -162,14 +162,24 @@
     </div>
     <!-- 이용 내역 모달 -->
     <UsageHistoryModal :isOpen="showUsageHistoryModal" @close="showUsageHistoryModal = false" />
+
+    <!-- 구매 경고 모달 -->
+    <WarningModalComponent :isOpen="isPurchaseWarningModal" 
+      title="이용권을 구매하시겠습니까?" :message="`${ticketCount}회의 이용권이 충전됩니다.`" 
+      cancelText="취소하기" confirmText="구매하기" 
+      @close="closeWarningModal" @confirm="purchaseModal"
+    />
   </div>
 </template>
   
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import UsageHistoryModal from '@/components/common/modal/type/mypage/UsageHistoryModal.vue';
+import WarningModalComponent from '../common/modal/type/WarningModalComponent.vue';
 
+// 모달 상태 관리
 const showUsageHistoryModal = ref(false);
+const isPurchaseWarningModal = ref(false);
 
 // 활성화된 탭 상태 관리
 const activeTab = ref('usage');
@@ -186,6 +196,7 @@ const maxVisiblePages = 5;
 
 // 임시 결제 내역 데이터 (실제로는 API 요청으로 대체)
 const paymentHistory = ref([]);
+
 
 // 데이터 초기화 함수
 const initializeData = () => {
@@ -286,6 +297,26 @@ const updateDateRange = () => {
     startDate.value = getMonthsAgoFormatted(months);
   }
 };
+
+// 구매하기 경고모달 관련 
+const ticketCount = ref(0);
+
+const openPurchaseWarningModal = (count) => {
+  ticketCount.value = count;
+  isPurchaseWarningModal.value = true;
+};
+
+  // 구매확인 함수
+  const purchaseModal = () => {
+
+    // 구매 로직 구현할 부분
+
+    closeWarningModal();
+  }
+
+const closeWarningModal = () => {
+  isPurchaseWarningModal.value = false;
+}
 
 // 컴포넌트 마운트 시 초기화
 onMounted(() => {
