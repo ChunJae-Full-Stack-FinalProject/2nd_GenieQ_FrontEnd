@@ -2,13 +2,22 @@
     <div class="edit-title">
         <p id="passage-head">작업이름</p>
             <input type="text" id="passage-title"
-            placeholder="직접 입력한 지문을 토대로 한 문항생성작업" v-model="title"/>
+            placeholder="작업 이름을 입력해 주세요. (최대 50자)" v-model="title"/>
     </div>
 </template>
-<script>
-export default {
-    
-}
+<script setup>
+import { ref, watch } from 'vue';
+
+const title = ref('');
+const MAX_LENGTH = 50;
+
+watch(title, (newValue) => {
+    // 최대 글자 수 제한 
+    if (newValue.length > MAX_LENGTH) {
+        // 최대 길이로 잘라서 다시 설정
+        title.value = newValue.substring(0, MAX_LENGTH);
+    }
+});
 </script>
 <style scoped>
 .edit-title {
