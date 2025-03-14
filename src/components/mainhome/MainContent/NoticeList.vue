@@ -11,8 +11,10 @@
                 </div>
                 <div class="notice-main">
                     <ol class="notice-list">
-                        <li v-for="item in items" :key="index" class="list-item">
-                            {{ item }}
+                        <li v-for="notice in notices" :key="index" class="list-item">
+                            <router-link :to="`/notice/${notice.NOT_CODE}`" class="notice-link">
+                                {{ notice.NOT_TITLE }}
+                            </router-link>
                         </li>
                     </ol>
                 </div>
@@ -21,14 +23,71 @@
 </template>
 <script setup>
 import { Icon } from "@iconify/vue";
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { useAuthStore } from "@/stores/auth";
 
-const items = ref ([
-    '지니큐 공식 런칭',
-    '지니큐 오픈 이벤트',
-    '지니큐 사용법',
-    '구독 플랜 적용 기준'
-]);
+// 라우터와 스토어 초기화
+const router = useRouter();
+const route = useRoute();
+const authStore = useAuthStore();
+
+// 공지사항 데이터 (최대 4개)
+const notices = ref ([]);
+
+// 컴포넌트 마운트 시, 데이터 로드
+onMounted(() => {
+    fetchNotices();
+});
+
+// 공지사항 데이터 가져오기
+const fetchNotices = () => {
+    const apiUrl = import.meta.env.VITE_API_URL;
+
+    fetch(`${apiUrl}/noti/select/list`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+    })
+    .then(response => {
+        if (!response.ok) {
+            // 인증 오류 처리 (401)
+            if (response.status === 401) {
+                console.error('인증 오류(401): 로그인이 필요합니다');
+
+                // 인증 상태 초기화
+                authStore.user = null;
+                authStore.isAuthenticated = false;
+                localStorage.removeItem('authUser');
+
+                // 로그인 페이지로 리다이렉트
+                router.push({ 
+                    path: '/login', 
+                    query: { redirect: route.fullPath }
+                });
+
+                throw new Error('인증이 필요합니다');
+            }
+            return response.text().then(text => { throw new Error(text); });
+        }
+        return response.json();
+    })
+    .then(data => {
+        // 응답 데이터 구조에 맞게 매핑하고 최신 4개만 사용
+        notices.value = data.map(item => ({
+            NOT_CODE: item.notCode,
+            NOT_TYPE: item.type,
+            NOT_TITLE: item.title,
+            NOT_DATE: item.date,
+            NOT_CONTENT: item.content || ''
+        })).slice(0, 4); // 최신 4개만 가져옴
+    })
+    .catch(error => {
+        console.error('공지사항 데이터 불러오기 실패:', error);
+    });
+};
 </script>
 <style scoped>
 .noticelist-card {
@@ -124,6 +183,10 @@ a {
     align-self: stretch;
     flex-grow: 0;
 }
+.notice-link {
+    color:#424242;
+}
+
 .list-item {
     box-sizing: border-box;
     display: flex;
