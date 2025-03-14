@@ -9,7 +9,8 @@ export const usePassageStore = defineStore('passage', {
         passage: [],
         currentPassage: null,
         isLoading: false,
-        error: null
+        error: null,
+        sProcessing: false
     }),
 
     getters: {
@@ -26,6 +27,8 @@ export const usePassageStore = defineStore('passage', {
     actions: {
         // 지문 저장 기능
         savePassage(passageData) {
+            if (this.isProcessing) return; // 중복 실행 방지
+            this.isProcessing = true;
             this.isLoading = true;
             this.error = null;
 
@@ -62,9 +65,9 @@ export const usePassageStore = defineStore('passage', {
                         });
         
                         // 추가 처리를 중단하기 위한 에러 발생
-                        throw new Error('인증이 필요합니다');
+                        return Promise.reject(new Error('인증이 필요합니다'));
                     }
-                    return response.text().then(text => { throw new Error(text); });
+                    return response.text().then(text => Promise.reject(new Error(text)));
                 }
                 return response.json();
             })
@@ -82,15 +85,16 @@ export const usePassageStore = defineStore('passage', {
                     }
                 });
 
-                return { success: true, passage: data };
+                return Promise.resolve({ success: true, passage: data });
             })
             .catch(error => {
                 console.error('지문 저장 오류:', error);
                 this.error = error.message || '지문 저장 중 오류가 발생했습니다.';
-                return { success: false, error: this.error };
+                return Promise.reject({ success: false, error: this.error });
             })
             .finally(() => {
                 this.isLoading = false;
+                this.isProcessing = false;
             });
         }
     }

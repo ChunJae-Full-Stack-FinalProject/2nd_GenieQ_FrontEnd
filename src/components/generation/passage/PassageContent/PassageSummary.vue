@@ -28,6 +28,7 @@
 <script setup>
 import { ref, defineExpose } from 'vue';
 
+
 // 데이터 관리
 const subject = ref('사회');
 const keyword = ref('인공지능과 기계학습');

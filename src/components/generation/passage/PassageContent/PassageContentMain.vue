@@ -1,4 +1,5 @@
-<template>
+<!-- 사용자가 작업 이름과 지문 입력 받기 => 하위컴포넌트 -->
+<template>    
 <div class="input-container">
     <div class="edit-title">
         <p id="passage-head">작업이름</p>
@@ -17,12 +18,19 @@
 <script setup>
 import { ref, defineExpose, defineEmits } from 'vue';
 
+const passageSummaryRef = ref(null);
+
 // 이벤트 정의
 const emit = defineEmits(['content-changed']);
 
 // 본문 내용 ref로 관리
 const content = ref('');
 const title = ref('');
+const summary = ref({
+    subject: '',
+    keyword: '',
+    items: []
+});
 const MIN_LENGTH = 500;
 const MAX_LENGTH = 1700;
 
@@ -38,10 +46,19 @@ const handleInput = (event) => {
         content.value = content.value.slice(0, MAX_LENGTH);
     }
     
+    const summaryValue = passageSummaryRef.value?.getSummary() || {
+        subject: '',
+        keyword: '',
+        items: []
+    };
+
+    summary.value = summaryValue;
+
     // 내용 변경 이벤트 발생
     emit('content-changed',{
         title: title.value,
-        content: content.value
+        content: content.value,
+        summary: summaryValue
     });
 };
 
@@ -53,12 +70,13 @@ const validateContent = () => {
 // 외부에서 접근할 수 있도록 함수 노출
 const getContent = () => content.value;
 const getTitle = () => title.value;
-
+const getSummary = () => summary.value;
 
 // 노출할 메소드 정의
 defineExpose({
     getContent, 
     getTitle,
+    getSummary,
     validateContent
 });
 </script>

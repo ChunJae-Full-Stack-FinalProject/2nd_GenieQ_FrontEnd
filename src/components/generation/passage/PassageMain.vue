@@ -40,7 +40,7 @@
     </div>
 </template>
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import CreatePassageMain from '@/components/generation/passage/PassageMain/CreatePassageMain.vue';
 import PaymentUsage from '@/components/generation/PaymentUsage.vue';
 import BaseButton from '@/components/common/button/BaseButton.vue';

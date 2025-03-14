@@ -5,7 +5,7 @@
             <PassageContentMain ref="passageContentRef" @content-changed="handleContentChange"/>   
             <PassageSummary ref="passageSummaryRef"/>
             <BaseButton id="recreate-button" text="재생성하기" type="type2" width="248px" height="54px" @click="openPaymentUsageModal" :disabled="isContentChanged"/>
-            <BaseButton id="save-button" text="저장하기" type="type2" width="248px" height="54px" @click="handleSaveButtonClick" :disabled="!isContentChanged"/>
+            <BaseButton id="save-button" text="저장하기" type="type2" width="248px" height="54px" @click.once="handleSaveButtonClick" :disabled="!isContentChanged"/>
             <BaseButton id="download-button" text="추출하기" type="type2" width="248px" height="54px" :disabled="isContentChanged || !hasManualSave" @click="checkContentLengthAndOpenFileModal()"/>
             <router-link to="/questions" custom v-slot="{ navigate }">
                 <BaseButton id="connect-create-button" text="이어서 문항 생성하기" type="type4" width="520px" height="54px" @click="handleConnectCreate($event, navigate)" :disabled="isContentChanged"/>
@@ -86,6 +86,7 @@ const router = useRouter();
 
 const passageStore = usePassageStore();
 
+
 // 글자 수 체크 함수
 const checkContentLength = (event) => {
     // 내용 길이 검증
@@ -132,9 +133,22 @@ const handleSaveButtonClick = () => {
 
     const passageData = {
         title: title.value,
-        content: content.value
-        // summary: summary.value
+        content: content.value,
+        summary: passageSummaryRef.value?.getSummary() || {
+            subject: '',
+            keyword: '',
+            items: []
+        }
     };
+
+    console.log('📢 Saving data:', JSON.stringify(passageData, null, 2));
+    
+      // ✅ 중복 확인
+      const existingIndex = passageStore.passage.findIndex(p => p.pasCode === passageData.pasCode);
+    if (existingIndex !== -1) {
+        alert('이미 저장된 지문입니다.');
+        return;
+    }
 
     console.log('Saving data:', passageData);
 
@@ -351,6 +365,7 @@ onBeforeUnmount(() => {
 const handleContentChange = (data) => {
     title.value = data.title;
     content.value = data.content;
+    summary.value = data.summary;
     // 내용이 변경되면 저장 플래그 초기화 (추출하기 버튼 비활성화)
     hasManualSave.value = false;
     isContentChanged.value = true;
