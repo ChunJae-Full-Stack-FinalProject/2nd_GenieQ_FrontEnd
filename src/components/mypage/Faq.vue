@@ -2,8 +2,8 @@
     <div class="faq-container">
       <h2 class="faq-title">자주 묻는 질문</h2>
       <div class="faq-list">
-        <div v-for="(item, index) in faqList" :key="index" class="faq-item">
-          <div class="faq-question" @click="toggleFAQ(index)">
+        <div v-for="(item, index) in faqList" :key="index" class="faq-item" :class="{ 'active': item.isOpen }">
+          <div class="faq-question" @click="toggleFAQ(index)" :class="{ 'active': item.isOpen }">
             <div class="faq-q">Q.</div>
             <div class="q-text">{{ item.question }}</div>
             <div class="faq-toggle-icon" :class="{ 'active': item.isOpen }">
@@ -17,7 +17,7 @@
           </div>
           <div class="faq-answer" :class="{ 'active': item.isOpen }">
             <div class="faq-a">A.</div>
-            <div class="a-text">{{ item.answer }}</div>
+            <div class="a-text" v-html="item.answer"></div>
           </div>
         </div>
       </div>
@@ -26,13 +26,9 @@
 
 <script setup>
 import { ref } from 'vue';
+import FAQData from '@/assets/data/FAQData.json';
 
-const faqList = ref([
-  { question: "환불 정책이 어떻게 되나요?", answer: "환불 정책은 이러이러한 내용이 있습니다. ...", isOpen: false },
-  { question: "결제를 취소하고 싶어요", answer: "결제 취소는 마이페이지에서 가능합니다.", isOpen:false },
-  { question: "문항 생성 시 사용자 입력에는 어떤 것을 써야 하나요?", answer: "사용자는 문항에 대한 설명을 입력해야 합니다.", isOpen:false },
-  { question: "문항 생성 시 입력해야 하는 정보가 있나요?", answer: "네, 필수 정보는 문항 유형과 세부 설명입니다.", isOpen:false }
-]);
+const faqList = ref(FAQData);
 
 const toggleFAQ = (index) => {
   faqList.value[index].isOpen = !faqList.value[index].isOpen;
@@ -93,7 +89,10 @@ const toggleFAQ = (index) => {
   order: 0;
   align-self: stretch;
   flex-grow: 0;
-  border-bottom: 1px solid #E1E1E1;
+  border-bottom: 2px solid #E1E1E1;
+}
+.faq-item.active {
+  border-bottom: 2px solid #FFEDDC;
 }
 .faq-question {
   box-sizing: border-box;
@@ -113,6 +112,9 @@ const toggleFAQ = (index) => {
   line-height: 150%;
   letter-spacing: -0.02em;
   color: #424242;
+}
+.faq-question.active *{
+  color: #FF9F40; /* 주황색 설정 */
 }
 .faq-q {
   padding: 8px;
@@ -159,7 +161,7 @@ const toggleFAQ = (index) => {
 
   display: flex;
   flex-direction: row;
-  align-items: flex-start; /* 상단 정렬로 변경 */
+  align-items: center;
   gap: 120px;
 
   width: 1472px;
@@ -193,14 +195,12 @@ const toggleFAQ = (index) => {
   color: #424242;
 }
 .a-text {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
   padding: 8px;
   gap: 8px;
 
   width: 1080px;
-  height: 40px;
+  height: auto;
+  min-height: 40px;
 
   font-family: 'Pretendard';
   font-style: normal;
@@ -210,5 +210,17 @@ const toggleFAQ = (index) => {
 
   letter-spacing: -0.02em;
   color: #424242;
+}
+.a-text :deep(a) {
+  color: #3b82f6;
+  text-decoration: none;
+  font-weight: 600;
+  display: inline;
+  padding: 0;
+  margin: 0;
+  transition: color 0.2s ease;
+}
+.a-text :deep(a):hover {
+  color: #2563eb;
 }
 </style>
