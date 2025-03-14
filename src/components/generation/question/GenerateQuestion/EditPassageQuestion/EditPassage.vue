@@ -20,9 +20,9 @@
                 <p id="edit-head">에디터</p>
                 <div id="editor-tool">
                     <ul class="editor-list">
-                        <li @click="formatText('bold')"><b>B</b></li>
-                        <li @click="formatText('underline')"><u>U</u></li>
-                        <li @click="formatText('strikethrough')"><s>S</s></li>
+                        <li @click="handleButtonClick($event, 'bold')"><b>B</b></li>
+                        <li @click="handleButtonClick($event, 'underline')"><u>U</u></li>
+                        <li @click="handleButtonClick($event, 'strikethrough')"><s>S</s></li>
                     </ul>
                 </div>
             </div>
@@ -32,14 +32,14 @@
             <div id="passage-count"><span style="color: #FF9500;">{{ getTextLength() }}</span>/1700</div>
             <div id="passage-content-main">
                 <!-- 기본 텍스트 입력 영역 -->
-                <textarea id="content-text" 
+                <div id="content-text" 
+                    contenteditable="true"
                     placeholder="본문을 입력해주세요." 
-                    v-model="contentText"
                     @select="onTextSelect"
                     @click="onTextSelect"
                     @keyup="onTextSelect"
                     @input="onContentChange">
-                </textarea>
+                </div>
             </div>
         </div>
     </div>
@@ -52,7 +52,7 @@
     />
 </template>
 <script setup>
-import { ref, watch, nextTick, computed } from 'vue';
+import { ref, watch, nextTick, computed, onMounted } from 'vue';
 import SymbolTooltip from './SymbolTooltip.vue';
 import ConfirmModalComponent from '@/components/common/modal/type/ConfirmModalComponent.vue';
 import EditTitle from './EditTitle.vue';
@@ -70,20 +70,42 @@ const selectionStart = ref(0);
 const selectionEnd = ref(0);
 const isConfirmModalOpen = ref(false);
 
+// 글로벌 선택 상태 변수 추가
+let savedRange = null;
+
 // 사용자 정의 이벤트 발생
 const emit = defineEmits(['content-changed']);
 
+// 최대 글자 수 제한
+const checkMaxLength = () => {
+    const contentDiv = document.getElementById('content-text');
+    if (contentDiv && contentDiv.textContent.length > MAX_LENGTH) {
+        // 현재 내용 가져오기
+        const html = contentDiv.innerHTML;
+
+        // HTML을 지정한 텍스트 길이로 자르기
+        contentDiv.innerHTML = truncateHtmlToTextLength(html, MAX_LENGTH);
+    };
+}
+
 // 내용이 변경될 때 이벤트 발생
 const onContentChange = () => {
+    // div의 innerHTML을 contentText ref에 저장
+    const contentDiv = document.getElementById('content-text');
+    if (contentDiv) {
+        contentText.value = contentDiv.innerHTML;
+    }
+
+    // 최대 글자 수 검사
+    checkMaxLength();
+
     emit('content-changed');
 };
 
 // 텍스트 길이 계산 함수
 const getTextLength = () => {
-    // HTML 태그를 제외한 순수 텍스트 길이 계산
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = contentText.value;
-    return tempDiv.textContent.length;
+    const contentDiv = document.getElementById('content-text');
+    return contentDiv ? contentDiv.textContent.length : 0;
 };
 
 // 텍스트 길이 계산된 값
@@ -96,9 +118,19 @@ const closeConfirmModal = () => {
 
 // 텍스트 선택 처리
 const onTextSelect = () => {
-    const textarea = document.getElementById('content-text');
-    selectionStart.value = textarea.selectionStart;
-    selectionEnd.value = textarea.selectionEnd;
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return ;
+
+    const range = selection.getRangeAt(0);
+    const contentDiv = document.getElementById('content-text');
+
+    // 선택 범위가 content-text 내부에 있는지 확인
+    if (contentDiv && contentDiv.contains(range.commonAncestorContainer)) {
+        // 나중에 선택 범위를 복원할 수 있도록 관련 정보 저장
+        selectionStart.value = range.startOffset;
+        selectionEnd.value = range.endOffset;
+    }
+
 };
 
 // 심볼 툴팁 표시
@@ -165,92 +197,70 @@ const truncateHtmlToTextLength = (html, maxLength) => {
 
 // 심볼 삽입
 const insertSymbol = (symbol) => {
-    const textarea = document.getElementById('content-text');
-    
-    // 현재 스크롤 위치 저장
-    const scrollTop = textarea.scrollTop;
+    // 선택된 텍스트 대신 심볼 삽입
+    document.execCommand('insertText', false, symbol);
 
-    // 현재 선택 위치 저장
-    const start = selectionStart.value;
-    const end = selectionEnd.value;
-    
-    // 선택 범위 앞뒤 텍스트
-    const beforeSelection = contentText.value.substring(0, start);
-    const afterSelection = contentText.value.substring(end);
-    
-    // 심볼 삽입
-    contentText.value = beforeSelection + symbol + afterSelection;
-    
-    // 심볼 삽입 후 커서 위치 설정
-    nextTick(() => {
-        textarea.focus();
-        const newCursorPos = start + symbol.length;
-        textarea.setSelectionRange(newCursorPos, newCursorPos);
-        selectionStart.value = newCursorPos;
-        selectionEnd.value = newCursorPos;
-
-        // 스크롤 위치 복원
-        textarea.scrollTop = scrollTop;
-    });
-    
     // 툴팁 닫기
     showTooltip.value = false;
     
     // 내용 변경 이벤트 발생
-    emit('content-changed');
+    onContentChange();
 };
 
 // 텍스트 서식 적용
 const formatText = (type) => {
-    const textarea = document.getElementById('content-text');
-    
-    // 선택된 텍스트가 없으면 아무것도 하지 않음
-    if (selectionStart.value === selectionEnd.value) {
-        return;
-    }
+    // 현재 선택된 텍스트 확인
+    const selection = window.getSelection();
+    if (!selection.rangeCount || selection.toString() === '') return; // 선택된 텍스트가 없으면 아무것도 하지 않음
 
-    // 현재 스크롤 위치 저장
-    const scrollTop = textarea.scrollTop;
-    
-    // 현재 선택 범위 가져오기
-    const selectedText = contentText.value.substring(selectionStart.value, selectionEnd.value);
-    const beforeText = contentText.value.substring(0, selectionStart.value);
-    const afterText = contentText.value.substring(selectionEnd.value);
-    
-    // 태그 생성
-    let formattedText;
+    // document.execCommand 사용하여 서식 적용
+    let command;
     switch(type) {
         case 'bold':
-            formattedText = `<b>${selectedText}</b>`;
+            command = 'bold';
             break;
         case 'underline':
-            formattedText = `<u>${selectedText}</u>`;
+            command = 'underline';
             break;
         case 'strikethrough':
-            formattedText = `<s>${selectedText}</s>`;
+            command = 'strikeThrough';
             break;
         default:
-            formattedText = selectedText;
+            return;
     }
 
-    // 텍스트 업데이트
-    contentText.value = beforeText + formattedText + afterText;
-    
-    // 새 커서 위치 계산 및 설정
-    const newCursorPos = selectionStart.value + formattedText.length;
-    
-    nextTick(() => {
-        textarea.focus();
-        textarea.setSelectionRange(newCursorPos, newCursorPos);
-        selectionStart.value = newCursorPos;
-        selectionEnd.value = newCursorPos;
-
-        // 스크롤 위치 복원
-        textarea.scrollTop = scrollTop;
-    });
+    // 명령어 실행
+    document.execCommand(command, false, null);
     
     // 내용 변경 이벤트 발생
-    emit('content-changed');
+    nextTick(() => {
+        // 변경 내용 업데이트
+        onContentChange();
+
+        // 새 선택 영역 저장
+        saveSelection();
+    })
+};
+
+// 에디터 버튼 클릭 처리
+const handleButtonClick = (event, type) => {
+    // 기본 이벤트 동작 방지
+    event.preventDefault();
+
+    // contentDiv 요소 가져오기
+    const contentDiv = document.getElementById('content-text');
+    if (contentDiv) {
+        contentDiv.focus();
+    };
+
+    // 저장된 선택 영역 복원
+    restoreSelection();
+
+    // 포커스 설정
+    contentDiv.focus();
+    
+    // 서식 적용
+    formatText(type);
 };
 
 // 글자 수 검증 함수
@@ -262,38 +272,59 @@ const validateTextLength = () => {
     return true;
 };
 
-// contentText 감시하여 글자 수 제한
-watch(contentText, (newValue) => {
-    // 최대 글자 수 제한
-    const length = getTextLength();
-    if (length > MAX_LENGTH) {
-        // HTML 태그를 유지하면서 텍스트만 자르는 로직
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = newValue;
-        const text = tempDiv.textContent;
-        
-        // 초과된 텍스트 계산
-        const excessLength = text.length - MAX_LENGTH;
-        const validText = text.substring(0, text.length - excessLength);
-        
-        // 유효 길이로 다시 설정
-        contentText.value = truncateHtmlToTextLength(newValue, validText.length);
-    }
-});
-
 // 지문 내용 설정 메서드
 const setContent = (content) => {
     console.log('EditPassage - setContent 호출됨:', content);
     if (content) {
-        contentText.value = content;
+        const contentDiv = document.getElementById('content-text');
+        if (contentDiv) {
+            contentDiv.innerHTML = content;
+            contentText.value = content;
+        }
         console.log('EditPassage - contentText 설정 후:', contentText.value);
     }
 };
 
+// 내용 가져오기 메서드
+const getContent = () => {
+    const contentDiv = document.getElementById('content-text');
+    return contentDiv ? contentDiv.innerHTML : '';
+};
+
+// 선택 영역 저장 함수
+const saveSelection = () => {
+    const selection = window.getSelection();
+    if (selection.rangeCount > 0) {
+        const contentDiv = document.getElementById('content-text');
+        const range = selection.getRangeAt(0);
+
+        // 선택 영역이 contentDiv 내부에 있는지 확인
+        if (contentDiv && contentDiv.contains(range.commonAncestorContainer)) {
+            savedRange = range.cloneRange();
+        }
+    }
+};
+
+// 선택 영역 복원 함수
+const restoreSelection = () => {
+    if (savedRange) {
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(savedRange);
+    }
+};
+
+// 컴포넌트 마운트 시 이벤트 리스너 추가
+onMounted(() => {
+    // 페이지 클릭 시 선택 영역 저장
+    document.addEventListener('mouseup', saveSelection);
+    document.addEventListener('keyup', saveSelection);
+});
+
 // 외부에서 접근할 메서드 노출
 defineExpose({
     validateTextLength,
-    getContent: () => contentText.value,
+    getContent,
     setContent
 });
 </script>
@@ -495,14 +526,12 @@ defineExpose({
     width: 756px;
     height: 398px;
 
-    font-family: 'Pretendard';
     font-style: normal;
     font-weight: 400;
     font-size: 16px;
     line-height: 28px;
 
     letter-spacing: -0.02em;
-
     color: #303030;
 
     flex: none;
@@ -510,11 +539,38 @@ defineExpose({
     flex-grow: 0;
     z-index: 0;
 
-    border: none;
     outline: none;
-    resize: none;
     overflow-y: auto;
     text-align: left;
     padding: 0;
+
+    white-space: pre-wrap;
+    min-height: 398px;
+}
+
+/* placeholder 스타일 */
+#content-text:empty:before {
+    content: attr(placeholder);
+    color: #BDBDBD;
+}
+
+/* focus 상태일 때 placeholder 숨기기 */
+#content-text:focus:before {
+    content: '';
+}
+
+/* deep 선택자 사용 */
+:deep(#content-text b) {
+  font-weight: 700 !important;
+}
+:deep(#content-text strong) {
+  font-weight: 700 !important;
+  /* 브라우저에 따라 strong으로 사용할 수도 있음 */
+}
+:deep(#content-text u) {
+  text-decoration: underline !important;
+}
+:deep(#content-text s) {
+  text-decoration: line-through !important;
 }
 </style>
