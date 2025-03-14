@@ -94,7 +94,7 @@
     </BaseModal>
 </template>
 <script setup>
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch} from "vue";
 import { useRouter } from 'vue-router';
 import BaseModal from "../../BaseModal.vue";
 import BaseButton from "@/components/common/button/BaseButton.vue";
@@ -109,13 +109,16 @@ const props = defineProps({
   mode: {
     type: String,
     default: 'navigate' //'navigate' 또는 'generate'
-  }
+  },
+  passageTitle: String,  // 부모에서 전달된 제목
+  passageContent: String,  // 부모에서 전달된 내용
 });
 
 const activePattern = ref(null); // 문항 유형 선택값
 const activeType = ref(null); // 서술 방식 선택값
 const activeDifficulty = ref(null); // 난이도 선택값
 const selectedQuestion = ref(null); // 선택된 문항을 ref로 저장
+
 
 const closeModal = () => {
   emit("close");
@@ -143,24 +146,50 @@ const handleGenerateQuestion = () => {
             }
         }
 
+        const requestData = {
+            "custom_passage": passageData.PAS_CONTENT,
+            "type_question": selectedQuestion.value.pattern,
+            "type_question_detail": selectedQuestion.value.type,
+            "question_example": selectedQuestion.value.title,
+        };
+
+        console.log("Request Data:", requestData); 
+
+        // fetch로 API 호출
+        fetch('http://10.41.1.56:7777/generate-question', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestData),
+        })
+        .then(response => response.json())
+        .then(result => {
+            console.log('문항 생성 성공:', result);
+            // 필요한 후속 처리 (예: 페이지 이동, 알림 등)
+        })
+        .catch(error => {
+            console.error('API 요청 오류:', error);
+        });
+
         // mode에 따라 다른 동작 수행
-        if (props.mode === 'generate') {
-            // GenerationQuestion 페이지에서 호출 (PaymentUsageModal 표시)
-            emit("openPaymentModal");
-        } else {
-            // QuestionMain 페이지에서 호출 (페이지 이동)
-            router.push({
-                path: '/questions/generate',
-                query: {
-                    pattern: activePattern.value,
-                    type: activeType.value
-                },
-                state: {
-                    questionData: selectedQuestion.value,
-                    passageData: passageData
-                }
-            });
-        }
+        // if (props.mode === 'generate') {
+        //     // GenerationQuestion 페이지에서 호출 (PaymentUsageModal 표시)
+        //     emit("openPaymentModal");
+        // } else {
+        //     // QuestionMain 페이지에서 호출 (페이지 이동)
+        //     router.push({
+        //         path: '/questions/generate',
+        //         query: {
+        //             pattern: activePattern.value,
+        //             type: activeType.value
+        //         },
+        //         state: {
+        //             questionData: selectedQuestion.value,
+        //             passageData: passageData
+        //         }
+        //     });
+        // }
         // 모달 닫기
         emit("close");
 
