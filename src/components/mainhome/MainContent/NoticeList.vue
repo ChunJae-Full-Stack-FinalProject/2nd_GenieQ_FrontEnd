@@ -77,6 +77,9 @@ const items = ref ([
     align-self: stretch;
     flex-grow: 0;
 }
+a {
+    text-decoration: none;
+}
 .notice-title {
     font-family: 'Pretendard';
     font-style: normal;
