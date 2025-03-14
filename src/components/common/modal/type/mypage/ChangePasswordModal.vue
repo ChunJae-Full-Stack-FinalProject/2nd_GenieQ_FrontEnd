@@ -51,17 +51,28 @@
         </form> 
     </div>
     </BaseModal>
+
+        <!-- 비밀번호 변경 완료 확인 모달 -->
+        <ConfirmModalComponent
+            :isOpen="showPasswordChangeComplete"
+            title="확인"
+            message="비밀번호가 성공적으로 변경되었습니다." 
+            @close="closePasswordChangeComplete"
+            @confirm="redirectAfterPasswordChange"
+        />
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import BaseButton from '@/components/common/button/BaseButton.vue';
 import BaseModal from '../../BaseModal.vue';
 import { Icon } from '@iconify/vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
+import ConfirmModalComponent from '@/components/common/modal/type/ConfirmModalComponent.vue';
 
-const emit = defineEmits(["close", "success-message", "error-message"]);
+
+const emit = defineEmits(["close", "success-message", "error-message", "show-confirm-modal"]);
 const props = defineProps({
   isOpen: Boolean,
 });
@@ -79,6 +90,7 @@ const isLoading = ref(false);
 const currentPasswordError = ref('');
 const newPasswordError = ref('');
 const error = ref(null);
+const showPasswordChangeComplete = ref(false); // 비밀번호 변경 완료 모달 표시 여부
 
 const closeModal = () => {
   emit("close");
@@ -92,6 +104,16 @@ const resetForm = () => {
   currentPasswordError.value = '';
   newPasswordError.value = '';
   error.value = null;
+};
+
+// 비밀번호 변경 완료 모달 관련 함수
+const closePasswordChangeComplete = () => {
+  showPasswordChangeComplete.value = false;
+};
+
+const redirectAfterPasswordChange = () => {
+  showPasswordChangeComplete.value = false;
+  // 필요한 경우 리다이렉트 처리
 };
 
 const togglePasswordVisibility = (field) => {
@@ -116,6 +138,7 @@ const isButtonEnabled = computed(() => {
 
 // 현재 비밀번호 검증 함수
 const validateCurrentPassword = () => {
+    currentPasswordError.value = '';
     if (!currentPassword.value) {
         currentPasswordError.value = '현재 비밀번호를 입력해주세요.';
         return false;
@@ -164,89 +187,93 @@ const changePassword = () => {
     
     // API 엔드포인트
     const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:9090';
-    console.log("감자스타트"+JSON.stringify(requestData),)
+    
     // API 요청
     fetch(`${apiUrl}/api/info/update/password`, {
         method: 'PATCH',
         credentials: 'include',
         headers: { 
             'Content-Type': 'application/json'
-            // 쿠키 기반 인증을 사용하므로 별도의 토큰 헤더는 필요 없음
         },
         body: JSON.stringify(requestData),
-       
     })
     .then(response => {
-    if (!response.ok) {
-        // 인증 오류 처리 (401)
-        if (response.status === 401) {
-            // (추가) 로그 - 인증 오류 감지
-            console.error('인증 오류(401): 로그인이 필요합니다');
-
-            // 인증 상태 초기화
-            authStore.user = null;
-            authStore.isAuthenticated = false;
-            localStorage.removeItem('authUser');
-
-            // 로그인 페이지로 리다이렉트
-            router.push({ 
-                path: '/login', 
-                query: { redirect: route.fullPath }
-            });
-
-            // 추가 처리를 중단하기 위한 에러 발생
-            throw new Error('인증이 필요합니다');
-        }
-        
-        // 현재 비밀번호 불일치 오류 처리 (400)
-        if (response.status === 400) {
-            return response.text().then(text => {
-                if (text.includes('현재 비밀번호') || text.includes('기존 비밀번호') || text.includes('password')) {
-                    currentPasswordError.value = '현재 비밀번호가 일치하지 않습니다.';
-                    throw new Error('현재 비밀번호가 일치하지 않습니다.');
-                } else {
-                    throw new Error(text);
-                }
-            });
-        }
-        
-        return response.text().then(text => { throw new Error(text); });
-    }
-    
-    // 응답이 JSON인지 확인하고 적절히 처리
-    const contentType = response.headers.get('content-type');
-    if (contentType && contentType.includes('application/json')) {
-        return response.json();
-    } else {
-        // JSON이 아닌 경우 텍스트로 처리
-        return response.text();
-    }
-})
-.then(data => {
-    console.log('비밀번호 변경 성공:', data);
-    emit('success-message', '비밀번호가 성공적으로 변경되었습니다.');
-    closeModal();
-})
-    .catch(err => {
-        console.error('비밀번호 변경 오류:', err);
-        console.error('에러 유형:', err.name);
-        console.error('에러 메시지:', err.message);
-        
-        if (currentPasswordError.value) {
-            // 현재 비밀번호 오류가 이미 설정된 경우 토스트 메시지로 표시
-            emit('error-message', currentPasswordError.value);
-        } else {
-            error.value = err.message || '비밀번호 변경 중 오류가 발생했습니다.';
-            emit('error-message', error.value);
-            
-            // 인증 오류인 경우 로그인 페이지로 리다이렉트
-            if (err.message.includes('인증에 실패했습니다') || err.message.includes('로그인이 필요합니다')) {
-                router.push({ path: '/login', query: { redirect: route.fullPath } });
+        if (!response.ok) {
+            // 인증 오류 처리 (401)
+            if (response.status === 401) {
+                console.error('인증 오류(401): 로그인이 필요합니다');
+                
+                // 인증 상태 초기화
+                authStore.user = null;
+                authStore.isAuthenticated = false;
+                localStorage.removeItem('authUser');
+                
+                // 로그인 페이지로 리다이렉트
+                router.push({ 
+                    path: '/login', 
+                    query: { redirect: route.fullPath }
+                });
+                
+                return Promise.reject(); // 오류 발생시키되 메시지 없이
             }
+            
+            // 현재 비밀번호 불일치 오류 처리 (400 또는 403)
+            if (response.status === 400 || response.status === 403) {
+                return response.text().then(text => {
+                    console.log('서버 오류 응답:', text);
+                    
+                    // 현재 비밀번호 오류 처리
+                    currentPasswordError.value = '비밀번호가 일치하지 않습니다.';
+                    
+                    // 토스트 메시지로 오류 표시
+                    emit('error-message', '비밀번호가 일치하지 않습니다.');
+                    
+                    // 입력 필드 스타일 변경
+                    const currentPasswordField = document.querySelector('.pwd-input-group:first-child .input-container');
+                    if (currentPasswordField) {
+                        currentPasswordField.classList.add('error-border');
+                    }
+                    
+                    // 오류가 있으므로 Promise를 거부하여 then 블록이 실행되지 않도록 함
+                    return Promise.reject(new Error('현재 비밀번호가 일치하지 않습니다.'));
+                });
+            }
+            
+            return response.text().then(text => { 
+                error.value = text || '비밀번호 변경 중 오류가 발생했습니다.';
+                emit('error-message', error.value);
+                return Promise.reject(new Error(error.value)); // 오류 발생
+            });
+        }
+        
+        // 응답이 JSON인지 확인하고 적절히 처리
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+            return response.json();
+        } else {
+            return response.text();
         }
     })
-    .finally(() => {
+    .then(data => {
+        console.log('비밀번호 변경 성공:', data);
+        // 성공 시에만 모달 창을 닫고 완료 모달 표시
+        closeModal();
+        showPasswordChangeComplete.value = true;
+        console.log('모달 상태:', showPasswordChangeComplete.value);
+    })
+    .catch(err => {
+        // 에러가 있는 경우에는 모달 창을 닫지 않음
+        console.error('비밀번호 변경 오류:', err);
+        // 로딩 상태만 해제
         isLoading.value = false;
+    })
+    .finally(() => {
+        // 로딩 상태 해제는 finally에서 처리하지만,
+        // catch에서 이미 처리했으므로 중복을 방지하기 위한 체크 추가
+        if (isLoading.value) {
+            isLoading.value = false;
+        }
+        console.log('작업 완료 후 모달 상태:', showPasswordChangeComplete.value);
     });
 };
 
@@ -292,10 +319,48 @@ const validateConfirmPassword = () => {
   return true;
 };
 
-// 컴포넌트 마운트 시 로그인 상태 확인
-if (!authStore.isAuthenticated) {
-    console.log('인증 상태 없음: 로그인이 필요합니다');
-}
+// 컴포넌트 마운트 시 로그인 상태 확인 및 얼럿 방지 설정
+onMounted(() => {
+    if (!authStore.isAuthenticated) {
+        console.log('인증 상태 없음: 로그인이 필요합니다');
+    }
+    
+    // 브라우저의 기본 alert 차단
+    // 1. 처리되지 않은 Promise 거부 이벤트 가로채기
+    window.onunhandledrejection = (event) => {
+        event.preventDefault();
+        console.error('처리되지 않은 Promise 거부:', event.reason);
+    };
+    
+    // 2. window.onerror 이벤트 가로채기
+    window.onerror = (message, source, lineno, colno, error) => {
+        console.error('전역 오류 발생:', { message, source, lineno, colno, error });
+        return true; // 기본 오류 처리 방지
+    };
+    
+    // 3. console.error 재정의 (원본 기능 유지하면서 alert 방지)
+    const originalConsoleError = console.error;
+    console.error = (...args) => {
+        originalConsoleError.apply(console, args);
+        return true; // alert 방지
+    };
+    
+    // 4. window.alert, window.confirm, window.prompt 메서드 무력화
+    window.alert = function(message) {
+        console.log('Alert 차단됨:', message);
+        return true;
+    };
+    
+    window.confirm = function(message) {
+        console.log('Confirm 차단됨:', message);
+        return true;
+    };
+    
+    window.prompt = function(message, defaultValue) {
+        console.log('Prompt 차단됨:', message);
+        return defaultValue || '';
+    };
+});
 </script>
 
 <style scoped>
