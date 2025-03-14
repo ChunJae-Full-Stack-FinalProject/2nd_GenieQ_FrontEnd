@@ -189,7 +189,8 @@ const processWithdrawal = () => {
       'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
     },
     body: JSON.stringify({
-      memEmail: userData.value.email
+      memEmail: userData.value.email,
+      memPassword: "qwer1234$", // <<< 임시로넣어둠  ( 이것도 생각해봐야 할 것 사용하자한테 비밀번호를 입력(input)하게 할지 ,  로컬스토리지에서 가져오는건 힘듬  )
     })
   })
   .then(response => {
@@ -509,6 +510,7 @@ onMounted(() => {
   top: 0px;
   left: 0px;
   width: 1764px;
+
 }
 
 #save-button {
@@ -526,7 +528,7 @@ onMounted(() => {
 
   position: absolute;
   width: 1472px;
-  height: 384px;
+  height: 250px;
   left: 136px;
   top: 94px;
 }
@@ -667,7 +669,7 @@ onMounted(() => {
   height: 1px;
   background-color: #BDBDBD;
   position: absolute;
-  bottom: -340px;
+  bottom: -240px;
 }
 
 .account {
@@ -680,7 +682,7 @@ onMounted(() => {
   width: 240px;
   height: 40px;
   left: 1524px;
-  top: 860px;
+  top: 620px;
 }
 
 .withdrawal {
