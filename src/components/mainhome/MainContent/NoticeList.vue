@@ -183,7 +183,11 @@ a {
     align-self: stretch;
     flex-grow: 0;
 }
+.notice-link:hover {
+    font-weight: 500;
+}
 .notice-link {
+    width: 100%;
     color:#424242;
 }
 
