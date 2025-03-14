@@ -88,7 +88,7 @@
                 <PlainTooltip id="tooltip" message="생성 시 이용권 1회 차감" width="205px"/>
                 <BaseButton text="닫기" type="type3" width="140px" height="54px" @click="closeModal" />
                 <BaseButton text="문항 생성하기" type="type1" width="182px" height="54px" :disabled="!selectedQuestion"
-                @click="handleGenerateQuestion"/>
+                @click.once="handleGenerateQuestion"/>
             </div>
         </div>
     </BaseModal>
@@ -118,6 +118,7 @@ const activePattern = ref(null); // 문항 유형 선택값
 const activeType = ref(null); // 서술 방식 선택값
 const activeDifficulty = ref(null); // 난이도 선택값
 const selectedQuestion = ref(null); // 선택된 문항을 ref로 저장
+const isProcessing = ref(false);
 
 
 const closeModal = () => {
@@ -129,77 +130,226 @@ const closeModal = () => {
 };
 
 // GenerateQuestion 페이지로 이동하면서 데이터 전달
-const handleGenerateQuestion = () => {
-    if (selectedQuestion.value) {
-       // 로컬 스토리지에서 지문 데이터 가져오기
-        const savedPassageData = localStorage.getItem('tempPassageData');
-        let passageData = null;
+// const handleGenerateQuestion = () => {
+//     if (selectedQuestion.value) {
+//        // 로컬 스토리지에서 지문 데이터 가져오기
+//         const savedPassageData = localStorage.getItem('tempPassageData');
+//         let passageData = null;
 
-        if (savedPassageData) {
-            try {
-                passageData = JSON.parse(savedPassageData);
+//         if (savedPassageData) {
+//             try {
+//                 passageData = JSON.parse(savedPassageData);
                 
+//                 localStorage.setItem('generateQuestionPassageData', savedPassageData);
+//                 localStorage.setItem('selectedQuestionData', JSON.stringify(selectedQuestion.value));
+//             } catch (error) {
+//                 console.error('저장된 지문 데이터를 불러오는 중 오류 발생 : ', error);
+//             }
+//         }
+
+//         const requestData = {
+//             "custom_passage": passageData.PAS_CONTENT,
+//             "type_question": selectedQuestion.value.pattern,
+//             "type_question_detail": selectedQuestion.value.type,
+//             "question_example": selectedQuestion.value.title,
+//         };
+
+//         console.log("Request Data:", requestData); 
+
+//         // fetch로 API 호출
+//         fetch('http://10.41.1.56:7777/generate-question', {
+//             method: 'POST',
+//             headers: {
+//                 'Content-Type': 'application/json',
+//             },
+//             body: JSON.stringify(requestData),
+//         })
+//         .then(response => response.json())
+//         .then(result => {
+//             console.log('문항 생성 성공:', result);
+//             // 필요한 후속 처리 (예: 페이지 이동, 알림 등)
+//         })
+//         .catch(error => {
+//             console.error('API 요청 오류:', error);
+//         });
+
+//         // mode에 따라 다른 동작 수행
+//         // if (props.mode === 'generate') {
+//         //     // GenerationQuestion 페이지에서 호출 (PaymentUsageModal 표시)
+//         //     emit("openPaymentModal");
+//         // } else {
+//         //     // QuestionMain 페이지에서 호출 (페이지 이동)
+//         //     router.push({
+//         //         path: '/questions/generate',
+//         //         query: {
+//         //             pattern: activePattern.value,
+//         //             type: activeType.value
+//         //         },
+//         //         state: {
+//         //             questionData: selectedQuestion.value,
+//         //             passageData: passageData
+//         //         }
+//         //     });
+//         // }
+//         // 모달 닫기
+//         emit("close");
+
+//         // 선택 상태 초기화
+//         activePattern.value = null;
+//         activeType.value = null;
+//         activeDifficulty.value = null;
+//         selectedQuestion.value = null;
+//     }
+// };
+const handleGenerateQuestion = async () => {
+    if (isProcessing.value) return; // 중복 실행 방지
+    isProcessing.value = true;
+
+    try {
+        if (selectedQuestion.value) {
+            // ✅ 로컬 스토리지에서 데이터 가져오기
+            const savedPassageData = localStorage.getItem('tempPassageData');
+            let passageData = null;
+
+            if (savedPassageData) {
+                passageData = JSON.parse(savedPassageData);
+
                 localStorage.setItem('generateQuestionPassageData', savedPassageData);
                 localStorage.setItem('selectedQuestionData', JSON.stringify(selectedQuestion.value));
-            } catch (error) {
-                console.error('저장된 지문 데이터를 불러오는 중 오류 발생 : ', error);
             }
-        }
 
-        const requestData = {
-            "custom_passage": passageData.PAS_CONTENT,
-            "type_question": selectedQuestion.value.pattern,
-            "type_question_detail": selectedQuestion.value.type,
-            "question_example": selectedQuestion.value.title,
-        };
+            // ✅ 1단계: 키워드 생성 API 호출
+            const keywordRequestData = {
+                "custom_passage": passageData?.PAS_CONTENT || ''
+            };
 
-        console.log("Request Data:", requestData); 
+            console.log("keywordRequestData:", keywordRequestData);
 
-        // fetch로 API 호출
-        fetch('http://10.41.1.56:7777/generate-question', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(requestData),
-        })
-        .then(response => response.json())
-        .then(result => {
+            const keywordResponse = await fetch('http://10.41.1.56:7777/get-type-keyword',{
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(keywordRequestData),
+            });
+
+            if (!keywordResponse.ok) throw new Error(`문항 생성 실패: ${keywordResponse.status}`);
+
+            const keywordResult = await keywordResponse.json();
+            console.log('키워드 성공:', keywordResult);
+            console.log("키워드 분리!: ", keywordResult.type_passage)
+
+            // ✅ 2단계: 문항 생성 API 호출
+            const requestData = {
+                "custom_passage": passageData?.PAS_CONTENT || '',
+                "type_question": selectedQuestion.value.pattern,
+                "type_question_detail": selectedQuestion.value.type,
+                "question_example": selectedQuestion.value.title,
+            };
+
+            console.log("Request Data:", requestData);
+
+            const response = await fetch('http://10.41.1.56:7777/generate-question', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestData),
+            });
+
+            if (!response.ok) throw new Error(`문항 생성 실패: ${response.status}`);
+            
+            const result = await response.json();
             console.log('문항 생성 성공:', result);
-            // 필요한 후속 처리 (예: 페이지 이동, 알림 등)
-        })
-        .catch(error => {
-            console.error('API 요청 오류:', error);
-        });
 
-        // mode에 따라 다른 동작 수행
-        // if (props.mode === 'generate') {
-        //     // GenerationQuestion 페이지에서 호출 (PaymentUsageModal 표시)
-        //     emit("openPaymentModal");
-        // } else {
-        //     // QuestionMain 페이지에서 호출 (페이지 이동)
-        //     router.push({
-        //         path: '/questions/generate',
-        //         query: {
-        //             pattern: activePattern.value,
-        //             type: activeType.value
-        //         },
-        //         state: {
-        //             questionData: selectedQuestion.value,
-        //             passageData: passageData
-        //         }
-        //     });
-        // }
-        // 모달 닫기
-        emit("close");
+            // ✅ 3단계: 문항 저장 API 호출
+            const saveRequestData = {
+                "type": keywordResult.type_passage,
+                "keyword": keywordResult.keyword,
+                "title": passageData?.PAS_TITLE || '',
+                "content": passageData?.PAS_CONTENT || '',
+                "gist": '',
+                "isGenerated": 0,
+                "questions":[{
+                    "queQuery": result.generated_question,
+                    "queOption": result.generated_option,
+                    "queAnswer": result.generated_description
+                }]
+            };
 
-        // 선택 상태 초기화
-        activePattern.value = null;
-        activeType.value = null;
-        activeDifficulty.value = null;
-        selectedQuestion.value = null;
+            console.log("saveRequest: ", saveRequestData);
+
+            const apiUrl = import.meta.env.VITE_API_URL;
+
+            const saveResponse = await fetch(`${apiUrl}/pass/ques/insert/each`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: "include",
+                body: JSON.stringify(saveRequestData),
+            });
+
+            if (!saveResponse.ok) throw new Error(`문항 저장 실패: ${saveResponse.status}`);
+            
+            const saveResult = await saveResponse.json();
+            console.log('문항 저장 성공:', saveResult);
+
+            // // ✅ 2단계: 문항 저장 API 호출
+            // const saveRequestData = {
+            //     "question_id": result.question_id,
+            //     "generated_question": result.generated_question,
+            //     "pattern": selectedQuestion.value.pattern,
+            //     "type": selectedQuestion.value.type,
+            //     "title": selectedQuestion.value.title,
+            //     "passage_content": passageData?.PAS_CONTENT || '',
+            // };
+
+            // console.log("Save Request Data:", saveRequestData);
+
+            // const saveResponse = await fetch('http://10.41.1.56:7777/save-question', {
+            //     method: 'POST',
+            //     headers: {
+            //         'Content-Type': 'application/json',
+            //     },
+            //     body: JSON.stringify(saveRequestData),
+            // });
+
+            // if (!saveResponse.ok) throw new Error(`저장 실패: ${saveResponse.status}`);
+
+            // const saveResult = await saveResponse.json();
+            // console.log('저장 성공:', saveResult);
+
+            // // ✅ 3단계: 저장 완료 후 상태 업데이트
+            // const updateResponse = await fetch('http://10.41.1.56:7777/update-status', {
+            //     method: 'POST',
+            //     headers: {
+            //         'Content-Type': 'application/json',
+            //     },
+            //     body: JSON.stringify({ question_id: result.question_id }),
+            // });
+
+            // if (!updateResponse.ok) throw new Error(`상태 업데이트 실패: ${updateResponse.status}`);
+            
+            // const updateResult = await updateResponse.json();
+            // console.log('상태 업데이트 성공:', updateResult);
+
+            // ✅ 작업 완료 후 상태 초기화 및 모달 닫기
+            alert("문항 생성 및 저장 성공!");
+
+            activePattern.value = null;
+            activeType.value = null;
+            activeDifficulty.value = null;
+            selectedQuestion.value = null;
+            emit("close");
+
+        }
+    } catch (error) {
+        console.error('API 요청 실패:', error);
+        alert(`오류 발생: ${error.message}`);
     }
 };
+
 
 const questionPattern = ref([
     { id: 1, label: "전체", width: "52px"},

@@ -17,7 +17,7 @@
             <GenerateQuestionModal 
                 :isOpen="showGenerateQuestionModal" 
                 @close="showGenerateQuestionModal = false"
-                :passageTitle="currentPassage.PAS_TITLE" 
+                :passageTitle="passageTitle" 
                 :passageContent="currentPassage.PAS_CONTENT"
             />
             <LoadPassageModal :isOpen="showLoadPassageModal" @close="closeLoadPassageModal" @loadPassage="handleLoadPassage"/>
