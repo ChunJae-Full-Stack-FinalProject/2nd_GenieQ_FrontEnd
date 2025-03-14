@@ -4,7 +4,7 @@
             <div class="edit-title">
                 <p id="passage-head">작업이름</p>
                 <input type="text" id="passage-title"
-                    placeholder="작업 이름을 입력해주세요." v-model="title"/>
+                    placeholder="작업 이름을 입력해주세요." :value="modelValue" @input="updateTitle"/>
             </div>
             <div class="select-category-container">
                 <p id="select-category-head">지문 분야 선택</p>
@@ -45,11 +45,24 @@
     </div>
 </template>
 <script setup>
-import { ref, watch, defineExpose } from 'vue';
+import { ref, watch, defineProps, defineExpose } from 'vue';
 
-const emit = defineEmits(['input-change']);
+// props에서 modelValue 정의
+const props = defineProps({
+  modelValue: {
+    type: String,
+    required: true
+  }
+});
+
+const emit = defineEmits(['update:modelValue', 'input-change', 'category-change']);
 const inputText = ref('');
 const selectedCategory = ref('human');
+
+// ✅ emit으로 값 업데이트 → 부모로 전달
+const updateTitle = (event) => {
+  emit('update:modelValue', event.target.value);
+};
 
 // 카테고리 변경 함수 추가
 const onCategoryChange = (category) => {

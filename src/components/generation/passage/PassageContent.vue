@@ -40,7 +40,6 @@
     </div>
 </template>
 <script setup>
-import { ref, computed } from 'vue';
 import CreatePassageMain from '@/components/generation/passage/PassageMain/CreatePassageMain.vue';
 import PaymentUsage from '@/components/generation/PaymentUsage.vue';
 import BaseButton from '@/components/common/button/BaseButton.vue';
@@ -48,13 +47,20 @@ import ConfirmModalComponent from '@/components/common/modal/type/ConfirmModalCo
 import WarningModalComponent from '@/components/common/modal/type/WarningModalComponent.vue';
 import PaymentUsageModal from '@/components/common/modal/type/generation/PaymentUsageModal.vue';
 
-import { ref, onMounted, onBeforeUnmount, getCurrentInstance } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount, getCurrentInstance } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { usePassageStore } from '@/stores/passage';
 
 // 모달 상태 관리
 const isConfirmModalOpen = ref(false);
 const isWarningModalOpen = ref(false);
+const inputText = ref('');
+const creditCountValue = ref(0);
+const passageTitleRef = ref(null);
+const selectedCategory = ref(''); 
+const router = useRouter(); 
+const createPassageMainRef = ref(null); // ✅ ref로 선언
+const paymentUsageRef = ref(null);
 
 // 수정 필요한 코드
 const isButtonEnabled = computed(() => {
@@ -154,8 +160,9 @@ const saveDataAndNavigate = () => {
     // 다음 페이지로 이동
     router.push('/passage/create');
 
-    // 컴포넌트 마운트 시 실행
-    onMounted(() => {
+};
+// 컴포넌트 마운트 시 실행
+onMounted(() => {
     // paymentUsageRef가 설정된 후 creditcount 값을 가져오기 위한 코드
     setTimeout(() => {
         if (paymentUsageRef.value && paymentUsageRef.value.creditcount) {
@@ -164,7 +171,6 @@ const saveDataAndNavigate = () => {
     }, 0);
 });
 
-};
 </script>
 <style scoped>
 .app-container {
