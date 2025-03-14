@@ -47,7 +47,6 @@
     </div>
 </template>
 <script setup>
-import InputPassageTitle from '@/components/generation/passage/PassageContent/InputPassageTitle.vue';
 import PassageContentMain from '@/components/generation/passage/PassageContent/PassageContentMain.vue';
 import PassageSummary from '@/components/generation/passage/PassageContent/PassageSummary.vue';
 import BaseButton from '@/components/common/button/BaseButton.vue';
@@ -134,6 +133,7 @@ const handleSaveButtonClick = () => {
     const passageData = {
         title: title.value,
         content: content.value
+        // summary: summary.value
     };
 
     console.log('Saving data:', passageData);
@@ -288,6 +288,10 @@ const instance = getCurrentInstance();
 let routerGuard = null;
 
 onMounted(() => {
+
+    console.log('title:', title.value);
+    console.log('content:', content.value);
+
     // 브라우저 새로고침, 닫기 등에 대한 이벤트 리스너 추가
     window.addEventListener('beforeunload', handleBeforeUnload);
     
@@ -313,6 +317,7 @@ onMounted(() => {
     // 로컬 스토리지에서 PassageMain에서 입력한 제목 데이터 로드
     const savedTitle = localStorage.getItem('passageTitle');
     if (savedTitle && passageTitleRef.value) {
+        console.log('📢 저장된 제목 불러오기:', savedTitle);
         // InputPassageTitle 컴포넌트에 저장된 제목 설정
         passageTitleRef.value.setTitle(savedTitle);
     }
@@ -320,8 +325,15 @@ onMounted(() => {
     //필요시 다른 데이터도 로드할 수 있음
     const savedPassageData = localStorage.getItem('passageInputText');
     if (savedPassageData && passageContentRef.value) {
+        console.log('📢 저장된 본문 불러오기:', savedPassageData);
        passageContentRef.value.setContent(savedPassageData);
     }
+    console.log('📌 현재 상태 값:', {
+        title: title.value,
+        content: content.value,
+        isContentChanged: isContentChanged.value,
+        hasManualSave: hasManualSave.value
+    });
 });
 
 onBeforeUnmount(() => {

@@ -39,7 +39,10 @@ const handleInput = (event) => {
     }
     
     // 내용 변경 이벤트 발생
-    emit('content-changed');
+    emit('content-changed',{
+        title: title.value,
+        content: content.value
+    });
 };
 
 // 본문 길이 검증
@@ -48,13 +51,15 @@ const validateContent = () => {
 };
 
 // 외부에서 접근할 수 있도록 함수 노출
-const getContent = () => {
-    return content.value;
-};
+const getContent = () => content.value;
+const getTitle = () => title.value;
+
 
 // 노출할 메소드 정의
 defineExpose({
-    getContent, validateContent
+    getContent, 
+    getTitle,
+    validateContent
 });
 </script>
 <style scoped>
