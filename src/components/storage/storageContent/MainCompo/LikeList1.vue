@@ -59,58 +59,36 @@ const workItems = ref([
     title: '메이드투메이드의 건배',
     type: '지문',
     date: '2025-02-28',
-    favorite: false
+    favorite: true
   },
   {
     name: '수능특강 기반 문제생성saasasdsadasdsadads',
     title: '메이드투메이드의 건배',
     type: '지문',
     date: '2025-02-28',
-    favorite: false
+    favorite: true
   },
   {
     name: '수능특강 기반 문제생성saasasdsadasdsadads',
     title: '메이드투메이드의 건배',
     type: '지문',
     date: '2025-02-28',
-    favorite: false
+    favorite: true
   },
   {
     name: '수능특강 기반 문제생성saasasdsadasdsadads',
     title: '메이드투메이드의 건배',
     type: '지문',
     date: '2025-02-28',
-    favorite: false
+    favorite: true
   },
   {
     name: '수능특강 기반 문제생성saasasdsadasdsadads',
     title: '메이드투메이드의 건배',
     type: '지문',
     date: '2025-02-28',
-    favorite: false
-  },
-  {
-    name: '수능특강 기반 문제생성saasasdsadasdsadads',
-    title: '메이드투메이드의 건배',
-    type: '지문',
-    date: '2025-02-28',
-    favorite: false
-  },
-  {
-    name: '수능특강 기반 문제생성saasasdsadasdsadads',
-    title: '메이드투메이드의 건배',
-    type: '지문',
-    date: '2025-02-28',
-    favorite: false
-  },
-  {
-    name: '수능특강 기반 문제생성saasasdsadasdsadads',
-    title: '메이드투메이드의 건배',
-    type: '지문',
-    date: '2025-02-28',
-    favorite: false
-  },
- 
+    favorite: true
+  }
 ]);
 
 // 메소드 정의 - 화살표 함수로 작성합니다
