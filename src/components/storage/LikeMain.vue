@@ -8,11 +8,14 @@
       <P>(N개)</P>
     </div>
     <div class="storage-likemain-subtitle2">
-      <span>삭제</span>
-      <button style="border: 0; background-color: transparent;">
-        <Icon icon="cil:trash" class="trash" width="20" height="20"  style="color: #303030" />
-      </button>
-    </div>
+    <span>삭제</span>
+    <button 
+      style="border: 0; background-color: transparent;"
+      @click="openDeleteModal"
+    >
+      <Icon icon="cil:trash" class="trash" width="20" height="20" style="color: #303030" />
+    </button>
+  </div>
     <div class="storage-likemain-table">
       <div class="table-container">
         <table class="data-table">
@@ -91,10 +94,22 @@
   </div>
   <!-- 파일 선택 모달 -->
   <FileSelectModal :isOpen="isModalOpen" @close="closeFileModal" @confirm="handleFileSelection"/>
+
+   <!-- 삭제 경고 모달 -->
+   <WarningModalComponent 
+    :isOpen="isDeleteModalOpen"
+    title="선택하 자료를 삭제하시겠습니까?"
+    :message="`삭제를 진행한 자료는 영구 삭제됩니다.`"
+    cancelText="취소"
+    confirmText="삭제"
+    @close="closeDeleteModal"
+    @confirm="confirmDelete"
+  />
 </template>
 <script setup>
-import { ref, nextTick, onMounted, onUnmounted, computed } from 'vue';
-import FileSelectModal from '@/components/common/modal/type/FileSelectModal.vue';
+import { ref, computed, nextTick, onMounted, onUnmounted } from 'vue';
+import WarningModalComponent from '@/components/common/modal/type/WarningModalComponent.vue';
+import { useRouter } from 'vue-router';
 
 // 데이터 정의 - ref로 감싸서 반응형으로 만듭니다
 const workItems = ref([
@@ -387,6 +402,39 @@ const nextPage = () => {
 
 const lastPage = () => {
   currentPage.value = totalPages.value;
+};
+
+// 삭제 모달 상태 관리
+const isDeleteModalOpen = ref(false);
+const router = useRouter();
+
+// 선택된 아이템들 찾기
+const selectedItems = computed(() => {
+  return workItems.value.filter(item => item.checked);
+});
+
+// 삭제 버튼 클릭 시 모달 열기
+const openDeleteModal = () => {
+  if (selectedItems.value.length > 0) {
+    isDeleteModalOpen.value = true;
+  }
+};
+
+// 선택된 아이템 삭제 확인 
+const confirmDelete = () => {
+  // 선택된 아이템 제거
+  workItems.value = workItems.value.filter(item => !item.checked);
+  
+  // 모달 닫기
+  isDeleteModalOpen.value = false;
+  
+  // 페이지 재계산
+  currentPage.value = Math.min(currentPage.value, totalPages.value);
+};
+
+// 삭제 모달 닫기
+const closeDeleteModal = () => {
+  isDeleteModalOpen.value = false;
 };
 
 </script>

@@ -1,6 +1,15 @@
 <template>
   <div class="wrapper">
-    <BaseButton text="저장하기" type="type1" id="save-button" width="248px" height="46px" @click="saveUserInfo"/>
+    <!-- 조건부 활성화 버튼 -->
+    <BaseButton 
+      text="저장하기" 
+      :type="isDataModified ? 'type1' : 'disabled'" 
+      id="save-button" 
+      width="248px" 
+      height="46px" 
+      @click="saveUserInfo"
+      :disabled="!isDataModified"
+    />
 
     <div class="content">
       <!-- 기본 정보 -->
@@ -10,7 +19,7 @@
         </div>
         <div class="item">
           <span class="label">이름</span>
-          <input class="value value-box" v-model="userData.name">
+          <input class="value value-box" v-model="userData.name" @input="checkModified">
         </div>
         <div class="item">
           <span class="label">이메일</span>
@@ -34,7 +43,7 @@
         </div>
         <div class="item">
           <span class="label">소속</span>
-          <select class="value value-box" id="user-type" v-model="userData.memType">
+          <select class="value value-box" id="user-type" v-model="userData.memType" @change="checkModified">
             <option value="초등교사">초등교사</option>
             <option value="중등교사">중등교사</option>
             <option value="고등교사">고등교사</option>
@@ -52,17 +61,39 @@
     <div v-if="error" class="error">{{ error }}</div>
 
     <div class="account">
-      <span class="withdrawal">회원 탈퇴</span>
+      <span class="withdrawal" @click="openWithdrawalWarning">회원 탈퇴</span>
       <span class="logout" @click="handleLogout">로그아웃</span>
     </div>
   </div>
   <changePasswordModal :isOpen="showPasswordModal" @close="closePasswordModal" @success-message="handleSuccessMessage" @error-message="handleErrorMessage"/>
+
+  <!-- 회원탈퇴 경고 모달 -->
+  <WarningModalComponent
+    :isOpen="showWithdrawalWarning"
+    title="서비스를 탈퇴하시겠습니까"
+    message="탈퇴 시 남은 이용권은 소멸되며, 회원 정보 및 생성한 데이터는 즉시 파기됩니다."
+    cancelText="취소하기"
+    confirmText="탈퇴하기"
+    @close="closeWithdrawalWarning"
+    @confirm="processWithdrawal"
+  />
+
+  <!-- 회원탈퇴 완료 확인 모달 -->
+  <ConfirmModalComponent
+    :isOpen="showWithdrawalComplete"
+    title="서비스 탈퇴 완료"
+    message="이용해 주셔서 감사합니다. '확인' 버튼을 누르시면 홈으로 이동합니다." 
+    @close="closeWithdrawalComplete"
+    @confirm="redirectAfterWithdrawal"
+  />
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
 import BaseButton from '../common/button/BaseButton.vue';
 import changePasswordModal from '../common/modal/type/mypage/ChangePasswordModal.vue';
+import WarningModalComponent from '../common/modal/type/WarningModalComponent.vue';
+import ConfirmModalComponent from '../common/modal/type/ConfirmModalComponent.vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 
@@ -71,13 +102,23 @@ const showPasswordModal = ref(false);
 const isLoading = ref(false);
 const error = ref(null);
 
+// 회원탈퇴 관련 모달 상태 관리
+const showWithdrawalWarning = ref(false);
+const showWithdrawalComplete = ref(false);
+
+// 데이터 수정 여부 체크 - 여기서 먼저 선언
+const isDataModified = ref(false);
+
+// 회원탈퇴 입력 정보
+const withdrawalInfo = ref({
+  memEmail: '',
+  memPassword: ''
+});
 
 // 라우터와 스토어 초기화
 const router = useRouter();
 const route = useRoute();
 const authStore = useAuthStore();
-
-
 
 // 원본 사용자 데이터 저장 (변경 감지용)
 const originalUserData = ref({
@@ -92,6 +133,13 @@ const userData = ref({
   gender: '',
   memType: '',
 });
+
+//수정 여부 확인 함수 구현
+const checkModified = () => {
+  isDataModified.value = 
+    userData.value.name !== originalUserData.value.name || 
+    userData.value.memType !== originalUserData.value.memType;
+};
 
 // 모달 열기
 const openPasswordModal = () => {
@@ -110,6 +158,77 @@ const handleSuccessMessage = (message) => {
 
 const handleErrorMessage = (message) => {
   alert(message);
+};
+
+// 회원탈퇴 모달 열기
+const openWithdrawalWarning = () => {
+  // 이메일 필드 초기화 - 현재 로그인한 사용자의 이메일로 자동 설정
+  withdrawalInfo.value.memEmail = userData.value.email;
+  withdrawalInfo.value.memPassword = '';
+  showWithdrawalWarning.value = true;
+};
+
+// 회원탈퇴 경고 모달 닫기
+const closeWithdrawalWarning = () => {
+  showWithdrawalWarning.value = false;
+};
+
+// 회원탈퇴 진행
+const processWithdrawal = () => {
+  isLoading.value = true;
+  error.value = null;
+
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:9090';
+  
+  // API 요청 (PUT 메서드 사용)
+  fetch(`${apiUrl}/api/auth/remove/withdrawal`, {
+    method: 'PUT',
+    credentials: 'include',
+    headers: { 
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
+    },
+    body: JSON.stringify({
+      memEmail: userData.value.email
+    })
+  })
+  .then(response => {
+    if (!response.ok) {
+      return response.text().then(errorText => { throw new Error(errorText || '회원탈퇴에 실패했습니다'); });
+    }
+    
+    return response.text();
+  })
+  .then(data => {
+    console.log('회원탈퇴 성공:', data);
+    
+    // 경고 모달 닫기
+    showWithdrawalWarning.value = false;
+    
+    // 완료 모달 표시
+    showWithdrawalComplete.value = true;
+  })
+  .catch(err => {
+    console.error('회원탈퇴 오류:', err);
+    alert('회원탈퇴 처리 중 오류가 발생했습니다: ' + err.message);
+  })
+  .finally(() => {
+    isLoading.value = false;
+  });
+};
+// 회원탈퇴 완료 모달 닫기
+const closeWithdrawalComplete = () => {
+  showWithdrawalComplete.value = false;
+};
+
+// 회원탈퇴 후 리다이렉트
+const redirectAfterWithdrawal = () => {
+  // 로그아웃 처리 및 로그인 페이지로 이동
+  localStorage.removeItem('authUser');
+  localStorage.removeItem('token');
+  authStore.user = null;
+  authStore.isAuthenticated = false;
+  router.push('/login');
 };
 
 // 사용자 정보 가져오는 함수
@@ -258,6 +377,9 @@ const updateType = () => {
   });
 };
 
+
+
+
 // 사용자 정보 저장하는 함수 (이름과 소속을 각각 업데이트)
 // 이벤트 중복 실행 방지 플래그
 let isSaving = false;
@@ -282,23 +404,25 @@ const saveUserInfo = () => {
     return;
   }
     
-    // 변경된 항목이 있는지 확인
+  // 변경된 항목이 있는지 확인
   const isNameChanged = userData.value.name !== originalUserData.value.name;
   const isTypeChanged = userData.value.memType !== originalUserData.value.memType;
   
     
-    // 변경된 항목이 없으면 알림만 표시
-    if (!isNameChanged && !isTypeChanged) {
-      alert('변경된 정보가 없습니다.');
-      return;
-    }
+  // 변경된 항목이 없으면 알림만 표시
+  if (!isNameChanged && !isTypeChanged) {
+    alert('변경된 정보가 없습니다.');
+    isSaving = false;
+    isLoading.value = false;
+    return;
+  }
     
-    console.log('변경할 정보:', {
+  console.log('변경할 정보:', {
     name: isNameChanged ? userData.value.name : '변경 없음',
     memType: isTypeChanged ? userData.value.memType : '변경 없음'
   });
     
-    // 성공 여부 추적
+  // 성공 여부 추적
   let successCount = 0;
   const updateCount = (isNameChanged ? 1 : 0) + (isTypeChanged ? 1 : 0);
   let namePromise = Promise.resolve();
@@ -609,5 +733,10 @@ onMounted(() => {
   color: white;
   border-radius: 4px;
   z-index: 1000;
+}
+.disabled {
+  background-color: #BDBDBD !important;
+  color: #FFFFFF !important;
+  cursor: not-allowed !important;
 }
 </style>
