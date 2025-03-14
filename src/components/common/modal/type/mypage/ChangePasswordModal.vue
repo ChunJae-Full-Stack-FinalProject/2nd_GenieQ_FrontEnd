@@ -13,7 +13,7 @@
             <div class="pwd-input-group">
                 <label>현재 비밀번호 *</label>
                 <div class="input-container" :class="{'error-border': currentPasswordError}">
-                    <input v-model="currentPassword" :type="showPassword.current ? 'text' : 'password'" placeholder="비밀번호 입력" />
+                    <input v-model="currentPassword" :type="showPassword.current ? 'text' : 'password'" placeholder="비밀번호 입력" @input="validateCurrentPassword" />
                     <Icon :icon="showPassword.current ? 'basil:eye-outline' : 'basil:eye-closed-outline'" width="24px" height="24px" class="eye-icon" @click="togglePasswordVisibility('current')" />
                 </div>
                 <div class="error-area">
@@ -23,7 +23,7 @@
             <div class="pwd-input-group">
                 <label>새로운 비밀번호 *</label>
                 <div class="input-container" :class="{'error-border': newPasswordError}">
-                    <input v-model="newPassword" :type="showPassword.new ? 'text' : 'password'" placeholder="새로운 비밀번호 입력" />
+                    <input v-model="newPassword" :type="showPassword.new ? 'text' : 'password'" placeholder="새로운 비밀번호 입력" @input="validateNewPassword" />
                     <Icon :icon="showPassword.new ? 'basil:eye-outline' : 'basil:eye-closed-outline'" width="24px" height="24px" class="eye-icon" @click="togglePasswordVisibility('new')" />
                 </div>
                 <div class="error-area">
@@ -35,7 +35,7 @@
             <div class="pwd-input-group">
                 <label>새로운 비밀번호 확인 *</label>
                 <div class="input-container" :class="{'error-border': isPasswordMismatch, 'success-border': isPasswordMatch}">
-                    <input v-model="confirmPassword" :type="showPassword.confirm ? 'text' : 'password'" placeholder="새로운 비밀번호 입력" />
+                    <input v-model="confirmPassword" :type="showPassword.confirm ? 'text' : 'password'" placeholder="새로운 비밀번호 입력" @input="validateConfirmPassword" />
                     <Icon :icon="showPassword.confirm ? 'basil:eye-outline' : 'basil:eye-closed-outline'" width="24px" height="24px" class="eye-icon" @click="togglePasswordVisibility('confirm')" />
                 </div>
                 <div class="error-area">
@@ -110,8 +110,18 @@ const isButtonEnabled = computed(() => {
     return currentPassword.value.trim() !== '' &&
            newPassword.value.trim() !== '' &&
            confirmPassword.value.trim() !== '' &&
-           isPasswordMatch.value;
+           isPasswordMatch.value &&
+           !newPasswordError.value;
 });
+
+// 현재 비밀번호 검증 함수
+const validateCurrentPassword = () => {
+    if (!currentPassword.value) {
+        currentPasswordError.value = '현재 비밀번호를 입력해주세요.';
+        return false;
+    }
+    return true;
+};
 
 // 비밀번호 변경 함수
 const changePassword = () => {
@@ -122,6 +132,11 @@ const changePassword = () => {
     currentPasswordError.value = '';
     newPasswordError.value = '';
     error.value = null;
+    
+    // 현재 비밀번호 검증
+    if (!validateCurrentPassword()) {
+        return;
+    }
     
     // 인증 상태 확인
     if (!authStore.isAuthenticated) {
@@ -182,6 +197,19 @@ const changePassword = () => {
             // 추가 처리를 중단하기 위한 에러 발생
             throw new Error('인증이 필요합니다');
         }
+        
+        // 현재 비밀번호 불일치 오류 처리 (400)
+        if (response.status === 400) {
+            return response.text().then(text => {
+                if (text.includes('현재 비밀번호') || text.includes('기존 비밀번호') || text.includes('password')) {
+                    currentPasswordError.value = '현재 비밀번호가 일치하지 않습니다.';
+                    throw new Error('현재 비밀번호가 일치하지 않습니다.');
+                } else {
+                    throw new Error(text);
+                }
+            });
+        }
+        
         return response.text().then(text => { throw new Error(text); });
     }
     
@@ -204,7 +232,10 @@ const changePassword = () => {
         console.error('에러 유형:', err.name);
         console.error('에러 메시지:', err.message);
         
-        if (!currentPasswordError.value) {
+        if (currentPasswordError.value) {
+            // 현재 비밀번호 오류가 이미 설정된 경우 토스트 메시지로 표시
+            emit('error-message', currentPasswordError.value);
+        } else {
             error.value = err.message || '비밀번호 변경 중 오류가 발생했습니다.';
             emit('error-message', error.value);
             
@@ -217,6 +248,48 @@ const changePassword = () => {
     .finally(() => {
         isLoading.value = false;
     });
+};
+
+// 비밀번호 검증 함수
+const validateNewPassword = () => {
+  newPasswordError.value = '';
+  
+  // 길이 검사
+  if (newPassword.value.length < 8) {
+    newPasswordError.value = '8자리 이상이어야 합니다.';
+    return false;
+  }
+  
+  // 영문 포함 검사
+  const hasLetter = /[a-zA-Z]/.test(newPassword.value);
+  if (!hasLetter) {
+    newPasswordError.value = '영문을 포함해야 합니다.';
+    return false;
+  }
+  
+  // 숫자 포함 검사
+  const hasNumber = /\d/.test(newPassword.value);
+  if (!hasNumber) {
+    newPasswordError.value = '숫자를 포함해야 합니다.';
+    return false;
+  }
+  
+  // 특수문자 포함 검사
+  const hasSpecial = /[@#$%^&*]/.test(newPassword.value);
+  if (!hasSpecial) {
+    newPasswordError.value = '특수문자(@#$%^&*)를 포함해야 합니다.';
+    return false;
+  }
+  
+  return true;
+};
+
+// 비밀번호 확인 검증 함수
+const validateConfirmPassword = () => {
+  if (newPassword.value !== confirmPassword.value) {
+    return false;
+  }
+  return true;
 };
 
 // 컴포넌트 마운트 시 로그인 상태 확인
