@@ -66,6 +66,7 @@ export const usePassageStore = defineStore('passage', {
                     }
                     return response.text().then(text => { throw new Error(text); });
                 }
+                return response.json();
             })
             .then(data => {
                 // 현재 지문 상태 업데이트
@@ -73,7 +74,7 @@ export const usePassageStore = defineStore('passage', {
 
                 // 반응형 상태 업데이트
                 this.$patch(state => {
-                    const index = state.passage.findIndex(p => p.id === data.id);
+                    const index = state.passage.findIndex(p => p.pasCode === data.pasCode);
                     if (index !== -1) {
                         state.passage[index] = data;
                     } else {
