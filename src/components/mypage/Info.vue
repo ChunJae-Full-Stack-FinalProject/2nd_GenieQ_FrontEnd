@@ -189,7 +189,6 @@ const processWithdrawal = () => {
     },
     body: JSON.stringify({
       memEmail: userData.value.email,
-      memPassword: "qwer1234#", // <<< 임시로넣어둠  ( 이것도 생각해봐야 할 것 사용하자한테 비밀번호를 입력(input)하게 할지 ,  로컬스토리지에서 가져오는건 힘듬  )
     })
   })
   .then(response => {
