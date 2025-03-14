@@ -4,19 +4,19 @@
             <div class="question-main">
                 <div class="question-header">
                     <div class="title-container">
-                        <span v-if="!isEditing" id="question-title">{{ title }}</span>
+                        <span v-if="!props.isEditing" id="question-title">{{ title }}</span>
                         <input v-else type="text" v-model="title" id="input-title" ref="titleInput" @input="handleQuestionChanged"/>
                     </div>
                     
-                    <button class="edit-button" @click="isEditing ? toggleEditMode() : requestEditMode()">
+                    <button class="edit-button" @click="props.isEditing ? toggleEditMode() : requestEditMode()">
                         <Icon icon="mingcute:pencil-fill" width="24" height="24" 
-                        :style="{color: isEditing ? '#FF9F40' : '#303030' }" />
+                        :style="{color: props.isEditing ? '#FF9F40' : '#303030' }" />
                     </button>
                 </div>
                 <div class="question-items">
                     <div v-for="(item, index) in items" :key="index" class="question-item">
                         <span class="question-number">{{ circledNumbers[index] }}</span>
-                        <span v-if="!isEditing" class="question-text">{{ item }}</span>
+                        <span v-if="!props.isEditing" class="question-text">{{ item }}</span>
                         <input v-else type="text" v-model="items[index]" id="input-question" @input="handleQuestionChanged"/>
                     </div>
                 </div>
@@ -47,6 +47,10 @@ const props = defineProps({
             'ChatGPT와 같은 혁신은 LLMs가 독특한 문제 해결 능력을 보여주기 시작했음을 나타낸다.',
             '연구자들은 LLMs의 잠재력을 확대하기 위해 새로운 아키텍처와 훈련 전략을 탐구하고 있다.'
         ]
+    },
+    isEditing: {
+        type: Boolean,
+        defaule: false
     }
 });
 
@@ -61,7 +65,7 @@ const emit = defineEmits([
 ]);
 
 // 반응형 상태 정의
-const isEditing = ref(false);
+const isEditing = ref(props.isEditing);
 const title = ref(props.questionTitle);
 const items = ref([...props.questions]);
 const titleInput = ref(null);
@@ -83,17 +87,14 @@ const requestEditMode = () => {
 const toggleEditMode = (forceEditMode) => {
     console.log('toggleEditMode 호출됨, 이전 상태:', isEditing.value, '강제 값:', forceEditMode);
     
-    // forceEditMode가 제공되면 해당 값으로 설정, 아니면 토글
-    if (forceEditMode !== undefined) {
-        isEditing.value = forceEditMode;
-    } else {
-        isEditing.value = !isEditing.value;
-    }
-    
-    console.log('toggleEditMode 실행 후 상태:', isEditing.value);
+    // forceEditMode가 제공되면 해당 값으로 설정
+    const newEditingState = forceEditMode !== undefined ? forceEditMode : !isEditing.value;
 
+    // 로컬 상태 업데이트
+    isEditing.value = newEditingState;
+    
     // 편집 모드 변경 이벤트를 발생시켜 부모 컴포넌트에 알림
-    emit('edit-mode-changed', isEditing.value);
+    emit('edit-mode-changed', newEditingState);
 
     // 편집 모드로 전환되면 input title에 포커스
     if (isEditing.value) {
@@ -121,6 +122,10 @@ watch(() => props.questions, (newVal) => {
 watch(() => props.questionTitle, (newVal) => {
     title.value = newVal;
 });
+
+watch(() => props.isEditing, (newVal) => {
+    isEditing.value = newVal;
+}, { immediate: true} );
 
 // 컴포넌트 마운트 시 초기화
 onMounted(() => {

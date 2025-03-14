@@ -15,7 +15,7 @@ const MIN_LENGTH = 500;
 const MAX_LENGTH = 1700;
 
 // 부모 컴포넌트에서 전달받은 지문 상태 감시
-watch(() => currentPassage.value.content, (newContent) => {
+watch(() => currentPassage.value.PAS_CONTENT, (newContent) => {
   userInput.value = newContent || '';
 }, { immediate: true });
 
@@ -27,7 +27,7 @@ watch(userInput, (newValue) => {
   }
   
   // 현재 패시지 내용 업데이트
-  currentPassage.value.content = userInput.value;
+  currentPassage.value.PAS_CONTENT = userInput.value;
 });
 </script>
 <style scoped>

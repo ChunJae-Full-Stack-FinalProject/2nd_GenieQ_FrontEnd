@@ -2,7 +2,7 @@
     <div class="app-container">
         <p id="main-head">문항 생성</p>
         <div class="main-content">
-            <InsertPassage/>
+            <InsertPassage ref="insertPassageRef"/>
             <PaymentUsage ref="paymentUsageRef" @credit-update="onCreditUpdate"/>
             <BaseButton id="reset_button" text="초기화" type="type2" width="248px" height="54px" :disabled="!hasContent" @click="resetPassage"/>
             <BaseButton 
@@ -20,7 +20,7 @@
     </div>
     <ConfirmModalComponent
       :isOpen="isConfirmModalOpen"
-      title="글자 수를 확인해 주세요."
+      PAS_TITLE="글자 수를 확인해 주세요."
       message="500자 이하의 지문으로 정상적인 문항을 생성하기 어렵습니다. 충분한 지문을 입력해 주세요."
       @close="isConfirmModalOpen = false"
       @confirm="isConfirmModalOpen = false"
@@ -47,6 +47,7 @@ const showLoadPassageModal = ref(false);
 const isConfirmModalOpen = ref(false);
 const paymentUsageRef = ref(null);
 const creditCountValue = ref(0); // 별도의 ref로 이용권 상태 관리
+const insertPassageRef = ref(null);
 
 // PaymentUsage 컴포넌트에서 이용권 업데이트 시 호출될 함수
 const onCreditUpdate = (count) => {
@@ -55,8 +56,8 @@ const onCreditUpdate = (count) => {
 
 // 지문 상태 및 메서드
 const currentPassage = ref({
-    title: '',
-    content: ''
+    PAS_TITLE: '',
+    PAS_CONTENT: ''
 });
 
 const validateAndOpenModal = () => {
@@ -82,13 +83,18 @@ const setPassage = (passage) => {
 // 지문 초기화 함수
 const resetPassage = () => {
     currentPassage.value = {
-        title: '',
-        content: ''
+        PAS_TITLE: '',
+        PAS_CONTENT: ''
     };
 };
 
 const hasContent = computed(() => {
-  return currentPassage.value.content && currentPassage.value.content.trim().length > 0;
+    return (
+    currentPassage.value.PAS_CONTENT &&
+    currentPassage.value.PAS_CONTENT.trim().length > 0 &&
+    insertPassageRef.value?.passageTitle && // 제목 입력 상태 체크
+    insertPassageRef.value?.passageTitle.trim().length > 0
+  );
 });
 
 // LoadPassageModal에서 지문 선택 시 호출될 함수
@@ -108,7 +114,7 @@ const openLoadPassageModal = () => {
 };
 
 const validatePassageLength = () => {
-  return currentPassage.value.content && currentPassage.value.content.length >= 500;
+  return currentPassage.value.PAS_CONTENT && currentPassage.value.PAS_CONTENT.length >= 500;
 };
 
 const showLengthWarning = () => {
@@ -123,8 +129,8 @@ onMounted(() => {
         try {
             const passageData = JSON.parse(savedPassageData);
             setPassage({
-                title: passageData.title || '',
-                content: passageData.content || ''
+                PAS_TITLE: passageData.PAS_TITLE || '',
+                PAS_CONTENT: passageData.PAS_CONTENT || ''
             });
             // 사용 후 삭제
             localStorage.removeItem('tempPassageData');

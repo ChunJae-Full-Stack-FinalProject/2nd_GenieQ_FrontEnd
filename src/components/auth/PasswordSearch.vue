@@ -21,7 +21,7 @@
             <div class="input-with-button">
               <div class="input-wrapper-with-timer" :class="{ 'success': isVerified }">
                 <input type="text" placeholder="인증코드를 입력하세요." class="form-input2" v-model="verificationCode" :disabled="!isEmailSent || isVerified || !isTimerRunning" />
-                <span v-if="isTimerRunning" class="timer">{{ formattedTime }}</span>
+                <span v-if="isTimerRunning && !isVerified" class="timer">{{ formattedTime }}</span>
               </div>
               <button class="button verify-button" :class="{ 'active': verificationCode && !isVerified }" :disabled="!verificationCode || isVerified || !isTimerRunning" @click="verifyCode">
                 {{ isVerified ? '완료' : '인증' }}
@@ -30,7 +30,7 @@
             <div v-if="verificationError" class="error-message">{{ verificationError }}</div>
             <div v-if="isVerified" class="success-message">인증이 완료되었습니다!</div>
           </div>
-          <button class="button gray-button" @click="sendTempPassword" :disabled="!isVerified" :style="isVerified ? { backgroundColor: '#303030', color: '#FFFFFF' } : { backgroundColor: '#BDBDBD', color: '#FFFFFF' }">완료</button>
+          <button class="button gray-button" @click="sendTempPassword" :disabled="!isVerified" :style="isVerified ? { backgroundColor: '#303030', color: '#FFFFFF' } : { backgroundColor: '#BDBDBD', color: '#FFFFFF' }">비밀번호 찾기</button>
       </div> 
     </div>
   </div>
@@ -53,8 +53,6 @@
   const generatedCode = ref('');
   const isSending = ref(false); // 이메일 전송 중 상태
 
-
-
   // 타이머 관련 상태
   const isTimerRunning = ref(false);
   const remainingTime = ref(180); // 3분(180초)
@@ -65,7 +63,6 @@
 });
 
 let timerInterval = null; // 이 선언이 누락됨
-
 
   // EmailJS 초기화
 onMounted(() => {
@@ -162,6 +159,13 @@ const verifyCode = () => {
   if (verificationCode.value === generatedCode.value) {
     isVerified.value = true;
     verificationError.value = '';
+
+    // 인증 성공 시 타이머 정지 & 정리
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+    isTimerRunning.value = false; // 타이머 상태 업데이트
   } else {
     verificationError.value = '인증코드가 일치하지 않습니다.';
   }
@@ -227,7 +231,6 @@ const validateEmail = () => {
   } 
 });
 
-
 // 임시 비밀번호 생성 함수
 const generateTempPassword = () => {
   // 8자리 이상, 영문 + 숫자 + 특수문자 조합
@@ -253,12 +256,6 @@ const generateTempPassword = () => {
   return password.split('').sort(() => 0.5 - Math.random()).join('');
 };
 
-
-
-
-
-
-
 // 임시 비밀번호 발송 함수
 const sendTempPassword = () => {
   // 이메일 인증이 완료되었는지 확인
@@ -269,7 +266,6 @@ const sendTempPassword = () => {
   
   // 임시 비밀번호 생성
   const tempPassword = generateTempPassword();
-  
   
   // 로딩 상태 표시
   isSending.value = true;
@@ -293,7 +289,10 @@ const sendTempPassword = () => {
     console.log('이메일 발송 성공!', tempPassword);
     isSending.value = false;
     // 다음 페이지로 이동 (Router-link 대신 프로그래밍 방식으로 이동)
-    router.push('/temppasswordnotice');
+    router.push({
+      path: '/temppasswordnotice',
+      query: {email: email.value}
+    });
   })
   .catch((error) => {
     console.error('이메일 발송 실패:', error);
@@ -301,12 +300,8 @@ const sendTempPassword = () => {
     isSending.value = false;
   });
 };
-
-
-
-
   </script>
-  
+
   <style scoped>
   * {
     box-sizing: border-box;
