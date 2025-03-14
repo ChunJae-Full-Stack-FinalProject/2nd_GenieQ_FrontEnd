@@ -51,7 +51,10 @@
       </div>
 
       <div class="pagination" v-if="totalPages > 0">
-        <button v-if="totalPages > 5" @click="prevPage" :disabled="currentPage === 1">&lt;</button>
+        <button @click="firstPage" :disabled="currentPage === 1" v-if="currentPage > 1">
+          &laquo;
+        </button>
+        <button @click="prevPage" :disabled="currentPage === 1">&lt;</button>
         
         <span
           v-for="page in visiblePages"
@@ -61,8 +64,8 @@
           {{ page }}
         </span>
         
-        <button v-if="totalPages > 5" @click="nextPage" :disabled="currentPage === totalPages">&gt;</button>
-        <button @click="lastPage" :disabled="currentPage === totalPages">&raquo;</button>
+        <button v-if="currentPage < totalPages" @click="nextPage" :disabled="currentPage === totalPages">&gt;</button>
+        <button @click="lastPage" :disabled="currentPage === totalPages" v-if="currentPage < totalPages">&raquo;</button>
       </div>
 
     </div>
@@ -72,13 +75,17 @@
 </BaseModal>
 </template> 
 <script setup>
-import { ref, computed, defineEmits, onMounted, watch } from 'vue';
+import { ref, computed, defineEmits, watch } from 'vue';
 import BaseModal from "../../BaseModal.vue";
 import BaseButton from "@/components/common/button/BaseButton.vue";
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 
 const emit = defineEmits(['close']);
+
+const props = defineProps({
+        isOpen: Boolean
+    });
 
 // 라우터와 스토어 초기화
 const router = useRouter();
@@ -97,23 +104,6 @@ const maxVisiblePages = 5;
 
 // 임시 사용 내역 데이터
 const usageHistory = ref([]);
-
-// 데이터 초기화 함수
-// const initializeData = () => {
-//   for (let i = 1; i <= 60; i++) {
-//     usageHistory.value.push({
-//       USA_CODE: i,
-//       USA_TYPE: `지문 생성 ${i}`,
-//       USA_COUNT: i % 3 === 0 ? "+10" : i % 2 === 0 ? "-1" : "+1",
-//       USA_BALANCE: 10 - (i % 10),
-//       USA_DATE: `2024-03-${String(31 - (i % 30)).padStart(2, '0')}`
-//     });
-//   }
-// };
-
-const props = defineProps({
-        isOpen: Boolean
-    });
 
 // 총 페이지 수 계산
 const totalPages = computed(() => {
@@ -160,6 +150,11 @@ const nextPage = () => {
   }
 };
 
+// 맨 처음 페이지 이동
+const firstPage = () => {
+  currentPage.value = 1;
+};
+
 // 마지막 페이지 이동
 const lastPage = () => {
   currentPage.value = totalPages.value;
@@ -193,7 +188,6 @@ const updateDateRange = () => {
   }
 };
 
-
 // 🔥 모달이 열릴 때 실행되도록 watch 추가
 watch(() => props.isOpen, (newValue) => {
   if (newValue) {
@@ -202,12 +196,6 @@ watch(() => props.isOpen, (newValue) => {
     loadUsageList(); // 데이터 로드
   }
 });
-// 컴포넌트 마운트 시 초기화
-// onMounted(() => {
-//   endDate.value = getTodayFormatted();
-//   //initializeData();
-//   loadUsageList();
-// });
 
 const closeModal = () => {
   //initialState();
@@ -221,12 +209,6 @@ const initialState = () => {
   currentPage.value = 1;
   usageHistory.value = [];
 };
-
-// 컴포넌트 마운트 시 초기화
-// onMounted(() => {
-//   //initializeData();
-//   loadUsageList();
-// });
 
 const loadUsageList = () =>{
   const start = startDate.value || '1970-01-01';
@@ -280,7 +262,6 @@ const loadUsageList = () =>{
     console.error('이용내역 데이터 불러오기 실패:', error);
   })
 };
-
 </script>
     
 <style scoped>
@@ -423,7 +404,6 @@ const loadUsageList = () =>{
   cursor: pointer;
 }
 
-
 /* 결제 내역 테이블 */
 .history-table {
   height: 286px;
@@ -464,8 +444,6 @@ const loadUsageList = () =>{
 .data-table tr:last-child td {
   border-bottom: none;
 }
-
-
 
 .column-title {
   width: 50px;
@@ -531,5 +509,4 @@ const loadUsageList = () =>{
   font-size:12.92px;
   font-weight: 700;
 }
-
 </style>
