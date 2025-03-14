@@ -14,7 +14,7 @@
       <div class="modal-content">
         <div class="modal-title">{{ title }}</div>
         <div class="modal-msg">{{ message }}</div>
-      </div>
+      </div>  
 
       <!-- ✅ 취소 & 실행 버튼 -->
       <div class="modal-buttons">

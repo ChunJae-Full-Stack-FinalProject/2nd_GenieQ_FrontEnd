@@ -8,11 +8,14 @@
       <P>(N개)</P>
     </div>
     <div class="storage-likemain-subtitle2">
-      <span>삭제</span>
-      <button style="border: 0; background-color: transparent;">
-        <Icon icon="cil:trash" class="trash" width="20" height="20"  style="color: #303030" />
-      </button>
-    </div>
+    <span>삭제</span>
+    <button 
+      style="border: 0; background-color: transparent;"
+      @click="openDeleteModal"
+    >
+      <Icon icon="cil:trash" class="trash" width="20" height="20" style="color: #303030" />
+    </button>
+  </div>
     <div class="storage-likemain-table">
       <div class="table-container">
         <table class="data-table">
@@ -28,7 +31,7 @@
           </tr>
         </thead>
           <tbody>
-            <tr v-for="(item, index) in workItems" :key="index" :class="{ 'row-checked': item.checked }">
+            <tr v-for="(item, index) in computedWorkItems" :key="index" :class="{ 'row-checked': item.checked }">
               <td @contextmenu="showEditForm(index, $event)">
                 <label class="custom-checkbox">
                   <input type="checkbox" class="checkbox-input" v-model="item.checked">
@@ -65,6 +68,21 @@
         </table>
       </div>
     </div>
+     <!-- 페이지네이션 -->
+     <div class="pagination" v-if="totalPages > 0">
+          <button @click="prevPage" :disabled="currentPage === 1">&lt;</button>
+          
+          <span
+            v-for="page in visiblePages"
+            :key="page"
+            @click="changePage(page)"
+            :class="{ 'active-page': currentPage === page }">
+            {{ page }}
+          </span>
+          
+          <button @click="nextPage" :disabled="currentPage === totalPages">&gt;</button>
+          <button @click="lastPage" :disabled="currentPage === totalPages">&raquo;</button>
+        </div>
   </div>
 
   <!-- 컨텍스트 메뉴(우클릭시 나오는 박스) -->
@@ -76,10 +94,22 @@
   </div>
   <!-- 파일 선택 모달 -->
   <FileSelectModal :isOpen="isModalOpen" @close="closeFileModal" @confirm="handleFileSelection"/>
+
+   <!-- 삭제 경고 모달 -->
+   <WarningModalComponent 
+    :isOpen="isDeleteModalOpen"
+    title="선택하 자료를 삭제하시겠습니까?"
+    :message="`삭제를 진행한 자료는 영구 삭제됩니다.`"
+    cancelText="취소"
+    confirmText="삭제"
+    @close="closeDeleteModal"
+    @confirm="confirmDelete"
+  />
 </template>
 <script setup>
-import { ref, nextTick, onMounted, onUnmounted } from 'vue';
-import FileSelectModal from '@/components/common/modal/type/FileSelectModal.vue';
+import { ref, computed, nextTick, onMounted, onUnmounted } from 'vue';
+import WarningModalComponent from '@/components/common/modal/type/WarningModalComponent.vue';
+import { useRouter } from 'vue-router';
 
 // 데이터 정의 - ref로 감싸서 반응형으로 만듭니다
 const workItems = ref([
@@ -99,6 +129,70 @@ const workItems = ref([
     date: '2025-02-28',
     favorite: false,
     checked: false,
+  },
+  {
+    name: '수능특강 기반 문제생성saasasdsadasdsadads',
+    title: '메이드투메이드의 건배',
+    type: '지문',
+    date: '2025-02-28',
+    favorite: false,
+    checked: false
+  },
+  {
+    name: '수능특강 기반 문제생성saasasdsadasdsadads',
+    title: '메이드투메이드의 건배',
+    type: '지문',
+    date: '2025-02-28',
+    favorite: false,
+    checked: false
+  },
+  {
+    name: '수능특강 기반 문제생성saasasdsadasdsadads',
+    title: '메이드투메이드의 건배',
+    type: '지문',
+    date: '2025-02-28',
+    favorite: false,
+    checked: false
+  },
+  {
+    name: '수능특강 기반 문제생성saasasdsadasdsadads',
+    title: '메이드투메이드의 건배',
+    type: '지문',
+    date: '2025-02-28',
+    favorite: false,
+    checked: false
+  },
+  {
+    name: '수능특강 기반 문제생성saasasdsadasdsadads',
+    title: '메이드투메이드의 건배',
+    type: '지문',
+    date: '2025-02-28',
+    favorite: false,
+    checked: false
+  },
+  {
+    name: '수능특강 기반 문제생성saasasdsadasdsadads',
+    title: '메이드투메이드의 건배',
+    type: '지문',
+    date: '2025-02-28',
+    favorite: false,
+    checked: false
+  },
+  {
+    name: '수능특강 기반 문제생성saasasdsadasdsadads',
+    title: '메이드투메이드의 건배',
+    type: '지문',
+    date: '2025-02-28',
+    favorite: false,
+    checked: false
+  },
+  {
+    name: '수능특강 기반 문제생성saasasdsadasdsadads',
+    title: '메이드투메이드의 건배',
+    type: '지문',
+    date: '2025-02-28',
+    favorite: false,
+    checked: false
   },
   {
     name: '수능특강 기반 문제생성saasasdsadasdsadads',
@@ -254,6 +348,95 @@ const toggleFavorite = (index) => {
   // 즐겨찾기 토글 로직
   workItems.value[index].favorite = !workItems.value[index].favorite;
 };
+
+// 페이지네이션 관련 상태
+const currentPage = ref(1);
+const itemsPerPage = 15; // 페이지당 표시할 아이템 수
+const maxVisiblePages = 5; // 한 번에 표시할 페이지 번호 최대 개수
+
+// 총 페이지 수 계산
+const totalPages = computed(() => {
+  return Math.ceil(workItems.value.length / itemsPerPage);
+});
+
+// 페이지네이션된 작업 아이템 계산
+const computedWorkItems = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  return workItems.value.slice(start, end);
+});
+
+// 표시할 페이지 배열 계산
+const visiblePages = computed(() => {
+  const total = totalPages.value;
+  if (total <= 1) return [1];
+  
+  const startPage = Math.max(1, Math.min(
+    currentPage.value - Math.floor(maxVisiblePages / 2),
+    total - maxVisiblePages + 1
+  ));
+  
+  const endPage = Math.min(startPage + maxVisiblePages - 1, total);
+  
+  return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
+});
+
+// 페이지 변경 시 currentPage 검증
+const changePage = (page) => {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page;
+  }
+};
+
+const prevPage = () => {
+  if (currentPage.value > 1) {
+    currentPage.value--;
+  }
+};
+
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++;
+  }
+};
+
+const lastPage = () => {
+  currentPage.value = totalPages.value;
+};
+
+// 삭제 모달 상태 관리
+const isDeleteModalOpen = ref(false);
+const router = useRouter();
+
+// 선택된 아이템들 찾기
+const selectedItems = computed(() => {
+  return workItems.value.filter(item => item.checked);
+});
+
+// 삭제 버튼 클릭 시 모달 열기
+const openDeleteModal = () => {
+  if (selectedItems.value.length > 0) {
+    isDeleteModalOpen.value = true;
+  }
+};
+
+// 선택된 아이템 삭제 확인 
+const confirmDelete = () => {
+  // 선택된 아이템 제거
+  workItems.value = workItems.value.filter(item => !item.checked);
+  
+  // 모달 닫기
+  isDeleteModalOpen.value = false;
+  
+  // 페이지 재계산
+  currentPage.value = Math.min(currentPage.value, totalPages.value);
+};
+
+// 삭제 모달 닫기
+const closeDeleteModal = () => {
+  isDeleteModalOpen.value = false;
+};
+
 </script>
 <style scoped>
 .card-container {
@@ -328,7 +511,7 @@ color: #FF9F40;
  isolation: isolate;
  position: absolute;
  width: 1472px;
- height: 684.5px;
+ height: 680px;
  left: 292px;
  top: 130px;  
  background: #FFFFFF;
@@ -605,4 +788,55 @@ margin-left: 4px;
 .menu-item:hover {
   background-color: #EAEAEA;
 }
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center; 
+    position: absolute;
+    left: 300px;
+    top: 850px;
+    width: 1471px; 
+    margin-top: 20px;
+    gap: 8px; 
+  }
+
+  .pagination span {
+    display: inline-block;
+    min-width: 26px; 
+    text-align: center;
+    font-size: 14px;
+    cursor: pointer;
+    user-select: none; 
+    outline: none; 
+    padding: 5px 10px;
+    border-radius: 4px;
+  }
+
+  .pagination button {
+    border: none;
+    background: none;
+    padding: 5px 10px;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+
+  .pagination button:hover {
+    background-color: #f0f0f0;
+  }
+
+  .pagination button:disabled {
+    color: #ccc;
+    cursor: not-allowed;
+  }
+
+  .active-page {
+    color: #FF9F40;
+    font-weight: bold;
+  }
+
+  .pagination span:hover:not(.active-page) {
+    background-color: #f0f0f0;
+
+  }
 </style>

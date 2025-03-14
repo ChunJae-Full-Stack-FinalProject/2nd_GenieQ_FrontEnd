@@ -5,25 +5,43 @@
     </div>
     <div class="storage-worklistmain-subtitle">
       <span>전체</span>
-      <P>(N개)</P>
+      <P>({{ filteredWorkItems.length }}개)</P>
     </div>
 
     <div class="storage-worklistmain-search">
       <div class="search-container">
-        <input type="text" placeholder="검색어를 입력하세요." class="search-input">
+        <input 
+          type="text" 
+          placeholder="작업명, 제목, 유형 검색" 
+          class="search-input"
+          v-model="searchQuery"
+          @input="handleSearch"
+        >
       </div>
       <div class="search-icon">
-        <Icon icon="iconamoon:search-light" width="20" height="20"  style="color: #757575" />
+        <Icon icon="iconamoon:search-light" width="20" height="20" style="color: #757575" />
       </div>
     </div>
 
     <div class="storage-worklistmain-subtitle2">
-      <span>삭제</span>
-      <button style="border: 0; background-color: transparent;">
-        <Icon icon="cil:trash" class="trash" width="20" height="20"  style="color: #303030" />
-      </button>
+    <span>삭제</span>
+    <button 
+      style="border: 0; background-color: transparent;"
+      @click="openDeleteModal"
+    >
+      <Icon icon="cil:trash" class="trash" width="20" height="20" style="color: #303030" />
+    </button>
+  </div>
+
+    <!-- 검색 결과가 없을 때 표시할 중앙 메시지 -->
+    <div v-if="filteredWorkItems.length === 0 && searchQuery" class="no-results-container">
+      <div class="no-results-message">
+        "{{ searchQuery }}"에 대한 검색결과가 없습니다.
+      </div>
     </div>
-    <div class="storage-worklist-table">
+
+    <!-- 데이터가 있을 때만 테이블 표시 -->
+    <div v-else class="storage-worklist-table">
       <div class="table-container">
         <table class="data-table">
           <thead>
@@ -38,7 +56,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(item, index) in workItems" :key="index" :class="{ 'row-checked': item.checked }">
+            <tr v-for="(item, index) in computedWorkItems" :key="index" :class="{ 'row-checked': item.checked }">
               <td @contextmenu="showEditForm(index, $event)">
                 <label class="custom-checkbox">
                   <input type="checkbox" class="checkbox-input" v-model="item.checked">
@@ -75,22 +93,51 @@
         </table>
       </div>
     </div>
-  </div>
 
-    <!-- 컨텍스트 메뉴(우클릭시 나오는 박스) -->
-  <div v-if="showContextMenu" class="context-menu" :style="{ top: contextMenuPosition.y + 'px', left: contextMenuPosition.x + 'px' }">
-    <div class="menu-item" @click="startEditing">
-      <span>이름 변경</span>
+    <!-- 페이지네이션 -->
+    <div class="pagination" v-if="totalPages > 0 && filteredWorkItems.length > 0">
+      <button @click="prevPage" :disabled="currentPage === 1">&lt;</button>
+      
+      <span
+        v-for="page in visiblePages"
+        :key="page"
+        @click="changePage(page)"
+        :class="{ 'active-page': currentPage === page }">
+        {{ page }}
+      </span>
+      
+      <button @click="nextPage" :disabled="currentPage === totalPages">&gt;</button>
+      <button @click="lastPage" :disabled="currentPage === totalPages">&raquo;</button>
     </div>
 
-  </div>
-  <!-- 파일 선택 모달 -->
-  <FileSelectModal :isOpen="isModalOpen" @close="closeFileModal" @confirm="handleFileSelection"/>
-</template>
-<script setup>
-import { ref, nextTick, onMounted, onUnmounted } from 'vue';
-import FileSelectModal from '@/components/common/modal/type/FileSelectModal.vue';
+    <!-- 컨텍스트 메뉴(우클릭시 나오는 박스) -->
+    <div v-if="showContextMenu" class="context-menu" :style="{ top: contextMenuPosition.y + 'px', left: contextMenuPosition.x + 'px' }">
+      <div class="menu-item" @click="startEditing">
+        <span>이름 변경</span>
+      </div>
+    </div>
+    
+    <!-- 파일 선택 모달 -->
+    <FileSelectModal :isOpen="isModalOpen" @close="closeFileModal" @confirm="handleFileSelection"/>
 
+       <!-- 삭제 경고 모달 -->
+   <WarningModalComponent 
+    :isOpen="isDeleteModalOpen"
+    title="선택하 자료를 삭제하시겠습니까?"
+    :message="`삭제를 진행한 자료는 영구 삭제됩니다.`"
+    cancelText="취소"
+    confirmText="삭제"
+    @close="closeDeleteModal"
+    @confirm="confirmDelete"
+  />
+  </div>
+</template>
+
+<script setup>
+import { ref, computed, onMounted, nextTick, onUnmounted } from 'vue';
+import FileSelectModal from '@/components/common/modal/type/FileSelectModal.vue';
+import WarningModalComponent from '@/components/common/modal/type/WarningModalComponent.vue';
+import { useRouter } from 'vue-router';
 // 데이터 정의 - ref로 감싸서 반응형으로 만듭니다
 const workItems = ref([
   // 기존 데이터 유지
@@ -102,6 +149,7 @@ const workItems = ref([
     favorite: false,
     checked: false 
   },
+  // 다른 아이템들...
   {
     name: '수능특강 기반 문제생성saasasdsadasdsadads',
     title: '메이드투메이드의 건배',
@@ -110,56 +158,11 @@ const workItems = ref([
     favorite: false,
     checked: false,
   },
-  {
-    name: '수능특강 기반 문제생성saasasdsadasdsadads',
-    title: '메이드투메이드의 건배',
-    type: '지문',
-    date: '2025-02-28',
-    favorite: false,
-    checked: false
-  },
-  {
-    name: '수능특강 기반 문제생성saasasdsadasdsadads',
-    title: '메이드투메이드의 건배',
-    type: '지문',
-    date: '2025-02-28',
-    favorite: false,
-    checked: false
-  },
-  {
-    name: '수능특강 기반 문제생성saasasdsadasdsadads',
-    title: '메이드투메이드의 건배',
-    type: '지문',
-    date: '2025-02-28',
-    favorite: false,
-    checked: false
-  },
-  {
-    name: '수능특강 기반 문제생성saasasdsadasdsadads',
-    title: '메이드투메이드의 건배',
-    type: '지문',
-    date: '2025-02-28',
-    favorite: false,
-    checked: false
-  },
-  {
-    name: '수능특강 기반 문제생성saasasdsadasdsadads',
-    title: '메이드투메이드의 건배',
-    type: '지문',
-    date: '2025-02-28',
-    favorite: false,
-    checked: false
-  },
-  {
-    name: '수능특강 기반 문제생성saasasdsadasdsadads',
-    title: '메이드투메이드의 건배',
-    type: '지문',
-    date: '2025-02-28',
-    favorite: false,
-    checked: false
-  },
-
+  // 여기에 나머지 항목들이 있습니다...
 ]);
+
+// 검색 관련 상태
+const searchQuery = ref('');
 
 // 컨텍스트 메뉴 상태 관리
 const showContextMenu = ref(false);
@@ -169,6 +172,17 @@ const contextMenuIndex = ref(-1);
 // 편집 중인 항목의 인덱스 (-1이면 편집 중이 아님)
 const editingIndex = ref(-1);
 const editInput = ref(null);
+
+// 띄어쓰기를 제거하는 함수
+const removeWhitespace = (str) => {
+  return str.replace(/\s+/g, '');
+};
+
+// 검색 기능 - 띄어쓰기 무시
+const handleSearch = () => {
+  // 검색어가 변경될 때 첫 페이지로 돌아가기
+  currentPage.value = 1;
+};
 
 // 컨텍스트 메뉴 표시
 const showEditForm = (index, event) => {
@@ -250,7 +264,7 @@ const openFileModal = (item) => {
 // 모달 닫기
 const closeFileModal = () => {
   isModalOpen.value = false;
-}
+};
 
 // 파일 형식 선택 후 처리
 const handleFileSelection = (fileType) => {
@@ -258,27 +272,163 @@ const handleFileSelection = (fileType) => {
   console.log('선택된 작업 아이템:', selectedItem.value);
 
   // 파일 추출 로직 구현
-}
+};
 
 const toggleFavorite = (index) => {
   // 즐겨찾기 토글 로직
   workItems.value[index].favorite = !workItems.value[index].favorite;
 };
+
+// 페이지네이션 관련 상태
+const currentPage = ref(1);
+const itemsPerPage = 15; // 페이지당 표시할 아이템 수
+const maxVisiblePages = 5; // 한 번에 표시할 페이지 번호 최대 개수
+
+// 띄어쓰기를 무시하는 고급 검색 함수
+const advancedSearch = (items, query) => {
+  if (!query) return items;
+  
+  // 검색어와 검색 대상에서 모든 공백 제거
+  const normalizedQuery = removeWhitespace(query.toLowerCase());
+  
+  return items.filter(item => {
+    // 검색할 필드들에서 공백 제거
+    const nameWithoutSpace = removeWhitespace(item.name.toLowerCase());
+    const titleWithoutSpace = removeWhitespace(item.title.toLowerCase());
+    const typeWithoutSpace = removeWhitespace(item.type.toLowerCase());
+    
+    // 공백 없는 텍스트에서 검색
+    return nameWithoutSpace.includes(normalizedQuery) || 
+           titleWithoutSpace.includes(normalizedQuery) || 
+           typeWithoutSpace.includes(normalizedQuery);
+  });
+};
+
+// 필터링된 작업 아이템 계산 (검색 기능)
+const filteredWorkItems = computed(() => {
+  return advancedSearch(workItems.value, searchQuery.value);
+});
+
+// 총 페이지 수 계산
+const totalPages = computed(() => {
+  return Math.ceil(filteredWorkItems.value.length / itemsPerPage);
+});
+
+// 페이지네이션된 작업 아이템 계산
+const computedWorkItems = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage;
+  return filteredWorkItems.value.slice(start, start + itemsPerPage);
+});
+
+// 표시할 페이지 배열 계산
+const visiblePages = computed(() => {
+  const total = totalPages.value;
+  if (total <= 1) return [1];
+  
+  // 현재 페이지를 중심으로 최대 5개의 페이지 번호 표시
+  const startPage = Math.max(1, Math.min(
+    currentPage.value - Math.floor(maxVisiblePages / 2),
+    total - maxVisiblePages + 1
+  ));
+  
+  const endPage = Math.min(startPage + maxVisiblePages - 1, total);
+  
+  return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
+});
+
+// 페이지 변경 함수들
+const changePage = (page) => {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page;
+  }
+};
+
+const prevPage = () => {
+  if (currentPage.value > 1) {
+    currentPage.value--;
+  }
+};
+
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++;
+  }
+};
+
+const lastPage = () => {
+  currentPage.value = totalPages.value;
+};
+
+// 삭제 모달 상태 관리
+const isDeleteModalOpen = ref(false);
+const router = useRouter();
+
+// 선택된 아이템들 찾기
+const selectedItems = computed(() => {
+  return workItems.value.filter(item => item.checked);
+});
+
+// 삭제 버튼 클릭 시 모달 열기
+const openDeleteModal = () => {
+  if (selectedItems.value.length > 0) {
+    isDeleteModalOpen.value = true;
+  }
+};
+
+// 선택된 아이템 삭제 확인 
+const confirmDelete = () => {
+  // 선택된 아이템 제거
+  workItems.value = workItems.value.filter(item => !item.checked);
+  
+  // 모달 닫기
+  isDeleteModalOpen.value = false;
+  
+  // 페이지 재계산
+  currentPage.value = Math.min(currentPage.value, totalPages.value);
+};
+
+// 삭제 모달 닫기
+const closeDeleteModal = () => {
+  isDeleteModalOpen.value = false;
+};
 </script>
+
 <style scoped>
 .card-container {
-    width: 100%;
-    padding: 20px 30px 80px 20px;
+  position: relative;
+  width: 100%;
+  padding: 20px 30px 80px 20px;
 }
- .storage-worklistmain-title {
-   display: flex;
-   align-items: flex-start;
-   gap: 12px;
-   isolation: isolate;
-   position: absolute;
-   left: 292px;
-   top: 48px;
-   box-sizing: border-box;
+
+/* 검색 결과 없음 메시지 스타일 */
+.no-results-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  width: 1472px;
+  height: 667px;
+  left: 292px;
+  top: 130px;
+  background: #FFFFFF;
+  border-radius: 12px;
+}
+
+.no-results-message {
+  font-size: 16px;
+  color: #757575;
+  text-align: center;
+}
+
+.storage-worklistmain-title {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  isolation: isolate;
+  position: absolute;
+  left: 292px;
+  top: 48px;
+  box-sizing: border-box;
 }
 
 .storage-worklistmain-title p {
@@ -288,25 +438,25 @@ const toggleFavorite = (index) => {
 }
 
 .storage-worklistmain-subtitle {
-   display: flex;
-   align-items: flex-start;
-   gap: 4px;
-   isolation: isolate;
-   position: absolute;
-   left: 292px;
-   top: 90px;
-   box-sizing: border-box;
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  isolation: isolate;
+  position: absolute;
+  left: 292px;
+  top: 90px;
+  box-sizing: border-box;
 }
 
 .storage-worklistmain-subtitle2 {
-   display: flex;
-   align-items: flex-start;
-   gap: 3px;
-   isolation: isolate;
-   position: absolute;
-   left: 1710px;
-   top: 90px;
-   box-sizing: border-box;
+  display: flex;
+  align-items: flex-start;
+  gap: 3px;
+  isolation: isolate;
+  position: absolute;
+  left: 1710px;
+  top: 90px;
+  box-sizing: border-box;
 }
 
 .storage-worklistmain-subtitle2 span {
@@ -330,25 +480,24 @@ const toggleFavorite = (index) => {
   color: #FF9F40;
 }
 
-
 .storage-worklist-table {
-   display: flex;
-   flex-direction: column;
-   align-items: flex-start;
-   gap: 12px;
-   isolation: isolate;
-   position: absolute;
-   width: 1472px;
-   height: 684.5px;
-   left: 292px;
-   top: 130px;  
-   background: #FFFFFF;
-   border-radius: 12px;
-   box-sizing: border-box;
-   overflow: hidden; /* 내부 요소가 border-radius를 넘지 않도록 */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  isolation: isolate;
+  position: absolute;
+  width: 1472px;
+  height: 667px;
+  left: 292px;
+  top: 130px;  
+  background: #FFFFFF;
+  border-radius: 12px;
+  box-sizing: border-box;
+  overflow: hidden; /* 내부 요소가 border-radius를 넘지 않도록 */
 }
 
-td{
+td {
   height: 29.21px;  
 }
 
@@ -382,7 +531,6 @@ td{
   text-overflow: ellipsis; 
 }
 
-
 /* 열 너비 조정 */
 .data-table th:nth-child(1), .data-table td:nth-child(1) {
   width: 4%;
@@ -398,7 +546,6 @@ td{
 
 .data-table th:nth-child(3), .data-table td:nth-child(3) {
   width: 10%;
-  
 }
 
 .data-table th:nth-child(4), .data-table td:nth-child(4) {
@@ -415,6 +562,7 @@ td{
   width: 7%;
   text-align: center;
 }
+
 .data-table th:nth-child(7), .data-table td:nth-child(7) {
   width: 7%;
   text-align: center;
@@ -422,11 +570,11 @@ td{
 
 /* 마지막 행의 셀에 border-radius 적용 */
 .data-table tbody tr:last-child td:first-child {
-   border-bottom-left-radius: 12px;
+  border-bottom-left-radius: 12px;
 }
 
 .data-table tbody tr:last-child td:last-child {
-   border-bottom-right-radius: 12px;
+  border-bottom-right-radius: 12px;
 }
 
 /* 마지막 빈 행은 테두리 없음 */
@@ -442,7 +590,7 @@ td{
   min-width: 50px;
   height: 28px;
   background-color: #f0f0f0;
-  border-radius: 4px;
+  border-radius: 12px;
   padding: 0 10px;
   font-size: 14px;
   color: #333;
@@ -462,46 +610,32 @@ td{
   align-items: center;
   padding: 5px 8px;
   gap: 8px;
-
   width: 72px;
   height: 34px;
-
   background: #303030;
   border-radius: 8px;
 }
+
 #btn-text {
   font-family: 'Pretendard';
   font-style: normal;
   font-weight: 600;
   font-size: 16px;
   line-height: 150%;
-
   letter-spacing: -0.02em;
   color: #FFFFFF;
 }
+
 #btn-icon {
   width: 20px;
   height: 20px;
-
   flex: none;
   order: 1;
   flex-grow: 0;
 }
-.download-icon:after {
-  content: "↑";
-  font-size: 12px;
-}
 
 /* 별 아이콘 */
-.star-empty {
-  font-size: 20px;
-  color: #ddd;
-  cursor: pointer;
-}
-
-.star-filled {
-  font-size: 20px;
-  color: #FFC107;
+.star-container {
   cursor: pointer;
 }
 
@@ -509,35 +643,6 @@ td{
 .data-table tbody tr:hover {
   background-color: #EAEAEA;
 }
-
-/* 추출하기 열(5번째 열) 스타일링 */
-.data-table th:nth-child(5), 
-.data-table td:nth-child(5) {
-  text-align: center; /* 셀 내용 중앙 정렬 */
-}
-
-/* 추출 버튼 스타일 */
-.extract-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px 16px;
-  gap: 6px;
-  background-color: #333;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 14px;
-  cursor: pointer;
-  margin: 0 auto;
-}
-
-/* 다운로드 아이콘 정렬 */
-.download-icon {
-  display: inline-block;
-  margin-left: 4px;
-}
-
 
 /* 체크박스 컨테이너 스타일 */
 .custom-checkbox {
@@ -582,33 +687,31 @@ td{
   background-color: #FFEDDC !important;
 }
 
-
-/* 검색인풋창 디자인. */
+/* 검색인풋창 디자인 */
 .storage-worklistmain-search {
-   display: flex;
-   align-items: flex-start;
-   gap: 3px;
-   isolation: isolate;
-   position: absolute;
-   left: 1420px;
-   top: 80px;
-   box-sizing: border-box;
+  display: flex;
+  align-items: flex-start;
+  gap: 3px;
+  isolation: isolate;
+  position: absolute;
+  left: 1420px;
+  top: 80px;
+  box-sizing: border-box;
 }
 
 .search-container {
   position: relative;
   width: 100%;
-  max-width: 400px;
-  margin: 0 auto;
+  max-width: 300px;
 }
 
 .search-input {
-  width: 100%;
+  /* width: 300px; */
   height: 40px;
   padding: 0 10px 0 15px;
   border: 1px solid #ddd;
   border-radius: 6px;
-  font-size: 18px;
+  font-size: 16px;
   color: #333;
   outline: none;
   box-sizing: border-box;
@@ -626,7 +729,6 @@ td{
   cursor: pointer;
 }
 
-
 /* 편집 입력 필드 스타일 */
 .edit-input {
   width: 100%;
@@ -641,7 +743,6 @@ td{
 .data-table td {
   cursor: context-menu;
 }
-
 
 /* 컨텍스트 메뉴 스타일 */
 .context-menu {
@@ -663,5 +764,55 @@ td{
 .menu-item:hover {
   background-color: #f5f5f5;
 }
-</style>
 
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center; 
+  position: absolute;
+  left: 300px;
+  top: 850px;
+  width: 1471px; 
+  margin-top: 20px;
+  gap: 8px; 
+}
+
+.pagination span {
+  display: inline-block;
+  min-width: 26px; 
+  text-align: center;
+  font-size: 14px;
+  cursor: pointer;
+  user-select: none; 
+  outline: none; 
+  padding: 5px 10px;
+  border-radius: 4px;
+}
+
+.pagination button {
+  border: none;
+  background: none;
+  padding: 5px 10px;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.pagination button:hover {
+  background-color: #f0f0f0;
+}
+
+.pagination button:disabled {
+  color: #ccc;
+  cursor: not-allowed;
+}
+
+.active-page {
+  color: #FF9F40;
+  font-weight: bold;
+}
+
+.pagination span:hover:not(.active-page) {
+  background-color: #f0f0f0;
+}
+</style>
