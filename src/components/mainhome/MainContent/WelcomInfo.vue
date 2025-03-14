@@ -17,6 +17,7 @@
 import {computed, onMounted} from 'vue';
 import { useAuthStore } from '@/stores/auth';
 
+
 //Auth 스토어 사용
 const authStore = useAuthStore();
 
@@ -31,46 +32,6 @@ onMounted(()=>{
         authStore.updateTicketCount();
     }
 })
-
-// import { ref, onMounted } from 'vue';
-// // 티켓 카운트를 저장할 반응형 변수 선언
-// const ticketCount = ref("n");
-
-// // 컴포넌트가 마운트될 때 자동으로 티켓 정보 조회 실행
-// onMounted(() => {
-//     // 컴포넌트 로드 시 티켓 정보 조회
-//     // getTicketCount();
-// });
-// 티켓 정보 조회 함수
-// function getTicketCount() {
-//     const apiUrl = import.meta.env.VITE_API_URL;
-//     // fetch를 사용한 티켓 정보 조회 요청
-//     fetch(`${apiUrl}/api/info/select/ticket`, {
-//         method: "GET",
-//         headers: {
-//             "Content-Type": "application/json",
-//         },
-//         credentials: 'include' // 쿠키를 포함시켜 세션 유지
-//     })
-//     .then(response => {
-//         console.log("서버 응답 상태 코드:", response.status);
-//         if (!response.ok) {
-//             return response.text().then(text => { throw new Error(text); });
-//         }
-//         return response.text();
-//     })
-//     .then(data => {
-//         // 티켓 정보 갱신
-//         console.log("티켓 수량:", data);
-//         ticketCount.value = data;
-//     })
-//     .catch(error => {
-//         console.error("티켓 조회 실패:", error);
-//     });
-// }
-
-    
-
 
 </script>
 <style scoped>

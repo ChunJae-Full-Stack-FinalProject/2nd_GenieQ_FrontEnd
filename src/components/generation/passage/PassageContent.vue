@@ -60,6 +60,7 @@ import { ref, onMounted, onBeforeUnmount, getCurrentInstance } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { usePassageStore } from '@/stores/passage';
 
+
 // 모달 상태 관리
 const isFileModalOpen = ref(false);
 const isConfirmModalOpen = ref(false);

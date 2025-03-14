@@ -3,11 +3,6 @@ import { defineStore } from "pinia";
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 
-  // 라우터와 스토어 초기화
-  const router = useRouter();
-  const route = useRoute();
-  const authStore = useAuthStore();
-
 export const usePassageStore = defineStore('passage', {
     state: () => ({
         passage: [],
@@ -34,6 +29,11 @@ export const usePassageStore = defineStore('passage', {
             this.error = null;
 
             const apiUrl = import.meta.env.VITE_API_URL;
+            const router = useRouter();
+            const route = useRoute();
+            const authStore = useAuthStore();
+
+            console.log('💾 저장할 데이터:', passageData);
 
             return fetch(`${apiUrl}/pass/insert/each`, {
                 method: 'POST',
@@ -42,6 +42,8 @@ export const usePassageStore = defineStore('passage', {
                 body: JSON.stringify(passageData)
             })
             .then(response => {
+                console.log('🌐 서버 응답 상태:', response.status);
+                
                 if (!response.ok) {
                     // 인증 오류 처리 (401)
                     if (response.status === 401) {
@@ -62,23 +64,40 @@ export const usePassageStore = defineStore('passage', {
                         // 추가 처리를 중단하기 위한 에러 발생
                         throw new Error('인증이 필요합니다');
                     }
-                    return response.text().then(text => { throw new Error(text); });
+                    return response.text().then(text => { 
+                        console.error(`🚨 서버 응답 오류: ${response.status} ${response.statusText} - ${text}`);
+                        throw new Error(text); 
+                    });
                 }
+
+                 // 응답이 JSON인지 확인 후 파싱
+                return response.json().catch(() => {
+                    throw new Error('🚨 서버에서 잘못된 JSON 응답 수신');
+                });
+                
             })
             .then(data => {
+                console.log('✅ 서버 응답 데이터:', data);
+
+                // 데이터 유효성 검사 추가
+                if (!data || !data.pasCode) {
+                    console.error('🚨 서버에서 유효한 응답 없음:', data);
+                    throw new Error('서버에서 유효한 데이터가 반환되지 않았습니다.');
+                }
+        
                 // 현재 지문 상태 업데이트
                 this.currentPassage = data;
 
                 // 반응형 상태 업데이트
                 this.$patch(state => {
-                    const index = state.passage.findIndex(p => p.id === data.id);
+                    const index = state.passage.findIndex(p => p.pasCode === data.pasCode);
                     if (index !== -1) {
                         state.passage[index] = data;
                     } else {
                         state.passage.push(data);
                     }
                 });
-
+                console.log('✅ 저장 성공:', data);
                 return { success: true, passage: data };
             })
             .catch(error => {
