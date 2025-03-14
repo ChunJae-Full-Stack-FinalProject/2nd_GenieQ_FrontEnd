@@ -310,6 +310,34 @@ const sendTempPassword = () => {
   // 로딩 상태 표시
   isSending.value = true;
   
+
+
+  // 백엔드 비밀번호 변경 요청.
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:9090';
+
+  fetch(`${apiUrl}/api/auth/update/temporal`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
+    },
+    body: JSON.stringify({
+      memEmail: email.value,
+      tempPassword: tempPassword,
+    })
+  })
+  .then(response => {
+    if (!response.ok) {
+      return response.text().then(errorText => {
+        throw new Error(errorText || '서버에서 비밀번호 변경에 실패했습니다.');
+      });
+    }
+    console.log('백엔드 비밀번호 변경 성공!');
+    return response.text(); // 성공 메시지 반환 (필요하면)
+  })
+
+
+
   // EmailJS로 이메일 전송
   const templateParams = {
     to_name: email.value.split('@')[0],
