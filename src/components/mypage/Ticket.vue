@@ -181,7 +181,7 @@ const endDate = ref('');
 
 // 페이지네이션 관련 상태 추가
 const currentPage = ref(1);
-const itemsPerPage = 10;
+const itemsPerPage = 5;
 const maxVisiblePages = 5;
 
 // 임시 결제 내역 데이터 (실제로는 API 요청으로 대체)
