@@ -186,10 +186,9 @@ const processWithdrawal = () => {
     credentials: 'include',
     headers: { 
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
     },
     body: JSON.stringify({
-      memEmail: userData.value.email
+      memEmail: userData.value.email,
     })
   })
   .then(response => {
@@ -509,6 +508,7 @@ onMounted(() => {
   top: 0px;
   left: 0px;
   width: 1764px;
+
 }
 
 #save-button {
@@ -526,7 +526,7 @@ onMounted(() => {
 
   position: absolute;
   width: 1472px;
-  height: 384px;
+  height: 250px;
   left: 136px;
   top: 94px;
 }
@@ -667,7 +667,7 @@ onMounted(() => {
   height: 1px;
   background-color: #BDBDBD;
   position: absolute;
-  bottom: -340px;
+  bottom: -240px;
 }
 
 .account {
@@ -680,7 +680,7 @@ onMounted(() => {
   width: 240px;
   height: 40px;
   left: 1524px;
-  top: 860px;
+  top: 620px;
 }
 
 .withdrawal {

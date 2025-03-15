@@ -230,7 +230,6 @@ const fetchNoticeDetails = () => {
 .notice-detail-container {
     position: absolute;
     width: 1472px; /*  표 크기 맞춤 */
-    /* padding: 20px; */
     display: flex;
     flex-direction: column;
     left:306.4px;
@@ -282,8 +281,7 @@ const fetchNoticeDetails = () => {
 
 .notice-content {
   min-height: 50px;
-  height: 530px;
-  padding: 8px;
+  padding: 18px;
   gap: 8px;
   line-height: 1.6;
   color: #424242;
@@ -292,7 +290,7 @@ const fetchNoticeDetails = () => {
 }
 
 .notice-content p {
-  padding-left: 36px;
+  padding-left: 26px;
   margin-bottom:5px;
 
   font-size: 16px;

@@ -14,7 +14,12 @@
                 :disabled="!hasContent || creditCountValue <= 0"
                 @click="validateAndOpenModal"
             />
-            <GenerateQuestionModal :isOpen="showGenerateQuestionModal" @close="showGenerateQuestionModal = false"/>
+            <GenerateQuestionModal 
+                :isOpen="showGenerateQuestionModal" 
+                @close="showGenerateQuestionModal = false"
+                :passageTitle="passageTitle" 
+                :passageContent="currentPassage.PAS_CONTENT"
+            />
             <LoadPassageModal :isOpen="showLoadPassageModal" @close="closeLoadPassageModal" @loadPassage="handleLoadPassage"/>
         </div>
     </div>

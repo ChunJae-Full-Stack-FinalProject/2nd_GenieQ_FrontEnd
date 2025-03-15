@@ -7,7 +7,7 @@
       <div class="info-card">
         <div class="info-item">
           <span class="info-label">나의 잔여 이용권</span>
-          <span class="info-value">10</span>
+          <span class="info-value">{{ ticketCount }}</span>
           <span class="info-label">회</span>
         </div>
       </div>
@@ -55,7 +55,7 @@
                   <span class="package-title">지문/문항 생성 10회 이용권</span>
                   <span class="package-price">10,000원</span>
                 </div>
-                <button class="purchase-btn">구매하기</button>
+                <button class="purchase-btn" @click="openPurchaseWarningModal(10)">구매하기</button>
               </div>
               
               <!-- 50회 이용권 -->
@@ -68,7 +68,7 @@
                     <span class="package-price">40,000원</span>
                   </div>
                 </div>
-                <button class="purchase-btn">구매하기</button>
+                <button class="purchase-btn" @click="openPurchaseWarningModal(50)">구매하기</button>
               </div>
               
               <!-- 100회 이용권 -->
@@ -81,7 +81,7 @@
                     <span class="package-price">70,000원</span>
                   </div>
                 </div>
-                <button class="purchase-btn">구매하기</button>
+                <button class="purchase-btn" @click="openPurchaseWarningModal(100)">구매하기</button>
               </div>
             </div>
           </div>
@@ -162,14 +162,31 @@
     </div>
     <!-- 이용 내역 모달 -->
     <UsageHistoryModal :isOpen="showUsageHistoryModal" @close="showUsageHistoryModal = false" />
+
+    <!-- 구매 경고 모달 -->
+    <WarningModalComponent :isOpen="isPurchaseWarningModal" 
+      title="이용권을 구매하시겠습니까?" :message="`${purchaseTicket}회의 이용권이 충전됩니다.`" 
+      cancelText="취소하기" confirmText="구매하기" 
+      @close="closeWarningModal" @confirm="purchaseModal"
+    />
   </div>
 </template>
   
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
 import UsageHistoryModal from '@/components/common/modal/type/mypage/UsageHistoryModal.vue';
+import WarningModalComponent from '../common/modal/type/WarningModalComponent.vue';
 
+// 라우터와 스토어 초기화
+const router = useRouter();
+const route = useRoute();
+const authStore = useAuthStore();
+
+// 모달 상태 관리
 const showUsageHistoryModal = ref(false);
+const isPurchaseWarningModal = ref(false);
 
 // 활성화된 탭 상태 관리
 const activeTab = ref('usage');
@@ -181,11 +198,12 @@ const endDate = ref('');
 
 // 페이지네이션 관련 상태 추가
 const currentPage = ref(1);
-const itemsPerPage = 10;
+const itemsPerPage = 5;
 const maxVisiblePages = 5;
 
 // 임시 결제 내역 데이터 (실제로는 API 요청으로 대체)
 const paymentHistory = ref([]);
+
 
 // 데이터 초기화 함수
 const initializeData = () => {
@@ -286,6 +304,85 @@ const updateDateRange = () => {
     startDate.value = getMonthsAgoFormatted(months);
   }
 };
+
+// 구매하기 경고모달 관련 
+const purchaseTicket = ref(0);
+
+const openPurchaseWarningModal = (count) => {
+  purchaseTicket.value = count;
+  isPurchaseWarningModal.value = true;
+};
+
+  // 구매확인 함수
+  const purchaseModal = () => {
+
+    // 구매 로직 구현할 부분
+
+    closeWarningModal();
+  }
+
+const closeWarningModal = () => {
+  isPurchaseWarningModal.value = false;
+}
+
+
+// 보유 이용권 횟수
+const ticketCount = ref("n");
+
+  // 컴포넌트가 마운트될 때 자동으로 티켓 정보 조회
+onMounted(() => {
+    // 컴포넌트 로드 시 티켓 정보 조회
+  getTicketCount();
+});
+
+  // 티켓 정보 조회 함수
+function getTicketCount() {
+  const apiUrl = import.meta.env.VITE_API_URL;
+    // fetch를 사용한 티켓 정보 조회 요청
+  fetch(`${apiUrl}/api/info/select/ticket`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: 'include' // 쿠키를 포함시켜 세션 유지
+  })
+  .then(response => {
+    console.log("서버 응답 상태 코드:", response.status);
+    if (!response.ok) {
+      // 인증 오류 처리 (401)
+      if (response.status === 401) {
+        // (추가) 로그 - 인증 오류 감지
+        console.error('인증 오류(401): 로그인이 필요합니다');
+        
+        // 인증 상태 초기화
+        authStore.user = null;
+        authStore.isAuthenticated = false;
+        localStorage.removeItem('authUser');
+        
+        // 로그인 페이지로 리다이렉트
+        router.push({ 
+        path: '/login', 
+        query: { redirect: route.fullPath }
+        });
+        
+        // 추가 처리를 중단하기 위한 에러 발생
+        throw new Error('인증이 필요합니다');
+      }
+      return response.text().then(text => { throw new Error(text); });
+    }
+    return response.text();
+  })
+  .then(data => {
+    // 티켓 정보 갱신
+    console.log("티켓 수량: ", data);
+    ticketCount.value = data;
+  })
+  .catch(error => {
+    console.error("티켓 조회 실패:", error);
+  });
+}
+
+
 
 // 컴포넌트 마운트 시 초기화
 onMounted(() => {

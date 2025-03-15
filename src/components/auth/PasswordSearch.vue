@@ -109,46 +109,86 @@ const isButtonEnabled = computed(() => {
   return isEmailValid ;
 });
 
-// 이메일 발송 함수
+// 데이터베이스에 존재하는 이메일만 인증 코드 발송하도록 수정
 const sendVerificationEmail = () => {
   validateEmail();
   if (isEmailValid.value && !isSending.value) {
-    generatedCode.value = generateVerificationCode();
-    
     // 로딩 상태 표시
     isSending.value = true;
     
-    // EmailJS로 이메일 전송 - 수신자 이메일 명확하게 지정
-    const templateParams = {
-      to_name: email.value.split('@')[0],
-      from_name: "GenieQ",
-      message: `인증 코드: ${generatedCode.value}`, // 기존 메시지 유지
-      verification_code: generatedCode.value,      // 명시적으로 추가
-      to_email: email.value,
-      reply_to: "no-reply@genieq.com"
-    };
+    // API URL 설정
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:9090';
     
-    console.log("전송 파라미터:", templateParams); // 디버깅용
+    // 이메일 URL 인코딩
+    const encodedEmail = encodeURIComponent(email.value);
     
-    emailjs.send(
-      'service_gamja',   // 서비스 ID
-      'template_zcvkxgp',  // 템플릿 ID
-      templateParams
-    )
-    .then(() => {
-      console.log('이메일 발송 성공!', generatedCode.value);
-      console.log('수신자:', email.value);
+    // 디버깅용 로그
+    console.log('요청 URL:', `${apiUrl}/api/auth/select/email?email=${encodedEmail}`);
+    
+    // GET 요청
+    fetch(`${apiUrl}/api/auth/select/email?email=${encodedEmail}`, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json'
+      }
+    })
+    .then(response => {
+      // 응답 상태 디버깅
+      console.log('응답 상태:', response.status);
+      
+      // 403 상태 코드를 받으면 이메일이 존재하지 않는 것으로 처리
+      if (response.status === 403) {
+        throw new Error('존재하지 않는 이메일입니다.');
+      }
+      
+      // 그 외 성공이 아닌 응답도 오류로 처리 + 무슨 에러인지 모르겠어서 일단 모든 오류에서 존재하지 않는 이메일 입니다. 라고
+      if (!response.ok) {
+        throw new Error('존재하지 않는 이메일입니다.');
+      }
+      
+      // 응답이 성공적이면 인증 코드 생성 및 발송 진행
+      // 인증코드 생성
+      generatedCode.value = generateVerificationCode();
+      
+      const templateParams = {
+        to_name: email.value.split('@')[0],
+        from_name: "GenieQ",
+        message: `인증 코드: ${generatedCode.value}`,
+        verification_code: generatedCode.value,
+        to_email: email.value,
+        reply_to: "no-reply@genieq.com"
+      };
+      
+      console.log('이메일 전송 시작');
+      return emailjs.send('service_gamja', 'template_zcvkxgp', templateParams);
+    })
+    .then(result => {
+      // 이 블록은 이메일 발송이 성공한 경우에만 실행됨
+      console.log('이메일 발송 성공!', result);
+      console.log('생성된 인증코드:', generatedCode.value);
       isEmailSent.value = true;
-      isSending.value = false;
       startTimer(); // 타이머 시작
     })
-    .catch((error) => {
-      console.error('이메일 발송 실패:', error);
-      emailError.value = '인증 메일 발송에 실패했습니다. 다시 시도해주세요.';
+    .catch(error => {
+      console.error('처리 중 에러 발생:', error);
+      
+      // 에러 메시지 설정
+      if (error.message === '존재하지 않는 이메일입니다.') {
+        emailError.value = '존재하지 않는 이메일입니다.';
+      } else {
+        emailError.value = '인증 메일 발송에 실패했습니다. 다시 시도해주세요.';
+      }
+      
+      // 상태 초기화
+      isEmailSent.value = false;
+      generatedCode.value = '';
+    })
+    .finally(() => {
       isSending.value = false;
     });
   }
 };
+
 // 테스트용 인증코드 생성 함수
 const generateVerificationCode = () => { 
   return Math.floor(100000 + Math.random() * 900000).toString(); 
@@ -270,6 +310,34 @@ const sendTempPassword = () => {
   // 로딩 상태 표시
   isSending.value = true;
   
+
+
+  // 백엔드 비밀번호 변경 요청.
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:9090';
+
+  fetch(`${apiUrl}/api/auth/update/temporal`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
+    },
+    body: JSON.stringify({
+      memEmail: email.value,
+      tempPassword: tempPassword,
+    })
+  })
+  .then(response => {
+    if (!response.ok) {
+      return response.text().then(errorText => {
+        throw new Error(errorText || '서버에서 비밀번호 변경에 실패했습니다.');
+      });
+    }
+    console.log('백엔드 비밀번호 변경 성공!');
+    return response.text(); // 성공 메시지 반환 (필요하면)
+  })
+
+
+
   // EmailJS로 이메일 전송
   const templateParams = {
     to_name: email.value.split('@')[0],
@@ -328,8 +396,8 @@ const sendTempPassword = () => {
   }
   
   .orange-q {
-    font-size: 32px;
-    font-weight: 700;
+    font-size: 32px !important;
+    font-weight: 700 !important;
     color: #FF9500;
   }
   

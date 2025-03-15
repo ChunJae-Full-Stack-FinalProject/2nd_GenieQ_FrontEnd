@@ -7,8 +7,9 @@
 </template>
 <script setup>
 import { ref, watch } from 'vue';
+const savePassageData = JSON.parse(localStorage.getItem('saveResponse'));
 
-const title = ref('');
+const title = ref(savePassageData.passage?.title||'');
 const MAX_LENGTH = 50;
 
 watch(title, (newValue) => {
