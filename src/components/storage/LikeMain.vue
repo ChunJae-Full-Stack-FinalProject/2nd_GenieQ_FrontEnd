@@ -168,7 +168,7 @@ const fetchWorkItems = () => {
       PAS_CODE: item.pasCode,
       PAS_TITLE: item.title,
       PAS_KEYWORD: item.keyword,
-      PAS_IS_GENERATED: item.isGenerated === 1 ? '생성' : '직접입력',
+      PAS_IS_GENERATED: item.isGenerated === 1 ? '지문' : '문항',
       PAS_DATE: item.date,
       PAS_IS_FAVORITE: item.isFavorite === 1,
       checked: false // 체크박스 상태 추가

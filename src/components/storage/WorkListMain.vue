@@ -365,36 +365,39 @@ const currentPage = ref(1);
 const itemsPerPage = 15; // 페이지당 표시할 아이템 수
 const maxVisiblePages = 5; // 한 번에 표시할 페이지 번호 최대 개수
 
-//고급 검색 함수.
+// 검색 텍스트 정규화 함수 개선
+const normalizeText = (str) => {
+  if (!str) return '';
+  // 문자열로 변환 후 소문자화, 띄어쓰기 제거, 특수문자 제거
+  return str.toString().toLowerCase().replace(/[\s\W_]+/g, '');
+};
+
+// advancedSearch 함수에서 해당 함수 사용
 const advancedSearch = (items, query) => {
   if (!query) return items;
   if (!items || !Array.isArray(items) || items.length === 0) return [];
   
-  const normalizedQuery = removeWhitespace(query.toLowerCase());
+  const normalizedQuery = normalizeText(query);
   
-  // 검색 결과에 우선순위 부여
   const prioritizedResults = items.map(item => {
     try {
-      const nameWithoutSpace = removeWhitespace(item.PAS_TITLE.toLowerCase());
-      const titleWithoutSpace = removeWhitespace(item.PAS_KEYWORD.toLowerCase());
-      const typeWithoutSpace = removeWhitespace(item.PAS_IS_GENERATED.toLowerCase());
+      const normalizedTitle = normalizeText(item.PAS_TITLE);
+      const normalizedKeyword = normalizeText(item.PAS_KEYWORD);
+      const normalizedType = normalizeText(item.PAS_IS_GENERATED);
       
-      // 우선순위 할당 (높을수록 먼저 표시)
       let priority = -1;
-      if (nameWithoutSpace.includes(normalizedQuery)) priority = 2;
-      else if (titleWithoutSpace.includes(normalizedQuery)) priority = 1;
-      else if (typeWithoutSpace.includes(normalizedQuery)) priority = 0;
+      if (normalizedTitle.includes(normalizedQuery)) priority = 2;
+      else if (normalizedKeyword.includes(normalizedQuery)) priority = 1;
+      else if (normalizedType.includes(normalizedQuery)) priority = 0;
       
       return { item, priority };
     } catch (error) {
-      console.error('검색 중 오류 발생 : ', error, item);
+      console.error('검색 중 오류 발생:', error, item);
       return { item, priority: -1 };
     }
   }).filter(result => result.priority >= 0);
   
-  // 우선순위에 따라 정렬
   prioritizedResults.sort((a, b) => b.priority - a.priority);
-  
   return prioritizedResults.map(result => result.item);
 };
 
