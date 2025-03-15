@@ -448,7 +448,7 @@ const handleWorkItemClick = (item) => {
     font-weight: 400;
   }
   
-/* 테이블이 비어있는 경우 */
+  /* 테이블이 비어있는 경우 */
 .empty-message {
   box-sizing: border-box;
   display: flex;
@@ -457,9 +457,8 @@ const handleWorkItemClick = (item) => {
   align-items: center;
 
   width: 1473px;
-  height: 276px;
+  height: 748px;
 }
-
 
   /* 추출 버튼 */
   .extract-btn {
