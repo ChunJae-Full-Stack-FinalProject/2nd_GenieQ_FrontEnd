@@ -4,14 +4,13 @@
         <div class="main-content">
             <PassageContentMain ref="passageContentRef" @content-changed="handleContentChange"/>   
             <PassageSummary ref="passageSummaryRef"/>
-            <BaseButton id="recreate-button" text="재생성하기" type="type2" width="248px" height="54px" @click="openPaymentUsageModal" :disabled="isContentChanged"/>
+            <BaseButton v-if="!isFromRoute" id="recreate-button" text="재생성하기" type="type2" width="248px" height="54px" @click="openPaymentUsageModal" :disabled="isContentChanged"/>
             <BaseButton id="save-button" text="저장하기" type="type2" width="248px" height="54px" @click="handleSaveButtonClick" :disabled="!isContentChanged"/>
             <BaseButton id="download-button" text="추출하기" type="type2" width="248px" height="54px" :disabled="isContentChanged || !hasManualSave" @click="checkContentLengthAndOpenFileModal()"/>
             <router-link to="/questions" custom v-slot="{ navigate }">
                 <BaseButton id="connect-create-button" text="이어서 문항 생성하기" type="type4" width="520px" height="54px" @click="handleConnectCreate($event, navigate)" :disabled="isContentChanged"/>
             </router-link>
             
-       
             <PlainTooltip id="start-edit" message="필요한 부분을 클릭하고 편집을 시작하세요" width="316px"/>
         </div>
 
@@ -45,6 +44,15 @@
             @generate="handleGenerate"
         />
 
+        <!-- 저장 성공 모달 -->
+        <ConfirmModalComponent
+            :isOpen="isSaveSuccessModalOpen"
+            title="확인"
+            :message="saveSuccessMessage"
+            @close="closeSaveSuccessModal"
+            @confirm="closeSaveSuccessModal"
+        />
+
         <!-- 로딩 표시 추가 -->
         <div v-if="isLoading" class="loading-overlay">
             <div class="loading-spinner"></div>
@@ -76,6 +84,9 @@ const isWarningModalOpen = ref(false); // 경고 모달 상태
 const isPaymentUsageModalOpen = ref(false); // 결제 사용 모달 상태
 const isLoading = ref(false); // 로딩 상태 추가
 const loadingMessage = ref('처리 중입니다...'); // 로딩 메시지
+const isFromRoute = ref(false); // 이전 페이지의 루트 확인용
+const isSaveSuccessModalOpen = ref(false); // 저장 확인 모달 오픈
+const saveSuccessMessage = ref('지문이 저장되었습니다.'); // 저장 확인 모달 메시지
 
 // 네비게이션 관련 변수
 const pendingRoute = ref(null); // 대기 중인 라우트 정보 저장
@@ -149,8 +160,17 @@ const openPaymentUsageModal = () => {
     }
 };
 
+// 모달 관련 함수
 const closePaymentUsageModal = () => {
     isPaymentUsageModalOpen.value = false;
+};
+
+const openSaveSuccessModal = () => {
+    isSaveSuccessModalOpen.value = true;
+};
+
+const closeSaveSuccessModal = () => {
+    isSaveSuccessModalOpen.value = false;
 };
 
 const handleGenerate = () => {
@@ -267,9 +287,14 @@ const handleSaveButtonClick = () => {
         // 로컬 스토리지 업데이트
         localStorage.setItem('genieq-passage-data', JSON.stringify(updatedData));
         
-        alert('지문 저장에 성공했습니다.');
+        openSaveSuccessModal();
         isContentChanged.value = false;
         hasManualSave.value = true;
+
+        // 보관함에서 왔을 경우 저장하기 버튼 초기 비활성화 상태 유지
+        if (isFromRoute.value) {
+            isContentChanged.value = false;
+        }
     })
     .catch(error => {
         console.error('지문 업데이트 중 오류:', error);
@@ -518,6 +543,10 @@ const loadPassageData = () => {
 // 컴포넌트 마운트 시 실행
 onMounted(async () => {
     console.log('PassageContent 컴포넌트 마운트');
+
+    // 이전 경로 확인 로직 추가
+    const fromPath = route.query.from || '';
+    isFromRoute.value = fromPath.startsWith('/home') || fromPath.startsWith('/storage');
     
     // 데이터 로드
     const loadedData = loadPassageData();
@@ -686,7 +715,7 @@ const handleContentChange = (data) => {
 }
 #start-edit {
     position: absolute;
-    top: 285px;
+    top: 242px;
     left: 670px;
 }
 </style>
