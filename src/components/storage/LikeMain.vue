@@ -812,7 +812,7 @@ color: #4285f4;
   align-items: center;
 
   width: 1473px;
-  height: 414px;
+  height: 748px;
 }
 
 /* 추출 버튼 */
