@@ -24,7 +24,7 @@ const title = ref('');
 const summary = ref({
     subject: '',
     keyword: '',
-    items: []
+    gist: ''
 });
 
 // 이벤트 발신 정의
@@ -57,9 +57,9 @@ const handleInput = (event) => {
 const emitContentChange = () => {
     // 현재 요약 정보 설정 (PassageSummary 컴포넌트와 동기화)
     const summaryValue = {
-        subject: summary.value.subject,
-        keyword: summary.value.keyword,
-        items: summary.value.items
+        subject: summary.value.subject || '',
+        keyword: summary.value.keyword || '',
+        gist: summary.value.gist || ''
     };
     
     // 상위 컴포넌트에 변경 내용 전달
@@ -68,6 +68,7 @@ const emitContentChange = () => {
         content: content.value,
         summary: summaryValue
     });
+    console.log('[31] PassageContentMain: 내용 변경 이벤트 발생', {titleLength: title.value?.length || 0,contentLength: content.value?.length || 0,summary: summaryValue});
 };
 
 // 본문 길이 검증
@@ -81,15 +82,19 @@ const getTitle = () => title.value;
 const getSummary = () => summary.value;
 
 const setContent = (newContent) => {
-    console.log('PassageContentMain: 내용 설정', newContent?.length || 0);
+    console.log('[29] PassageContentMain: 내용 설정', newContent?.length || 0);
+    if (newContent !== undefined) {
     content.value = newContent || '';
     emitContentChange();
+    }
 };
 
 const setTitle = (newTitle) => {
-    console.log('PassageContentMain: 제목 설정', newTitle);
-    title.value = newTitle || '';
-    emitContentChange();
+    console.log('[30] PassageContentMain: 제목 설정', newTitle);
+    if (newTitle !== undefined) {
+        title.value = newTitle || '';
+        emitContentChange();
+    }
 };
 
 const setSummary = (newSummary) => {
@@ -98,7 +103,7 @@ const setSummary = (newSummary) => {
         summary.value = {
             subject: newSummary.subject || '',
             keyword: newSummary.keyword || '',
-            items: Array.isArray(newSummary.items) ? [...newSummary.items] : []
+            gist: Array.isArray(newSummary.gist) ? [...newSummary.gist] : []
         };
     }
     emitContentChange();

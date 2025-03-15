@@ -38,3 +38,4 @@ coverage
 # src/components/storage
 src/.gitignore2
 *merged.md
+src/.gitignore

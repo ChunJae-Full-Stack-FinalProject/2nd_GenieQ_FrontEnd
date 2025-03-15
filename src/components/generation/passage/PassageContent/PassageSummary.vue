@@ -16,61 +16,67 @@
         <div class="gist-container">
             <p id="gist-text">핵심 논점</p>
             <div class="gist-main">
-                <ol class="gist-list">
-                    {{ items }}
-                    <!-- <li v-for="(item, index) in items" :key="index" class="list-item">
+                <ol class="gist-content">
+                    <li v-for="(item, index) in gistItems" :key="index" class="list-item">
                         {{ item }}
-                    </li> -->
+                    </li>
                 </ol>
             </div>
         </div>
     </div>
 </template>
 <script setup>
-import { ref, defineExpose } from 'vue';
-const savePassageData = JSON.parse(localStorage.getItem('saveResponse'));
-
+import { ref, defineExpose, computed } from 'vue';
 
 // 데이터 관리
-const subject = ref(savePassageData.passage.type);
-const keyword = ref(savePassageData.passage.keyword);
-const items = ref (savePassageData?.passage?.gist || '');
+const subject = ref('');
+const keyword = ref('');
+const gist = ref(''); // 문자열로 저장
+
+// computed 속성으로 gist를 줄바꿈으로 분리해 배열로 변환
+const gistItems = computed(() => {
+    if (!gist.value) return [];
+    return gist.value.split(/\\n|\n/).filter(item => item.trim());
+});
 
 // 외부에서 접근할 수 있도록 요약 정보를 가져오는 함수 노출
 const getSummary = () => {
     return {
         subject: subject.value,
         keyword: keyword.value,
-        items: [...items.value]
+        gist: gist.value
     };
 };
     
 // 요약 정보 설정 (외부에서 호출 가능)
 const setSummary = (summaryData) => {
-    console.log('PassageSummary: 요약 정보 설정', summaryData);
-    
+    console.log('[27] PassageSummary: 요약 정보 설정', summaryData);
     if (summaryData) {
-        if (summaryData.subject) {
-            subject.value = summaryData.subject;
-        }
+        // subject와 keyword 값 설정
+        subject.value = summaryData.subject || '';
+        keyword.value = summaryData.keyword || '';
         
-        if (summaryData.keyword) {
-            keyword.value = summaryData.keyword;
-        }
-        
-        if (Array.isArray(summaryData.items)) {
-            items.value = [...summaryData.items];
-        } else if (typeof summaryData.items === 'string') {
-            // 문자열인 경우 줄바꿈으로 분리
-            items.value = summaryData.items.split('\n').filter(item => item.trim());
+        // gist 처리 - 항상 문자열로 통일
+        if (summaryData.gist) {
+            // 배열인 경우 줄바꿈으로 합치기
+            if (Array.isArray(summaryData.gist)) {
+                gist.value = summaryData.gist.join('\n');
+            } else {
+                // 이미 문자열인 경우 그대로 사용
+                gist.value = String(summaryData.gist);
+            }
+        } else {
+            gist.value = '';
         }
     }
+    
+    console.log('[28] PassageSummary: 설정된 요약 정보', {subject: subject.value,keyword: keyword.value,gist: gist.value});
 };
 
 // 외부에서 사용 가능한 메서드 노출
 defineExpose({
-    getSummary,
-    setSummary
+  getSummary,
+  setSummary
 });
 </script>
 <style scoped>

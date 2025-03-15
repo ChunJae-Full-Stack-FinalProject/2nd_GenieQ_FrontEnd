@@ -101,21 +101,18 @@ const authStore = useAuthStore();
 
 // 더미 데이터 정의 (API 실패 시 사용)
 const dummyData = {
-    title: '인공지능과 기계학습',
+    title: '인공지능과 기계학습 PassageContent.dummyData',
     type: '사회',
-    keyword: '인공지능과 기계학습',
-    content: `인공지능과 기계학습은 현대 기술의 핵심 요소로 자리 잡고 있습니다. 이러한 기술은 데이터 처리와 분석을 통해 지속적으로 성능을 개선하며, 이는 의료, 금융, 제조업 등 다양한 분야에 걸쳐 응용되고 있습니다.
+    keyword: '인공지능과 기계학습 PassageContent.dummyData',
+    content: `PassageContent.dummyData
+    인공지능과 기계학습은 현대 기술의 핵심 요소로 자리 잡고 있습니다. 이러한 기술은 데이터 처리와 분석을 통해 지속적으로 성능을 개선하며, 이는 의료, 금융, 제조업 등 다양한 분야에 걸쳐 응용되고 있습니다.
 
     연구 커뮤니티는 이러한 모델의 규모를 확장하면 성능이 향상된다고 인정합니다. 대규모 언어 모델(LLMs)은 인공지능이 인간 언어를 이해하고 생성하는 방식을 변화시키고 있습니다.
 
     ChatGPT와 같은 혁신은 LLMs가 독특한 문제 해결 능력을 보여주기 시작했음을 나타냅니다. 이러한 발전은 다양한 분야에서 새로운 응용 프로그램을 만들어내고 있습니다.
 
     연구자들은 LLMs의 잠재력을 확대하기 위해 새로운 아키텍처와 훈련 전략을 탐구하고 있습니다. 인공지능의 발전은 효율적인 데이터 이용을 통해 새로운 가능성을 제공하고 있지만, 동시에 윤리적 문제도 동반할 수 있습니다. 따라서 기술의 공정성과 투명성을 확보하기 위한 관리가 필요합니다.`,
-    gist: [
-        '인공지능과 기계학습의 원리는 데이터 처리와 분석을 통해 성능을 개선하는 것이다.',
-        '기계학습의 응용은 의료, 금융, 제조업 등 다양한 분야에 걸쳐 있으며, 데이터의 효율적 이용을 통해 새로운 가능성을 제공한다.',
-        '인공지능과 기계학습의 활용은 윤리적 문제를 동반할 수 있으며, 기술의 공정성과 투명성을 확보하기 위한 관리가 필요하다.'
-    ],
+    gist: '인공지능과 기계학습의 원리는 데이터 처리와 분석을 통해 성능을 개선하는 것이다.',
     pasCode: 999
 };
 
@@ -479,128 +476,151 @@ let routerGuard = null;
 
 // 로컬 스토리지에서 지문 데이터 로드
 const loadPassageData = () => {
-    try {
-        console.log('로컬 스토리지에서 지문 데이터 로드 시도');
-        
-        // 통합 키로 변경
-        const storedData = localStorage.getItem('genieq-passage-data');
-        
-        if (storedData) {
-            const data = JSON.parse(storedData);
-            console.log('📢 로컬 스토리지에서 데이터 로드 성공:', data);
-            
-            // 데이터 설정
-            title.value = data.title || '';
-            content.value = data.content || '';
-            pasCode.value = data.pasCode || null;
-            type.value = data.type || '';
-            keyword.value = data.keyword || '';
-            
-            // 요약 정보 설정
-            if (data.gist) {
-                summary.value = {
-                    subject: data.type || '',
-                    keyword: data.keyword || '',
-                    items: Array.isArray(data.gist) ? data.gist : [data.gist]
-                };
-            }
-            
-            return data;
-        }
-    } catch (error) {
-        console.error('지문 데이터 로드 중 오류:', error);
-    }
-    
-    console.log('로드된 데이터 없음, 더미 데이터 반환');
-    return null;
-};
-
-// 컴포넌트 마운트 시 실행
-onMounted(async () => {
-    console.log('PassageContent 컴포넌트 마운트');
-    
-    // 데이터 로드
-    const loadedData = loadPassageData();
-    
-    // 데이터가 있으면 컴포넌트에 적용
-    if (loadedData) {
-        console.log('로드된 데이터를 컴포넌트에 적용 시작');
-        
-        // 본문 설정
-        if (passageContentRef.value && loadedData.content) {
-            await nextTick();
-            passageContentRef.value.setContent(loadedData.content);
-            content.value = loadedData.content;
-            console.log('본문 설정 완료, 길이:', loadedData.content.length);
-        }
-        
-        // 핵심 논점 설정
-        if (passageSummaryRef.value && typeof passageSummaryRef.value.setSummary === 'function' && summary.value) {
-            passageSummaryRef.value.setSummary(summary.value);
-            console.log('핵심 논점 설정 완료');
-        }
-        
-        // 컴포넌트 상태 초기화
-        isContentChanged.value = false;
-        hasManualSave.value = true;
-    } else {
-        // 데이터가 없으면 더미 데이터 사용
-        console.log('데이터가 없어 더미 데이터 사용');
-        
-        title.value = dummyData.title;
-        content.value = dummyData.content;
-        type.value = dummyData.type;
-        keyword.value = dummyData.keyword;
-        pasCode.value = dummyData.pasCode;
-        
-        summary.value = {
-            subject: dummyData.type,
-            keyword: dummyData.keyword,
-            items: dummyData.gist
-        };
-        
-        if (passageContentRef.value) {
-            await nextTick();
-            passageContentRef.value.setContent(dummyData.content);
-        }
-        
-        if (passageSummaryRef.value && typeof passageSummaryRef.value.setSummary === 'function') {
-            passageSummaryRef.value.setSummary(summary.value);
-        }
-    }
-
-    // 브라우저 새로고침, 닫기 등에 대한 이벤트 리스너 추가
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    
-    // 전역 네비게이션 가드 설정
-    routerGuard = router.beforeEach((to, from, next) => {
-        console.log('라우터 가드 호출됨', { from: from.path, to: to.path, current: route.path });
-        
-        // 현재 라우트에서 다른 라우트로 이동하는 경우에만 확인
-        if (from.path === route.path && hasUnsavedChanges()) {
-            console.log('저장되지 않은 변경사항 감지됨, 네비게이션 중단 및 모달 표시');
-            
-            // 저장되지 않은 변경사항이 있다면 모달 표시하고 대기
-            isWarningModalOpen.value = true;
-            pendingRoute.value = to.fullPath; // 이동하려는 전체 경로 저장
-            
-            return false; // 네비게이션 중단
-        }
-        
-        console.log('네비게이션 계속 진행');
-        return next(); // 네비게이션 계속
-    });
-
-    // 현재 상태 로그
-    console.log('📌 현재 상태 값:', {
-        title: title.value,
+  try {
+    console.log('[12] 로컬 스토리지에서 지문 데이터 로드 시도');
+    // (수정) 통일된 키 사용
+    const storedData = localStorage.getItem('genieq-passage-data');
+    if (storedData) {
+      const data = JSON.parse(storedData);
+      console.log('[13] 로컬 스토리지에서 데이터 로드 성공:', data);
+      
+      // (수정) 데이터 설정 - 백엔드 응답 구조(PAS_)와 프론트엔드 변수명(소문자) 모두 처리
+      title.value = data.PAS_TITLE || data.title || '';
+      content.value = data.PAS_CONTENT || data.content || '';
+      pasCode.value = data.pasCode || data.PAS_CODE || null;
+      type.value = data.PAS_TYPE || data.type || '';
+      keyword.value = data.PAS_KEYWORD || data.keyword || '';
+      
+      // (수정) 요약 정보 일관되게 처리
+      let gistData = data.PAS_GIST || data.gist || [];
+      
+      // 문자열이면 배열로 변환
+      if (typeof gistData === 'string') {
+        gistData = gistData.split('\n').filter(item => item.trim());
+      } 
+      // 배열이 아니면 빈 배열로 초기화
+      else if (!Array.isArray(gistData)) {
+        gistData = [];
+      }
+      
+      // 요약 정보 설정
+      summary.value = {
+        subject: data.PAS_TYPE || data.type || '',
+        keyword: data.PAS_KEYWORD || data.keyword || '',
+        items: gistData
+      };
+      
+      console.log('[14] 지문 데이터 로드 완료:', {
+        title: title.value, 
         contentLength: content.value?.length || 0,
         pasCode: pasCode.value,
         type: type.value,
         keyword: keyword.value,
-        isContentChanged: isContentChanged.value,
-        hasManualSave: hasManualSave.value
+        summary: summary.value
+      });
+      
+      return data;
+    }
+  } catch (error) {
+    console.error('[15] 지문 데이터 로드 중 오류:', error);
+  }
+  console.log('[16] 로드된 데이터 없음, 더미 데이터 반환');
+  return null;
+};
+
+// 컴포넌트 마운트 시 실행
+onMounted(async () => {
+  console.log('[17] PassageContent 컴포넌트 마운트');
+  // 데이터 로드
+  const loadedData = loadPassageData();
+  
+  // 데이터가 있으면 컴포넌트에 적용
+  if (loadedData) {
+    console.log('[18] 로드된 데이터를 컴포넌트에 적용 시작');
+    
+    // (수정) 본문 설정 - await 제거, 대신 nextTick 사용
+    if (passageContentRef.value && content.value) {
+      nextTick(() => {
+        passageContentRef.value.setContent(content.value);
+        passageContentRef.value.setTitle(title.value);
+        console.log('[19] 본문 설정 완료, 길이:', content.value.length);
+      });
+    }
+    
+    // (수정) 핵심 논점 설정 - PassageSummary 컴포넌트에 데이터 전달
+    if (passageSummaryRef.value && typeof passageSummaryRef.value.setSummary === 'function' && summary.value) {
+      nextTick(() => {
+        passageSummaryRef.value.setSummary(summary.value);
+        console.log('[20] 핵심 논점 설정 완료', summary.value);
+      });
+    }
+    
+    // 컴포넌트 상태 초기화
+    isContentChanged.value = false;
+    hasManualSave.value = true;
+  } else {
+    // (수정) 데이터가 없으면 더미 데이터 사용
+    console.log('[21] 데이터가 없어 더미 데이터 사용');
+    title.value = dummyData.title;
+    content.value = dummyData.content;
+    type.value = dummyData.type;
+    keyword.value = dummyData.keyword;
+    pasCode.value = dummyData.pasCode;
+    
+    // (수정) 더미 데이터 일관되게 처리
+    let gistItems = dummyData.gist;
+    if (typeof gistItems === 'string') {
+      gistItems = gistItems.split('\n').filter(item => item.trim());
+    }
+    
+    summary.value = {
+      subject: dummyData.type,
+      keyword: dummyData.keyword,
+      items: gistItems
+    };
+    
+    nextTick(() => {
+      if (passageContentRef.value) {
+        passageContentRef.value.setContent(dummyData.content);
+        passageContentRef.value.setTitle(dummyData.title);
+      }
+      
+      if (passageSummaryRef.value && typeof passageSummaryRef.value.setSummary === 'function') {
+        passageSummaryRef.value.setSummary(summary.value);
+      }
+      
+      console.log('[22] 더미 데이터 설정 완료');
     });
+  }
+  
+  // 브라우저 새로고침, 닫기 등에 대한 이벤트 리스너 추가
+  window.addEventListener('beforeunload', handleBeforeUnload);
+  
+  // 전역 네비게이션 가드 설정
+  routerGuard = router.beforeEach((to, from, next) => {
+    console.log('[23] 라우터 가드 호출됨', { from: from.path, to: to.path, current: route.path });
+    // 현재 라우트에서 다른 라우트로 이동하는 경우에만 확인
+    if (from.path === route.path && hasUnsavedChanges()) {
+      console.log('[24] 저장되지 않은 변경사항 감지됨, 네비게이션 중단 및 모달 표시');
+      // 저장되지 않은 변경사항이 있다면 모달 표시하고 대기
+      isWarningModalOpen.value = true;
+      pendingRoute.value = to.fullPath; // 이동하려는 전체 경로 저장
+      return false; // 네비게이션 중단
+    }
+    console.log('[25] 네비게이션 계속 진행');
+    return next(); // 네비게이션 계속
+  });
+  
+  // 현재 상태 로그
+  console.log('[26] 현재 상태 값:', {
+    title: title.value,
+    contentLength: content.value?.length || 0,
+    pasCode: pasCode.value,
+    type: type.value,
+    keyword: keyword.value,
+    isContentChanged: isContentChanged.value,
+    hasManualSave: hasManualSave.value
+  });
 });
 
 onBeforeUnmount(() => {
