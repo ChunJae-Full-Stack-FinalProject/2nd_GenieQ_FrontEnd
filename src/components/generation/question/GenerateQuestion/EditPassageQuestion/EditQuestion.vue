@@ -21,7 +21,7 @@
                     </div>
                 </div>
             </div>
-            <BaseButton text="재생성하기" type="type4" id="recreate-button" width="200px" height="54px" @click="handleRecreate"/>
+            <BaseButton text="재생성하기" type="type4" id="recreate-button" width="200px" height="54px" @click="handleRecreate" :disabled="props.isFromRoute"/>
         </div>
     </div>
 </template>
@@ -51,6 +51,10 @@ const props = defineProps({
     isEditing: {
         type: Boolean,
         defaule: false
+    },
+    isFromRoute: { // 이전 페이지가 보관함 관련일 경우, 재생성하기 버튼 비활성화
+        type: Boolean,
+        default: false
     }
 });
 
