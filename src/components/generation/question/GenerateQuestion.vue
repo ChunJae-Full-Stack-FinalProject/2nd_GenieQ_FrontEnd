@@ -17,8 +17,8 @@
         <div v-for="(item, index) in questionsData" :key="index" class="carousel-item">
           <EditQuestion 
             ref="editQuestionRefs"
-            :questions="item.questions" 
-            :questionTitle="item.title"
+            :questions="item.queOption" 
+            :questionTitle="item.queQuery"
             :isEditing="isEditingGlobal"
             @edit-mode-changed="updateEditingMode"
             @question-changed="handleContentChange($event, index)"
@@ -38,8 +38,8 @@
         <div v-for="(item, index) in questionsData" :key="index" class="carousel-item description-item">
           <QuestionDescription 
             :isEditing="isEditingGlobal" 
-            :correct="item.correct" 
-            :description="item.description"
+            :correct="item.correct"
+            :description="item.queAnswer"
             :slideIndex="index"
             @description-changed="handleContentChange($event, index)"
           />
@@ -158,20 +158,19 @@ const editQuestionRefs = ref([]);
 // 캐러셀 관련 상태
 const currentSlide = ref(0);
 
-const questionsData = ref([
-  {
-    title: '다음 중 본문과 내용이 다른 것을 고르시오.',
-    questions: [
-      'LLMs의 성능은 모델의 크기를 줄일수록 향상된다.',
-      'LLMs의 성능은 모델의 크기를 줄일수록 향상된다.',
-      'LLMs는 인공지능이 인간 언어를 이해하고 생성하는 방식을 변화시키고 있다.',
-      'ChatGPT와 같은 혁신은 LLMs가 독특한 문제 해결 능력을 보여주기 시작했음을 나타낸다.',
-      '연구자들은 LLMs의 잠재력을 확대하기 위해 새로운 아키텍처와 훈련 전략을 탐구하고 있다.'
-    ],
-    correct: '①',
-    description: "연구 커뮤니티는 이러한 모델의 규모를 확장하면 성능이 향상된다고 인정한다고 했으므로, \n① 'LLMs의 성능은 모델의 크기를 줄일수록 향상된다.' 는 글의 내용과 일치하지 않는다."
+let saveResponse = null;
+
+try {
+  const data = localStorage.getItem('saveResponse');
+  if (data) {
+    saveResponse = JSON.parse(data);
   }
-]);
+} catch (error) {
+  console.error('JSON 파싱 오류:', error);
+}
+
+const questionsData = ref(saveResponse.passage.questions);
+
 
 // 재생성하기 버튼 클릭 핸들러
 const handleRecreateButtonClick = (index) => {
@@ -495,7 +494,11 @@ const confirmNavigation = () => {
 const instance = getCurrentInstance();
 let routerGuard = null;
 
+
+console.log("실험: ", saveResponse.passage.pasCode);
+
 onMounted(() => {
+  console.log('전달 값:', saveResponse);
   // URL 쿼리 파라미터에서 문항 유형과 서술 방식 가져오기
   if (route.query) {
     pattern.value = route.query.pattern || null;
@@ -503,17 +506,17 @@ onMounted(() => {
   }
 
   // 라우터 state에서 선택된 문항 데이터 가져오기
-  if (route.state && route.state.questionData) {
-    questionData.value = route.state.questionData;
+  if (saveResponse && saveResponse.question) {
+    questionData.value = saveResponse.question;
   }
 
   // 라우터 state에서 지문 데이터 가져오기
-  if (route.state && route.state.passageData) {
-    passageData.value = route.state.passageData;
+  if (saveResponse && saveResponse.passage) {
+    passageData.value = saveResponse.passage;
     
     // EditPassage에 지문 내용 설정
-    if (editPassageRef.value && passageData.value && passageData.value.content) {
-      editPassageRef.value.setContent(passageData.value.content);
+    if (editPassageRef.value && saveResponse.passage && saveResponse.passage.content) {
+      editPassageRef.value.setContent(saveResponse.passage.content);
     }
   } 
   // 로컬 스토리지에서 지문 데이터 확인

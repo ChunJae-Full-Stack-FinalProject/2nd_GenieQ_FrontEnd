@@ -25,8 +25,6 @@ const { currentPassage, openLoadPassageModal, showLengthWarning } = inject('pass
 const MIN_LENGTH = 500;
 const MAX_LENGTH = 1700;
 
-console.log("currentPassage:", currentPassage.value.PAS_CONTENT);
-
 // 지문 내용을 위한 반응형 변수
 const passageContent = computed({
     get: () => currentPassage.value.PAS_CONTENT || '',
