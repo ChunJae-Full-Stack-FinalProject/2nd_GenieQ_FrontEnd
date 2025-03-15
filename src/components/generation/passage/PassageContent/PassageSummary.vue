@@ -16,57 +16,82 @@
         <div class="gist-container">
             <p id="gist-text">핵심 논점</p>
             <div class="gist-main">
-                <ol class="gist-list">
-                    {{ items }}
-                    <!-- <li v-for="(item, index) in items" :key="index" class="list-item">
+                <ol class="gist-content">
+                    <li v-for="(item, index) in gistItems" :key="index" class="list-item">
                         {{ item }}
-                    </li> -->
+                    </li>
                 </ol>
             </div>
         </div>
     </div>
 </template>
 <script setup>
-import { ref, defineExpose } from 'vue';
-const savePassageData = JSON.parse(localStorage.getItem('saveResponse'));
-
-
+import { ref, defineExpose, computed, watch } from 'vue';
 // 데이터 관리
-const subject = ref(savePassageData.passage.type);
-const keyword = ref(savePassageData.passage.keyword);
-const items = ref (savePassageData?.passage?.gist || '');
-
+const subject = ref('');
+const keyword = ref('');
+const gist = ref(''); // 문자열로 저장
+// computed 속성으로 gist를 줄바꿈으로 분리해 배열로 변환
+const gistItems = computed(() => {
+    if (!gist.value) return [];
+    // 문자열 또는 배열 처리
+    if (typeof gist.value === 'string') {
+        // (수정) 다양한 줄바꿈 형식 처리
+        return gist.value.split(/\\n|\n/).filter(item => item.trim());
+    } else if (Array.isArray(gist.value)) {
+        // (추가) 배열인 경우 직접 반환
+        return gist.value;
+    }
+    return [];
+});
 // 외부에서 접근할 수 있도록 요약 정보를 가져오는 함수 노출
 const getSummary = () => {
     return {
         subject: subject.value,
         keyword: keyword.value,
-        items: [...items.value]
+        gist: Array.isArray(gist.value) ? gist.value : gist.value
     };
 };
-    
 // 요약 정보 설정 (외부에서 호출 가능)
 const setSummary = (summaryData) => {
-    console.log('PassageSummary: 요약 정보 설정', summaryData);
-    
+    console.log('[27] PassageSummary: 요약 정보 설정', summaryData);
     if (summaryData) {
-        if (summaryData.subject) {
-            subject.value = summaryData.subject;
-        }
-        
-        if (summaryData.keyword) {
-            keyword.value = summaryData.keyword;
-        }
-        
-        if (Array.isArray(summaryData.items)) {
-            items.value = [...summaryData.items];
-        } else if (typeof summaryData.items === 'string') {
-            // 문자열인 경우 줄바꿈으로 분리
-            items.value = summaryData.items.split('\n').filter(item => item.trim());
+        // (수정) subject와 keyword 값 설정 - 명시적으로 빈 문자열 처리
+        subject.value = summaryData.subject || '';
+        keyword.value = summaryData.keyword || '';
+        // (수정) gist 처리 - 배열 또는 문자열 처리
+        if (summaryData.gist !== undefined) {
+            if (Array.isArray(summaryData.gist)) {
+                // 배열이면 그대로 저장
+                gist.value = summaryData.gist;
+                console.log('[27A] gist 배열로 설정:', gist.value);
+            } else if (typeof summaryData.gist === 'string') {
+                // 문자열이면 그대로 저장
+                gist.value = summaryData.gist;
+                console.log('[27B] gist 문자열로 설정:', gist.value);
+            } else {
+                // 다른 타입이면 빈 문자열로 초기화
+                gist.value = '';
+            }
+        } else {
+            gist.value = '';
         }
     }
+    console.log('[28] PassageSummary: 설정된 요약 정보', {
+        subject: subject.value,
+        keyword: keyword.value,
+        gist: gist.value,
+        gistItems: gistItems.value
+    });
 };
-
+// (추가) subject와 keyword의 변경 감지
+watch([subject, keyword, gist], () => {
+    console.log('[28A] PassageSummary: 요약 정보 변경됨', {
+        subject: subject.value,
+        keyword: keyword.value,
+        gistItems: gistItems.value
+    });
+});
 // 외부에서 사용 가능한 메서드 노출
 defineExpose({
     getSummary,
@@ -103,6 +128,7 @@ defineExpose({
     align-self: stretch;
     flex-grow: 0;
 }
+
 #passage-type-text {
     width: 522px;
     height: 36px;
@@ -123,6 +149,7 @@ defineExpose({
     align-self: stretch;
     flex-grow: 0;
 }
+
 .passage-type-main {
     box-sizing: border-box;
 
@@ -143,6 +170,7 @@ defineExpose({
     align-self: stretch;
     flex-grow: 0;
 }
+
 #subject {
     display: flex;
     flex-direction: row;
@@ -158,6 +186,7 @@ defineExpose({
     align-self: stretch;
     flex-grow: 0;
 }
+
 #subject-head {
     height: 30px;
 
@@ -170,6 +199,7 @@ defineExpose({
     letter-spacing: -0.02em;
     color: #000000;
 }
+
 #subject-text {
     height: 30px;
 
@@ -186,6 +216,7 @@ defineExpose({
     order: 0;
     flex-grow: 0;
 }
+
 #keyword {
     display: flex;
     flex-direction: row;
@@ -201,6 +232,7 @@ defineExpose({
     align-self: stretch;
     flex-grow: 0;
 }
+
 #keyword-head {
     width: 73px;
     height: 30px;
@@ -218,6 +250,7 @@ defineExpose({
     order: 0;
     flex-grow: 0;
 }
+
 #keyword-text {
     height: 30px;
     font-family: 'Pretendard';
@@ -233,6 +266,7 @@ defineExpose({
     order: 0;
     flex-grow: 1;
 }
+
 .gist-container {
     display: flex;
     flex-direction: column;
@@ -248,6 +282,7 @@ defineExpose({
     align-self: stretch;
     flex-grow: 0;
 }
+
 #gist-text {
     width: 522px;
     height: 32px;
@@ -266,6 +301,7 @@ defineExpose({
     align-self: stretch;
     flex-grow: 0;
 }
+
 .gist-main {
     box-sizing: border-box;
 
@@ -287,6 +323,7 @@ defineExpose({
     align-self: stretch;
     flex-grow: 0;
 }
+
 .gist-list {
     display: flex;
     flex-direction: column;
