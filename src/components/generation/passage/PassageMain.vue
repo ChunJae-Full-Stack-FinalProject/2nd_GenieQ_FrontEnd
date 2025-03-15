@@ -2,7 +2,7 @@
     <div class="app-container">
         <p id="main-title">지문 생성</p>
         <div class="main-content">
-            <CreatePassageMain ref="createPassageMainRef" @input-change="updateInputText" @category-change="updateCategory"/>
+            <CreatePassageMain ref="createPassageMainRef" @input-change="updateInputText" @category-change="updateCategory" @title-change="updateTitle"/>
             <PaymentUsage ref="paymentUsageRef" @credit-update="onCreditUpdate"/>
             <BaseButton id="reset_button" text="초기화" type="type2" width="248px" height="54px" :disabled="!hasContent" @click="resetText"/>
             <BaseButton 
@@ -60,6 +60,7 @@ const router = useRouter();
 const authStore = useAuthStore();
 
 // 사용자 입력 관련 상태
+const titleText = ref('');
 const inputText = ref('');
 const selectedCategory = ref('human');
 const passageTitle = ref('');
@@ -100,10 +101,11 @@ const isButtonEnabled = computed(() => {
     const ticketCount = authStore.userTicketCount;
     
     // 입력 텍스트가 있고 보유 이용권이 0보다 큰 경우 활성화
-    const isEnabled = inputText.value.length >= 1 && ticketCount > 0;
+    const isEnabled = inputText.value.length >= 1 && titleText.value.length >= 1 && ticketCount > 0;
     
     console.log('버튼 활성화 상태:', { 
         inputTextLength: inputText.value.length, 
+        titleTextLength: titleText.value.length,
         ticketCount, 
         isEnabled 
     });
@@ -123,6 +125,12 @@ const onCreditUpdate = (count) => {
     authStore.updateTicketCount().then(newCount => {
         console.log('authStore 이용권 업데이트됨:', newCount);
     });
+};
+
+// 제목 업데이트 함수 추가
+const updateTitle = (text) => {
+  titleText.value = text;
+  console.log('작업 이름 업데이트:', text);
 };
 
 // 지문 제재 업데이트 함수
