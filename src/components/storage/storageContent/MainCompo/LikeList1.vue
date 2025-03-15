@@ -220,7 +220,10 @@ const handleWorkItemClick = (item) => {
       localStorage.setItem('saveResponse', JSON.stringify(questionData));
       
       // 문항 생성 페이지로 이동
-      router.push('/questions/generate');
+      router.push({
+        path: '/questions/generate',
+        query: {from: route.path} // 현재 경로 전달
+      });
     }
   })
   .catch(error => {
