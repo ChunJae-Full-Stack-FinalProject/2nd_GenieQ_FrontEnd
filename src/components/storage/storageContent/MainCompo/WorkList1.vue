@@ -457,7 +457,7 @@ const handleWorkItemClick = (item) => {
   align-items: center;
 
   width: 1473px;
-  height: 748px;
+  height: 414px;
 }
 
   /* 추출 버튼 */

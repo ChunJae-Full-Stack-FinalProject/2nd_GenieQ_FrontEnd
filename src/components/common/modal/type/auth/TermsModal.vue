@@ -38,12 +38,12 @@ const closeModal = () => {
 </script>
 <style>
 pre{
-    text-align: left;
-    white-space: pre-wrap; /* 자동 줄바꿈 적용 */
-    word-wrap: break-word; /* 긴 단어도 줄바꿈 */
-    width: 100%; /* 컨테이너 너비에 맞춤 */
-    overflow-x: hidden; /* 가로 스크롤 제거 */
-    margin: 0; /* 기본 마진 제거 */
+  text-align: left;
+  white-space: pre-wrap; /* 자동 줄바꿈 적용 */
+  word-wrap: break-word; /* 긴 단어도 줄바꿈 */
+  width: 100%; /* 컨테이너 너비에 맞춤 */
+  overflow-x: hidden; /* 가로 스크롤 제거 */
+  margin: 0; /* 기본 마진 제거 */
 }
 
 /* 전체 스크롤 문제 해결 */
@@ -58,9 +58,7 @@ html, body {
   display: flex;
   flex-direction: column;
   align-items: centesr;
-  /* background-color: #F6F6F6; */
   width: 100%;
-  /* min-height: 100vh;  */
   padding-bottom: 50px;
 }
 
@@ -74,13 +72,12 @@ html, body {
   width: 100%;
   height: 100%;
   max-width: 950.67px;
-  /* padding: 50px 0; */
 }
 
 /* 스크롤을 `terms-box` 내부에서만 적용 */
 .terms-box {
   width: 100%;
-  height: 500px;
+  height: 550px;
   background-color: #FFFFFF;
   border-radius: 7.75px;
   border: 0.65px solid #FF9F40;
@@ -89,12 +86,17 @@ html, body {
   white-space: pre-wrap;
   font-size: 14px;
   line-height: 1.5;
+  margin-top: 40px;
 }
 
 .terms-container h1 {
   width: 100%;
   text-align: left; /* 왼쪽 정렬 */
   padding-left: 15px; /* 왼쪽 여백 추가 */
+
+  position: absolute;
+  top: 10px;
+  left: 20px;
 }
 
 .close-btn-container {
@@ -103,6 +105,10 @@ html, body {
   justify-content: flex-end;
   padding: 10px;
   margin-top: 10px; /* 위쪽 여백 추가 */
+
+  position: absolute;
+  top: 620px;
+  right: 20px;
 }
 
 .close-btn {
