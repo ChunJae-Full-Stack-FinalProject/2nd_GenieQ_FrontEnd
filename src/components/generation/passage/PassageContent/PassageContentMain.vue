@@ -225,12 +225,11 @@ watch([title, content], () => {
 }
 
 #sub-title {
-   
     position: absolute;
     width: 848px;
     height: 450px;
     left: 40px;
-    top: 180px;
+    top: 132px;
 
     font-family: 'Pretendard';
     font-style: normal;
@@ -248,7 +247,7 @@ watch([title, content], () => {
     height: 24px;
     right: 0px;
     left: 810px;
-    top: 190px;
+    top: 150px;
 
     font-family: 'Pretendard';
     font-style: normal;
@@ -274,9 +273,9 @@ watch([title, content], () => {
 
     position: absolute;
     width: 848px;
-    height: 400px;
+    height: 422px;
     left: 40px;
-    top: 220px;
+    top: 174px;
 
     background: #FFFFFF;
     border: 1px solid #FF9F40;
@@ -285,7 +284,7 @@ watch([title, content], () => {
 
 #content-text {
     width: 780px;
-    height: 335px;
+    height: 358px;
 
     font-family: 'Pretendard';
     font-style: normal;
