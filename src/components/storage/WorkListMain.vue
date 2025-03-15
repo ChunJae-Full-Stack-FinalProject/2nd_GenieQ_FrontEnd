@@ -44,6 +44,7 @@
     <!-- 데이터가 있을 때만 테이블 표시 -->
     <div v-else class="storage-worklist-table">
       <div class="table-container">
+       <template v-if="computedWorkItems.length > 0">
         <table class="data-table">
           <thead>
             <tr>
@@ -92,6 +93,10 @@
             </tr>
           </tbody>
         </table>
+        </template>
+        <template v-else>
+          <span class="empty-message">최근 작업 내역이 없습니다.</span>
+        </template>
       </div>
     </div>
 
@@ -909,6 +914,18 @@ const closeDeleteModal = () => {
 .work-action {
   padding: 0;
   text-align: center;
+}
+
+/* 테이블이 비어있는 경우 */
+.empty-message {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+
+  width: 1473px;
+  height: 414px;
 }
 
 /* 추출 버튼 */
