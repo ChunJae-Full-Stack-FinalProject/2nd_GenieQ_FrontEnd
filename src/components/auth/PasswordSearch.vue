@@ -396,8 +396,8 @@ const sendTempPassword = () => {
   }
   
   .orange-q {
-    font-size: 32px;
-    font-weight: 700;
+    font-size: 32px !important;
+    font-weight: 700 !important;
     color: #FF9500;
   }
   

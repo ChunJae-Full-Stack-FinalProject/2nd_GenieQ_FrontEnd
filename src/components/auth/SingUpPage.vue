@@ -581,6 +581,8 @@ watch(verificationCode, () => {
 }
 
 .orange-q {
+  font-size: 32px !important;
+  font-weight: 700 !important;
   color: #FF9500;
 }
 
