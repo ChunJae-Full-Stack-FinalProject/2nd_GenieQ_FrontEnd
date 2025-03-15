@@ -87,7 +87,7 @@
             <div class="modal-footer">
                 <PlainTooltip id="tooltip" message="생성 시 이용권 1회 차감" width="205px"/>
                 <BaseButton text="닫기" type="type3" width="140px" height="54px" @click="closeModal" />
-                <BaseButton text="문항 생성하기" type="type1" width="182px" height="54px" :disabled="!selectedQuestion"
+                <BaseButton :text="createText" type="type1" width="182px" height="54px" :disabled="!selectedQuestion"
                 @click.once="handleGenerateQuestion"/>
             </div>
         </div>
@@ -110,6 +110,7 @@ const props = defineProps({
     type: String,
     default: 'navigate' //'navigate' 또는 'generate'
   },
+  createText: {type: String, default: "문항 생성하기"}, 
   passageTitle: String,  // 부모에서 전달된 제목
   passageContent: String,  // 부모에서 전달된 내용
 });
