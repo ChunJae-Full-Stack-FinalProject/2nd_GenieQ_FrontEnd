@@ -3,7 +3,7 @@
 <div class="input-container">
     <div class="edit-title">
         <p id="passage-head">작업이름</p>
-        <input type="text" id="passage-title" placeholder="작업 이름을 입력해주세요." v-model="title"/>
+        <input type="text" id="passage-title" placeholder="작업 이름을 입력해주세요. (최대 50자)" v-model="title"/>
     </div>
 
     <div class="select-category-container">
@@ -18,9 +18,11 @@
 <script setup>
 import { ref, defineExpose, defineEmits, watch, onMounted } from 'vue';
 
+const savePassageData = JSON.parse(localStorage.getItem('saveResponse'));
 // 본문 내용 ref로 관리
 const content = ref('');
-const title = ref('');
+const title = ref(savePassageData.passage?.title||'');
+const MAX_TITLE_LENGTH = 50;
 const summary = ref({
     subject: '',
     keyword: '',
@@ -120,6 +122,14 @@ onMounted(() => {
     console.log('PassageContentMain 컴포넌트 마운트');
     // 초기 데이터 변경 이벤트 발생
     emitContentChange();
+});
+
+watch(title, (newValue) => {
+    // 최대 제목 글자 수 제한 
+    if (newValue.length > MAX_TITLE_LENGTH) {
+        // 최대 길이로 잘라서 다시 설정
+        title.value = newValue.substring(0, MAX_TITLE_LENGTH);
+    }
 });
 
 // title이나 content가 변경될 때 이벤트 발생
