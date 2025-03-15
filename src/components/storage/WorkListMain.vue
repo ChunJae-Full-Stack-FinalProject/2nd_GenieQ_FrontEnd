@@ -6,6 +6,7 @@
     <div class="storage-worklistmain-subtitle">
       <span>전체</span>
       <P>({{ filteredWorkItems.length }}개)</P>
+      <v-pre v-if="searchQuery && hasSearchResults">"{{ searchQuery }}"에 대한 검색 결과입니다.</v-pre>
     </div>
 
     <div class="storage-worklistmain-search">
@@ -556,6 +557,11 @@ const filteredWorkItems = computed(() => {
   return advancedSearch(workItems.value, searchQuery.value);
 });
 
+// 검색 결과 유무 확인을 위한 computed 속성 (여기에 추가)
+const hasSearchResults = computed(() => {
+  return searchQuery.value && filteredWorkItems.value.length > 0;
+});
+
 // 총 페이지 수 계산
 const totalPages = computed(() => {
   return Math.ceil(filteredWorkItems.value.length / itemsPerPage);
@@ -729,11 +735,18 @@ const closeDeleteModal = () => {
   display: flex;
   align-items: flex-start;
   gap: 4px;
+  font-size: 10.33px;
   isolation: isolate;
   position: absolute;
   left: 292px;
   top: 90px;
   box-sizing: border-box;
+}
+
+
+.storage-worklistmain-subtitle v-pre {
+ margin-left: 40px;
+ font-weight: 600;
 }
 
 .storage-worklistmain-subtitle2 {
