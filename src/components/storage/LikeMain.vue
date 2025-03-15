@@ -244,11 +244,65 @@ onUnmounted(() => {
   document.removeEventListener('click', closeContextMenu);
 });
 
-// 편집 완료
+// 편집 완료 및 서버 업데이트
 const finishEditing = () => {
-  editingIndex.value = -1;
+  if (editingIndex.value >= 0) {
+    const item = computedWorkItems.value[editingIndex.value];
+    const apiUrl = import.meta.env.VITE_API_URL;
+    
+    // API 호출하여 제목 업데이트 (PATCH 메서드 사용)
+    fetch(`${apiUrl}/pass/update/each`, {
+      method: 'PATCH', // PUT에서 PATCH로 변경
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include',
+      body: JSON.stringify({
+        pasCode: item.PAS_CODE,
+        title: item.PAS_TITLE,
+        content: item.PAS_KEYWORD || "" // content 필드가 필요한 경우 기존 값 유지
+      })
+    })
+    .then(response => {
+      if (!response.ok) {
+        console.error('이름 변경 응답 오류:', response.status);
+        throw new Error('이름 변경 실패');
+      }
+      
+      // 응답 형식 확인
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        return response.json();
+      } else {
+        return { success: true };
+      }
+    })
+    .then(data => {
+      console.log('이름 변경 성공:', data);
+      
+      // 원본 workItems 배열에서 해당 항목 찾아 업데이트
+      const originalItem = workItems.value.find(i => i.PAS_CODE === item.PAS_CODE);
+      if (originalItem) {
+        originalItem.PAS_TITLE = item.PAS_TITLE;
+      }
+    })
+    .catch(error => {
+      console.error('이름 변경 실패:', error);
+      // 실패해도 UI는 업데이트 (사용자 경험을 위해)
+      const originalItem = workItems.value.find(i => i.PAS_CODE === item.PAS_CODE);
+      if (originalItem) {
+        originalItem.PAS_TITLE = item.PAS_TITLE;
+      }
+    })
+    .finally(() => {
+      // 편집 모드 종료
+      editingIndex.value = -1;
+    });
+  } else {
+    editingIndex.value = -1;
+  }
 };
-
+  
 // 메소드 정의 - 화살표 함수로 작성합니다
 const extractItem = (item) => {
   // 추출 버튼 클릭 시 실행될 로직
