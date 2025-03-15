@@ -42,6 +42,7 @@ const setActiveTab = (tab) => {
     activeTab.value = tab;
 };
 
+
 // 제목 길이 50자 제한
 const saveTitle = JSON.parse(localStorage.getItem('saveResponse'));
 
