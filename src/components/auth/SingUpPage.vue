@@ -250,42 +250,73 @@ const isButtonEnabled = computed(() => {
 const sendVerificationEmail = () => {
   validateEmail();
   if (isEmailValid.value && !isSending.value) {
-    generatedCode.value = generateVerificationCode();
-    
     // 로딩 상태 표시
     isSending.value = true;
     
-    // EmailJS로 이메일 전송 - 수신자 이메일 명확하게 지정
-    const templateParams = {
-      to_name: email.value.split('@')[0],
-      from_name: "GenieQ",
-      message: `인증 코드: ${generatedCode.value}`, // 기존 메시지 유지
-      verification_code: generatedCode.value,      // 명시적으로 추가
-      to_email: email.value,
-      reply_to: "no-reply@genieq.com"
-    };
+    // API URL 설정
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:9090';
     
-    console.log("전송 파라미터:", templateParams); // 디버깅용
+    // 이메일 URL 인코딩
+    const encodedEmail = encodeURIComponent(email.value);
     
-    emailjs.send(
-      'service_gamja',   // 서비스 ID
-      'template_zcvkxgp',  // 템플릿 ID
-      templateParams
-    )
-    .then(() => {
-      console.log('이메일 발송 성공!', generatedCode.value);
-      console.log('수신자:', email.value);
-      isEmailSent.value = true;
-      isSending.value = false;
-      startTimer(); // 타이머 시작
+    // 이메일 중복 체크 API 호출
+    fetch(`${apiUrl}/api/auth/select/email?email=${encodedEmail}`, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json'
+      }
     })
-    .catch((error) => {
-      console.error('이메일 발송 실패:', error);
+    .then(response => {
+      // 서버 응답 상태에 따른 처리
+      if (response.status === 200) {
+        // 200 응답: 이메일이 존재함
+        emailError.value = '이미 존재하는 이메일입니다.';
+        isSending.value = false;
+        return null;
+      } 
+      else if (response.status === 404) {
+        // 404 응답: 이메일이 존재하지 않음 -> 인증 코드 발송
+        generatedCode.value = generateVerificationCode();
+        
+        const templateParams = {
+          to_name: email.value.split('@')[0],
+          from_name: "GenieQ",
+          message: `인증 코드: ${generatedCode.value}`,
+          verification_code: generatedCode.value,
+          to_email: email.value,
+          reply_to: "no-reply@genieq.com"
+        };
+        
+        console.log("전송 파라미터:", templateParams);
+        
+        return emailjs.send(
+          'service_gamja',
+          'template_zcvkxgp',
+          templateParams
+        );
+      }
+      else {
+        // 기타 오류
+        throw new Error('서버 통신 중 오류가 발생했습니다.');
+      }
+    })
+    .then(result => {
+      // 이메일 전송 결과가 있는 경우에만 처리
+      if (result) {
+        console.log('이메일 발송 성공!', generatedCode.value);
+        isEmailSent.value = true;
+        isSending.value = false;
+        startTimer(); // 타이머 시작
+      }
+    })
+    .catch(error => {
+      console.error('이메일 처리 중 오류:', error);
       emailError.value = '인증 메일 발송에 실패했습니다. 다시 시도해주세요.';
       isSending.value = false;
     });
   }
 };
+
 // 테스트용 인증코드 생성 함수
 const generateVerificationCode = () => { 
   return Math.floor(100000 + Math.random() * 900000).toString(); 
