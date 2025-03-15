@@ -3,7 +3,7 @@
         <div class="edit-title">
             <p id="passage-head">작업이름</p>
             <input type="text" id="passage-title"
-                placeholder="작업 이름을 입력해주세요." v-model="passageTitle"/>
+                placeholder="작업 이름을 입력해주세요. (최대 50자)" v-model="passageTitle"/>
         </div>
         <p id="insert-head">지문 입력</p>
         <div class="select-insert-type">
@@ -34,7 +34,6 @@ import { ref, inject, computed, watch, defineExpose} from 'vue';
 
 // 현재 활성화된 탭 상태 관리
 const activeTab = ref('user');
-const passageTitle = ref('');
 
 // provide로 제공된 데이터 주입
 const { currentPassage, openLoadPassageModal } = inject('passageData');
@@ -43,11 +42,24 @@ const setActiveTab = (tab) => {
     activeTab.value = tab;
 };
 
+// 제목 길이 50자 제한
+const saveTitle = JSON.parse(localStorage.getItem('saveResponse'));
+
+const passageTitle = ref(saveTitle.passage?.title || '');
+const MAX_LENGTH = 50;
+
+watch(passageTitle, (newVal) => {
+    // 최대 글자 수 제한
+    if (newVal.length > MAX_LENGTH) {
+        // 최대 길이로 잘라서 다시 설정
+        passageTitle.value = newVal.substring(0, MAX_LENGTH);
+    }
+});
+
 // 현재 입력된 글자 수 계산
 const currentLength = computed(() => {
     return currentPassage.value?.PAS_CONTENT?.length || 0;
 });
-
 
 // 제목이 입력될 때 currentPassage 값 업데이트
 watch(passageTitle, (newVal) => {
