@@ -2,23 +2,38 @@
     <div class="app-container">
         <p id="main-title">지문 생성</p>
         <div class="main-content">
-            <CreatePassageMain ref="createPassageMainRef" @input-change="updateInputText"
-                @category-change="updateCategory" />
-            <PaymentUsage ref="paymentUsageRef" @credit-update="onCreditUpdate" />
-            <BaseButton id="reset_button" text="초기화" type="type2" width="248px" height="54px" :disabled="!hasContent"
-                @click="resetText" />
-            <BaseButton id="create_button" text="지문 생성하기" type="type2" width="248px" height="54px"
-                :disabled="!isButtonEnabled" @click="handleCreatePassage" />
-
+            <CreatePassageMain ref="createPassageMainRef" @input-change="updateInputText" @category-change="updateCategory" @title-change="updateTitle"/>
+            <PaymentUsage ref="paymentUsageRef" @credit-update="onCreditUpdate"/>
+            <BaseButton id="reset_button" text="초기화" type="type2" width="248px" height="54px" :disabled="!hasContent" @click="resetText"/>
+            <BaseButton 
+                id="create_button" 
+                text="지문 생성하기" 
+                type="type2" 
+                width="248px" 
+                height="54px"
+                :disabled="!isButtonEnabled"
+                @click="handleCreatePassage"
+            />
+            
             <!-- 확인 모달 추가 -->
-            <WarningModalComponent :isOpen="isConfirmModalOpen" title="지문을 생성하시겠습니까?"
-                message="생성 시 이용권이 차감되며, 오타가 있을 경우 AI가 잘못된 지문을 생성할 수 있습니다." cancelText="취소하기" confirmText="생성하기"
-                @close="closeConfirmModal" @confirm="confirmCreatePassage" />
-
-            <!-- 경고 모달 추가 -->
-            <WarningModalComponent :isOpen="isWarningModalOpen" title="작업 내역 초과"
-                message="최근 작업 내역이 가득 찼습니다. 이전 작업을 삭제하고 진행하시겠습니까?" cancelText="취소하기" confirmText="삭제 후 진행하기"
-                @close="closeWarningModal" @confirm="confirmAfterWarning" />
+            <WarningModalComponent
+                :isOpen="isConfirmModalOpen"
+                title="지문을 생성하시겠습니까?"
+                message="생성 시 이용권이 차감되며, 오타가 있을 경우 AI가 잘못된 지문을 생성할 수 있습니다."
+                cancelText="취소하기"
+                confirmText="생성하기"
+                @close="closeConfirmModal"
+                @confirm="confirmCreatePassage"
+            />
+            
+            <!-- 작업 공간 부족 모달 추가 -->
+            <ConfirmModalComponent
+                :isOpen="isListLimitModalOpen"
+                title="최근 작업 내역이 꽉 찼습니다."
+                message="생성할 문항을 저장할 공간이 부족합니다. 최근 작업 내역에서 공간을 확보하고 다시 시도하세요."
+                @close="isListLimitModalOpen = false"
+                @confirm="isListLimitModalOpen = false"
+            />
 
             <!-- 로딩 표시 추가 -->
             <div v-if="isLoading" class="loading-overlay">
@@ -35,14 +50,16 @@ import PaymentUsage from '@/components/generation/PaymentUsage.vue';
 import BaseButton from '@/components/common/button/BaseButton.vue';
 import ConfirmModalComponent from '@/components/common/modal/type/ConfirmModalComponent.vue';
 import WarningModalComponent from '@/components/common/modal/type/WarningModalComponent.vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 
 // 라우터 및 인증 스토어
 const router = useRouter();
+const route = useRoute();
 const authStore = useAuthStore();
 
 // 사용자 입력 관련 상태
+const titleText = ref('');
 const inputText = ref('');
 const selectedCategory = ref('human');
 const passageTitle = ref('');
@@ -83,12 +100,13 @@ const isButtonEnabled = computed(() => {
     const ticketCount = authStore.userTicketCount;
 
     // 입력 텍스트가 있고 보유 이용권이 0보다 큰 경우 활성화
-    const isEnabled = inputText.value.length >= 1 && ticketCount > 0;
-
-    console.log('버튼 활성화 상태:', {
-        inputTextLength: inputText.value.length,
-        ticketCount,
-        isEnabled
+    const isEnabled = inputText.value.length >= 1 && titleText.value.length >= 1 && ticketCount > 0;
+    
+    console.log('버튼 활성화 상태:', { 
+        inputTextLength: inputText.value.length, 
+        titleTextLength: titleText.value.length,
+        ticketCount, 
+        isEnabled 
     });
 
     return isEnabled;
@@ -106,6 +124,12 @@ const onCreditUpdate = (count) => {
     authStore.updateTicketCount().then(newCount => {
         console.log('authStore 이용권 업데이트됨:', newCount);
     });
+};
+
+// 제목 업데이트 함수 추가
+const updateTitle = (text) => {
+  titleText.value = text;
+  console.log('작업 이름 업데이트:', text);
 };
 
 // 지문 제재 업데이트 함수
@@ -143,28 +167,55 @@ const handleCreatePassage = () => {
         console.error('작업 이름 가져오기 실패:', error);
         passageTitle.value = '지문 작업';
     }
-
-    // 작업 내역 확인
-    const isWorkHistoryFull = checkWorkHistoryFull();
-
-    if (isWorkHistoryFull) {
-        // 작업 내역이 가득 찬 경우 경고 모달 표시
-        isWarningModalOpen.value = true;
-    } else {
-        // 일반적인 경우 확인 모달 표시
-        isConfirmModalOpen.value = true;
-    }
+    
+    // 작업 내역 개수 확인
+    const apiUrl = import.meta.env.VITE_API_URL;
+    
+    fetch(`${apiUrl}/pass/select/count/recent`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+    })
+    .then(response => {
+        if (!response.ok) {
+            if (response.status === 401) {
+                // 인증 오류 처리
+                authStore.user = null;
+                authStore.isAuthenticated = false;
+                localStorage.removeItem('authUser');
+                router.push({ 
+                    path: '/login', 
+                    query: { redirect: route.fullPath }
+                });
+                throw new Error('인증이 필요합니다');
+            }
+            throw new Error('API 호출 실패: ' + response.status);
+        }
+        return response.json();
+    })
+    .then(count => {
+        recentListCount.value = count;
+        
+        // 작업 내역이 150개 이상인 경우 경고 모달 표시
+        if (count >= 150) {
+            isListLimitModalOpen.value = true;
+        } else {
+            // 일반적인 경우 확인 모달 표시
+            isConfirmModalOpen.value = true;
+        }
+    })
+    .catch(error => {
+        console.error('작업 내역 확인 중 오류 발생:', error);
+    });
 };
 
-// 최근 작업 내역이 가득 찼는지 확인하는 함수
-const checkWorkHistoryFull = () => {
-    // 여기에 작업 내역 확인 로직 구현
-    // 예: 로컬 스토리지에서 작업 내역 개수 확인 등
+// 현재 "최근 작업 내역"의 개수
+const recentListCount = ref(0);
 
-    // 현재는 테스트를 위해 임의의 값 반환 (실제로는 적절한 로직으로 대체)
-    // return Math.random() > 0.5; // 50% 확률로 가득 참/아님 반환
-    return false; // 기본값은 가득 차지 않음
-};
+// 작업 내역 150개 이상인 경우, 띄울 모달창 정보
+const isListLimitModalOpen = ref(false);
 
 // 확인 모달 관련 핸들러
 const closeConfirmModal = () => {

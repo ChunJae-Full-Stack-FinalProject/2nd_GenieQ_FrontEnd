@@ -2,15 +2,16 @@
     <div class="app-container">
         <p id="main-title">지문 생성</p>
         <div class="main-content">
-            <PassageContentMain ref="passageContentRef" @content-changed="handleContentChange" />
-            <PassageSummary ref="passageSummaryRef" />
-            <BaseButton id="recreate-button" text="재생성하기" type="type2" width="248px" height="54px" @click="openPaymentUsageModal" :disabled="isContentChanged" />
-            <BaseButton id="save-button" text="저장하기" type="type2" width="248px" height="54px" @click="handleSaveButtonClick" :disabled="!isContentChanged" />
-            <BaseButton id="download-button" text="추출하기" type="type2" width="248px" height="54px" :disabled="isContentChanged || !hasManualSave" @click="checkContentLengthAndOpenFileModal()" />
+            <PassageContentMain ref="passageContentRef" @content-changed="handleContentChange"/>   
+            <PassageSummary ref="passageSummaryRef"/>
+            <BaseButton v-if="!isFromRoute" id="recreate-button" text="재생성하기" type="type2" width="248px" height="54px" @click="openPaymentUsageModal" :disabled="isContentChanged"/>
+            <BaseButton id="save-button" text="저장하기" type="type2" width="248px" height="54px" @click="handleSaveButtonClick" :disabled="!isContentChanged"/>
+            <BaseButton id="download-button" text="추출하기" type="type2" width="248px" height="54px" :disabled="isContentChanged || !hasManualSave" @click="checkContentLengthAndOpenFileModal()"/>
             <router-link to="/questions" custom v-slot="{ navigate }">
                 <BaseButton id="connect-create-button" text="이어서 문항 생성하기" type="type4" width="520px" height="54px" @click="handleConnectCreate($event, navigate)" :disabled="isContentChanged" />
             </router-link>
-            <PlainTooltip id="start-edit" message="필요한 부분을 클릭하고 편집을 시작하세요" width="316px" />
+            
+            <PlainTooltip id="start-edit" message="필요한 부분을 클릭하고 편집을 시작하세요" width="316px"/>
         </div>
         <!-- 파일 선택 모달 -->
         <FileSelectModal :isOpen="isFileModalOpen" @close="closeFileModal" @confirm="handleFileSelect" />
@@ -19,7 +20,22 @@
         <!-- 저장하지 않고 페이지 이동 시 경고 모달 -->
         <WarningModalComponent :isOpen="isWarningModalOpen" title="작업을 중단하시겠습니까?" message="마지막 편집 내용은 저장되지 않습니다." cancelText="취소하기" confirmText="작업 중단하기" @close="cancelNavigation" @confirm="confirmNavigation" />
         <!-- 결제 사용 모달 -->
-        <PaymentUsageModal :isOpen="isPaymentUsageModalOpen" @close="closePaymentUsageModal" @generate="handleGenerate" />
+
+        <PaymentUsageModal 
+            :isOpen="isPaymentUsageModalOpen"
+            @close="closePaymentUsageModal"
+            @generate="handleGenerate"
+        />
+
+        <!-- 저장 성공 모달 -->
+        <ConfirmModalComponent
+            :isOpen="isSaveSuccessModalOpen"
+            title="확인"
+            :message="saveSuccessMessage"
+            @close="closeSaveSuccessModal"
+            @confirm="closeSaveSuccessModal"
+        />
+
         <!-- 로딩 표시 추가 -->
         <div v-if="isLoading" class="loading-overlay">
             <div class="loading-spinner"></div>
@@ -49,6 +65,10 @@ const isWarningModalOpen = ref(false); // 경고 모달 상태
 const isPaymentUsageModalOpen = ref(false); // 결제 사용 모달 상태
 const isLoading = ref(false); // 로딩 상태 추가
 const loadingMessage = ref('처리 중입니다...'); // 로딩 메시지
+const isFromRoute = ref(false); // 이전 페이지의 루트 확인용
+const isSaveSuccessModalOpen = ref(false); // 저장 확인 모달 오픈
+const saveSuccessMessage = ref('지문이 저장되었습니다.'); // 저장 확인 모달 메시지
+
 // 네비게이션 관련 변수
 const pendingRoute = ref(null); // 대기 중인 라우트 정보 저장
 // 컴포넌트 참조
@@ -106,9 +126,20 @@ const openPaymentUsageModal = () => {
         isPaymentUsageModalOpen.value = true;
     }
 };
+
+// 모달 관련 함수
 const closePaymentUsageModal = () => {
     isPaymentUsageModalOpen.value = false;
 };
+
+const openSaveSuccessModal = () => {
+    isSaveSuccessModalOpen.value = true;
+};
+
+const closeSaveSuccessModal = () => {
+    isSaveSuccessModalOpen.value = false;
+};
+
 const handleGenerate = () => {
     console.log('지문 재생성 시작');
     closePaymentUsageModal();
@@ -178,24 +209,24 @@ const handleSaveButtonClick = () => {
         credentials: 'include',
         body: JSON.stringify(saveData)
     })
-        .then(response => {
-            if (!response.ok) {
-                if (response.status === 401) {
-                    // 인증 오류 처리
-                    authStore.user = null;
-                    authStore.isAuthenticated = false;
-                    localStorage.removeItem('authUser');
-                    router.push({
-                        path: '/login',
-                        query: { redirect: route.fullPath }
-                    });
-                    throw new Error('인증이 필요합니다');
-                }
-                throw new Error('업데이트 API 호출 실패: ' + response.status);
+    .then(response => {
+        if (!response.ok) {
+            if (response.status === 401) {
+                // 인증 오류 처리
+                authStore.user = null;
+                authStore.isAuthenticated = false;
+                localStorage.removeItem('authUser');
+                router.push({
+                    path: '/login',
+                    query: { redirect: route.fullPath }
+                });
+                throw new Error('인증이 필요합니다');
             }
-            return response.json();
-        })
-        .then(responseData => {
+            throw new Error('업데이트 API 호출 실패: ' + response.status);
+        }
+        return response.json();
+    })
+    .then(responseData => {
             console.log('업데이트 응답 데이터:', responseData);
             // 통합 데이터 구조로 저장
             const updatedData = {
@@ -440,6 +471,11 @@ const loadPassageData = () => {
 // 컴포넌트 마운트 시 실행
 onMounted(async () => {
     console.log('[17] PassageContent 컴포넌트 마운트');
+
+    // 이전 경로 확인 로직 추가
+    const fromPath = route.query.from || '';
+    isFromRoute.value = fromPath.startsWith('/home') || fromPath.startsWith('/storage');
+
     // 데이터 로드
     const loadedData = loadPassageData();
     // 데이터가 있으면 컴포넌트에 적용
@@ -645,7 +681,7 @@ const handleContentChange = (data) => {
 
 #start-edit {
     position: absolute;
-    top: 285px;
+    top: 242px;
     left: 670px;
 }
 </style>
