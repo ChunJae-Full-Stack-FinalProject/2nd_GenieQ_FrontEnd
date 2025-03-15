@@ -282,13 +282,13 @@ td {
 }
 
 .data-table th:nth-child(4), .data-table td:nth-child(4) {
-  width: 15%;
+  width: 20%;
   text-align: center;
 }
 
 .data-table th:nth-child(5), .data-table td:nth-child(5) {
   width: 15%;
-  text-align: center;
+  /* text-align: center; */
 }
 
 .data-table th:nth-child(6), .data-table td:nth-child(6) {
