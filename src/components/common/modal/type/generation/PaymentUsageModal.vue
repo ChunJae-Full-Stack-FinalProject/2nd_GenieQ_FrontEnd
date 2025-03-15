@@ -38,20 +38,50 @@
     </BaseModal>
 </template> 
 <script setup>
-import { ref } from "vue";
+import { ref, watch, onMounted } from "vue";
 import BaseModal from "../../BaseModal.vue";
 import BaseButton from "@/components/common/button/BaseButton.vue";
 import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
 
 const router = useRouter();
-const emit = defineEmits(["close", "generate"]);
+const emit = defineEmits(["close", "generate", 'credit-update']);
 
 const props = defineProps({
   isOpen: Boolean,
   createText: {type: String, default: "생성하기"}
 });
 
-const creditcount = ref(10);
+const creditcount = ref(0); // 초기값 0
+const authStore = useAuthStore();
+
+// creditcount 변경 감지
+watch(creditcount, (newValue) => {
+    emit('credit-update', newValue);
+});
+
+// creditcount를 외부에 노출
+const updateCreditCount = (count) => {
+    creditcount.value = count || authStore.userTicketCount;
+    emit('credit-update', creditcount.value);
+};
+
+// 컴포넌트 마운트 시 이벤트 발생
+onMounted(() => {
+    // authStore의 updateTicketCount 메서드 호출
+    authStore.updateTicketCount()
+        .then(count => {
+            console.log("[PaymentUsage] 티켓 정보 로드 완료:", count);
+            creditcount.value = count; // 반환된 값으로 creditcount 업데이트
+            emit('credit-update', creditcount.value);
+        })
+        .catch(error => {
+            console.error("[PaymentUsage] 티켓 정보 로드 실패:", error);
+            // 에러 발생 시 기본값 혹은 현재 authStore에 있는 값 사용
+            creditcount.value = authStore.userTicketCount;
+            emit('credit-update', creditcount.value);
+        });
+});
 
 const closeModal = () => {
   emit("close");
@@ -88,7 +118,13 @@ const goToTicketPage = () => {
   } catch (error) {
     console.error('페이지 이동 중 오류:', error);
   }
-}
+};
+
+// 외부에서 사용할 수 있도록 defineExpose 사용
+defineExpose({
+  creditcount,
+  updateCreditCount
+});
 </script>
 <style scoped>
 .credit-container {
