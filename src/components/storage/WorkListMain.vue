@@ -434,27 +434,23 @@ const advancedSearch = (items, query) => {
   if (!items || !Array.isArray(items) || items.length === 0) return [];
   
   const normalizedQuery = normalizeText(query);
-  
-  const prioritizedResults = items.map(item => {
+
+  return items.filter(item => {
     try {
-      const normalizedTitle = normalizeText(item.PAS_TITLE);
-      const normalizedKeyword = normalizeText(item.PAS_KEYWORD);
-      const normalizedType = normalizeText(item.PAS_IS_GENERATED);
-      
-      let priority = -1;
-      if (normalizedTitle.includes(normalizedQuery)) priority = 2;
-      else if (normalizedKeyword.includes(normalizedQuery)) priority = 1;
-      else if (normalizedType.includes(normalizedQuery)) priority = 0;
-      
-      return { item, priority };
+      // 각 필드별로 정규화 후 검색
+      const normalizedTitle = normalizeText(item.PAS_TITLE || '');
+      const normalizedKeyword = normalizeText(item.PAS_KEYWORD || '');
+      const normalizedType = normalizeText(item.PAS_IS_GENERATED || '');
+
+      // 정확한 매칭이 아닌 부분 문자열 검색 (includes)
+      return normalizedTitle.includes(normalizedQuery) ||
+        normalizedKeyword.includes(normalizedQuery) ||
+        normalizedType.includes(normalizedQuery);
     } catch (error) {
-      console.error('검색 중 오류 발생:', error, item);
-      return { item, priority: -1 };
+      console.error('검색 중 오류 발생 : ', error);
+      return false;
     }
-  }).filter(result => result.priority >= 0);
-  
-  prioritizedResults.sort((a, b) => b.priority - a.priority);
-  return prioritizedResults.map(result => result.item);
+  });
 };
 
 // 필터링된 작업 아이템 계산 (검색 기능)
@@ -703,10 +699,6 @@ const closeDeleteModal = () => {
   border-collapse: collapse;
   table-layout: fixed;
 }
-
-.data-table tbody {
-  /* height: 690px; */
-}
 .data-table th {
   text-align: left;
   padding: 10px 20px;    
@@ -905,7 +897,7 @@ const closeDeleteModal = () => {
 
 .search-container {
   position: relative;
-  width: 100%;
+  width: 248px;
   max-width: 300px;
 }
 
