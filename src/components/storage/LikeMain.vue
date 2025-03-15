@@ -69,7 +69,7 @@
       </div>
     </div>
      <!-- 페이지네이션 -->
-     <div class="pagination" v-if="totalPages > 0 && filteredWorkItems.length > 0">
+     <div class="pagination" v-if="totalPages > 0 && computedWorkItems.length > 0">
           <button @click="prevPage" :disabled="currentPage === 1">&lt;</button>
           
           <span
