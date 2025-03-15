@@ -10,27 +10,27 @@
                 <p id="select-category-head">지문 분야 선택</p>
                 <div class="select-category">
                     <div class="category-option">
-                        <input type="radio" id="human" name="category" checked @change="onCategoryChange('human')">
+                        <input type="radio" id="human" name="category" checked @change="onCategoryChange('인문')">
                         <label for="human">인문</label>
                     </div>
                     <div class="category-option">
-                        <input type="radio" id="art" name="category" @change="onCategoryChange('art')">
+                        <input type="radio" id="art" name="category" @change="onCategoryChange('예술')">
                         <label for="art">예술</label>
                     </div>
                     <div class="category-option">
-                        <input type="radio" id="social" name="category" @change="onCategoryChange('social')">
+                        <input type="radio" id="social" name="category" @change="onCategoryChange('사회')">
                         <label for="social">사회</label>
                     </div>
                     <div class="category-option">
-                        <input type="radio" id="culture" name="category" @change="onCategoryChange('culture')">
+                        <input type="radio" id="culture" name="category" @change="onCategoryChange('문화')">
                         <label for="culture">문화</label>
                     </div>
                     <div class="category-option">
-                        <input type="radio" id="science" name="category" @change="onCategoryChange('science')">
+                        <input type="radio" id="science" name="category" @change="onCategoryChange('과학')">
                         <label for="science">과학</label>
                     </div>
                     <div class="category-option">
-                        <input type="radio" id="other" name="category" @change="onCategoryChange('other')">
+                        <input type="radio" id="other" name="category" @change="onCategoryChange('기술')">
                         <label for="other">기술</label>
                     </div>
                 </div>
