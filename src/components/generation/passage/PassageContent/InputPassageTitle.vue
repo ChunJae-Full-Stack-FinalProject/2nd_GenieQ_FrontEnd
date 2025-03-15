@@ -11,7 +11,7 @@ const title = ref('');
 
 // 외부에서 접근할 수 있도록 함수 노출
 const getTitle = () => {
-    return title.value || '';
+    return title.value;
 }
 
 // InputPassageTitle.vue 수정
@@ -22,8 +22,8 @@ const setTitle = (newTitle) => {
 
 // 외부에 노출할 메소드 정의 업데이트
 defineExpose({
-  getTitle ,
-  setTitle
+  getTitle,
+  setTitle  // 추가
 });
 
 </script>

@@ -63,11 +63,12 @@
     <div class="button-container">
         <BaseButton text="문항 추가하기" type="type2" id="add-button" width="248px" height="54px" :disabled="isContentChanged" @click="validateAndOpenModal"/>
         <BaseButton text="저장하기" type="type2" id="save-button" width="248px" height="54px" :disabled="!isContentChanged" @click="handleSaveButtonClick"/>
-        <BaseButton text="추출하기" type="type2" id="download-button" width="248px" height="54px" :disabled="isContentChanged" @click="openFileModal"/>
+        <BaseButton text="추출하기" type="type2" id="download-button" width="248px" height="54px" :disabled="isContentChanged || isFromRoute" @click="openFileModal"/>
     </div>
         
     <GenerateQuestionModal 
       :isOpen="showGenerateQuestionModal" 
+      createText="다음"
       mode="generate"
       @close="showGenerateQuestionModal = false"
       @openPaymentModal="showPaymentModal = true"
@@ -151,6 +152,7 @@ const isWarningModalOpen = ref(false);
 const isFileModalOpen = ref(false); // 파일 선택 모달 상태 추가
 const isEditWarningModalOpen = ref(false); // 문항 편집 경고 모달 상태 추가
 const currentRecreateIndex = ref(null); // 현재 재생성하려는 문항 인덱스 추가
+const isFromRoute = ref(false); // 문항 생성 페이지로 오기 전 주소에 따라 "문항 추가" 버튼 비활성화
 
 // EditQuestion 컴포넌트 참조
 const editQuestionRefs = ref([]);
@@ -535,6 +537,10 @@ onMounted(() => {
       }
     }
   }
+
+  // 이전 경로가 /home 또는 /storage로 시작하는지 확인
+  const fromPath = route.query.from || '';
+  isFromRoute.value = fromPath.startsWith('/home') || fromPath.startsWith('/storage');
   
   // 브라우저 새로고침, 닫기 등에 대한 이벤트 리스너 추가
   window.addEventListener('beforeunload', handleBeforeUnload);

@@ -28,8 +28,10 @@
 
 <script setup>
 import { ref, watch, onMounted } from "vue";
+import { useAuthStore } from '@/stores/auth';
 
-const creditcount = ref(10); // 초기값 0
+const creditcount = ref(0); // 초기값 0
+const authStore = useAuthStore();
 
 // 이벤트 정의
 const emit = defineEmits(['credit-update']);
@@ -41,13 +43,25 @@ watch(creditcount, (newValue) => {
 
 // creditcount를 외부에 노출
 const updateCreditCount = (count) => {
-  creditcount.value = count;
-  emit('credit-update', count);
+    creditcount.value = count || authStore.userTicketCount;
+    emit('credit-update', creditcount.value);
 };
 
 // 컴포넌트 마운트 시 이벤트 발생
 onMounted(() => {
-    emit('credit-update', creditcount.value);
+    // authStore의 updateTicketCount 메서드 호출
+    authStore.updateTicketCount()
+        .then(count => {
+            console.log("[PaymentUsage] 티켓 정보 로드 완료:", count);
+            creditcount.value = count; // 반환된 값으로 creditcount 업데이트
+            emit('credit-update', creditcount.value);
+        })
+        .catch(error => {
+            console.error("[PaymentUsage] 티켓 정보 로드 실패:", error);
+            // 에러 발생 시 기본값 혹은 현재 authStore에 있는 값 사용
+            creditcount.value = authStore.userTicketCount;
+            emit('credit-update', creditcount.value);
+        });
 });
 
 // 외부에서 사용할 수 있도록 defineExpose 사용
