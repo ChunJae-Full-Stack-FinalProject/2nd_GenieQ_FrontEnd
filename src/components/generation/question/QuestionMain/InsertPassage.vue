@@ -43,9 +43,10 @@ const setActiveTab = (tab) => {
 };
 
 // 제목 길이 50자 제한
-const saveTitle = JSON.parse(localStorage.getItem('saveResponse'));
+const savedData = localStorage.getItem('saveResponse');
+const saveTitle = savedData ? JSON.parse(savedData) : {};
 
-const passageTitle = ref(saveTitle.passage?.title || '');
+const passageTitle = ref(saveTitle?.passage?.title || '');
 const MAX_LENGTH = 50;
 
 watch(passageTitle, (newVal) => {
