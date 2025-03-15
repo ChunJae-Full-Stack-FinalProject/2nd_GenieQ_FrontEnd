@@ -1,137 +1,137 @@
 <!-- 사용자가 작업 이름과 지문 입력 받기 => 하위컴포넌트 -->
 <template>    
-<div class="input-container">
-    <div class="edit-title">
-        <p id="passage-head">작업이름</p>
-        <input type="text" id="passage-title" placeholder="작업 이름을 입력해주세요." v-model="title"/>
-    </div>
-
-    <div class="select-category-container">
-        <p id="sub-title">생성 결과</p>
-        <div id="text-count"><span style="color: #FF9500;">{{ content.length }}</span>/1700</div>
-        <div id="passage-content-main">
-            <textarea id="content-text" placeholder="본문을 입력해주세요." v-model="content" @input="handleInput"></textarea>
+    <div class="input-container">
+        <div class="edit-title">
+            <p id="passage-head">작업이름</p>
+            <input type="text" id="passage-title" placeholder="작업 이름을 입력해주세요." v-model="title"/>
+        </div>
+    
+        <div class="select-category-container">
+            <p id="sub-title">생성 결과</p>
+            <div id="text-count"><span style="color: #FF9500;">{{ content.length }}</span>/1700</div>
+            <div id="passage-content-main">
+                <textarea id="content-text" placeholder="본문을 입력해주세요." v-model="content" @input="handleInput"></textarea>
+            </div>
         </div>
     </div>
-</div>
-</template>
-<script setup>
-import { ref, defineExpose, defineEmits, watch, onMounted } from 'vue';
-
-// 본문 내용 ref로 관리
-const content = ref('');
-const title = ref('');
-const summary = ref({
-    subject: '',
-    keyword: '',
-    gist: ''
-});
-
-// 이벤트 발신 정의
-const emit = defineEmits(['content-changed']);
-
-// 초기 텍스트 길이 설정
-const MIN_LENGTH = 300;
-const MAX_LENGTH = 1700;
-
-// 초기 더미 데이터 (빈 컴포넌트일 때 표시)
-const initialContent = `인공지능과 기계학습은 현대 기술의 핵심 요소로 자리 잡고 있습니다. 이러한 기술은 데이터 처리와 분석을 통해 지속적으로 성능을 개선하며, 이는 의료, 금융, 제조업 등 다양한 분야에 걸쳐 응용되고 있습니다. 인공지능의 발전은 효율적인 데이터 이용을 통해 새로운 가능성을 제공하고 있지만, 동시에 윤리적 문제도 동반할 수 있습니다. 따라서 기술의 공정성과 투명성을 확보하기 위한 관리가 필요합니다.`;
-
-// 초기화 시 내용 설정
-if (content.value.length === 0) {
-    content.value = initialContent;
-}
-
-// 입력 처리 함수
-const handleInput = (event) => {
-    // 최대 글자 수 제한
-    if (content.value.length > MAX_LENGTH) {
-        content.value = content.value.slice(0, MAX_LENGTH);
+    </template>
+    <script setup>
+    import { ref, defineExpose, defineEmits, watch, onMounted } from 'vue';
+    
+    // 본문 내용 ref로 관리
+    const content = ref('');
+    const title = ref('');
+    const summary = ref({
+        subject: '',
+        keyword: '',
+        gist: ''
+    });
+    
+    // 이벤트 발신 정의
+    const emit = defineEmits(['content-changed']);
+    
+    // 초기 텍스트 길이 설정
+    const MIN_LENGTH = 300;
+    const MAX_LENGTH = 1700;
+    
+    // 초기 더미 데이터 (빈 컴포넌트일 때 표시)
+    const initialContent = `인공지능과 기계학습은 현대 기술의 핵심 요소로 자리 잡고 있습니다. 이러한 기술은 데이터 처리와 분석을 통해 지속적으로 성능을 개선하며, 이는 의료, 금융, 제조업 등 다양한 분야에 걸쳐 응용되고 있습니다. 인공지능의 발전은 효율적인 데이터 이용을 통해 새로운 가능성을 제공하고 있지만, 동시에 윤리적 문제도 동반할 수 있습니다. 따라서 기술의 공정성과 투명성을 확보하기 위한 관리가 필요합니다.`;
+    
+    // 초기화 시 내용 설정
+    if (content.value.length === 0) {
+        content.value = initialContent;
     }
     
-    // 상위 컴포넌트에 변경 알림
-    emitContentChange();
-};
-
-// 변경사항 상위 컴포넌트로 전달
-const emitContentChange = () => {
-    // 현재 요약 정보 설정 (PassageSummary 컴포넌트와 동기화)
-    const summaryValue = {
-        subject: summary.value.subject || '',
-        keyword: summary.value.keyword || '',
-        gist: summary.value.gist || ''
+    // 입력 처리 함수
+    const handleInput = (event) => {
+        // 최대 글자 수 제한
+        if (content.value.length > MAX_LENGTH) {
+            content.value = content.value.slice(0, MAX_LENGTH);
+        }
+        
+        // 상위 컴포넌트에 변경 알림
+        emitContentChange();
     };
     
-    // 상위 컴포넌트에 변경 내용 전달
-    emit('content-changed', {
-        title: title.value,
-        content: content.value,
-        summary: summaryValue
-    });
-    console.log('[31] PassageContentMain: 내용 변경 이벤트 발생', {titleLength: title.value?.length || 0,contentLength: content.value?.length || 0,summary: summaryValue});
-};
-
-// 본문 길이 검증
-const validateContent = () => {
-    return content.value.length >= MIN_LENGTH;
-};
-
-// 외부에서 접근할 수 있도록 함수 노출
-const getContent = () => content.value;
-const getTitle = () => title.value;
-const getSummary = () => summary.value;
-
-const setContent = (newContent) => {
-    console.log('[29] PassageContentMain: 내용 설정', newContent?.length || 0);
-    if (newContent !== undefined) {
-    content.value = newContent || '';
-    emitContentChange();
-    }
-};
-
-const setTitle = (newTitle) => {
-    console.log('[30] PassageContentMain: 제목 설정', newTitle);
-    if (newTitle !== undefined) {
-        title.value = newTitle || '';
-        emitContentChange();
-    }
-};
-
-const setSummary = (newSummary) => {
-    console.log('PassageContentMain: 요약 설정', newSummary);
-    if (newSummary) {
-        summary.value = {
-            subject: newSummary.subject || '',
-            keyword: newSummary.keyword || '',
-            gist: Array.isArray(newSummary.gist) ? [...newSummary.gist] : []
+    // 변경사항 상위 컴포넌트로 전달
+    const emitContentChange = () => {
+        // 현재 요약 정보 설정 (PassageSummary 컴포넌트와 동기화)
+        const summaryValue = {
+            subject: summary.value.subject || '',
+            keyword: summary.value.keyword || '',
+            gist: summary.value.gist || ''
         };
-    }
-    emitContentChange();
-};
-
-// 외부에서 접근 가능한 메서드 노출
-defineExpose({
-    getContent, 
-    getTitle,
-    getSummary,
-    setContent,
-    setTitle,
-    setSummary,
-    validateContent
-});
-
-// 컴포넌트 마운트 시 실행
-onMounted(() => {
-    console.log('PassageContentMain 컴포넌트 마운트');
-    // 초기 데이터 변경 이벤트 발생
-    emitContentChange();
-});
-
-// title이나 content가 변경될 때 이벤트 발생
-watch([title, content], () => {
-    emitContentChange();
-});
-</script>    
+        
+        // 상위 컴포넌트에 변경 내용 전달
+        emit('content-changed', {
+            title: title.value,
+            content: content.value,
+            summary: summaryValue
+        });
+        console.log('[31] PassageContentMain: 내용 변경 이벤트 발생', {titleLength: title.value?.length || 0,contentLength: content.value?.length || 0,summary: summaryValue});
+    };
+    
+    // 본문 길이 검증
+    const validateContent = () => {
+        return content.value.length >= MIN_LENGTH;
+    };
+    
+    // 외부에서 접근할 수 있도록 함수 노출
+    const getContent = () => content.value;
+    const getTitle = () => title.value;
+    const getSummary = () => summary.value;
+    
+    const setContent = (newContent) => {
+        console.log('[29] PassageContentMain: 내용 설정', newContent?.length || 0);
+        if (newContent !== undefined) {
+        content.value = newContent || '';
+        emitContentChange();
+        }
+    };
+    
+    const setTitle = (newTitle) => {
+        console.log('[30] PassageContentMain: 제목 설정', newTitle);
+        if (newTitle !== undefined) {
+            title.value = newTitle || '';
+            emitContentChange();
+        }
+    };
+    
+    const setSummary = (newSummary) => {
+        console.log('PassageContentMain: 요약 설정', newSummary);
+        if (newSummary) {
+            summary.value = {
+                subject: newSummary.subject || '',
+                keyword: newSummary.keyword || '',
+                gist: Array.isArray(newSummary.gist) ? [...newSummary.gist] : []
+            };
+        }
+        emitContentChange();
+    };
+    
+    // 외부에서 접근 가능한 메서드 노출
+    defineExpose({
+        getContent, 
+        getTitle,
+        getSummary,
+        setContent,
+        setTitle,
+        setSummary,
+        validateContent
+    });
+    
+    // 컴포넌트 마운트 시 실행
+    onMounted(() => {
+        console.log('PassageContentMain 컴포넌트 마운트');
+        // 초기 데이터 변경 이벤트 발생
+        emitContentChange();
+    });
+    
+    // title이나 content가 변경될 때 이벤트 발생
+    watch([title, content], () => {
+        emitContentChange();
+    });
+    </script>    
 <style scoped>
 #main-title {
     position: absolute;
