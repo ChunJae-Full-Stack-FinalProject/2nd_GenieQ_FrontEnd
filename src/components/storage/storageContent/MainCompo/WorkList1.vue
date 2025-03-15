@@ -11,38 +11,43 @@
     </div>
     <div class="storage-worklist-table">
       <div class="table-container">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>작업명</th>
-              <th>제재</th>
-              <th>유형</th>
-              <th>최종 작업일</th>
-              <th>추출하기</th>
-              <th>즐겨찾기</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(item, index) in displayItems" :key="index">
-              <td class="work-name" @click="handleWorkItemClick(item)">{{ item.PAS_TITLE }}</td>
-              <td class="work-title">{{ item.PAS_KEYWORD }}</td>
-              <td class="work-type"><span class="type-tag">{{ item.PAS_IS_GENERATED }}</span></td>
-              <td class="work-date">{{ item.PAS_DATE }}</td>
-              <td class="work-action">
-                <button class="extract-btn" @click="openFileModal(item)">
-                  <p id="btn-text">추출 </p>
-                  <Icon icon="lucide:upload" id="btn-icon" style="color: #FFFFFF" />
-                </button>
-              </td>
-              <td class="work-favorite">
-                <span class="star-container" @click="toggleFavorite(index)">
-                  <Icon v-if="item.PAS_IS_FAVORITE" icon="mynaui:star-solid" width="24" height="24" style="color: #FF9F40" />
-                  <Icon v-else icon="mynaui:star" width="24" height="24" style="color: #FF9F40" />
-                </span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <template v-if="displayItems.length > 0">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>작업명</th>
+                <th>제재</th>
+                <th>유형</th>
+                <th>최종 작업일</th>
+                <th>추출하기</th>
+                <th>즐겨찾기</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(item, index) in displayItems" :key="index">
+                <td class="work-name" @click="handleWorkItemClick(item)">{{ item.PAS_TITLE }}</td>
+                <td class="work-title">{{ item.PAS_KEYWORD }}</td>
+                <td class="work-type"><span class="type-tag">{{ item.PAS_IS_GENERATED }}</span></td>
+                <td class="work-date">{{ item.PAS_DATE }}</td>
+                <td class="work-action">
+                  <button class="extract-btn" @click="openFileModal(item)">
+                    <p id="btn-text">추출 </p>
+                    <Icon icon="lucide:upload" id="btn-icon" style="color: #FFFFFF" />
+                  </button>
+                </td>
+                <td class="work-favorite">
+                  <span class="star-container" @click="toggleFavorite(index)">
+                    <Icon v-if="item.PAS_IS_FAVORITE" icon="mynaui:star-solid" width="24" height="24" style="color: #FF9F40" />
+                    <Icon v-else icon="mynaui:star" width="24" height="24" style="color: #FF9F40" />
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </template>
+        <template v-else>
+          <span class="empty-message">최근 작업 내역이 없습니다.</span>
+        </template>
       </div>
     </div>
   
@@ -443,6 +448,18 @@ const handleWorkItemClick = (item) => {
     font-weight: 400;
   }
   
+  /* 테이블이 비어있는 경우 */
+.empty-message {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+
+  width: 1473px;
+  height: 748px;
+}
+
   /* 추출 버튼 */
   .extract-btn {
     display: flex;

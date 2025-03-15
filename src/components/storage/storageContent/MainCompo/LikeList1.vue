@@ -1,13 +1,14 @@
 <template>
   <div class="card-container">
-      <div class="storage-likelist-title">
-          <p>즐겨찾기</p>
-          <router-link to="/storage/likelistMina">
-            <Icon icon="weui:arrow-outlined" width="24" height="24" id="arrow-icon" style="color: #303030" />
-          </router-link>
-      </div>
-     <div class="storage-likelist-table">
-        <div class="table-container">
+    <div class="storage-likelist-title">
+      <p>즐겨찾기</p>
+      <router-link to="/storage/likelistMina">
+        <Icon icon="weui:arrow-outlined" width="24" height="24" id="arrow-icon" style="color: #303030" />
+      </router-link>
+    </div>
+    <div class="storage-likelist-table">
+      <div class="table-container">
+        <template v-if="displayItems.length > 0">
           <table class="data-table">
             <thead>
               <tr>
@@ -40,6 +41,10 @@
               </tr>
             </tbody>
           </table>
+          </template>
+          <template v-else>
+            <span class="empty-message">즐겨찾기가 비어있습니다.</span>
+          </template>
         </div>
       </div>
 
@@ -425,6 +430,18 @@ padding: 0 10px;
 font-size: 14px;
 color: #333;
 font-weight: 400;
+}
+
+/* 테이블이 비어있는 경우 */
+.empty-message {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+
+  width: 1473px;
+  height: 276px;
 }
 
 /* 추출 버튼 */
