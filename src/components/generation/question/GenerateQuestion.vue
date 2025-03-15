@@ -68,6 +68,7 @@
         
     <GenerateQuestionModal 
       :isOpen="showGenerateQuestionModal" 
+      createText="다음"
       mode="generate"
       @close="showGenerateQuestionModal = false"
       @openPaymentModal="showPaymentModal = true"
