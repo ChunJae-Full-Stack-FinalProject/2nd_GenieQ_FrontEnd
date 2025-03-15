@@ -309,17 +309,67 @@ const updateDateRange = () => {
 const purchaseTicket = ref(0);
 
 const openPurchaseWarningModal = (count) => {
-  purchaseTicket.value = count;
+   // ticCode로 매핑되도록 수정
+  if (count === 10) purchaseTicket.value = 1;
+  if (count === 50) purchaseTicket.value = 2;
+  if (count === 100) purchaseTicket.value = 3;
   isPurchaseWarningModal.value = true;
 };
 
   // 구매확인 함수
   const purchaseModal = () => {
+     // 구매 로직 구현할 부분
 
-    // 구매 로직 구현할 부분
+    const apiUrl = import.meta.env.VITE_API_URL;
 
-    closeWarningModal();
-  }
+    fetch(`${apiUrl}/paym/insert/each`, {
+      method : 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include',
+      body: JSON.stringify({
+        ticCode: purchaseTicket.value
+      })
+    })
+    .then(response => {
+      console.log("서버 응답 상태 코드:", response.status);
+      if (!response.ok) {
+        // 인증 오류 처리 (401)
+        if (response.status === 401) {
+          // (추가) 로그 - 인증 오류 감지
+          console.error('인증 오류(401): 로그인이 필요합니다');
+          
+          // 인증 상태 초기화
+          authStore.user = null;
+          authStore.isAuthenticated = false;
+          localStorage.removeItem('authUser');
+          
+          // 로그인 페이지로 리다이렉트
+          router.push({ 
+          path: '/login', 
+          query: { redirect: route.fullPath }
+          });
+          
+          // 추가 처리를 중단하기 위한 에러 발생
+          throw new Error('인증이 필요합니다');
+        }
+        return response.text().then(text => { throw new Error(text); });
+      }
+      return response.text();
+    })
+    .then(data => {
+      console.log('결제 성공', data);
+
+      // 결제 성공 시 티켓 수 갱신
+      getTicketCount(); // 최신 티켓 수 다시 조회
+      closeWarningModal(); // 모달 닫기
+
+    })
+    .catch(error => {
+      console.error('결제 실패:', error);
+    });
+  };
 
 const closeWarningModal = () => {
   isPurchaseWarningModal.value = false;
@@ -381,8 +431,6 @@ function getTicketCount() {
     console.error("티켓 조회 실패:", error);
   });
 }
-
-
 
 // 컴포넌트 마운트 시 초기화
 onMounted(() => {
