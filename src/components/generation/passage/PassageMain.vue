@@ -26,15 +26,13 @@
                 @confirm="confirmCreatePassage"
             />
             
-            <!-- 경고 모달 추가 -->
-            <WarningModalComponent
-                :isOpen="isWarningModalOpen"
-                title="작업 내역 초과"
-                message="최근 작업 내역이 가득 찼습니다. 이전 작업을 삭제하고 진행하시겠습니까?"
-                cancelText="취소하기"
-                confirmText="삭제 후 진행하기"
-                @close="closeWarningModal"
-                @confirm="confirmAfterWarning"
+            <!-- 작업 공간 부족 모달 추가 -->
+            <ConfirmModalComponent
+                :isOpen="isListLimitModalOpen"
+                title="최근 작업 내역이 꽉 찼습니다."
+                message="생성할 문항을 저장할 공간이 부족합니다. 최근 작업 내역에서 공간을 확보하고 다시 시도하세요."
+                @close="isListLimitModalOpen = false"
+                @confirm="isListLimitModalOpen = false"
             />
 
             <!-- 로딩 표시 추가 -->
@@ -52,11 +50,12 @@ import PaymentUsage from '@/components/generation/PaymentUsage.vue';
 import BaseButton from '@/components/common/button/BaseButton.vue';
 import ConfirmModalComponent from '@/components/common/modal/type/ConfirmModalComponent.vue';
 import WarningModalComponent from '@/components/common/modal/type/WarningModalComponent.vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 
 // 라우터 및 인증 스토어
 const router = useRouter();
+const route = useRoute();
 const authStore = useAuthStore();
 
 // 사용자 입력 관련 상태
@@ -169,27 +168,54 @@ const handleCreatePassage = () => {
         passageTitle.value = '지문 작업';
     }
     
-    // 작업 내역 확인
-    const isWorkHistoryFull = checkWorkHistoryFull();
+    // 작업 내역 개수 확인
+    const apiUrl = import.meta.env.VITE_API_URL;
     
-    if (isWorkHistoryFull) {
-        // 작업 내역이 가득 찬 경우 경고 모달 표시
-        isWarningModalOpen.value = true;
-    } else {
-        // 일반적인 경우 확인 모달 표시
-        isConfirmModalOpen.value = true;
-    }
+    fetch(`${apiUrl}/pass/select/count/recent`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+    })
+    .then(response => {
+        if (!response.ok) {
+            if (response.status === 401) {
+                // 인증 오류 처리
+                authStore.user = null;
+                authStore.isAuthenticated = false;
+                localStorage.removeItem('authUser');
+                router.push({ 
+                    path: '/login', 
+                    query: { redirect: route.fullPath }
+                });
+                throw new Error('인증이 필요합니다');
+            }
+            throw new Error('API 호출 실패: ' + response.status);
+        }
+        return response.json();
+    })
+    .then(count => {
+        recentListCount.value = count;
+        
+        // 작업 내역이 150개 이상인 경우 경고 모달 표시
+        if (count >= 150) {
+            isListLimitModalOpen.value = true;
+        } else {
+            // 일반적인 경우 확인 모달 표시
+            isConfirmModalOpen.value = true;
+        }
+    })
+    .catch(error => {
+        console.error('작업 내역 확인 중 오류 발생:', error);
+    });
 };
 
-// 최근 작업 내역이 가득 찼는지 확인하는 함수
-const checkWorkHistoryFull = () => {
-    // 여기에 작업 내역 확인 로직 구현
-    // 예: 로컬 스토리지에서 작업 내역 개수 확인 등
-    
-    // 현재는 테스트를 위해 임의의 값 반환 (실제로는 적절한 로직으로 대체)
-    // return Math.random() > 0.5; // 50% 확률로 가득 참/아님 반환
-    return false; // 기본값은 가득 차지 않음
-};
+// 현재 "최근 작업 내역"의 개수
+const recentListCount = ref(0);
+
+// 작업 내역 150개 이상인 경우, 띄울 모달창 정보
+const isListLimitModalOpen = ref(false);
 
 // 확인 모달 관련 핸들러
 const closeConfirmModal = () => {
