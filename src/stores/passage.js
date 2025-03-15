@@ -3,17 +3,14 @@ import { defineStore } from "pinia";
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 
-  // 라우터와 스토어 초기화
-  const router = useRouter();
-  const route = useRoute();
-  const authStore = useAuthStore();
 
 export const usePassageStore = defineStore('passage', {
     state: () => ({
         passage: [],
         currentPassage: null,
         isLoading: false,
-        error: null
+        error: null,
+        sProcessing: false
     }),
 
     getters: {
@@ -30,6 +27,8 @@ export const usePassageStore = defineStore('passage', {
     actions: {
         // 지문 저장 기능
         savePassage(passageData) {
+            if (this.isProcessing) return; // 중복 실행 방지
+            this.isProcessing = true;
             this.isLoading = true;
             this.error = null;
 
@@ -49,9 +48,15 @@ export const usePassageStore = defineStore('passage', {
                         console.error('인증 오류(401): 로그인이 필요합니다');
         
                         // 인증 상태 초기화
+                        const authStore = useAuthStore();
                         authStore.user = null;
                         authStore.isAuthenticated = false;
                         localStorage.removeItem('authUser');
+
+                        // 라우터와 스토어 초기화
+                        const router = useRouter();
+                        const route = useRoute();
+  
         
                         // 로그인 페이지로 리다이렉트
                         router.push({ 
@@ -60,10 +65,11 @@ export const usePassageStore = defineStore('passage', {
                         });
         
                         // 추가 처리를 중단하기 위한 에러 발생
-                        throw new Error('인증이 필요합니다');
+                        return Promise.reject(new Error('인증이 필요합니다'));
                     }
-                    return response.text().then(text => { throw new Error(text); });
+                    return response.text().then(text => Promise.reject(new Error(text)));
                 }
+                return response.json();
             })
             .then(data => {
                 // 현재 지문 상태 업데이트
@@ -71,7 +77,7 @@ export const usePassageStore = defineStore('passage', {
 
                 // 반응형 상태 업데이트
                 this.$patch(state => {
-                    const index = state.passage.findIndex(p => p.id === data.id);
+                    const index = state.passage.findIndex(p => p.pasCode === data.pasCode);
                     if (index !== -1) {
                         state.passage[index] = data;
                     } else {
@@ -79,15 +85,16 @@ export const usePassageStore = defineStore('passage', {
                     }
                 });
 
-                return { success: true, passage: data };
+                return Promise.resolve({ success: true, passage: data });
             })
             .catch(error => {
                 console.error('지문 저장 오류:', error);
                 this.error = error.message || '지문 저장 중 오류가 발생했습니다.';
-                return { success: false, error: this.error };
+                return Promise.reject({ success: false, error: this.error });
             })
             .finally(() => {
                 this.isLoading = false;
+                this.isProcessing = false;
             });
         }
     }

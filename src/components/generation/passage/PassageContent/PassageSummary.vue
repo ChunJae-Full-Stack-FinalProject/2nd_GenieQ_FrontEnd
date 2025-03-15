@@ -30,6 +30,7 @@
 import { ref, defineExpose } from 'vue';
 const savePassageData = JSON.parse(localStorage.getItem('saveResponse'));
 
+
 // 데이터 관리
 const subject = ref(savePassageData.passage.type);
 const keyword = ref(savePassageData.passage.keyword);
@@ -43,10 +44,33 @@ const getSummary = () => {
         items: [...items.value]
     };
 };
+    
+// 요약 정보 설정 (외부에서 호출 가능)
+const setSummary = (summaryData) => {
+    console.log('PassageSummary: 요약 정보 설정', summaryData);
+    
+    if (summaryData) {
+        if (summaryData.subject) {
+            subject.value = summaryData.subject;
+        }
+        
+        if (summaryData.keyword) {
+            keyword.value = summaryData.keyword;
+        }
+        
+        if (Array.isArray(summaryData.items)) {
+            items.value = [...summaryData.items];
+        } else if (typeof summaryData.items === 'string') {
+            // 문자열인 경우 줄바꿈으로 분리
+            items.value = summaryData.items.split('\n').filter(item => item.trim());
+        }
+    }
+};
 
-// 노출할 메소드 정의
+// 외부에서 사용 가능한 메서드 노출
 defineExpose({
-    getSummary
+    getSummary,
+    setSummary
 });
 </script>
 <style scoped>
