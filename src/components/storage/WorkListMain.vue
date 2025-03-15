@@ -368,8 +368,8 @@ const maxVisiblePages = 5; // 한 번에 표시할 페이지 번호 최대 개�
 // 검색 텍스트 정규화 함수 개선
 const normalizeText = (str) => {
   if (!str) return '';
-  // 문자열로 변환 후 소문자화, 띄어쓰기 제거, 특수문자 제거
-  return str.toString().toLowerCase().replace(/[\s\W_]+/g, '');
+  // 문자열로 변환 후 소문자화, 띄어쓰기만 제거 (특수문자 제거하지 않음)
+  return str.toString().toLowerCase().replace(/\s+/g, '');
 };
 
 // advancedSearch 함수에서 해당 함수 사용
