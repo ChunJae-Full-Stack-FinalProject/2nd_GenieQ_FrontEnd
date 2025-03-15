@@ -319,6 +319,7 @@ const handleFileSelection = (fileType) => {
   // 파일 추출 로직 구현
 };
 
+
 const toggleFavorite = (index) => {
   const item = computedWorkItems.value[index];
   const apiUrl = import.meta.env.VITE_API_URL;
@@ -459,9 +460,11 @@ const lastPage = () => {
 // 삭제 모달 상태 관리
 const isDeleteModalOpen = ref(false);
 
-// 선택된 아이템들 찾기
+// 선택된 아이템들 찾기 (수정된 버전)
 const selectedItems = computed(() => {
-  return workItems.value.filter(item => item.checked);
+  const selected = workItems.value.filter(item => item.checked);
+  console.log('선택된 항목:', selected);
+  return selected;
 });
 
 // 삭제 버튼 클릭 시 모달 열기
@@ -471,16 +474,56 @@ const openDeleteModal = () => {
   }
 };
 
-// 선택된 아이템 삭제 확인 
 const confirmDelete = () => {
-  // 선택된 아이템 제거
-  workItems.value = workItems.value.filter(item => !item.checked);
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:9090';
+  const selectedPasCodes = selectedItems.value.map(item => item.PAS_CODE);
   
-  // 모달 닫기
-  isDeleteModalOpen.value = false;
+  // 선택된 항목이 없으면 작업 중단
+  if (selectedPasCodes.length === 0) {
+    console.log('삭제할 항목이 선택되지 않았습니다.');
+    return;
+  }
   
-  // 페이지 재계산
-  currentPage.value = Math.min(currentPage.value, totalPages.value);
+  // API 호출
+  fetch(`${apiUrl}/pass/remove/each`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    credentials: 'include',
+    body: JSON.stringify({
+      pasCodeList: selectedPasCodes
+    })
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('항목 삭제 실패');
+    }
+     // 응답 형식 확인
+     const contentType = response.headers.get("content-type");
+    if (contentType && contentType.includes("application/json")) {
+      return response.json();
+    } else {
+      return response.text().then(text => {
+        return { message: text };
+      });
+    }
+  })
+  .then(data => {
+    console.log('삭제 완료:', data);
+    
+    // UI에서 선택된 항목 제거
+    workItems.value = workItems.value.filter(item => !item.checked);
+    
+    // 모달 닫기
+    isDeleteModalOpen.value = false;
+    
+    // 페이지 재계산
+    currentPage.value = Math.min(currentPage.value, totalPages.value);
+  })
+  .catch(error => {
+    console.error('삭제 요청 실패:', error);
+  });
 };
 
 // 삭제 모달 닫기

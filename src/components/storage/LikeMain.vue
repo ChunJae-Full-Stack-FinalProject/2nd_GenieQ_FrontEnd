@@ -377,9 +377,11 @@ const lastPage = () => {
 // 삭제 모달 상태 관리
 const isDeleteModalOpen = ref(false);
 
-// 선택된 아이템들 찾기
+// 선택된 아이템들 찾기 (수정된 버전)
 const selectedItems = computed(() => {
-  return workItems.value.filter(item => item.checked);
+  const selected = workItems.value.filter(item => item.checked);
+  console.log('선택된 항목:', selected);
+  return selected;
 });
 
 // 삭제 버튼 클릭 시 모달 열기
@@ -389,16 +391,60 @@ const openDeleteModal = () => {
   }
 };
 
-// 선택된 아이템 삭제 확인 
 const confirmDelete = () => {
-  // 선택된 아이템 제거
-  workItems.value = workItems.value.filter(item => !item.checked);
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:9090';
+  const selectedPasCodes = selectedItems.value.map(item => item.PAS_CODE);
   
-  // 모달 닫기
-  isDeleteModalOpen.value = false;
+  // 선택된 항목이 없으면 작업 중단
+  if (selectedPasCodes.length === 0) {
+    console.log('삭제할 항목이 선택되지 않았습니다.');
+    return;
+  }
   
-  // 페이지 재계산
-  currentPage.value = Math.min(currentPage.value, totalPages.value);
+  console.log('삭제 요청:', selectedPasCodes);
+  
+  // API 호출
+  fetch(`${apiUrl}/pass/remove/each`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    credentials: 'include',
+    body: JSON.stringify({
+      pasCodeList: selectedPasCodes
+    })
+  })
+  .then(response => {
+    // HTTP 응답 상태 코드만 확인하고 성공으로 처리
+    if (response.status >= 200 && response.status < 300) {
+      return { success: true };
+    }
+    
+    console.error('HTTP 오류:', response.status);
+    return Promise.reject(new Error('서버에서 오류가 발생했습니다: ' + response.status));
+  })
+  .then(data => {
+    console.log('삭제 성공:', data);
+    
+    // UI에서 선택된 항목 제거
+    workItems.value = workItems.value.filter(item => !selectedPasCodes.includes(item.PAS_CODE));
+    
+    // 모달 닫기
+    isDeleteModalOpen.value = false;
+    
+    // 마지막 페이지가 비게 되면 이전 페이지로 이동
+    if (totalPages.value === 0) {
+      currentPage.value = 1;
+    } else if (currentPage.value > totalPages.value) {
+      currentPage.value = totalPages.value;
+    }
+  })
+  .catch(error => {
+    console.error('삭제 요청 처리 오류:', error);
+    
+    // 모달 닫기 - 에러가 발생해도 사용자 경험을 위해 모달은 닫음
+    isDeleteModalOpen.value = false;
+  });
 };
 
 // 삭제 모달 닫기
