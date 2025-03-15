@@ -320,7 +320,7 @@ const handleFileSelection = (fileType) => {
 };
 
 const toggleFavorite = (index) => {
-  const item = workItems.value[index];
+  const item = computedWorkItems.value[index];
   const apiUrl = import.meta.env.VITE_API_URL;
 
   // 즐겨찾기 토글 로직
@@ -365,33 +365,37 @@ const currentPage = ref(1);
 const itemsPerPage = 15; // 페이지당 표시할 아이템 수
 const maxVisiblePages = 5; // 한 번에 표시할 페이지 번호 최대 개수
 
-// 띄어쓰기를 무시하는 고급 검색 함수
+//고급 검색 함수.
 const advancedSearch = (items, query) => {
   if (!query) return items;
   if (!items || !Array.isArray(items) || items.length === 0) return [];
   
-  // 검색어와 검색 대상에서 모든 공백 제거
   const normalizedQuery = removeWhitespace(query.toLowerCase());
   
-  return items.filter(item => {
+  // 검색 결과에 우선순위 부여
+  const prioritizedResults = items.map(item => {
     try {
-      // 검색할 필드들에서 공백 제거 (문자열이 아닌 경우 빈 문자열로 처리)
-      const titleStr = (item.PAS_TITLE || '').toString();
-      const keywordStr = (item.PAS_KEYWORD || '').toString();
-      const generatedStr = (item.PAS_IS_GENERATED || '').toString();
-  
       const nameWithoutSpace = removeWhitespace(item.PAS_TITLE.toLowerCase());
       const titleWithoutSpace = removeWhitespace(item.PAS_KEYWORD.toLowerCase());
       const typeWithoutSpace = removeWhitespace(item.PAS_IS_GENERATED.toLowerCase());
       
-      // 공백 없는 텍스트에서 검색
-      return nameWithoutSpace.includes(normalizedQuery) || 
-             titleWithoutSpace.includes(normalizedQuery) || 
-             typeWithoutSpace.includes(normalizedQuery);
+      // 우선순위 할당 (높을수록 먼저 표시)
+      let priority = -1;
+      if (nameWithoutSpace.includes(normalizedQuery)) priority = 2;
+      else if (titleWithoutSpace.includes(normalizedQuery)) priority = 1;
+      else if (typeWithoutSpace.includes(normalizedQuery)) priority = 0;
+      
+      return { item, priority };
     } catch (error) {
-      console.error('검색 중 오류 발생 : ', error, item)
+      console.error('검색 중 오류 발생 : ', error, item);
+      return { item, priority: -1 };
     }
-  });
+  }).filter(result => result.priority >= 0);
+  
+  // 우선순위에 따라 정렬
+  prioritizedResults.sort((a, b) => b.priority - a.priority);
+  
+  return prioritizedResults.map(result => result.item);
 };
 
 // 필터링된 작업 아이템 계산 (검색 기능)
@@ -594,13 +598,13 @@ const closeDeleteModal = () => {
 
 .data-table {
   width: 100%;
-  height: 736px;
+  /* height: 736px; */
   border-collapse: collapse;
   table-layout: fixed;
 }
 
 .data-table tbody {
-  height: 690px;
+  /* height: 690px; */
 }
 .data-table th {
   text-align: left;
