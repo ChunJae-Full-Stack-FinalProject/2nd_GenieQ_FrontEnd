@@ -69,7 +69,7 @@
       </div>
     </div>
      <!-- 페이지네이션 -->
-     <div class="pagination" v-if="totalPages > 0 && filteredWorkItems.length > 0">
+     <div class="pagination" v-if="totalPages > 0 && computedWorkItems.length > 0">
           <button @click="prevPage" :disabled="currentPage === 1">&lt;</button>
           
           <span
@@ -168,7 +168,7 @@ const fetchWorkItems = () => {
       PAS_CODE: item.pasCode,
       PAS_TITLE: item.title,
       PAS_KEYWORD: item.keyword,
-      PAS_IS_GENERATED: item.isGenerated === 1 ? '생성' : '직접입력',
+      PAS_IS_GENERATED: item.isGenerated === 1 ? '지문' : '문항',
       PAS_DATE: item.date,
       PAS_IS_FAVORITE: item.isFavorite === 1,
       checked: false // 체크박스 상태 추가
