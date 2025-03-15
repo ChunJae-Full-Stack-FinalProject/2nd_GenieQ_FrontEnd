@@ -18,56 +18,61 @@
   </div>
     <div class="storage-likemain-table">
       <div class="table-container">
-        <table class="data-table">
-        <thead>
-          <tr>
-            <th>선택</th>
-            <th>작업명</th>
-            <th>제재</th>
-            <th>유형</th>
-            <th>최종 작업일</th>
-            <th>추출하기</th>
-            <th>즐겨찾기</th>
-          </tr>
-        </thead>
-          <tbody>
-            <tr v-for="(item, index) in computedWorkItems" :key="index" :class="{ 'row-checked': item.checked }">
-              <td @contextmenu="showEditForm(index, $event)">
-                <label class="custom-checkbox">
-                  <input type="checkbox" class="checkbox-input" v-model="item.checked">
-                  <span class="checkbox-custom"></span>
-                </label>
-              </td>
-              <td class="work-name" @contextmenu="showEditForm(index, $event)" @click="handleWorkItemClick(item)">
-                <div v-if="editingIndex === index">
-                  <input type="text" v-model="item.PAS_TITLE" @blur="finishEditing" @keyup.enter="finishEditing" ref="editInput" class="edit-input"/>
-                </div>
-                <div v-else class="clickable-title">
-                  {{ item.PAS_TITLE }}
-                </div>
-              </td>
-              <td class="work-title" @contextmenu="showEditForm(index, $event)">{{ item.PAS_KEYWORD }}</td>
-              <td class="work-type" @contextmenu="showEditForm(index, $event)">
-                <span class="type-tag">{{ item.PAS_IS_GENERATED }}</span>
-              </td>
-              <td class="work-date" @contextmenu="showEditForm(index, $event)">{{ item.PAS_DATE }}</td>
-              <td class="work-action">
-                <button class="extract-btn" @click="openFileModal(item)">
-                  <p id="btn-text">추출 </p>
-                  <Icon icon="lucide:upload" id="btn-icon" style="color: #FFFFFF" />
-                </button>
-              </td>
-              <td class="work-favorite" @contextmenu="showEditForm(index, $event)">
-                <span class="star-container" @click="toggleFavorite(index)">
-                  <Icon v-if="item.PAS_IS_FAVORITE" icon="mynaui:star-solid" width="24" height="24" style="color: #FF9F40" />
-                  <Icon v-else icon="mynaui:star" width="24" height="24" style="color: #FF9F40" />
-                </span>
-              </td>
-            </tr>
+        <template v-if="computedWorkItems.length > 0">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>선택</th>
+                <th>작업명</th>
+                <th>제재</th>
+                <th>유형</th>
+                <th>최종 작업일</th>
+                <th>추출하기</th>
+                <th>즐겨찾기</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(item, index) in computedWorkItems" :key="index" :class="{ 'row-checked': item.checked }">
+                <td @contextmenu="showEditForm(index, $event)">
+                  <label class="custom-checkbox">
+                    <input type="checkbox" class="checkbox-input" v-model="item.checked">
+                    <span class="checkbox-custom"></span>
+                  </label>
+                </td>
+                <td class="work-name" @contextmenu="showEditForm(index, $event)" @click="handleWorkItemClick(item)">
+                  <div v-if="editingIndex === index">
+                    <input type="text" v-model="item.PAS_TITLE" @blur="finishEditing" @keyup.enter="finishEditing" ref="editInput" class="edit-input"/>
+                  </div>
+                  <div v-else class="clickable-title">
+                    {{ item.PAS_TITLE }}
+                  </div>
+                </td>
+                <td class="work-title" @contextmenu="showEditForm(index, $event)">{{ item.PAS_KEYWORD }}</td>
+                <td class="work-type" @contextmenu="showEditForm(index, $event)">
+                  <span class="type-tag">{{ item.PAS_IS_GENERATED }}</span>
+                </td>
+                <td class="work-date" @contextmenu="showEditForm(index, $event)">{{ item.PAS_DATE }}</td>
+                <td class="work-action">
+                  <button class="extract-btn" @click="openFileModal(item)">
+                    <p id="btn-text">추출 </p>
+                    <Icon icon="lucide:upload" id="btn-icon" style="color: #FFFFFF" />
+                  </button>
+                </td>
+                <td class="work-favorite" @contextmenu="showEditForm(index, $event)">
+                  <span class="star-container" @click="toggleFavorite(index)">
+                    <Icon v-if="item.PAS_IS_FAVORITE" icon="mynaui:star-solid" width="24" height="24" style="color: #FF9F40" />
+                    <Icon v-else icon="mynaui:star" width="24" height="24" style="color: #FF9F40" />
+                  </span>
+                </td>
+              </tr>
           </tbody>
         </table>
-      </div>
+      </template>
+      <template v-else>
+        <span class="empty-message">즐겨찾기가 비어있습니다.</span>
+      </template>
     </div>
+  </div>
      <!-- 페이지네이션 -->
      <div class="pagination" v-if="totalPages > 0 && computedWorkItems.length > 0">
           <button @click="prevPage" :disabled="currentPage === 1">&lt;</button>
@@ -796,6 +801,18 @@ font-weight: 400;
 .type-tag-combined {
 background-color: #e8f0fe;
 color: #4285f4;
+}
+
+/* 테이블이 비어있는 경우 */
+.empty-message {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+
+  width: 1473px;
+  height: 414px;
 }
 
 /* 추출 버튼 */
