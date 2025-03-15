@@ -19,7 +19,7 @@
           </thead>
           <tbody>
             <tr v-for="(item, index) in displayItems" :key="index">
-              <td class="work-name">{{ item.PAS_TITLE }}</td>
+              <td class="work-name" @click="handleWorkItemClick(item)">{{ item.PAS_TITLE }}</td>
               <td class="work-title">{{ item.PAS_KEYWORD }}</td>
               <td class="work-type">
                 <span class="type-tag">{{ item.PAS_IS_GENERATED }}</span>
@@ -124,6 +124,105 @@ const fetchWorkItems = () => {
     console.error('최근 작업 리스트 불러오기 실패: ', error);
   });
 };
+
+// 작업명 클릭시, 해당 화면으로 이동
+const handleWorkItemClick = (item) => {
+  const apiUrl = import.meta.env.VITE_API_URL;
+  const pasCode = item.PAS_CODE;
+
+  // PAS_IS_GENERATED 값에 따라 API 및 페이지 분기처리
+  const isGeneratedText = item.PAS_IS_GENERATED;
+  const isPassage = isGeneratedText === '지문';
+    // '지문'인 경우 true, '문항'인 경우 false
+
+  // api 엔드 포인트 결정
+  const endpoint = isPassage
+    ? `${apiUrl}/pass/select/${pasCode}`
+    : `${apiUrl}/pass/ques/select/${pasCode}`;
+
+  // api 호출
+  fetch(endpoint, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    credentials: 'include'
+  })
+  .then(response => {
+    if (!response.ok) {
+      // 인증 오류 처리 (401)
+      if (response.status === 401) {
+        console.error('인증 오류(401): 로그인이 필요합니다');
+        
+        // 인증 상태 초기화
+        authStore.user = null;
+        authStore.isAuthenticated = false;
+        localStorage.removeItem('authUser');
+        
+        // 로그인 페이지로 리다이렉트
+        router.push({ 
+          path: '/login', 
+          query: { redirect: route.fullPath }
+        });
+        
+        throw new Error('인증이 필요합니다');
+      }
+      return response.text().then(text => { throw new Error(text); });
+    }
+    return response.json();
+  })
+  .then(data => {
+    console.log('가져온 데이터 : ', data);
+
+    if (isPassage) {
+      // 지문인 경우 - PassageContent.vue로 이동
+      // 데이터 형식 변환 및 저장
+      const passageData = {
+        pasCode: data.pasCode,
+        title: data.title,
+        type: data.type,
+        keyword: data.keyword,
+        content: data.content,
+        gist: data.gist
+      };
+
+      // 통합 키로 저장
+      localStorage.setItem('genieq-passage-data', JSON.stringify(passageData));;
+
+      // 지문 생성 페이지로 이동
+      router.push('/passage/create');
+    } else {
+      // 문항인 경우 - GenerateQuestion.vue로 이동
+      // 데이터 형식 변환 및 저장
+      const questionData = {
+        passage: {
+          pasCode: data.pasCode,
+          title: data.title,
+          type: data.type,
+          keyword: data.keyword,
+          content: data.content,
+          gist: data.gist,
+          questions: data.questions.map(q => ({
+            queCode: q.queCode,
+            queQuery: q.queQuery,
+            queOption: q.queOption,
+            queAnswer: q.queAnswer
+          }))
+        }
+      };
+
+      // 로컬 스토리지에 저장
+      localStorage.setItem('saveResponse', JSON.stringify(questionData));
+      
+      // 문항 생성 페이지로 이동
+      router.push('/questions/generate');
+    }
+  })
+  .catch(error => {
+    console.error('데이터 가져오기 실패:', error);
+    alert('데이터를 가져오는 중 오류가 발생했습니다.');
+  });
+}
 
 // 모달 상태 관리
 const isModalOpen = ref(false);
@@ -282,13 +381,13 @@ td {
 }
 
 .data-table th:nth-child(4), .data-table td:nth-child(4) {
-  width: 15%;
+  width: 20%;
   text-align: center;
 }
 
 .data-table th:nth-child(5), .data-table td:nth-child(5) {
   width: 15%;
-  text-align: center;
+  /* text-align: center; */
 }
 
 .data-table th:nth-child(6), .data-table td:nth-child(6) {
