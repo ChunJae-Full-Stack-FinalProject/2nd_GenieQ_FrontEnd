@@ -206,8 +206,10 @@ const paymentHistory = ref([]);
 
 const fetchPaymentHistory = () => {
   const apiUrl = import.meta.env.VITE_API_URL;
-  const startDateEncoded = encodeURIComponent(startDate.value);
-  const endDateEncoded = encodeURIComponent(endDate.value);
+ 
+  // 날짜가 비어있으면 기본값 설정
+  const startDateEncoded = encodeURIComponent(startDate.value || '1970-01-01');
+  const endDateEncoded = encodeURIComponent(endDate.value || getTodayFormatted());
   
   fetch(`${apiUrl}/paym/select/list?startDate=${startDateEncoded}&endDate=${endDateEncoded}&page=${currentPage.value}&size=${itemsPerPage}`, {
     method: "GET",
