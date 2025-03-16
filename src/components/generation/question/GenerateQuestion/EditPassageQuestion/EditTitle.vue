@@ -1,15 +1,23 @@
 <template>
     <div class="edit-title">
         <p id="passage-head">작업이름</p>
-            <input type="text" id="passage-title"
-            placeholder="작업 이름을 입력해 주세요. (최대 50자)" v-model="title"/>
+            <input 
+                type="text"
+                id="passage-title"
+                placeholder="작업 이름을 입력해 주세요. (최대 50자)"
+                v-model="title"
+                @input="emitTitleChange" />
     </div>
 </template>
 <script setup>
-import { ref, watch } from 'vue';
-const savePassageData = JSON.parse(localStorage.getItem('saveResponse'));
+import { ref, watch, defineEmits } from 'vue';
+const emit = defineEmits(['title-changed']);
 
-const title = ref(savePassageData.passage?.title||'');
+const title = ref('');
+
+// 초기 값 설정 (값이 없으면 빈 문자열로 설정)
+const savePassageData = JSON.parse(localStorage.getItem('saveResponse'));
+title.value = savePassageData?.passage?.title || '';
 const MAX_LENGTH = 50;
 
 watch(title, (newValue) => {
@@ -17,6 +25,19 @@ watch(title, (newValue) => {
     if (newValue.length > MAX_LENGTH) {
         // 최대 길이로 잘라서 다시 설정
         title.value = newValue.substring(0, MAX_LENGTH);
+    }
+});
+
+// 수정된 제목을 부모 컴포넌트에 전달
+const emitTitleChange = () => {
+    emit('title-changed', title.value || '');
+};
+
+// 외부에서 상태 접근 가능하도록 설정
+defineExpose({
+    getTitle: () => title.value,
+    setTitle: (newTitle) => {
+        title.value = newTitle || '';
     }
 });
 </script>

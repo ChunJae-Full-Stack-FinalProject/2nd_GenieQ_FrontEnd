@@ -18,7 +18,7 @@
 <script setup>
 import { ref, defineExpose, defineEmits, watch, onMounted } from 'vue';
 
-const savePassageData = JSON.parse(localStorage.getItem('saveResponse'));
+const savePassageData = JSON.parse(localStorage.getItem('saveResponse')) || {};
 // 본문 내용 ref로 관리
 const content = ref('');
 const title = ref(savePassageData.passage?.title||'');
