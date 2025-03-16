@@ -444,7 +444,14 @@ const loadPassageData = () => {
         // 통일된 키 사용
         const storedData = localStorage.getItem('genieq-passage-data');
         if (storedData) {
-            const data = JSON.parse(storedData);
+            let data;
+            try {
+                data = JSON.parse(storedData);
+            } catch (parseError) {
+                console.error('[2] JSON 파싱 오류:', parseError);
+                return null;
+            }
+
             console.log('[12-1] 로컬 스토리지에서 데이터 로드 성공:', data);
             // 데이터 설정 - 백엔드 응답 구조(PAS_)와 프론트엔드 변수명(소문자) 모두 처리
             title.value = data.title || '';
@@ -456,7 +463,7 @@ const loadPassageData = () => {
             let gistData = data.gist || '';
             // 문자열이면 배열로 변환
             if (typeof gistData === 'string') {
-                gistData = gistData.split('\\n').filter(item => item.trim());
+                gistData = gistData.split(/\\n|\n/).filter(item => item.trim());
             }
             // 배열이 아니면 빈 배열로 초기화
             else if (!Array.isArray(gistData)) {
