@@ -62,8 +62,14 @@ import ConfirmModalComponent from '@/components/common/modal/type/ConfirmModalCo
 import EditTitle from './EditTitle.vue';
 
 const props = defineProps({
-  initialTitle: String,
-  initialContent: String
+  initialTitle: {
+    type: String,
+    default: ''
+  },
+  initialContent: {
+    type: String,
+    default: ''
+  }
 });
 
 // 상수 정의
@@ -117,11 +123,13 @@ const handleTitleChange = (newTitle) => {
 const onContentChange = () => {
   const contentDiv = document.getElementById('content-text');
   if (contentDiv) {
-    content.value = contentDiv.innerHTML;
+    content.value = contentDiv.innerHTML || '';
   }
 
-  // 글자 수 제한 처리
-  truncateHtmlToTextLength();
+  // 최대 글자 수 검사
+  checkMaxLength();
+
+  saveSelection();
 
   // 상태 전달
   emitChange();
@@ -222,6 +230,7 @@ const truncateHtmlToTextLength = (html, maxLength) => {
 
 // 심볼 삽입
 const insertSymbol = (symbol) => {
+    saveSelection();
     // 선택된 텍스트 대신 심볼 삽입
     document.execCommand('insertText', false, symbol);
 
@@ -299,14 +308,14 @@ const validateTextLength = () => {
 
 // 지문 내용 설정 메서드
 const setContent = (content) => {
-    console.log('EditPassage - setContent 호출됨:', content);
+    //console.log('EditPassage - setContent 호출됨:', content);
     if (content) {
         const contentDiv = document.getElementById('content-text');
         if (contentDiv) {
             contentDiv.innerHTML = content;
             contentText.value = content;
         }
-        console.log('EditPassage - contentText 설정 후:', contentText.value);
+        //console.log('EditPassage - contentText 설정 후:', contentText.value);
     }
 };
 
@@ -350,6 +359,23 @@ onMounted(() => {
     // 페이지 클릭 시 선택 영역 저장
     document.addEventListener('mouseup', saveSelection);
     document.addEventListener('keyup', saveSelection);
+});
+
+watch(() => props.initialTitle, (newValue) => {
+  //console.log("제목 변경 감지: ", newValue);
+  if (newValue !== undefined && newValue !== null) {
+    title.value = newValue;
+  }
+});
+
+watch(() => props.initialContent, (newValue) => {
+  //console.log(" 지문 변경 감지: ", newValue);
+  if (newValue !== undefined && newValue !== null) {
+    saveSelection();
+    content.value = newValue;
+    setContent(newValue); // 값이 변경되면 자동 반영
+    restoreSelection();
+  }
 });
 
 // 외부에서 접근할 메서드 노출

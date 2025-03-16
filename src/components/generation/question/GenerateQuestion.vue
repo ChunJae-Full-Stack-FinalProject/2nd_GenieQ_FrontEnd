@@ -44,8 +44,8 @@
         <div v-for="(item, index) in questionsData" :key="index" class="carousel-item description-item">
           <QuestionDescription 
             :isEditing="isEditingGlobal" 
-            :correct="item.correct"
-            :description="item.queAnswer"
+            :queAnswer="item.queAnswer"
+            :description="item.description"
             :slideIndex="index"
             @description-changed="handleDescriptionChange($event, index)"
           />
@@ -130,6 +130,7 @@
 <script setup>
 import { ref, onMounted, provide, onBeforeUnmount, getCurrentInstance, watch, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
 // 직접 컴포넌트 임포트
 import EditPassage from './GenerateQuestion/EditPassageQuestion/EditPassage.vue';
 import EditQuestion from './GenerateQuestion/EditPassageQuestion/EditQuestion.vue';
@@ -147,7 +148,7 @@ const pattern = ref(null);
 const type = ref(null);
 const questionData = ref(null);
 const passageData = ref({
-  title: '',
+  title:'',
   content: ''
 });
 const isConfirmModalOpen = ref(false);
@@ -162,6 +163,7 @@ const isFileModalOpen = ref(false); // 파일 선택 모달 상태 추가
 const isEditWarningModalOpen = ref(false); // 문항 편집 경고 모달 상태 추가
 const currentRecreateIndex = ref(null); // 현재 재생성하려는 문항 인덱스 추가
 const isFromRoute = ref(false); // 문항 생성 페이지로 오기 전 주소에 따라 "문항 추가" 버튼 비활성화
+const isProcessing = ref(false);
 
 // EditQuestion 컴포넌트 참조
 const editQuestionRefs = ref([]);
@@ -169,25 +171,28 @@ const editQuestionRefs = ref([]);
 // 캐러셀 관련 상태
 const currentSlide = ref(0);
 
-let saveResponse = null;
+const saveResponse = ref({});
 
-try {
-  const data = localStorage.getItem('saveResponse');
-  if (data) {
-    saveResponse = JSON.parse(data);
-  }
-} catch (error) {
-  console.error('JSON 파싱 오류:', error);
-}
+// try {
+//   const data = localStorage.getItem('saveResponse');
+//   if (data) {
+//     saveResponse = JSON.parse(data);
+//   }
+// } catch (error) {
+//   console.error('JSON 파싱 오류:', error);
+//   saveResponse={};
+// }
 
-const questionsData = ref(saveResponse?.passage?.questions || []);
+const questionsData = ref([]);
+
+const authStore = useAuthStore();
 
 // 제목 및 지문 수정
 const handlePassageChange = (updatedData) => {
   passageData.value.title = updatedData.title || '';
   passageData.value.content = updatedData.content || '';
 
-  console.log('지문 수정됨:', updatedData);
+  console.log('지문 수정됨:', passageData.value);
   
   // 상태 변경 감지
   handleContentChange();
@@ -199,8 +204,8 @@ const handleDescriptionChange = (event, index) => {
 
   console.log(`문항 ${index + 1} 해설 수정됨:`, event);
 
-  if (event.correct) {
-    questionsData.value[index].correct = event.correct;
+  if (event.queAnswer) {
+    questionsData.value[index].queAnswer = event.queAnswer;
   }
   
   if (event.description) {
@@ -208,8 +213,6 @@ const handleDescriptionChange = (event, index) => {
   }
 
   handleContentChange();
-
-  console.log("수정된 문항 전체 보기: ", questionsData.value);
 };
 
 
@@ -251,7 +254,7 @@ const handleRecreateGeneration = () => {
         '재생성된 문항 4번',
         '재생성된 문항 5번'
       ],
-      correct: '②',
+      queAnswer: '②',
       description: "재생성된 문항의 설명입니다."
     };
     
@@ -335,17 +338,71 @@ const editPassageRef = ref(null);
 const handleContentChange = () => {
   // 내용이 변경되면 isContentChanged를 true로, hasManualSave를 false로 설정
   isContentChanged.value = true;
-  hasManualSave.value = false;content-changed
+  hasManualSave.value = false;
   isSaved.value = false;
   console.log('내용이 변경되었습니다:', { isContentChanged: isContentChanged.value, hasManualSave: hasManualSave.value });
 };
 
 // 저장 버튼 클릭 핸들러
 const handleSaveButtonClick = () => {
+  if (isProcessing.value) return; // 중복 실행 방지
+      isProcessing.value = true;
+
+  updateEditingMode(false);
+
   if (editPassageRef.value) {
     const isValid = editPassageRef.value.validateTextLength();
     
     if (isValid) {
+
+      console.log("저장데이터: ", passageData.value);
+      const apiUrl = import.meta.env.VITE_API_URL;
+      const pasCode = saveResponse.value.passage.pasCode;
+      const selectedQuestion = saveResponse.value.question;
+
+      // 지문 저장 api
+      fetch(`${apiUrl}/pass/ques/update/${pasCode}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(passageData.value),
+        credentials: 'include'
+    })
+    .then(response => {
+        if (!response.ok) {
+            // 인증 오류 처리 (401)
+            if (response.status === 401) {
+                console.error('인증 오류(401): 로그인이 필요합니다');
+
+                // 인증 상태 초기화
+                authStore.user = null;
+                authStore.isAuthenticated = false;
+                localStorage.removeItem('authUser');
+
+                // 로그인 페이지로 리다이렉트
+                router.push({ 
+                    path: '/login', 
+                    query: { redirect: route.fullPath }
+                });
+
+                throw new Error('인증이 필요합니다');
+            }
+            return response.text().then(text => { throw new Error(text); });
+        }
+        return response.json();
+    })
+    .then(data => {
+        localStorage.setItem('saveResponse', JSON.stringify({
+            question: selectedQuestion,
+            passage: data
+        }))
+    })
+    .catch(error => {
+        console.error("문항 수정 실패 : ", error);
+    });
+
+    
       savePassageData();
       isSaved.value = true;
       hasManualSave.value = true;
@@ -435,7 +492,7 @@ const handleQuestionGeneration = () => {
       'LLMs는 기업 환경에서만 사용되는 전문적인 도구이다.',
       '연구자들은 LLMs의 성능을 줄이기 위해 노력하고 있다.'
     ],
-    correct: '①',
+    queAnswer: '①',
     description: "으아아아아아아아아악 너무 힘들어요오오오오오오 살려줘 제에에에에ㅔㅇ바라라아ㅏ아아라"
   };
 
@@ -469,8 +526,6 @@ const handleQuestionChange = (updatedData, index) => {
 
     // 상태 변경 감지
     handleContentChange();
-    
-    console.log("수정된 문항 전체 보기: ", questionsData.value);
 };
 
 // const handleDescriptionChange = (event, index) => {
@@ -549,11 +604,22 @@ const instance = getCurrentInstance();
 let routerGuard = null;
 
 
-console.log("실험: ", saveResponse?.passage?.pasCode || "pasCode 값 없음");
-
-
 onMounted(() => {
-  console.log('전달 값:', saveResponse);
+  try {
+    const data = localStorage.getItem('saveResponse');
+    if (data) {
+      saveResponse.value = JSON.parse(data);
+      console.log("로드된 데이터:", saveResponse.value);
+      
+      // ✅ 값이 있으면 상태에 반영
+      passageData.value.title = saveResponse.value.passage?.title || '';
+      passageData.value.content = saveResponse.value.passage?.content || '';
+      questionsData.value = saveResponse.value.passage?.questions || [];
+    }
+  } catch (error) {
+    console.error('JSON 파싱 오류:', error);
+    saveResponse.value = {}; // ✅ 오류 발생 시 빈 객체로 초기화
+  }
   // URL 쿼리 파라미터에서 문항 유형과 서술 방식 가져오기
   if (route.query) {
     pattern.value = route.query.pattern || null;
@@ -561,17 +627,17 @@ onMounted(() => {
   }
 
   // 라우터 state에서 선택된 문항 데이터 가져오기
-  if (saveResponse && saveResponse.question) {
+  if (saveResponse.value && saveResponse.value.question) {
     questionData.value = saveResponse.question;
   }
 
   // 라우터 state에서 지문 데이터 가져오기
-  if (saveResponse && saveResponse.passage) {
-    passageData.value = saveResponse.passage;
+  if (saveResponse.value && saveResponse.value.passage) {
+    passageData.value = saveResponse.value.passage;
     
     // EditPassage에 지문 내용 설정
-    if (editPassageRef.value && saveResponse.passage && saveResponse.passage.content) {
-      editPassageRef.value.setContent(saveResponse.passage.content);
+    if (editPassageRef.value && saveResponse.value.passage && saveResponse.value.passage.content) {
+      editPassageRef.value.setContent(saveResponse.value.passage.content);
     }
   } 
   // 로컬 스토리지에서 지문 데이터 확인
@@ -646,10 +712,23 @@ provide('passageData', {
   }
 });
 
+
 // 슬라이드가 변경될 때마다 포커스 조정 (접근성 개선)
 watch(currentSlide, (newSlide) => {
   console.log(`슬라이드 변경: ${newSlide + 1}/${questionsData.value.length}`);
 });
+
+const updateRequest = {
+  "type": saveResponse.value.passage?.type||'',
+  "keyword": saveResponse.value.passage?.keyword||'',
+  "title": passageData.value?.title||'',
+  "content": passageData.value?.content||'',
+  "gist":saveResponse.value.passage?.gist||'',
+  "isGenerated": 0,
+  "questsions" : questionsData.value,
+}
+
+
 </script>
 <style scoped>
 .app-container {
