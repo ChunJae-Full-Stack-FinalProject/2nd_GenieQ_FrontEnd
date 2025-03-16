@@ -180,6 +180,7 @@ defineExpose({
     width: 100%;
     height: 100%;
 }
+
 .edit-main {
     box-sizing: border-box;
     width: 100%;
@@ -189,6 +190,7 @@ defineExpose({
     border: 1px solid #BDBDBD;
     border-radius: 12px;
 }
+
 .question-main {
     display: flex;
     flex-direction: column;
@@ -200,7 +202,9 @@ defineExpose({
     margin: 0 auto;
     height: auto;
     top: 25px;
+    overflow: visible;
 }
+
 .question-header {
     height: 36px;
     display: flex;
@@ -216,10 +220,12 @@ defineExpose({
     letter-spacing: -0.02em;
     color: #303030;
 }
+
 .title-container {
     flex: 1;
     margin-right: 10px;
 }
+
 #question-title {
     font-family: 'Pretendard';
     font-style: normal;
@@ -231,6 +237,7 @@ defineExpose({
     color: #303030;
     align-self: stretch;
 }
+
 #input-title {
     height: 36px;
     font-family: 'Pretendard';
@@ -246,6 +253,7 @@ defineExpose({
     border: none;
     width: 734px;
 }
+
 .edit-button {
     border: none;
     background: none;
@@ -256,54 +264,74 @@ defineExpose({
     left: 830px;
     width: 16.67px;
 }
+
 .question-items {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     padding: 0px;
     gap: 12px;
-
-    width: 736.67px;
-    height: 198px;
-
+    
+    max-height: 198px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    
     flex: none;
     order: 1;
     align-self: stretch;
     flex-grow: 0;
     z-index: 1;
 }
+
 .question-item {
     display: flex;
     flex-direction: row;
-    align-items: center;
+    align-items: flex-start;
     padding: 0px;
     gap: 8px;
 
-    width: 736.67px;
-    height: 30px;
+    width: 100%;
+    min-height: 30px;
+    height: auto;
 
     flex: none;
     order: 0;
     align-self: stretch;
     flex-grow: 0;
 }
-.question-number, .question-text {
+
+.question-number {
     font-family: 'Pretendard';
     font-style: normal;
     font-weight: 400;
     font-size: 20px;
     line-height: 150%;
-
     letter-spacing: -0.02em;
     color: #303030;
-
     flex: none;
-    order: 0;
-    flex-grow: 0;
+    flex-shrink: 0;
 }
+
+.question-text {
+    font-family: 'Pretendard';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 20px;
+    line-height: 150%;
+    letter-spacing: -0.02em;
+    color: #303030;
+    flex: 1;
+    word-wrap: break-word;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+    white-space: normal;
+    max-width: calc(100% - 30px);
+}
+
 #input-question {
-    width: 710px;
-    height: 30px;
+    width: calc(100% - 30px);
+    min-height: 30px;
+    height: auto;
     font-family: 'Pretendard';
     font-style: normal;
     font-weight: 400;
@@ -312,7 +340,11 @@ defineExpose({
     letter-spacing: -0.02em;
     color: #303030;
     border: 1px solid #BDBDBD;
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-break: keep-all;
 }
+
 #recreate-button {
     position: relative;
     left: 703px;
