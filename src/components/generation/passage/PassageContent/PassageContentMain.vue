@@ -35,7 +35,7 @@ const MAX_TITLE_LENGTH = 50;
 const summary = ref({
     subject: '',
     keyword: '',
-    items: []
+    gist: []
 });
 
 // 이벤트 발신 정의
