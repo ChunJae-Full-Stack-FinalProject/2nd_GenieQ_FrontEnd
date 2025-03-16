@@ -46,10 +46,14 @@
 </template>
 <script setup>
 import { ref, watch, defineExpose } from 'vue';
-const savePassageData = JSON.parse(localStorage.getItem('saveResponse'));
+const savePassageData = JSON.parse(localStorage.getItem('saveResponse')) || {};
 
 const emit = defineEmits(['input-change', 'category-change','title-change']);
-const title = ref(savePassageData.passage?.title||'');
+const title = ref(
+    savePassageData.passage && savePassageData.passage.title 
+        ? savePassageData.passage.title 
+        : ''
+);
 const inputText = ref('');
 const selectedCategory = ref('human');
 

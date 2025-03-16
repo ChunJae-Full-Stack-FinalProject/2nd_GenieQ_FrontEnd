@@ -582,6 +582,7 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
+  localStorage.removeItem('saveResponse');
   // 컴포넌트 해제 시 이벤트 리스너 제거
   window.removeEventListener('beforeunload', handleBeforeUnload);
 
@@ -590,6 +591,7 @@ onBeforeUnmount(() => {
     routerGuard();
   }
 });
+
 
 // provide 실행
 provide('passageData', {

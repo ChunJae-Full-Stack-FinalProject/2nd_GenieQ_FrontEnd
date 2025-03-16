@@ -44,9 +44,14 @@ const setActiveTab = (tab) => {
 
 
 // 제목 길이 50자 제한
-const saveTitle = JSON.parse(localStorage.getItem('saveResponse'));
+// saveTitle이 존재할 때만 접근하도록 수정
+const saveTitle = JSON.parse(localStorage.getItem('saveResponse')) || {};
 
-const passageTitle = ref(saveTitle.passage?.title || '');
+const passageTitle = ref(
+  saveTitle?.passage && saveTitle.passage.title 
+    ? saveTitle.passage.title 
+    : ''
+);
 const MAX_LENGTH = 50;
 
 watch(passageTitle, (newVal) => {
