@@ -21,12 +21,12 @@ import { ref, defineExpose, defineEmits, watch, onMounted } from 'vue';
 const savePassageData = JSON.parse(localStorage.getItem('saveResponse')) || {};
 // 본문 내용 ref로 관리
 const content = ref('');
-const title = ref(savePassageData.passage?.title||'');
+const title = ref(savePassageData?.passage?.title || '');
 const MAX_TITLE_LENGTH = 50;
 const summary = ref({
     subject: '',
     keyword: '',
-    items: []
+    gist: []
 });
 
 // 이벤트 발신 정의
@@ -35,14 +35,6 @@ const emit = defineEmits(['content-changed']);
 // 초기 텍스트 길이 설정
 const MIN_LENGTH = 300;
 const MAX_LENGTH = 1700;
-
-// 초기 더미 데이터 (빈 컴포넌트일 때 표시)
-const initialContent = `인공지능과 기계학습은 현대 기술의 핵심 요소로 자리 잡고 있습니다. 이러한 기술은 데이터 처리와 분석을 통해 지속적으로 성능을 개선하며, 이는 의료, 금융, 제조업 등 다양한 분야에 걸쳐 응용되고 있습니다. 인공지능의 발전은 효율적인 데이터 이용을 통해 새로운 가능성을 제공하고 있지만, 동시에 윤리적 문제도 동반할 수 있습니다. 따라서 기술의 공정성과 투명성을 확보하기 위한 관리가 필요합니다.`;
-
-// 초기화 시 내용 설정
-if (content.value.length === 0) {
-    content.value = initialContent;
-}
 
 // 입력 처리 함수
 const handleInput = (event) => {
@@ -70,7 +62,7 @@ const emitContentChange = () => {
         content: content.value,
         summary: summaryValue
     });
-    console.log('[31] PassageContentMain: 내용 변경 이벤트 발생', {titleLength: title.value?.length || 0,contentLength: content.value?.length || 0,summary: summaryValue});
+    // console.log('[31] PassageContentMain: 내용 변경 이벤트 발생', {titleLength: title.value?.length || 0,contentLength: content.value?.length || 0,summary: summaryValue});
 };
     
 // 본문 길이 검증
@@ -84,15 +76,15 @@ const getTitle = () => title.value;
 const getSummary = () => summary.value;
 
 const setContent = (newContent) => {
-    console.log('[29] PassageContentMain: 내용 설정', newContent?.length || 0);
+    // console.log('[29] PassageContentMain: 내용 설정', newContent?.length || 0);
     if (newContent !== undefined) {
-    content.value = newContent || '';
-    emitContentChange();
+        content.value = newContent || '';
+        emitContentChange();
     }
 };
-    
+
 const setTitle = (newTitle) => {
-    console.log('[30] PassageContentMain: 제목 설정', newTitle);
+    // console.log('[30] PassageContentMain: 제목 설정', newTitle);
     if (newTitle !== undefined) {
         title.value = newTitle || '';
         emitContentChange();
@@ -100,7 +92,7 @@ const setTitle = (newTitle) => {
 };
     
 const setSummary = (newSummary) => {
-    console.log('PassageContentMain: 요약 설정', newSummary);
+    // console.log('PassageContentMain: 요약 설정', newSummary);
     if (newSummary) {
         summary.value = {
             subject: newSummary.subject || '',
@@ -124,9 +116,55 @@ defineExpose({
 
 // 컴포넌트 마운트 시 실행
 onMounted(() => {
-    console.log('PassageContentMain 컴포넌트 마운트');
-    // 초기 데이터 변경 이벤트 발생
-    emitContentChange();
+  // console.log('[1] PassageContentMain 컴포넌트 마운트');
+  
+  // genieq-passage-data에서 데이터 로드
+    try {
+        const storedData = localStorage.getItem('genieq-passage-data');
+        if (storedData) {
+            const passageData = JSON.parse(storedData);
+            // console.log('[2] 저장된 지문 데이터 로드:', passageData);
+            
+            // 제목과 내용 설정
+            if (passageData.title) {
+            title.value = passageData.title;
+            // console.log('[3] 제목 설정:', title.value);
+            }
+            
+            if (passageData.content) {
+            content.value = passageData.content;
+            // console.log('[4] 내용 설정(길이):', content.value.length);
+            }
+            
+            // 요약 정보 설정
+            summary.value = {
+            subject: passageData.type || '',
+            keyword: passageData.keyword || '',
+            gist: passageData.gist || []
+            };
+            
+            // console.log('[5] 요약 정보 설정:', summary.value);
+            
+            // 변경 이벤트 발생 - 상위 컴포넌트에 알림
+            emitContentChange();
+        } else {
+            // console.log('[6] 저장된 지문 데이터 없음');
+        }
+    } catch (error) {
+    // console.error('[7] 지문 데이터 로드 오류:', error);
+    // 에러 발생 시 기본 상태 유지
+    }
+
+    // saveResponse 초기화 (문제 방지)
+    try {
+    localStorage.removeItem('saveResponse');
+    localStorage.setItem('saveResponse', JSON.stringify({}));
+    } catch (error) {
+    // console.error('[8] localStorage 접근 오류:', error);
+    }
+
+    // localStorage.removeItem('saveResponse');
+    // localStorage.setItem('saveResponse', JSON.stringify({}));
 });
 
 watch(title, (newValue) => {

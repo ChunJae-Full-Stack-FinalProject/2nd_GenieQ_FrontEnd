@@ -120,7 +120,7 @@ const handleTitleChange = (newTitle) => {
 
 // 내용이 변경될 때 이벤트 발생
 // 내용 수정 처리
-const onContentChange = () => {
+const onContentChange = (skipSaveSelection = false) => {
   const contentDiv = document.getElementById('content-text');
   if (contentDiv) {
     content.value = contentDiv.innerHTML || '';
@@ -129,10 +129,10 @@ const onContentChange = () => {
   // 최대 글자 수 검사
   checkMaxLength();
 
-  saveSelection();
-
-  // 상태 전달
-  emitChange();
+  // skipSaveSelection이 true가 아닐 때만 선택 영역 저장
+  if (!skipSaveSelection) {
+    saveSelection();
+  }
 };
 
 // 텍스트 길이 계산 함수
@@ -228,17 +228,29 @@ const truncateHtmlToTextLength = (html, maxLength) => {
     return tempDiv.innerHTML;
 };
 
-// 심볼 삽입
+// 심볼 삽입 함수
 const insertSymbol = (symbol) => {
-    saveSelection();
+    // 저장된 선택 영역 복원
+    restoreSelection();
+    
+    // 컨텐츠 영역에 포커스 설정
+    const contentDiv = document.getElementById('content-text');
+    if (contentDiv) {
+        contentDiv.focus();
+    }
+    
     // 선택된 텍스트 대신 심볼 삽입
     document.execCommand('insertText', false, symbol);
 
-    // 툴팁 닫기
-    showTooltip.value = false;
-    
+    // 현재 선택 영역 가져오기
+    const selection = window.getSelection();
+    if (selection.rangeCount > 0) {
+        // 현재 위치 저장
+        savedRange = selection.getRangeAt(0).cloneRange();
+    }
+        
     // 내용 변경 이벤트 발생
-    onContentChange();
+    onContentChange(true);
 };
 
 // 텍스트 서식 적용
@@ -266,14 +278,14 @@ const formatText = (type) => {
     // 명령어 실행
     document.execCommand(command, false, null);
     
-    // 내용 변경 이벤트 발생
-    nextTick(() => {
-        // 변경 내용 업데이트
-        onContentChange();
+    // 현재 선택 영역 가져오기
+    if (selection.rangeCount > 0) {
+        // 현재 위치 저장
+        savedRange = selection.getRangeAt(0).cloneRange();
+    }
 
-        // 새 선택 영역 저장
-        saveSelection();
-    })
+    // 내용 변경 이벤트 발생
+    onContentChange(true);
 };
 
 // 에디터 버튼 클릭 처리

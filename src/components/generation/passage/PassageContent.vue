@@ -86,19 +86,7 @@ const route = useRoute();
 const router = useRouter();
 const passageStore = usePassageStore();
 const authStore = useAuthStore();
-// 더미 데이터 정의 (API 실패 시 사용)
-const dummyData = {
-    title: '인공지능과 기계학습 PassageContent.dummyData',
-    type: '사회',
-    keyword: '인공지능과 기계학습 PassageContent.dummyData',
-    content: `PassageContent.dummyData
-    인공지능과 기계학습은 현대 기술의 핵심 요소로 자리 잡고 있습니다. 이러한 기술은 데이터 처리와 분석을 통해 지속적으로 성능을 개선하며, 이는 의료, 금융, 제조업 등 다양한 분야에 걸쳐 응용되고 있습니다.
-    연구 커뮤니티는 이러한 모델의 규모를 확장하면 성능이 향상된다고 인정합니다. 대규모 언어 모델(LLMs)은 인공지능이 인간 언어를 이해하고 생성하는 방식을 변화시키고 있습니다.
-    ChatGPT와 같은 혁신은 LLMs가 독특한 문제 해결 능력을 보여주기 시작했음을 나타냅니다. 이러한 발전은 다양한 분야에서 새로운 응용 프로그램을 만들어내고 있습니다.
-    연구자들은 LLMs의 잠재력을 확대하기 위해 새로운 아키텍처와 훈련 전략을 탐구하고 있습니다. 인공지능의 발전은 효율적인 데이터 이용을 통해 새로운 가능성을 제공하고 있지만, 동시에 윤리적 문제도 동반할 수 있습니다. 따라서 기술의 공정성과 투명성을 확보하기 위한 관리가 필요합니다.`,
-    gist: '인공지능과 기계학습의 원리는 데이터 처리와 분석을 통해 성능을 개선하는 것이다.',
-    pasCode: 999
-};
+
 // 글자 수 체크 함수
 const checkContentLength = (event) => {
     // 내용 길이 검증
@@ -146,44 +134,72 @@ const handleGenerate = () => {
     // 재생성 처리 로직
     isLoading.value = true;
     loadingMessage.value = '지문 재생성 중입니다...';
-    // 임시로 더미 데이터 사용 (API 시뮬레이션)
-    setTimeout(() => {
-        try {
-            // 재생성 결과 적용
-            if (passageContentRef.value) {
-                passageContentRef.value.setContent(dummyData.content);
-            }
-            if (passageSummaryRef.value && typeof passageSummaryRef.value.setSummary === 'function') {
-                const summaryData = {
-                    subject: type.value,
-                    keyword: keyword.value,
-                    items: dummyData.gist
-                };
-                passageSummaryRef.value.setSummary(summaryData);
-            }
-            // 상태 업데이트
-            content.value = dummyData.content;
-            summary.value = {
+
+    // (수정) TestMemberController API 호출
+    const apiUrl = import.meta.env.VITE_API_URL;
+    const requestData = {
+        type_passage: type.value || '인문',
+        keyword: keyword.value || '키워드'
+    };
+
+    console.log('지문 재생성 API 요청 데이터:', requestData);
+
+    fetch(`${apiUrl}/api/test/generate-passage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestData)
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`API 호출 실패: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('재생성된 지문 데이터:', {
+            content: data.generated_passage.substring(0, 50) + '...',
+            corePoints: data.generated_core_point
+        });
+
+        // 재생성 결과 적용
+        if (passageContentRef.value) {
+            passageContentRef.value.setContent(data.generated_passage);
+        }
+
+        if (passageSummaryRef.value && typeof passageSummaryRef.value.setSummary === 'function') {
+            const summaryData = {
                 subject: type.value,
                 keyword: keyword.value,
-                items: dummyData.gist
+                gist: data.generated_core_point
             };
-            isContentChanged.value = false;
-            hasManualSave.value = false;
-            alert('지문이 재생성되었습니다.');
-        } catch (error) {
-            console.error('지문 재생성 중 오류:', error);
-            alert('지문 재생성 중 오류가 발생했습니다.');
-        } finally {
-            isLoading.value = false;
+           passageSummaryRef.value.setSummary(summaryData);
         }
-    }, 1500); // 1.5초 딜레이로 비동기 시뮬레이션
+
+        // 상태 업데이트
+        content.value = data.generated_passage;
+        summary.value = {
+            subject: type.value,
+            keyword: keyword.value,
+            gist: data.generated_core_point
+        };
+
+        isContentChanged.value = true;
+        hasManualSave.value = false;
+        alert('지문이 재생성되었습니다.');
+    })
+    .catch(error => {
+        console.error('지문 재생성 중 오류:', error);
+        alert('지문 재생성 중 오류가 발생했습니다: ' + error.message);
+    })
+    .finally(() => {
+        isLoading.value = false;
+    });
 };
 // 저장 버튼 클릭 핸들러
 const handleSaveButtonClick = () => {
     // 내용 검증
-    if (!content.value || content.value.length < 500) {
-        alert('500자 이상 입력해주세요.');
+    if (!content.value || content.value.length < 300) {
+        alert('300자 이상 입력해주세요.');
         return;
     }
     // 로딩 상태 활성화
@@ -425,34 +441,41 @@ let routerGuard = null;
 const loadPassageData = () => {
     try {
         console.log('[12] 로컬 스토리지에서 지문 데이터 로드 시도');
-        // (수정) 통일된 키 사용
+        // 통일된 키 사용
         const storedData = localStorage.getItem('genieq-passage-data');
         if (storedData) {
-            const data = JSON.parse(storedData);
-            console.log('[13] 로컬 스토리지에서 데이터 로드 성공:', data);
-            // (수정) 데이터 설정 - 백엔드 응답 구조(PAS_)와 프론트엔드 변수명(소문자) 모두 처리
-            title.value = data.PAS_TITLE || data.title || '';
-            content.value = data.PAS_CONTENT || data.content || '';
-            pasCode.value = data.pasCode || data.PAS_CODE || null;
-            type.value = data.PAS_TYPE || data.type || '';
-            keyword.value = data.PAS_KEYWORD || data.keyword || '';
-            // (수정) 요약 정보 일관되게 처리
-            let gistData = data.PAS_GIST || data.gist || [];
+            let data;
+            try {
+                data = JSON.parse(storedData);
+            } catch (parseError) {
+                console.error('[2] JSON 파싱 오류:', parseError);
+                return null;
+            }
+
+            console.log('[12-1] 로컬 스토리지에서 데이터 로드 성공:', data);
+            // 데이터 설정 - 백엔드 응답 구조(PAS_)와 프론트엔드 변수명(소문자) 모두 처리
+            title.value = data.title || '';
+            content.value = data.content || '';
+            pasCode.value = data.pasCode || null;
+            type.value = data.type || '';
+            keyword.value = data.keyword || '';
+            // 요약 정보 일관되게 처리
+            let gistData = data.gist || '';
             // 문자열이면 배열로 변환
             if (typeof gistData === 'string') {
-                gistData = gistData.split('\n').filter(item => item.trim());
+                gistData = gistData.split(/\\n|\n/).filter(item => item.trim());
             }
             // 배열이 아니면 빈 배열로 초기화
             else if (!Array.isArray(gistData)) {
                 gistData = [];
             }
-            // (수정) 요약 정보 설정 - subject와 keyword 명시적으로 추가
+            // 요약 정보 설정
             summary.value = {
-                subject: data.PAS_TYPE || data.type || '',
-                keyword: data.PAS_KEYWORD || data.keyword || '',
+                subject: data.type || '',
+                keyword: data.keyword || '',
                 items: gistData
             };
-            console.log('[14] 지문 데이터 로드 완료:', {
+            console.log('[12-2] 지문 데이터 로드 완료:', {
                 title: title.value,
                 contentLength: content.value?.length || 0,
                 pasCode: pasCode.value,
@@ -463,9 +486,9 @@ const loadPassageData = () => {
             return data;
         }
     } catch (error) {
-        console.error('[15] 지문 데이터 로드 중 오류:', error);
+        console.error('[12-3] 지문 데이터 로드 중 오류:', error);
     }
-    console.log('[16] 로드된 데이터 없음, 더미 데이터 반환');
+    console.log('[12-4] 로드된 데이터 없음, 더미 데이터 반환');
     return null;
 };
 // 컴포넌트 마운트 시 실행
@@ -480,22 +503,22 @@ onMounted(async () => {
     const loadedData = loadPassageData();
     // 데이터가 있으면 컴포넌트에 적용
     if (loadedData) {
-        console.log('[18] 로드된 데이터를 컴포넌트에 적용 시작');
-        // (수정) 본문과 제목 설정 - nextTick 사용
+        console.log('[17-1] 로드된 데이터를 컴포넌트에 적용 시작');
+        // 본문과 제목 설정 - nextTick 사용
         nextTick(() => {
             if (passageContentRef.value) {
-                // (수정) 명시적으로 setContent와 setTitle 호출, 순서 변경
+                // 명시적으로 setContent와 setTitle 호출, 순서 변경
                 if (title.value) {
                     passageContentRef.value.setTitle(title.value);
-                    console.log('[30A] 명시적으로 제목 설정:', title.value);
+                    console.log('[17-2] 명시적으로 제목 설정:', title.value);
                 }
                 if (content.value) {
                     passageContentRef.value.setContent(content.value);
-                    console.log('[19] 본문 설정 완료, 길이:', content.value.length);
+                    console.log('[17-3] 본문 설정 완료, 길이:', content.value.length);
                 }
             }
 
-            // (수정) 핵심 논점 설정 - PassageSummary 컴포넌트에 데이터 전달
+            // 핵심 논점 설정 - PassageSummary 컴포넌트에 데이터 전달
             if (passageSummaryRef.value && typeof passageSummaryRef.value.setSummary === 'function') {
                 // (수정) 명시적으로 summary 데이터 구조 정의
                 const summaryData = {
@@ -503,9 +526,9 @@ onMounted(async () => {
                     keyword: keyword.value,
                     gist: summary.value.items || []
                 };
-                console.log('[20A] 핵심 논점 설정 준비:', summaryData);
+                console.log('[17-4] 핵심 논점 설정 준비:', summaryData);
                 passageSummaryRef.value.setSummary(summaryData);
-                console.log('[20] 핵심 논점 설정 완료', summaryData);
+                console.log('[17-5] 핵심 논점 설정 완료', summaryData);
             }
 
             // 컴포넌트 상태 초기화
@@ -513,48 +536,11 @@ onMounted(async () => {
             hasManualSave.value = true;
         });
     } else {
-        // (수정) 데이터가 없으면 더미 데이터 사용
-        console.log('[21] 데이터가 없어 더미 데이터 사용');
-        title.value = dummyData.title;
-        content.value = dummyData.content;
-        type.value = dummyData.type;
-        keyword.value = dummyData.keyword;
-        pasCode.value = dummyData.pasCode;
-        // (수정) 더미 데이터 일관되게 처리
-        let gistItems = dummyData.gist;
-        if (typeof gistItems === 'string') {
-            gistItems = gistItems.split('\n').filter(item => item.trim());
-        }
-        // (수정) 명시적으로 summary 데이터 구조 정의
-        summary.value = {
-            subject: dummyData.type,
-            keyword: dummyData.keyword,
-            items: gistItems
-        };
-
-        nextTick(() => {
-            if (passageContentRef.value) {
-                // (수정) 순서 변경: 먼저 setTitle, 그 다음 setContent 호출
-                passageContentRef.value.setTitle(dummyData.title);
-                passageContentRef.value.setContent(dummyData.content);
-            }
-            if (passageSummaryRef.value && typeof passageSummaryRef.value.setSummary === 'function') {
-                // (수정) 명확한 데이터 구조로 전달
-                const summaryData = {
-                    subject: dummyData.type,
-                    keyword: dummyData.keyword,
-                    gist: gistItems
-                };
-                passageSummaryRef.value.setSummary(summaryData);
-            }
-            console.log('[22] 더미 데이터 설정 완료:', {
-                title: dummyData.title,
-                contentLength: dummyData.content.length,
-                type: dummyData.type,
-                keyword: dummyData.keyword,
-                summaryItems: gistItems
-            });
-        });
+        // (수정) 데이터가 없는 경우 이전 페이지로 리다이렉트
+        console.log('[17-6] 로드된 데이터 없음, 이전 페이지로 리다이렉트');
+        alert('지문 데이터를 찾을 수 없습니다. 지문 생성 페이지로 이동합니다.');
+        router.push('/passage');
+        return; // 불필요한 코드 실행 방지
     }
     // 브라우저 새로고침, 닫기 등에 대한 이벤트 리스너 추가
     window.addEventListener('beforeunload', handleBeforeUnload);

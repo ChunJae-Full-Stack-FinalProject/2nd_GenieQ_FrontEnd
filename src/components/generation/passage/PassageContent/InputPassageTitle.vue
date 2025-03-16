@@ -17,14 +17,14 @@ const getTitle = () => {
 // InputPassageTitle.vue 수정
 // 외부에서 제목을 설정할 수 있는 메서드 추가
 const setTitle = (newTitle) => {
-  console.log('[32] InputPassageTitle: 제목 설정', newTitle);
+  // console.log('[32] InputPassageTitle: 제목 설정', newTitle);
   if (newTitle !== undefined) {
     title.value = newTitle || '';
   }
 }
 // (추가) 제목 변경 시 로그 출력
 watch(title, (newValue) => {
-  console.log('[33] InputPassageTitle: 제목 변경됨', newValue);
+  // console.log('[33] InputPassageTitle: 제목 변경됨', newValue);
 });
 
 // 외부에 노출할 메소드 정의 업데이트
