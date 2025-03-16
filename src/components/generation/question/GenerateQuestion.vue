@@ -47,7 +47,7 @@
             :correct="item.correct"
             :description="item.queAnswer"
             :slideIndex="index"
-            @description-changed="handleContentChange($event, index)"
+            @description-changed="handleDescriptionChange($event, index)"
           />
         </div>
       </div>
@@ -190,8 +190,26 @@ const handlePassageChange = (updatedData) => {
   console.log('지문 수정됨:', updatedData);
   
   // 상태 변경 감지
-  isContentChanged.value = true;
-  isSaved.value = false;
+  handleContentChange();
+};
+
+// 해설 수정
+const handleDescriptionChange = (event, index) => {
+  if (!event || index === undefined) return;
+
+  console.log(`문항 ${index + 1} 해설 수정됨:`, event);
+
+  if (event.correct) {
+    questionsData.value[index].correct = event.correct;
+  }
+  
+  if (event.description) {
+    questionsData.value[index].description = event.description;
+  }
+
+  handleContentChange();
+
+  console.log("수정된 문항 전체 보기: ", questionsData.value);
 };
 
 
@@ -450,29 +468,28 @@ const handleQuestionChange = (updatedData, index) => {
     };
 
     // 상태 변경 감지
-    isContentChanged.value = true;
-    isSaved.value = false;
+    handleContentChange();
     
     console.log("수정된 문항 전체 보기: ", questionsData.value);
 };
 
-const handleDescriptionChange = (event, index) => {
-  handleContentChange();
+// const handleDescriptionChange = (event, index) => {
+//   handleContentChange();
 
-  // 해당 인덱스의 문항 데이터 업데이트
-  if (event && index !== undefined) {
-    const targetIndex = index;
+//   // 해당 인덱스의 문항 데이터 업데이트
+//   if (event && index !== undefined) {
+//     const targetIndex = index;
 
-    if (event.correct) {
-      console.log(`문항 ${targetIndex+1}의 정답을 ${event.correct}로 업데이트`);
-      questionsData.value[targetIndex].correct = event.correct;
-    }
-    if (event.description) {
-      console.log(`문항 ${targetIndex+1}의 해설 업데이트`);
-      questionsData.value[targetIndex].description = event.description;
-    }
-  }
-};
+//     if (event.correct) {
+//       console.log(`문항 ${targetIndex+1}의 정답을 ${event.correct}로 업데이트`);
+//       questionsData.value[targetIndex].correct = event.correct;
+//     }
+//     if (event.description) {
+//       console.log(`문항 ${targetIndex+1}의 해설 업데이트`);
+//       questionsData.value[targetIndex].description = event.description;
+//     }
+//   }
+// };
 
 // 라우터 관련 정보 가져오기
 const route = useRoute();
