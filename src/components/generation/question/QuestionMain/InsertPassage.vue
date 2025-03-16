@@ -30,7 +30,7 @@
 import StoresInsertPassage from './StoresInsertPassage.vue';
 import UserInsertPassage from './UserInsertPassage.vue';
 
-import { ref, inject, computed, watch, defineExpose} from 'vue';
+import { ref, inject, computed, watch, defineExpose, onMounted} from 'vue';
 
 // 현재 활성화된 탭 상태 관리
 const activeTab = ref('user');
@@ -53,6 +53,29 @@ const passageTitle = ref(
     : ''
 );
 const MAX_LENGTH = 50;
+
+onMounted(() => {
+  // genieq-passage-data에서 데이터 로드
+  try {
+    const storedData = localStorage.getItem('genieq-passage-data');
+    console.log(storedData)
+    if (storedData) {
+      const data = JSON.parse(storedData);
+
+      // 작업 이름 설정
+      if (data.title) {
+        passageTitle.value = data.title;
+      }
+      // 내용 설정 (currentPassage 업데이트)
+      if (data.content && currentPassage.value) {
+        currentPassage.value.PAS_CONTENT = data.content;
+      }
+      activeTab.value = 'user';
+    }
+  } catch (error) {
+    console.error('데이터 로드 오류:', error);
+  }
+});
 
 watch(passageTitle, (newVal) => {
     // 최대 글자 수 제한
