@@ -61,7 +61,7 @@ const authStore = useAuthStore();
 // 사용자 입력 관련 상태
 const titleText = ref('');
 const inputText = ref('');
-const selectedCategory = ref('human');
+const selectedCategory = ref('인문');
 const passageTitle = ref('');
 const createPassageMainRef = ref(null);
 const paymentUsageRef = ref(null);
@@ -75,25 +75,6 @@ const loadingMessage = ref('지문을 생성 중입니다...');
 // 중복 요청 방지를 위한 처리 상태 플래그 추가
 const isProcessing = ref(false);
 
-// 더미 데이터 정의 - API 실패 시 사용
-const dummyPassageData = {
-    generated_passage: `PassageMain.dummyPassageData.generated_passage
-    인공지능과 기계학습은 현대 기술의 핵심 요소로 자리 잡고 있습니다. 이러한 기술은 데이터 처리와 분석을 통해 지속적으로 성능을 개선하며, 이는 의료, 금융, 제조업 등 다양한 분야에 걸쳐 응용되고 있습니다.
-
-    연구 커뮤니티는 이러한 모델의 규모를 확장하면 성능이 향상된다고 인정합니다. 대규모 언어 모델(LLMs)은 인공지능이 인간 언어를 이해하고 생성하는 방식을 변화시키고 있습니다.
-
-    ChatGPT와 같은 혁신은 LLMs가 독특한 문제 해결 능력을 보여주기 시작했음을 나타냅니다. 이러한 발전은 다양한 분야에서 새로운 응용 프로그램을 만들어내고 있습니다.
-    ChatGPT와 같은 혁신은 LLMs가 독특한 문제 해결 능력을 보여주기 시작했음을 나타냅니다. 이러한 발전은 다양한 분야에서 새로운 응용 프로그램을 만들어내고 있습니다.
-    ChatGPT와 같은 혁신은 LLMs가 독특한 문제 해결 능력을 보여주기 시작했음을 나타냅니다. 이러한 발전은 다양한 분야에서 새로운 응용 프로그램을 만들어내고 있습니다.
-
-    연구자들은 LLMs의 잠재력을 확대하기 위해 새로운 아키텍처와 훈련 전략을 탐구하고 있습니다. 인공지능의 발전은 효율적인 데이터 이용을 통해 새로운 가능성을 제공하고 있지만, 동시에 윤리적 문제도 동반할 수 있습니다. 따라서 기술의 공정성과 투명성을 확보하기 위한 관리가 필요합니다.`,
-    generated_core_point: `PassageMain.dummyPassageData.generated_core_point
-    인공지능과 기계학습의 활용은 윤리적 문제를 동반할 수 있으며, 기술의 공정성과 투명성을 확보하기 위한 관리가 필요하다.`,
-    // 지문 분류 정보
-    type: '사회',
-    keyword: '인공지능과 기계학습 PassageMain.dummyPassageData.keyword'
-};
-
 // 버튼 활성화 상태 계산 - authStore.userTicketCount 사용
 const isButtonEnabled = computed(() => {
     // authStore의 userTicketCount getter 사용
@@ -101,13 +82,7 @@ const isButtonEnabled = computed(() => {
 
     // 입력 텍스트가 있고 보유 이용권이 0보다 큰 경우 활성화
     const isEnabled = inputText.value.length >= 1 && titleText.value.length >= 1 && ticketCount > 0;
-    
-    console.log('버튼 활성화 상태:', { 
-        inputTextLength: inputText.value.length, 
-        titleTextLength: titleText.value.length,
-        ticketCount, 
-        isEnabled 
-    });
+
 
     return isEnabled;
 });
@@ -129,19 +104,16 @@ const onCreditUpdate = (count) => {
 // 제목 업데이트 함수 추가
 const updateTitle = (text) => {
   titleText.value = text;
-  console.log('작업 이름 업데이트:', text);
 };
 
 // 지문 제재 업데이트 함수
 const updateInputText = (text) => {
     inputText.value = text;
-    console.log('입력 텍스트 업데이트:', text);
 };
 
 // 지문 분야 업데이트 함수
 const updateCategory = (category) => {
     selectedCategory.value = category;
-    console.log('선택된 카테고리 업데이트:', category);
 };
 
 // 초기화 함수
@@ -156,7 +128,7 @@ const resetText = () => {
 
 // 지문 생성하기 버튼 클릭 핸들러
 const handleCreatePassage = () => {
-    console.log('지문 생성하기 버튼 클릭됨');
+    // console.log('지문 생성하기 버튼 클릭됨');
 
     // 작업 이름 가져오기
     try {
@@ -233,7 +205,7 @@ const confirmAfterWarning = () => {
 
 // 지문 생성 확인 시 실행되는 함수
 const confirmCreatePassage = () => {
-    console.log('지문 생성 확인 모달에서 생성하기 버튼 클릭됨');
+    console.log('[1] 지문 생성 확인 모달에서 생성하기 버튼 클릭됨');
     // 이미 처리 중이면 중복 실행 방지
     if (isProcessing.value) {
         console.log('이미 처리 중입니다. 중복 요청 방지');
@@ -255,167 +227,117 @@ const confirmCreatePassage = () => {
             type_passage: selectedCategory.value,
             keyword: inputText.value
         };
-        console.log('[1] 지문 생성 API 요청 데이터:', requestData);
+        console.log('[1-2] 지문 생성 API 요청 데이터:', requestData);
 
-        // 임시로 더미 데이터 사용 (API 시뮬레이션)
-        setTimeout(() => {
-            // (수정) 더미 데이터 구조를 백엔드 응답 구조와 일치시킴
-            const data = {
-                generated_passage: dummyPassageData.generated_passage,
-                generated_core_point: dummyPassageData.generated_core_point,
-                type: selectedCategory.value,
-                keyword: inputText.value
-            };
-            console.log('[2] 생성된 지문 데이터:', {
+        // (수정) TestMemberController API 호출
+        const apiUrl = import.meta.env.VITE_API_URL;
+
+        fetch(`${apiUrl}/api/test/generate-passage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestData)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`API 호출 실패: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('[1-3] 생성된 지문 데이터:', {
                 content: data.generated_passage.substring(0, 50) + '...',
                 corePoints: data.generated_core_point
             });
 
             // 백엔드 API에 저장 요청
-            savePassageToBackend(data)
-                .then(() => {
-                    // 성공 처리
-                    isLoading.value = false;
-                    isProcessing.value = false;
-                })
-                .catch(error => {
-                    console.error('[3] 저장 중 오류:', error);
-                    isLoading.value = false;
-                    isProcessing.value = false;
-                    alert('저장 중 오류가 발생했습니다: ' + error.message);
-                });
-        }, 1500);
-    } catch (error) {
-        console.error('[4] 지문 생성 중 오류 발생:', error);
-        alert('지문 생성 중 오류가 발생했습니다: ' + error.message);
-        // 에러가 '이용권 부족'이 아닌 경우에만 더미 데이터로 진행
-        if (!error.message.includes('이용권이 부족')) {
-            // 에러 발생 시에도 더미 데이터 준비
-            const dummyData = {
-                generated_passage: dummyPassageData.generated_passage,
-                generated_core_point: dummyPassageData.generated_core_point,
-                type: selectedCategory.value,
-                keyword: inputText.value
-            };
-            // 더미 데이터로 백엔드에 저장 요청
-            savePassageToBackend(dummyData)
-                .then(() => {
-                    isLoading.value = false;
-                    isProcessing.value = false;
-                })
-                .catch(saveError => {
-                    console.error('[5] 더미 데이터 저장 중 오류:', saveError);
-                    alert('저장 중 오류가 발생했습니다. 다시 시도해 주세요.');
-                    isLoading.value = false;
-                    isProcessing.value = false;
-                });
-        } else {
+            savePassageToBackend(data);
+        })
+        .catch(error => {
+            console.error('[1-4] 지문 생성 중 오류 발생:', error);
+            alert('지문 생성 중 오류가 발생했습니다: ' + error.message);
             isLoading.value = false;
             isProcessing.value = false;
-        }
+        });
+    } catch (error) {
+        console.error('[1-5] 지문 생성 중 오류 발생:', error);
+        alert('지문 생성 중 오류가 발생했습니다: ' + error.message);
+        isLoading.value = false;
+        isProcessing.value = false;
     }
 };
 
 // 백엔드 API에 지문 저장 함수
 const savePassageToBackend = (data) => {
-    console.log('[6] 백엔드 API 저장 요청 시작');
+    console.log('[2] 백엔드 API 저장 요청 시작');
     loadingMessage.value = '생성된 지문을 저장 중입니다...';
-    // (수정) 저장할 데이터 준비 - 명확하고 일관된 형식으로 변수명 통일
+    // 저장할 데이터 준비 - 명확하고 일관된 형식으로 변수명 통일
     const saveData = {
-        type: data.type || selectedCategory.value,
+        type: data.type_passage || selectedCategory.value,
         keyword: data.keyword || inputText.value,
         title: passageTitle.value || '지문 작업',
         content: data.generated_passage,
-        // (수정) gist를 항상 문자열로 저장
-        gist: Array.isArray(data.generated_core_point)
-            ? data.generated_core_point.join('\n')
-            : String(data.generated_core_point),
+        gist: data.generated_core_point,
         isGenerated: 1
     };
-    console.log('[7] 백엔드 저장 요청 데이터:', saveData);
-    return new Promise((resolve, reject) => {
-        const apiUrl = import.meta.env.VITE_API_URL;
-        // 백엔드 API 호출
-        fetch(`${apiUrl}/pass/insert/each`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify(saveData)
-        })
-            .then(response => {
-                if (!response.ok) {
-                    if (response.status === 401) {
-                        // 인증 오류 처리
-                        authStore.user = null;
-                        authStore.isAuthenticated = false;
-                        localStorage.removeItem('authUser');
-                        router.push({
-                            path: '/login',
-                            query: { redirect: router.currentRoute.value.fullPath }
-                        });
-                        throw new Error('인증이 필요합니다');
-                    }
-                    return response.text().then(text => { throw new Error('저장 API 호출 실패: ' + text); });
-                }
-                return response.json();
-            })
-            .then(responseData => {
-                console.log('[8] 저장 응답 데이터:', responseData);
-                // 이용권 정보 업데이트
-                authStore.updateTicketCount();
-                // (수정) 표준화된 형식으로 로컬 스토리지에 저장 - 백엔드 응답 구조와 프론트엔드에서 사용할 구조 모두 포함
-                const passageData = {
-                    // 백엔드 응답 형식 (PAS_ 접두사)
-                    pasCode: responseData.pasCode,
-                    PAS_TITLE: saveData.title,
-                    PAS_TYPE: saveData.type,
-                    PAS_KEYWORD: saveData.keyword,
-                    PAS_CONTENT: saveData.content,
-                    // (수정) 핵심 논점도 PAS_ 접두사 형식으로 저장
-                    PAS_GIST: typeof saveData.gist === 'string' ? saveData.gist.split('\n').filter(item => item.trim()) : saveData.gist,
+    console.log('[2-1] 백엔드 저장 요청 데이터:', saveData);
 
-                    // 프론트엔드 사용 형식 (소문자)
-                    title: saveData.title,
-                    type: saveData.type,
-                    keyword: saveData.keyword,
-                    content: saveData.content,
-                    // (수정) 핵심 논점을 배열로 변환하여 저장
-                    gist: typeof saveData.gist === 'string' ? saveData.gist.split('\n').filter(item => item.trim()) : saveData.gist
-                };
-                // (수정) 통일된 키로 저장
-                localStorage.setItem('genieq-passage-data', JSON.stringify(passageData));
-                console.log('[9] 로컬 스토리지에 저장된 데이터:', passageData);
-                // 페이지 이동
-                router.push('/passage/create');
-                resolve(responseData);
-            })
-            .catch(error => {
-                console.error('[10] 백엔드 저장 중 오류:', error);
-                // 에러 발생 시 더미 데이터를 로컬 스토리지에 저장하고 페이지 이동
-                const dummyResponseData = {
-                    pasCode: Math.floor(Math.random() * 1000) + 1,
-                    // (수정) 명확한 데이터 구조로 저장 - 백엔드 응답 형식
-                    PAS_TITLE: saveData.title,
-                    PAS_TYPE: saveData.type,
-                    PAS_KEYWORD: saveData.keyword,
-                    PAS_CONTENT: saveData.content,
-                    // (수정) 핵심 논점도 PAS_ 접두사 형식으로 저장
-                    PAS_GIST: typeof saveData.gist === 'string' ? saveData.gist.split('\n').filter(item => item.trim()) : saveData.gist,
+    // 백엔드 API 호출
+    const apiUrl = import.meta.env.VITE_API_URL;
+    fetch(`${apiUrl}/pass/insert/each`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(saveData)
+    })
+    .then(response => {
+      if (!response.ok) {
+        if (response.status === 401) {
+          // 인증 오류 처리
+          authStore.user = null;
+          authStore.isAuthenticated = false;
+          localStorage.removeItem('authUser');
+          router.push({
+            path: '/login',
+            query: {redirect: router.currentRoute.value.fullPath}
+          });
+          throw new Error('인증이 필요합니다');
+        }
+        return response.text().then(text => {
+          throw new Error('저장 API 호출 실패: ' + text);
+        });
+      }
+      return response.json();
+    })
+    .then(responseData => {
+      console.log('[2-2] 저장 응답 데이터:', responseData);
+      // 이용권 정보 업데이트
+      authStore.updateTicketCount();
 
-                    // 프론트엔드 사용 형식 (소문자)
-                    title: saveData.title,
-                    type: saveData.type,
-                    keyword: saveData.keyword,
-                    content: saveData.content,
-                    // (수정) 핵심 논점을 배열로 변환하여 저장
-                    gist: typeof saveData.gist === 'string' ? saveData.gist.split('\n').filter(item => item.trim()) : saveData.gist
-                };
-                localStorage.setItem('genieq-passage-data', JSON.stringify(dummyResponseData));
-                console.log('[11] 오류 발생으로 더미 데이터 저장:', dummyResponseData);
-                // 페이지 이동
-                router.push('/passage/create');
-                reject(error);
-            });
+      // (수정) 표준화된 형식으로 로컬 스토리지에 저장
+      const passageData = {
+        pasCode: responseData.pasCode,
+        title: saveData.title,
+        type: saveData.type,
+        keyword: saveData.keyword,
+        content: saveData.content,
+        gist: saveData.gist
+      };
+
+      localStorage.setItem('genieq-passage-data', JSON.stringify(passageData));
+      console.log('[2-3] 로컬 스토리지에 저장된 데이터:', passageData);
+
+      // 페이지 이동
+      router.push('/passage/create');
+
+      // 상태 초기화
+      isLoading.value = false;
+      isProcessing.value = false;
+    })
+    .catch(error => {
+      console.error('[2-4] 백엔드 저장 중 오류:', error);
+      alert('저장 중 오류가 발생했습니다: ' + error.message);
+      isLoading.value = false;
+      isProcessing.value = false;
     });
 };
 

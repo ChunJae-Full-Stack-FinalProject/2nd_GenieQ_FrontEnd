@@ -36,14 +36,6 @@ const emit = defineEmits(['content-changed']);
 const MIN_LENGTH = 300;
 const MAX_LENGTH = 1700;
 
-// 초기 더미 데이터 (빈 컴포넌트일 때 표시)
-const initialContent = `인공지능과 기계학습은 현대 기술의 핵심 요소로 자리 잡고 있습니다. 이러한 기술은 데이터 처리와 분석을 통해 지속적으로 성능을 개선하며, 이는 의료, 금융, 제조업 등 다양한 분야에 걸쳐 응용되고 있습니다. 인공지능의 발전은 효율적인 데이터 이용을 통해 새로운 가능성을 제공하고 있지만, 동시에 윤리적 문제도 동반할 수 있습니다. 따라서 기술의 공정성과 투명성을 확보하기 위한 관리가 필요합니다.`;
-
-// 초기화 시 내용 설정
-if (content.value.length === 0) {
-    content.value = initialContent;
-}
-
 // 입력 처리 함수
 const handleInput = (event) => {
     // 최대 글자 수 제한
@@ -86,11 +78,11 @@ const getSummary = () => summary.value;
 const setContent = (newContent) => {
     console.log('[29] PassageContentMain: 내용 설정', newContent?.length || 0);
     if (newContent !== undefined) {
-    content.value = newContent || '';
-    emitContentChange();
+        content.value = newContent || '';
+        emitContentChange();
     }
 };
-    
+
 const setTitle = (newTitle) => {
     console.log('[30] PassageContentMain: 제목 설정', newTitle);
     if (newTitle !== undefined) {

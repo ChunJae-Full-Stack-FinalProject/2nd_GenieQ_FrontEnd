@@ -51,7 +51,7 @@ const savePassageData = JSON.parse(localStorage.getItem('saveResponse'));
 const emit = defineEmits(['input-change', 'category-change','title-change']);
 const title = ref(savePassageData.passage?.title||'');
 const inputText = ref('');
-const selectedCategory = ref('human');
+const selectedCategory = ref('인문');
 
 const MAX_LENGTH = 50;
 
