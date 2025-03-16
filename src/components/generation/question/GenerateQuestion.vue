@@ -124,7 +124,7 @@
     />
 
     <!-- 파일 선택 모달 -->
-    <FileSelectModal :isOpen="isFileModalOpen" @close="closeFileModal" @confirm="handleFileSelect"/>
+    <FileSelectModal :isOpen="isFileModalOpen" :pasCode="pasCode" @close="closeFileModal" @confirm="handleFileSelect"/>
   </div>
 </template>
 <script setup>
@@ -164,6 +164,7 @@ const isEditWarningModalOpen = ref(false); // 문항 편집 경고 모달 상태
 const currentRecreateIndex = ref(null); // 현재 재생성하려는 문항 인덱스 추가
 const isFromRoute = ref(false); // 문항 생성 페이지로 오기 전 주소에 따라 "문항 추가" 버튼 비활성화
 const isProcessing = ref(false);
+const pasCode = ref(0);
 
 // EditQuestion 컴포넌트 참조
 const editQuestionRefs = ref([]);
@@ -615,6 +616,7 @@ onMounted(() => {
       passageData.value.title = saveResponse.value.passage?.title || '';
       passageData.value.content = saveResponse.value.passage?.content || '';
       questionsData.value = saveResponse.value.passage?.questions || [];
+      pasCode.value = saveResponse.value.passage?.pasCode || '';
     }
   } catch (error) {
     console.error('JSON 파싱 오류:', error);

@@ -8,7 +8,7 @@
                     v-for="file in fileTypes"
                     :key="file.type"
                     :class="['file-option', { active: selectedFile === file.type }]"
-                    @click="selectFile(file.type)"
+                    @click="() => selectFile(file.type)" 
                 >   
 
                 <Icon class="file-icon" :icon="file.icon" width="53.33px"
@@ -20,7 +20,7 @@
 
         <div class="modal-buttons">
             <BaseButton text="취소하기" type="type3" width="183.5px" height="46px" @click="closeModal" />
-            <BaseButton text="추출하기" type="type1" width="183.5px" height="46px" :disabled="!selectedFile" @click="confirmSelection" />
+            <BaseButton text="추출하기" type="type1" width="183.5px" height="46px" :disabled="!selectedFile" @click="getFile" />
         </div>
     </BaseModal>
 </template>
@@ -30,9 +30,18 @@
     import BaseModal from "../BaseModal.vue";;
     import BaseButton from "../../button/BaseButton.vue";
     import { Icon } from "@iconify/vue";
+    import { useRouter, useRoute } from 'vue-router';
+    import { useAuthStore } from '@/stores/auth';
+
+    // 라우터와 스토어 초기화
+    const router = useRouter();
+    const route = useRoute();
+    const authStore = useAuthStore();
+    
 
     const props = defineProps({
-        isOpen: Boolean
+        isOpen: Boolean,
+        pasCode: Number
     });
 
     const emit = defineEmits(["close", "confirm"]);
@@ -45,16 +54,116 @@
 
     // ✅ PDF를 기본 선택값으로 설정
     const selectedFile = ref("pdf");
+    const isProcessing = ref(false);
+
 
     const selectFile = (fileType) => {
         selectedFile.value = fileType;
+    };
+
+// ✅ 파일 선택 시 처리 함수
+const getFile = async () => {
+    if (!selectedFile.value) {
+        alert("파일 형식을 선택해주세요.");
+        return;
+    }
+
+    if (!props.pasCode) {
+        alert("pasCode 값이 없습니다.");
+        return;
+    }
+
+    if (isProcessing.value) return; // 중복 실행 방지
+    isProcessing.value = true;
+
+    console.log("파일 타입: ", selectedFile.value);
+    console.log("pasCode: ", props.pasCode);
+
+    const apiUrl = import.meta.env.VITE_API_URL;
+
+    try {
+        const response = await fetch(`${apiUrl}/pass/export/each/${props.pasCode}?type=${selectedFile.value}`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/octet-stream'
+            },
+            credentials: 'include' // ✅ 인증 쿠키 포함
+        });
+
+        if (!response.ok) {
+            if (response.status === 401) {
+                console.error('인증 오류(401): 로그인이 필요합니다');
+                
+                //인증 상태 초기화
+                authStore.user = null;
+                authStore.isAuthenticated = false;
+                localStorage.removeItem('authUser');
+
+                // 로그인 페이지로 이동
+                router.push({ 
+                    path: '/login', 
+                    query: { redirect: route.fullPath }
+                });
+
+                throw new Error('인증이 필요합니다');
+            }
+
+            if (response.status === 403) {
+                console.error('권한 오류(403): 권한이 없습니다.');
+                alert('파일 다운로드에 필요한 권한이 없습니다.');
+                throw new Error('파일 다운로드 권한이 없습니다.');
+            }
+
+            const errorText = await response.text();
+            throw new Error(`파일 다운로드 실패: ${errorText}`);
+        }
+
+        // 응답을 blob으로 변환
+        const blob = await response.blob();
+
+        //  Content-Disposition에서 파일 이름 추출 정규식 수정
+        const contentDisposition = response.headers.get('Content-Disposition');
+        let fileName = `file.${selectedFile.value}`; // 기본값 설정
+
+        if (contentDisposition) {
+            console.log('Content-Disposition:', contentDisposition);
+
+            // 규식 수정 → 큰따옴표, 작은따옴표 모두 처리
+            const match = contentDisposition.match(/filename\*?=(?:UTF-8'')?["']?([^;"']+)["']?/);
+            if (match) {
+                fileName = decodeURIComponent(match[1]); // 서버에서 반환된 파일명 사용
+                console.log('추출된 파일 이름:', fileName);
+            }
+        }
+
+            //Blob URL 생성 → 새 창에서 열기
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', fileName);
+            document.body.appendChild(link);
+            link.click();
+
+            //URL 정리
+            window.URL.revokeObjectURL(url);
+            link.remove();
+
+            console.log(`파일 다운로드 성공: ${fileName}`);
+            closeModal();
+        } catch (error) {
+            console.error("파일 다운로드 실패:", error.message);
+            alert(`파일 다운로드 실패: ${error.message}`);
+        } finally {
+            //상태 초기화 추가
+            isProcessing.value = false;
+        }
     };
 
     const closeModal = () => {
         emit("close");
     };
 
-    // ✅ 모달이 열릴 때 기본값을 PDF로 설정
+    // 모달이 열릴 때 기본값을 PDF로 설정
     watch(() => props.isOpen, (newVal) => {
         if (newVal) {
             selectedFile.value = "pdf";
