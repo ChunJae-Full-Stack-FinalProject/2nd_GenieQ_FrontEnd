@@ -123,7 +123,7 @@ const getFile = async () => {
 
         //  Content-Disposition에서 파일 이름 추출 정규식 수정
         const contentDisposition = response.headers.get('Content-Disposition');
-        let fileName = `file.${selectedFile.value}`; // 기본값 설정
+        let fileName = `file.${selectedFile.value === 'word' ? 'docx' : selectedFile.value}`;
 
         if (contentDisposition) {
             console.log('Content-Disposition:', contentDisposition);
