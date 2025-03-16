@@ -494,9 +494,16 @@ const selectGender = (selectedGender) => {
   gender.value = selectedGender;
 };
 
+const isSubmitting = ref(false);
+
 // 폼 제출 함수
-const submitForm = () => 
-{ if (isButtonEnabled.value) {
+const submitForm = (event) => 
+{ 
+  event.stopPropagation(); // 이벤트 전파 방지
+  if (isSubmitting.value) return; // ✅ 중복 실행 방지
+  isSubmitting.value = true;
+  
+  if (isButtonEnabled.value) {
   // API 요청에 필요한 데이터 구성
   const signUpData = {
     "memEmail": email.value,
@@ -535,8 +542,10 @@ const submitForm = () =>
       } else {
         alert('회원가입 처리 중 오류가 발생했습니다: ' + error.message);
       }
-    }
-  );
+    })
+    .finally(() => {
+      isSubmitting.value = false; // ✅ 상태 초기화
+    });
   }
 };
 
