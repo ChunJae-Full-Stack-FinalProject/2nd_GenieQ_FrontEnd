@@ -369,8 +369,14 @@ const purchaseCount = computed(() => {
   return ticketMapping[purchaseTicket.value] || 0;
 });
 
+  const isProcessing = ref(false);
+
   // 구매확인 함수
   const purchaseModal = () => {
+
+    if (isProcessing.value) return; // 중복 클릭 방지
+    isProcessing.value = true; //처리 중 상태 설정
+
      // 구매 로직 구현할 부분
 
     const apiUrl = import.meta.env.VITE_API_URL;
@@ -416,12 +422,21 @@ const purchaseCount = computed(() => {
 
       // 결제 성공 시 티켓 수 갱신
       getTicketCount(); // 최신 티켓 수 다시 조회
+
+      // 결제 내역 즉시 갱신
+      paymentHistory.value = [];
+      fetchPaymentHistory();
+
       closeWarningModal(); // 모달 닫기
 
     })
     .catch(error => {
       console.error('결제 실패:', error);
-    });
+    })
+    .finally(() => {
+    // 처리 상태 해제 → 버튼 활성화
+    isProcessing.value = false;
+  });
   };
 
 const closeWarningModal = () => {
