@@ -552,6 +552,10 @@ color: #BDBDBD;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+
+    /* 스크롤바 추가 */
+    overflow-y: auto;
+    max-height: 582px;
 }
 
 .preview-title{

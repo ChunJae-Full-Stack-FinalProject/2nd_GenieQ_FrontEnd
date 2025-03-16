@@ -1,7 +1,7 @@
 <template>
     <div class="question-description">
         <div class="description-main">
-            <span v-if="!isEditing" id="correct-answer">정답 {{ answer }}</span>
+            <span v-if="!isEditing" id="correct-answer">정답 {{ queAnswer }}</span>
             <!-- <input v-else type="text" v-model="answer" id="input-answer"/> -->
             <div v-else class="select-answerbox">
                 <div id="input-answer">
@@ -30,8 +30,8 @@
             </div>
             
             <div class="content-box">
-            <span v-if="!isEditing" id="description-content">{{ content }}</span>
-            <textarea v-else type="text" v-model="content" id="input-content" @input="handleDescriptionChanged"></textarea>
+            <span v-if="!isEditing" id="description-content">{{ description }}</span>
+            <textarea v-else type="text" v-model="description" id="input-content" @input="handleDescriptionChanged"></textarea>
             </div>
         </div>
     </div>
@@ -42,7 +42,7 @@ import { ref, computed, onMounted, watch } from 'vue';
 // props 정의
 const props = defineProps({
     // 정답
-    correct: {
+    queAnswer: {
         type: String,
         default: '①'
     },
@@ -69,7 +69,7 @@ const emit = defineEmits(['description-changed']);
 // 내부적으로 관리할 정답 데이터 (v-model에 연결)
 const localAnswer = ref('');
 // 내부적으로 관리할 해설 데이터
-const content = ref('');
+const description = ref('');
 
 // 고유 ID 계산 (slideIndex 기반)
 const uniqueId = computed(() => `desc-${props.slideIndex}`);
@@ -78,25 +78,25 @@ const uniqueId = computed(() => `desc-${props.slideIndex}`);
 const handleDescriptionChanged = () => {
     // 변경사항을 부모 컴포넌트에 알림
     emit('description-changed', {
-        correct: localAnswer.value,
-        description: content.value,
+        queAnswer: localAnswer.value,
+        description: description.value,
         slideIndex: props.slideIndex
     });
 };
 
 // 초기 상태 설정
 onMounted(() => {
-    localAnswer.value = props.correct;
-    content.value = props.description;
+    localAnswer.value = props.queAnswer;
+    description.value = props.description;
 });
 
 // props 변경 감시
-watch(() => props.correct, (newVal) => {
+watch(() => props.queAnswer, (newVal) => {
     localAnswer.value = newVal;
 });
 
 watch(() => props.description, (newVal) => {
-    content.value = newVal;
+    description.value = newVal;
 });
 
 watch(() => props.isEditing, (newVal) => {

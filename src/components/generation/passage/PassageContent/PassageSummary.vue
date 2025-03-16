@@ -27,23 +27,29 @@
 </template>
 <script setup>
 import { ref, defineExpose, computed, watch } from 'vue';
+
 // 데이터 관리
 const subject = ref('');
 const keyword = ref('');
-const gist = ref(''); // 문자열로 저장
+const gist = ref('');
+
+// 초기 값 설정 (값이 없으면 빈 문자열로 설정)
+const savePassageData = JSON.parse(localStorage.getItem('saveResponse')) || {};
+subject.value = savePassageData?.passage?.type || '';
+keyword.value = savePassageData?.passage?.keyword || '';
+gist.value = savePassageData?.passage?.gist || '';
+
 // computed 속성으로 gist를 줄바꿈으로 분리해 배열로 변환
 const gistItems = computed(() => {
     if (!gist.value) return [];
-    // 문자열 또는 배열 처리
     if (typeof gist.value === 'string') {
-        // (수정) 다양한 줄바꿈 형식 처리
         return gist.value.split(/\\n|\n/).filter(item => item.trim());
     } else if (Array.isArray(gist.value)) {
-        // (추가) 배열인 경우 직접 반환
         return gist.value;
     }
     return [];
 });
+
 // 외부에서 접근할 수 있도록 요약 정보를 가져오는 함수 노출
 const getSummary = () => {
     return {
@@ -56,21 +62,18 @@ const getSummary = () => {
 const setSummary = (summaryData) => {
     console.log('[27] PassageSummary: 요약 정보 설정', summaryData);
     if (summaryData) {
-        // (수정) subject와 keyword 값 설정 - 명시적으로 빈 문자열 처리
+        // subject와 keyword 값 설정 - 명시적으로 빈 문자열 처리
         subject.value = summaryData.subject || '';
         keyword.value = summaryData.keyword || '';
-        // (수정) gist 처리 - 배열 또는 문자열 처리
+
         if (summaryData.gist !== undefined) {
             if (Array.isArray(summaryData.gist)) {
-                // 배열이면 그대로 저장
                 gist.value = summaryData.gist;
                 console.log('[27A] gist 배열로 설정:', gist.value);
             } else if (typeof summaryData.gist === 'string') {
-                // 문자열이면 그대로 저장
                 gist.value = summaryData.gist;
                 console.log('[27B] gist 문자열로 설정:', gist.value);
             } else {
-                // 다른 타입이면 빈 문자열로 초기화
                 gist.value = '';
             }
         } else {

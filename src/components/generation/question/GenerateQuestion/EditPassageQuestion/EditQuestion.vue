@@ -27,7 +27,7 @@
 </template>
 
 <script setup>
-import { ref, watch, nextTick, onMounted } from 'vue';
+import { ref, watch, nextTick, onMounted, defineProps, defineEmits, defineExpose, } from 'vue';
 import BaseButton from '@/components/common/button/BaseButton.vue';
 
 // props 정의
@@ -87,20 +87,37 @@ const requestEditMode = () => {
     emit('request-edit-mode');
 };
 
-// 편집 모드 토글 (부모 컴포넌트에서 호출될 수 있음)
-const toggleEditMode = (forceEditMode) => {
-    console.log('toggleEditMode 호출됨, 이전 상태:', isEditing.value, '강제 값:', forceEditMode);
+// // 편집 모드 토글 (부모 컴포넌트에서 호출될 수 있음)
+// const toggleEditMode = (forceEditMode) => {
+//     console.log('toggleEditMode 호출됨, 이전 상태:', isEditing.value, '강제 값:', forceEditMode);
     
-    // forceEditMode가 제공되면 해당 값으로 설정
-    const newEditingState = forceEditMode !== undefined ? forceEditMode : !isEditing.value;
+//     // forceEditMode가 제공되면 해당 값으로 설정
+//     const newEditingState = forceEditMode !== undefined ? forceEditMode : !isEditing.value;
 
-    // 로컬 상태 업데이트
-    isEditing.value = newEditingState;
+//     // 로컬 상태 업데이트
+//     isEditing.value = newEditingState;
     
-    // 편집 모드 변경 이벤트를 발생시켜 부모 컴포넌트에 알림
-    emit('edit-mode-changed', newEditingState);
+//     // 편집 모드 변경 이벤트를 발생시켜 부모 컴포넌트에 알림
+//     emit('edit-mode-changed', newEditingState);
 
-    // 편집 모드로 전환되면 input title에 포커스
+//     // 편집 모드로 전환되면 input title에 포커스
+//     if (isEditing.value) {
+//         nextTick(() => {
+//             if (titleInput.value) {
+//                 titleInput.value.focus();
+//             }
+//         });
+//     } else {
+//         emit('update:questions', items.value);
+//         emit('update:questionTitle', title.value);
+//     }
+// };
+
+// 편집 모드 토글 함수
+const toggleEditMode = () => {
+    isEditing.value = !isEditing.value;
+    emit('edit-mode-changed', isEditing.value);
+
     if (isEditing.value) {
         nextTick(() => {
             if (titleInput.value) {
@@ -108,14 +125,20 @@ const toggleEditMode = (forceEditMode) => {
             }
         });
     } else {
-        emit('update:questions', items.value);
-        emit('update:questionTitle', title.value);
+        // 수정 완료 시 상태 업데이트
+        emit('question-changed', {
+            title: title.value,
+            options: items.value // ✅ 명확한 데이터 구조로 전달
+        });
     }
 };
 
-// 문항 변경 시 이벤트 발생
+// 입력 값 수정 시 상태 업데이트
 const handleQuestionChanged = () => {
-    emit('question-changed');
+    emit('question-changed', {
+        title: title.value,
+        options: items.value
+    });
 };
 
 // props 변경 감시
@@ -139,7 +162,11 @@ onMounted(() => {
 
 // 외부에서 호출 가능하도록 함수 노출
 defineExpose({
-    toggleEditMode
+    toggleEditMode,
+    getTitle: () => title.value,
+    getOptions: () => items.value,
+    setTitle: (newTitle) => { title.value = newTitle || '' },
+    setOptions: (newOptions) => { items.value = newOptions || [] }
 });
 </script>
 <style scoped>
