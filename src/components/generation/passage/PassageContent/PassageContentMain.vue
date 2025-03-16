@@ -62,7 +62,7 @@ const emitContentChange = () => {
         content: content.value,
         summary: summaryValue
     });
-    console.log('[31] PassageContentMain: 내용 변경 이벤트 발생', {titleLength: title.value?.length || 0,contentLength: content.value?.length || 0,summary: summaryValue});
+    // console.log('[31] PassageContentMain: 내용 변경 이벤트 발생', {titleLength: title.value?.length || 0,contentLength: content.value?.length || 0,summary: summaryValue});
 };
     
 // 본문 길이 검증
@@ -76,7 +76,7 @@ const getTitle = () => title.value;
 const getSummary = () => summary.value;
 
 const setContent = (newContent) => {
-    console.log('[29] PassageContentMain: 내용 설정', newContent?.length || 0);
+    // console.log('[29] PassageContentMain: 내용 설정', newContent?.length || 0);
     if (newContent !== undefined) {
         content.value = newContent || '';
         emitContentChange();
@@ -84,7 +84,7 @@ const setContent = (newContent) => {
 };
 
 const setTitle = (newTitle) => {
-    console.log('[30] PassageContentMain: 제목 설정', newTitle);
+    // console.log('[30] PassageContentMain: 제목 설정', newTitle);
     if (newTitle !== undefined) {
         title.value = newTitle || '';
         emitContentChange();
@@ -92,7 +92,7 @@ const setTitle = (newTitle) => {
 };
     
 const setSummary = (newSummary) => {
-    console.log('PassageContentMain: 요약 설정', newSummary);
+    // console.log('PassageContentMain: 요약 설정', newSummary);
     if (newSummary) {
         summary.value = {
             subject: newSummary.subject || '',
@@ -116,9 +116,52 @@ defineExpose({
 
 // 컴포넌트 마운트 시 실행
 onMounted(() => {
-    console.log('PassageContentMain 컴포넌트 마운트');
-    // 초기 데이터 변경 이벤트 발생
-    emitContentChange();
+  // console.log('[1] PassageContentMain 컴포넌트 마운트');
+  
+  // genieq-passage-data에서 데이터 로드
+    try {
+        const storedData = localStorage.getItem('genieq-passage-data');
+        if (storedData) {
+            const passageData = JSON.parse(storedData);
+            // console.log('[2] 저장된 지문 데이터 로드:', passageData);
+            
+            // 제목과 내용 설정
+            if (passageData.title) {
+            title.value = passageData.title;
+            // console.log('[3] 제목 설정:', title.value);
+            }
+            
+            if (passageData.content) {
+            content.value = passageData.content;
+            // console.log('[4] 내용 설정(길이):', content.value.length);
+            }
+            
+            // 요약 정보 설정
+            summary.value = {
+            subject: passageData.type || '',
+            keyword: passageData.keyword || '',
+            gist: passageData.gist || []
+            };
+            
+            // console.log('[5] 요약 정보 설정:', summary.value);
+            
+            // 변경 이벤트 발생 - 상위 컴포넌트에 알림
+            emitContentChange();
+        } else {
+            // console.log('[6] 저장된 지문 데이터 없음');
+        }
+    } catch (error) {
+    // console.error('[7] 지문 데이터 로드 오류:', error);
+    // 에러 발생 시 기본 상태 유지
+    }
+
+    // saveResponse 초기화 (문제 방지)
+    try {
+    localStorage.removeItem('saveResponse');
+    localStorage.setItem('saveResponse', JSON.stringify({}));
+    } catch (error) {
+    // console.error('[8] localStorage 접근 오류:', error);
+    }
 
     // localStorage.removeItem('saveResponse');
     // localStorage.setItem('saveResponse', JSON.stringify({}));

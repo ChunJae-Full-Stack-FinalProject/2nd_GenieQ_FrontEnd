@@ -16,38 +16,153 @@
         <div class="gist-container">
             <p id="gist-text">핵심 논점</p>
             <div class="gist-main">
-                <ol class="gist-content">
-                    <li v-for="(item, index) in gistItems" :key="index" class="list-item">
-                        {{ item }}
-                    </li>
-                </ol>
+                <div class="gist-content">
+                    {{ gistText }}
+                </div>
             </div>
         </div>
     </div>
 </template>
 <script setup>
-import { ref, defineExpose, computed, watch } from 'vue';
+import { ref, defineExpose, computed, watch, onMounted } from 'vue';
 
 // 데이터 관리
 const subject = ref('');
 const keyword = ref('');
 const gist = ref('');
 
-// 초기 값 설정 (값이 없으면 빈 문자열로 설정)
-const savePassageData = JSON.parse(localStorage.getItem('saveResponse')) || {};
-subject.value = savePassageData?.passage?.type || '';
-keyword.value = savePassageData?.passage?.keyword || '';
-gist.value = savePassageData?.passage?.gist || '';
+// gistText computed 속성 - 문자열로 직접 출력
+const gistText = computed(() => {
+    console.log('[gistText] 계산 중, 현재 gist 값:', gist.value);
+    
+    // gist가 빈 배열이거나 없을 때 localStorage에서 다시 확인
+    if (!gist.value || (Array.isArray(gist.value) && gist.value.length === 0)) {
+        try {
+            const storedData = localStorage.getItem('genieq-passage-data');
+            if (storedData) {
+                const passageData = JSON.parse(storedData);
+                
+                // gist 데이터가 있으면 반환
+                if (passageData.gist) {
+                    console.log('[gistText] localStorage에서 gist 복구:', passageData.gist);
+                    
+                    // gist 값을 업데이트 (나중에 사용하기 위해)
+                    if (typeof passageData.gist === 'string') {
+                        gist.value = passageData.gist;
+                        return passageData.gist;
+                    } else if (Array.isArray(passageData.gist)) {
+                        gist.value = passageData.gist;
+                        return passageData.gist.join('\n');
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('[gistText] localStorage 데이터 확인 중 오류:', error);
+        }
+        
+        return '핵심 논점이 없습니다.';
+    }
 
-// computed 속성으로 gist를 줄바꿈으로 분리해 배열로 변환
-const gistItems = computed(() => {
-    if (!gist.value) return [];
     if (typeof gist.value === 'string') {
-        return gist.value.split(/\\n|\n/).filter(item => item.trim());
-    } else if (Array.isArray(gist.value)) {
         return gist.value;
     }
-    return [];
+    // 배열인 경우 줄바꿈으로 연결
+    if (Array.isArray(gist.value)) {
+      return gist.value.join('\n');
+    }
+    return String(gist.value); // 기타 타입은 문자열로 변환
+});
+
+// LocalStorage에서 데이터 로드하는 함수
+const loadFromLocalStorage = () => {
+    console.log('[loadFromLocalStorage] 로컬 스토리지에서 데이터 로드 시도');
+    
+    // saveResponse에서 데이터 로드 - 첫 번째 시도
+    try {
+        const saveResponseStr = localStorage.getItem('saveResponse');
+        if (saveResponseStr) {
+            const saveResponse = JSON.parse(saveResponseStr);
+            console.log('[loadFromLocalStorage-1] saveResponse 데이터:', saveResponse);
+            
+            if (saveResponse && saveResponse.passage) {
+                // 데이터가 있으면 설정
+                subject.value = saveResponse.passage.type || '';
+                keyword.value = saveResponse.passage.keyword || '';
+                
+                // (수정) gist가 실제 값이 있는 경우에만 설정
+                if (saveResponse.passage.gist && 
+                    !(Array.isArray(saveResponse.passage.gist) && saveResponse.passage.gist.length === 0)) {
+                    gist.value = saveResponse.passage.gist;
+                }
+                
+                console.log('[loadFromLocalStorage-1] 값 설정됨:', { 
+                    subject: subject.value, 
+                    keyword: keyword.value, 
+                    gist: gist.value 
+                });
+                
+                // 하나라도 데이터가 설정되었으면 성공으로 간주
+                if (subject.value || keyword.value || gist.value) {
+                    return true; 
+                }
+            }
+        }
+    } catch (error) {
+        console.error('[loadFromLocalStorage-1] saveResponse 데이터 로드 오류:', error);
+    }
+    
+    // genieq-passage-data에서 데이터 로드 - 두 번째 시도
+    try {
+        const storedData = localStorage.getItem('genieq-passage-data');
+        if (storedData) {
+            const passageData = JSON.parse(storedData);
+            console.log('[loadFromLocalStorage-2] genieq-passage-data 데이터:', passageData);
+            
+            // 데이터가 있으면 설정
+            if (!subject.value) {
+                subject.value = passageData.type || passageData.PAS_TYPE || '';
+            }
+            
+            if (!keyword.value) {
+                keyword.value = passageData.keyword || passageData.PAS_KEYWORD || '';
+            }
+            
+            // (수정) gist가 없거나 빈 배열인 경우에만 새 값 설정
+            if (!gist.value || (Array.isArray(gist.value) && gist.value.length === 0)) {
+                if (passageData.gist || passageData.PAS_GIST) {
+                    gist.value = passageData.gist || passageData.PAS_GIST || '';
+                }
+            }
+            
+            console.log('[loadFromLocalStorage-2] 값 설정됨:', { 
+                subject: subject.value, 
+                keyword: keyword.value, 
+                gist: gist.value 
+            });
+            
+            // 하나라도 데이터가 설정되었으면 성공으로 간주
+            if (subject.value || keyword.value || gist.value) {
+                return true;
+            }
+        }
+    } catch (error) {
+        console.error('[loadFromLocalStorage-2] genieq-passage-data 데이터 로드 오류:', error);
+    }
+    
+    console.log('[loadFromLocalStorage] 데이터 로드 실패');
+    return false; // 데이터 로드 실패
+};
+
+// 외부에서 직접 호출할 수 있는 업데이트 메서드
+const updateData = () => {
+    console.log('[updateData] 데이터 업데이트 요청됨');
+    return loadFromLocalStorage();
+};
+
+// 컴포넌트 마운트 시 초기 데이터 로드
+onMounted(() => {
+    console.log('[마운트] PassageSummary 컴포넌트 마운트됨');
+    loadFromLocalStorage();
 });
 
 // 외부에서 접근할 수 있도록 요약 정보를 가져오는 함수 노출
@@ -55,50 +170,58 @@ const getSummary = () => {
     return {
         subject: subject.value,
         keyword: keyword.value,
-        gist: Array.isArray(gist.value) ? gist.value : gist.value
+        gist: gist.value
     };
 };
 // 요약 정보 설정 (외부에서 호출 가능)
 const setSummary = (summaryData) => {
     console.log('[27] PassageSummary: 요약 정보 설정', summaryData);
-    if (summaryData) {
+    if (!summaryData) {
+        console.error('[setSummary] 유효하지 않은 요약 데이터');
+        return;
+    }
         // subject와 keyword 값 설정 - 명시적으로 빈 문자열 처리
         subject.value = summaryData.subject || '';
         keyword.value = summaryData.keyword || '';
 
         if (summaryData.gist !== undefined) {
-            if (Array.isArray(summaryData.gist)) {
+            // 빈 배열이 아닌 경우에만 설정
+            if (!(Array.isArray(summaryData.gist) && summaryData.gist.length === 0)) {
                 gist.value = summaryData.gist;
-                console.log('[27A] gist 배열로 설정:', gist.value);
-            } else if (typeof summaryData.gist === 'string') {
-                gist.value = summaryData.gist;
-                console.log('[27B] gist 문자열로 설정:', gist.value);
+                console.log('[setSummary] gist 설정됨:', gist.value);
             } else {
-                gist.value = '';
+                // 빈 배열인 경우 로컬 스토리지에서 gist 복구 시도
+                try {
+                    const storedData = localStorage.getItem('genieq-passage-data');
+                    if (storedData) {
+                        const passageData = JSON.parse(storedData);
+                        if (passageData.gist || passageData.PAS_GIST) {
+                            gist.value = passageData.gist || passageData.PAS_GIST;
+                            console.log('[setSummary] 로컬 스토리지에서 gist 복구:', gist.value);
+                        }
+                    }
+                } catch (error) {
+                    console.error('[setSummary] 로컬 스토리지에서 gist 복구 중 오류:', error);
+                }
             }
-        } else {
-            gist.value = '';
-        }
     }
     console.log('[28] PassageSummary: 설정된 요약 정보', {
         subject: subject.value,
         keyword: keyword.value,
         gist: gist.value,
-        gistItems: gistItems.value
+        gistText: gistText.value 
     });
 };
-// (추가) subject와 keyword의 변경 감지
+
+// 값 변경 감지
 watch([subject, keyword, gist], () => {
-    console.log('[28A] PassageSummary: 요약 정보 변경됨', {
-        subject: subject.value,
-        keyword: keyword.value,
-        gistItems: gistItems.value
-    });
+    console.log('[watch] 요약 정보 변경됨:', { subject: subject.value, keyword: keyword.value, gist: gist.value, gistText: gistText.value });
 });
 // 외부에서 사용 가능한 메서드 노출
 defineExpose({
     getSummary,
-    setSummary
+    setSummary,
+    updateData // 로컬 스토리지 데이터 갱신 메서드
 });
 </script>
 <style scoped>
@@ -325,30 +448,5 @@ defineExpose({
     order: 1;
     align-self: stretch;
     flex-grow: 0;
-}
-
-.gist-list {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    padding-left: 20px;
-    gap: 20px;
-
-    width: 482px;
-    height: 208px;
-
-    flex: none;
-    order: 0;
-    align-self: stretch;
-    flex-grow: 0;
-
-    font-family: 'Pretendard';
-    font-style: normal;
-    font-weight: 400;
-    font-size: 16px;
-    line-height: 28px;
-
-    letter-spacing: -0.02em;
-    color: #000000;
 }
 </style>

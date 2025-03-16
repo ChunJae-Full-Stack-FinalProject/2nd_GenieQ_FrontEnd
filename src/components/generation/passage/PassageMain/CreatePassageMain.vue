@@ -53,7 +53,7 @@ try {
         savePassageData = JSON.parse(savedData) || {};
     }
 } catch (error) {
-    console.error('데이터 파싱 오류:', error);
+    // // console.error('데이터 파싱 오류:', error);
 }
 
 const emit = defineEmits(['input-change', 'category-change','title-change']);
