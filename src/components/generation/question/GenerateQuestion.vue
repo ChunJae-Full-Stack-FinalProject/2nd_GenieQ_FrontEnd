@@ -6,7 +6,12 @@
       <p id="content-head">지문</p>
       <!-- EditPassage를 직접 사용 -->
       <div class="edit-content-container">
-        <EditPassage ref="editPassageRef" @content-changed="handleContentChange"/>
+        <EditPassage 
+          ref="editPassageRef" 
+          :initialTitle="passageData.title"
+          :initialContent="passageData.content" 
+          @content-changed="handlePassageChange"
+        />
       </div>
     </div>
         
@@ -141,7 +146,10 @@ const isEditingGlobal = ref(false);
 const pattern = ref(null);
 const type = ref(null);
 const questionData = ref(null);
-const passageData = ref(null);
+const passageData = ref({
+  title: '',
+  content: ''
+});
 const isConfirmModalOpen = ref(false);
 const showGenerateQuestionModal = ref(false);
 const showPaymentModal = ref(false); // PaymentUsageModal 상태
@@ -173,6 +181,17 @@ try {
 }
 
 const questionsData = ref(saveResponse.passage.questions);
+
+// 제목 및 지문 수정
+const handlePassageChange = (updatedData) => {
+  passageData.value.title = updatedData.title || '';
+  passageData.value.content = updatedData.content || '';
+
+  console.log('지문 수정됨:', updatedData);
+  
+  // 상태 변경 감지
+  isContentChanged.value = true;
+};
 
 
 // 재생성하기 버튼 클릭 핸들러
@@ -290,11 +309,6 @@ const prevSlide = () => {
 // 네비게이션 관련 변수
 const pendingRoute = ref(null);
 
-const currentPassage = ref({
-  title: '',
-  content: ''
-});
-
 // EditPassage 컴포넌트 참조
 const editPassageRef = ref(null);
 
@@ -302,7 +316,7 @@ const editPassageRef = ref(null);
 const handleContentChange = () => {
   // 내용이 변경되면 isContentChanged를 true로, hasManualSave를 false로 설정
   isContentChanged.value = true;
-  hasManualSave.value = false;
+  hasManualSave.value = false;content-changed
   isSaved.value = false;
   console.log('내용이 변경되었습니다:', { isContentChanged: isContentChanged.value, hasManualSave: hasManualSave.value });
 };

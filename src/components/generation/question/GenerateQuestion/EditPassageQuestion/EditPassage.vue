@@ -1,6 +1,10 @@
 <template>
     <div class="edit-passage">
-        <EditTitle/>
+        <EditTitle
+            ref="editTitleRef"
+            :initialTitle="title"
+            @title-changed="handleTitleChange"
+        />
         <div class="edit-tool-bar">
             <p>편집 도구</p>
             <div class="edit-tool-bar-content">
@@ -52,16 +56,23 @@
     />
 </template>
 <script setup>
-import { ref, watch, nextTick, computed, onMounted } from 'vue';
+import { ref, watch, nextTick, computed, onMounted, defineProps, defineEmits } from 'vue';
 import SymbolTooltip from './SymbolTooltip.vue';
 import ConfirmModalComponent from '@/components/common/modal/type/ConfirmModalComponent.vue';
 import EditTitle from './EditTitle.vue';
+
+const props = defineProps({
+  initialTitle: String,
+  initialContent: String
+});
 
 // 상수 정의
 const MIN_LENGTH = 500;
 const MAX_LENGTH = 1700;
 
 // 상태 관리
+const title = ref(props.initialTitle || '');
+const content = ref(props.initialContent || '');
 const symbolList = ref([]);
 const showTooltip = ref(false);
 const contentText = ref('');
@@ -88,18 +99,32 @@ const checkMaxLength = () => {
     };
 }
 
+const emitChange = () => {
+  emit('content-changed', {
+    title: title.value || '',
+    content: content.value || ''
+  });
+};
+
+// 제목 수정 처리
+const handleTitleChange = (newTitle) => {
+  title.value = newTitle || '';
+  emitChange();
+};
+
 // 내용이 변경될 때 이벤트 발생
+// 내용 수정 처리
 const onContentChange = () => {
-    // div의 innerHTML을 contentText ref에 저장
-    const contentDiv = document.getElementById('content-text');
-    if (contentDiv) {
-        contentText.value = contentDiv.innerHTML;
-    }
+  const contentDiv = document.getElementById('content-text');
+  if (contentDiv) {
+    content.value = contentDiv.innerHTML;
+  }
 
-    // 최대 글자 수 검사
-    checkMaxLength();
+  // 글자 수 제한 처리
+  truncateHtmlToTextLength();
 
-    emit('content-changed');
+  // 상태 전달
+  emitChange();
 };
 
 // 텍스트 길이 계산 함수
@@ -316,16 +341,24 @@ const restoreSelection = () => {
 
 // 컴포넌트 마운트 시 이벤트 리스너 추가
 onMounted(() => {
+    if (props.initialTitle) {
+        title.value = props.initialTitle;
+    }
+    if (props.initialContent) {
+        setContent(props.initialContent);
+    }
     // 페이지 클릭 시 선택 영역 저장
     document.addEventListener('mouseup', saveSelection);
     document.addEventListener('keyup', saveSelection);
 });
 
 // 외부에서 접근할 메서드 노출
+// 수정된 상태 외부에서 접근 가능하도록 expose 설정
 defineExpose({
-    validateTextLength,
-    getContent,
-    setContent
+  validateTextLength,
+  getContent: () => content.value,
+  setContent,
+  getTitle: () => title.value
 });
 </script>
 <style scoped>
