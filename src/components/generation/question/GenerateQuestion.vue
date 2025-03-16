@@ -27,7 +27,7 @@
             :isEditing="isEditingGlobal"
             :isFromRoute="isFromRoute"
             @edit-mode-changed="updateEditingMode"
-            @question-changed="handleContentChange($event, index)"
+            @question-changed="handleQuestionChange($event, index)"
             @request-edit-mode="openEditWarningModal"
             @recreate-question="handleRecreateButtonClick(index)"
           />
@@ -180,7 +180,7 @@ try {
   console.error('JSON 파싱 오류:', error);
 }
 
-const questionsData = ref(saveResponse.passage.questions);
+const questionsData = ref(saveResponse?.passage?.questions || []);
 
 // 제목 및 지문 수정
 const handlePassageChange = (updatedData) => {
@@ -191,6 +191,7 @@ const handlePassageChange = (updatedData) => {
   
   // 상태 변경 감지
   isContentChanged.value = true;
+  isSaved.value = false;
 };
 
 
@@ -431,10 +432,29 @@ const handleQuestionGeneration = () => {
   console.log(questionsData);
 };
 
-const handleQuestionChange = (event, index) => {
-  handleContentChange();
-  // 필요한 경우, 특정 인덱스의 문항 데이터 업데이트
-}
+// const handleQuestionChange = (event, index) => {
+//   handleContentChange();
+//   // 필요한 경우, 특정 인덱스의 문항 데이터 업데이트
+// }
+
+const handleQuestionChange = (updatedData, index) => {
+    if (!updatedData || index === undefined) return;
+
+    console.log(`문항 수정됨 [${index}]:`, updatedData);
+
+    // ✅ 수정된 값 명확하게 저장
+    questionsData.value[index] = {
+        ...questionsData.value[index],
+        queQuery: updatedData.title || '',
+        queOption: updatedData.options || []
+    };
+
+    // 상태 변경 감지
+    isContentChanged.value = true;
+    isSaved.value = false;
+    
+    console.log("수정된 문항 전체 보기: ", questionsData.value);
+};
 
 const handleDescriptionChange = (event, index) => {
   handleContentChange();
@@ -512,7 +532,8 @@ const instance = getCurrentInstance();
 let routerGuard = null;
 
 
-console.log("실험: ", saveResponse.passage.pasCode);
+console.log("실험: ", saveResponse?.passage?.pasCode || "pasCode 값 없음");
+
 
 onMounted(() => {
   console.log('전달 값:', saveResponse);
@@ -577,12 +598,12 @@ onMounted(() => {
     }
     
     console.log('네비게이션 계속 진행');
+    localStorage.removeItem('saveResponse');
     return next(); // 네비게이션 계속
   });
 });
 
 onBeforeUnmount(() => {
-  localStorage.removeItem('saveResponse');
   // 컴포넌트 해제 시 이벤트 리스너 제거
   window.removeEventListener('beforeunload', handleBeforeUnload);
 
@@ -591,7 +612,6 @@ onBeforeUnmount(() => {
     routerGuard();
   }
 });
-
 
 // provide 실행
 provide('passageData', {
