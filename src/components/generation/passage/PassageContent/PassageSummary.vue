@@ -27,11 +27,19 @@
 </template>
 <script setup>
 import { ref, defineExpose, computed, watch } from 'vue';
+
 // 데이터 관리
 const subject = ref('');
 const keyword = ref('');
 const gist = ref('');
 
+// 초기 값 설정 (값이 없으면 빈 문자열로 설정)
+const savePassageData = JSON.parse(localStorage.getItem('saveResponse')) || {};
+subject.value = savePassageData?.passage?.type || '';
+keyword.value = savePassageData?.passage?.keyword || '';
+gist.value = savePassageData?.passage?.gist || '';
+
+// computed 속성으로 gist를 줄바꿈으로 분리해 배열로 변환
 const gistItems = computed(() => {
     if (!gist.value) return [];
     if (typeof gist.value === 'string') {
@@ -57,7 +65,7 @@ const setSummary = (summaryData) => {
         // subject와 keyword 값 설정 - 명시적으로 빈 문자열 처리
         subject.value = summaryData.subject || '';
         keyword.value = summaryData.keyword || '';
-        
+
         if (summaryData.gist !== undefined) {
             if (Array.isArray(summaryData.gist)) {
                 gist.value = summaryData.gist;

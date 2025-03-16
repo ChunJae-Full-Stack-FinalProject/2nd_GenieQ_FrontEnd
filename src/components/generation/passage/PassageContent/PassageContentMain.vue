@@ -18,16 +18,7 @@
 <script setup>
 import { ref, defineExpose, defineEmits, watch, onMounted } from 'vue';
 
-let savePassageData = {};
-try {
-    const savedData = localStorage.getItem('saveResponse');
-    if (savedData) {
-        savePassageData = JSON.parse(savedData) || {};
-    }
-} catch (error) {
-    console.error('데이터 파싱 오류:', error);
-}
-
+const savePassageData = JSON.parse(localStorage.getItem('saveResponse')) || {};
 // 본문 내용 ref로 관리
 const content = ref('');
 const title = ref(savePassageData?.passage?.title || '');
@@ -129,8 +120,8 @@ onMounted(() => {
     // 초기 데이터 변경 이벤트 발생
     emitContentChange();
 
-    localStorage.removeItem('saveResponse');
-    localStorage.setItem('saveResponse', JSON.stringify({}));
+    // localStorage.removeItem('saveResponse');
+    // localStorage.setItem('saveResponse', JSON.stringify({}));
 });
 
 watch(title, (newValue) => {
