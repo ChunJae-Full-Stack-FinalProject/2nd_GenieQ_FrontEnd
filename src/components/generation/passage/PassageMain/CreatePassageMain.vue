@@ -45,17 +45,21 @@
     </div>
 </template>
 <script setup>
-import { ref, watch, defineExpose } from 'vue';
-const savePassageData = JSON.parse(localStorage.getItem('saveResponse')) || {};
+import { ref, watch, defineExpose, onMounted } from 'vue';
+let savePassageData = {};
+try {
+    const savedData = localStorage.getItem('saveResponse');
+    if (savedData) {
+        savePassageData = JSON.parse(savedData) || {};
+    }
+} catch (error) {
+    console.error('데이터 파싱 오류:', error);
+}
 
 const emit = defineEmits(['input-change', 'category-change','title-change']);
-const title = ref(
-    savePassageData.passage && savePassageData.passage.title 
-        ? savePassageData.passage.title 
-        : ''
-);
+const title = ref(savePassageData?.passage?.title || '');
 const inputText = ref('');
-const selectedCategory = ref('human');
+const selectedCategory = ref('인문');
 
 const MAX_LENGTH = 50;
 
@@ -79,6 +83,13 @@ const onInputChange = () => {
     checkTextLength();
     emit('input-change', inputText.value);
 };
+
+// 새 작업 시작 시 관련 데이터 초기화
+onMounted(() => {
+    localStorage.removeItem('saveResponse');
+    // 또는 빈 객체로 초기화
+    localStorage.setItem('saveResponse', JSON.stringify({}));
+});
 
 // 초기값 설정을 위한 emit
 watch(inputText, (newValue) => {
