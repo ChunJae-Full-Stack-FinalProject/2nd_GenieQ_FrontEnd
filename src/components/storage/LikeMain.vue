@@ -18,56 +18,61 @@
   </div>
     <div class="storage-likemain-table">
       <div class="table-container">
-        <table class="data-table">
-        <thead>
-          <tr>
-            <th>선택</th>
-            <th>작업명</th>
-            <th>제재</th>
-            <th>유형</th>
-            <th>최종 작업일</th>
-            <th>추출하기</th>
-            <th>즐겨찾기</th>
-          </tr>
-        </thead>
-          <tbody>
-            <tr v-for="(item, index) in computedWorkItems" :key="index" :class="{ 'row-checked': item.checked }">
-              <td @contextmenu="showEditForm(index, $event)">
-                <label class="custom-checkbox">
-                  <input type="checkbox" class="checkbox-input" v-model="item.checked">
-                  <span class="checkbox-custom"></span>
-                </label>
-              </td>
-              <td class="work-name" @contextmenu="showEditForm(index, $event)">
-                <div v-if="editingIndex === index">
-                  <input type="text" v-model="item.PAS_TITLE" @blur="finishEditing" @keyup.enter="finishEditing" ref="editInput" class="edit-input"/>
-                </div>
-                <div v-else>
-                  {{ item.PAS_TITLE }}
-                </div>
-              </td>
-              <td class="work-title" @contextmenu="showEditForm(index, $event)">{{ item.PAS_KEYWORD }}</td>
-              <td class="work-type" @contextmenu="showEditForm(index, $event)">
-                <span class="type-tag">{{ item.PAS_IS_GENERATED }}</span>
-              </td>
-              <td class="work-date" @contextmenu="showEditForm(index, $event)">{{ item.PAS_DATE }}</td>
-              <td class="work-action">
-                <button class="extract-btn" @click="openFileModal(item)">
-                  <p id="btn-text">추출 </p>
-                  <Icon icon="lucide:upload" id="btn-icon" style="color: #FFFFFF" />
-                </button>
-              </td>
-              <td class="work-favorite" @contextmenu="showEditForm(index, $event)">
-                <span class="star-container" @click="toggleFavorite(index)">
-                  <Icon v-if="item.PAS_IS_FAVORITE" icon="mynaui:star-solid" width="24" height="24" style="color: #FF9F40" />
-                  <Icon v-else icon="mynaui:star" width="24" height="24" style="color: #FF9F40" />
-                </span>
-              </td>
-            </tr>
+        <template v-if="computedWorkItems.length > 0">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>선택</th>
+                <th>작업명</th>
+                <th>제재</th>
+                <th>유형</th>
+                <th>최종 작업일</th>
+                <th>추출하기</th>
+                <th>즐겨찾기</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(item, index) in computedWorkItems" :key="index" :class="{ 'row-checked': item.checked }">
+                <td @contextmenu="showEditForm(index, $event)">
+                  <label class="custom-checkbox">
+                    <input type="checkbox" class="checkbox-input" v-model="item.checked">
+                    <span class="checkbox-custom"></span>
+                  </label>
+                </td>
+                <td class="work-name" @contextmenu="showEditForm(index, $event)" @click="handleWorkItemClick(item)">
+                  <div v-if="editingIndex === index">
+                    <input type="text" v-model="item.PAS_TITLE" @blur="finishEditing" @keyup.enter="finishEditing" ref="editInput" class="edit-input"/>
+                  </div>
+                  <div v-else class="clickable-title">
+                    {{ item.PAS_TITLE }}
+                  </div>
+                </td>
+                <td class="work-title" @contextmenu="showEditForm(index, $event)">{{ item.PAS_KEYWORD }}</td>
+                <td class="work-type" @contextmenu="showEditForm(index, $event)">
+                  <span class="type-tag">{{ item.PAS_IS_GENERATED }}</span>
+                </td>
+                <td class="work-date" @contextmenu="showEditForm(index, $event)">{{ item.PAS_DATE }}</td>
+                <td class="work-action">
+                  <button class="extract-btn" @click="openFileModal(item)">
+                    <p id="btn-text">추출 </p>
+                    <Icon icon="lucide:upload" id="btn-icon" style="color: #FFFFFF" />
+                  </button>
+                </td>
+                <td class="work-favorite" @contextmenu="showEditForm(index, $event)">
+                  <span class="star-container" @click="toggleFavorite(index)">
+                    <Icon v-if="item.PAS_IS_FAVORITE" icon="mynaui:star-solid" width="24" height="24" style="color: #FF9F40" />
+                    <Icon v-else icon="mynaui:star" width="24" height="24" style="color: #FF9F40" />
+                  </span>
+                </td>
+              </tr>
           </tbody>
         </table>
-      </div>
+      </template>
+      <template v-else>
+        <span class="empty-message">즐겨찾기가 비어있습니다.</span>
+      </template>
     </div>
+  </div>
      <!-- 페이지네이션 -->
      <div class="pagination" v-if="totalPages > 0 && computedWorkItems.length > 0">
           <button @click="prevPage" :disabled="currentPage === 1">&lt;</button>
@@ -177,6 +182,108 @@ const fetchWorkItems = () => {
   .catch(error => {
     console.error('최근 작업 리스트 불러오기 실패: ', error);
   })
+};
+
+// 작업명 클릭시, 해당 화면으로 이동
+const handleWorkItemClick = (item) => {
+  const apiUrl = import.meta.env.VITE_API_URL;
+  const pasCode = item.PAS_CODE;
+
+  // PAS_IS_GENERATED 값에 따라 API 및 페이지 분기처리
+  const isGeneratedText = item.PAS_IS_GENERATED;
+  const isPassage = isGeneratedText === '지문';
+    // '지문'인 경우 true, '문항'인 경우 false
+
+  // api 엔드 포인트 결정
+  const endpoint = isPassage
+    ? `${apiUrl}/pass/select/${pasCode}`
+    : `${apiUrl}/pass/ques/select/${pasCode}`;
+
+  // api 호출
+  fetch(endpoint, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    credentials: 'include'
+  })
+  .then(response => {
+    if (!response.ok) {
+      // 인증 오류 처리 (401)
+      if (response.status === 401) {
+        console.error('인증 오류(401): 로그인이 필요합니다');
+        
+        // 인증 상태 초기화
+        authStore.user = null;
+        authStore.isAuthenticated = false;
+        localStorage.removeItem('authUser');
+        
+        // 로그인 페이지로 리다이렉트
+        router.push({ 
+          path: '/login', 
+          query: { redirect: route.fullPath }
+        });
+        
+        throw new Error('인증이 필요합니다');
+      }
+      return response.text().then(text => { throw new Error(text); });
+    }
+    return response.json();
+  })
+  .then(data => {
+    console.log('가져온 데이터 : ', data);
+
+    if (isPassage) {
+      // 지문인 경우 - PassageContent.vue로 이동
+      // 데이터 형식 변환 및 저장
+      const passageData = {
+        pasCode: data.pasCode,
+        title: data.title,
+        type: data.type,
+        keyword: data.keyword,
+        content: data.content,
+        gist: data.gist
+      };
+
+      // 통합 키로 저장
+      localStorage.setItem('genieq-passage-data', JSON.stringify(passageData));;
+
+      // 지문 생성 페이지로 이동
+      router.push('/passage/create');
+    } else {
+      // 문항인 경우 - GenerateQuestion.vue로 이동
+      // 데이터 형식 변환 및 저장
+      const questionData = {
+        passage: {
+          pasCode: data.pasCode,
+          title: data.title,
+          type: data.type,
+          keyword: data.keyword,
+          content: data.content,
+          gist: data.gist,
+          questions: data.questions.map(q => ({
+            queCode: q.queCode,
+            queQuery: q.queQuery,
+            queOption: q.queOption,
+            queAnswer: q.queAnswer
+          }))
+        }
+      };
+
+      // 로컬 스토리지에 저장
+      localStorage.setItem('saveResponse', JSON.stringify(questionData));
+      
+      // 문항 생성 페이지로 이동
+      router.push({
+        path: '/questions/generate',
+        query: {from: route.path} // 현재 경로 전달
+      });
+    }
+  })
+  .catch(error => {
+    console.error('데이터 가져오기 실패:', error);
+    alert('데이터를 가져오는 중 오류가 발생했습니다.');
+  });
 }
 
 // 컨텍스트 메뉴 상태 관리
@@ -244,11 +351,65 @@ onUnmounted(() => {
   document.removeEventListener('click', closeContextMenu);
 });
 
-// 편집 완료
+// 편집 완료 및 서버 업데이트
 const finishEditing = () => {
-  editingIndex.value = -1;
+  if (editingIndex.value >= 0) {
+    const item = computedWorkItems.value[editingIndex.value];
+    const apiUrl = import.meta.env.VITE_API_URL;
+    
+    // API 호출하여 제목 업데이트 (PATCH 메서드 사용)
+    fetch(`${apiUrl}/pass/update/each`, {
+      method: 'PATCH', // PUT에서 PATCH로 변경
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include',
+      body: JSON.stringify({
+        pasCode: item.PAS_CODE,
+        title: item.PAS_TITLE,
+        content: item.PAS_KEYWORD || "" // content 필드가 필요한 경우 기존 값 유지
+      })
+    })
+    .then(response => {
+      if (!response.ok) {
+        console.error('이름 변경 응답 오류:', response.status);
+        throw new Error('이름 변경 실패');
+      }
+      
+      // 응답 형식 확인
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        return response.json();
+      } else {
+        return { success: true };
+      }
+    })
+    .then(data => {
+      console.log('이름 변경 성공:', data);
+      
+      // 원본 workItems 배열에서 해당 항목 찾아 업데이트
+      const originalItem = workItems.value.find(i => i.PAS_CODE === item.PAS_CODE);
+      if (originalItem) {
+        originalItem.PAS_TITLE = item.PAS_TITLE;
+      }
+    })
+    .catch(error => {
+      console.error('이름 변경 실패:', error);
+      // 실패해도 UI는 업데이트 (사용자 경험을 위해)
+      const originalItem = workItems.value.find(i => i.PAS_CODE === item.PAS_CODE);
+      if (originalItem) {
+        originalItem.PAS_TITLE = item.PAS_TITLE;
+      }
+    })
+    .finally(() => {
+      // 편집 모드 종료
+      editingIndex.value = -1;
+    });
+  } else {
+    editingIndex.value = -1;
+  }
 };
-
+  
 // 메소드 정의 - 화살표 함수로 작성합니다
 const extractItem = (item) => {
   // 추출 버튼 클릭 시 실행될 로직
@@ -377,9 +538,11 @@ const lastPage = () => {
 // 삭제 모달 상태 관리
 const isDeleteModalOpen = ref(false);
 
-// 선택된 아이템들 찾기
+// 선택된 아이템들 찾기 (수정된 버전)
 const selectedItems = computed(() => {
-  return workItems.value.filter(item => item.checked);
+  const selected = workItems.value.filter(item => item.checked);
+  console.log('선택된 항목:', selected);
+  return selected;
 });
 
 // 삭제 버튼 클릭 시 모달 열기
@@ -389,16 +552,60 @@ const openDeleteModal = () => {
   }
 };
 
-// 선택된 아이템 삭제 확인 
 const confirmDelete = () => {
-  // 선택된 아이템 제거
-  workItems.value = workItems.value.filter(item => !item.checked);
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:9090';
+  const selectedPasCodes = selectedItems.value.map(item => item.PAS_CODE);
   
-  // 모달 닫기
-  isDeleteModalOpen.value = false;
+  // 선택된 항목이 없으면 작업 중단
+  if (selectedPasCodes.length === 0) {
+    console.log('삭제할 항목이 선택되지 않았습니다.');
+    return;
+  }
   
-  // 페이지 재계산
-  currentPage.value = Math.min(currentPage.value, totalPages.value);
+  console.log('삭제 요청:', selectedPasCodes);
+  
+  // API 호출
+  fetch(`${apiUrl}/pass/remove/each`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    credentials: 'include',
+    body: JSON.stringify({
+      pasCodeList: selectedPasCodes
+    })
+  })
+  .then(response => {
+    // HTTP 응답 상태 코드만 확인하고 성공으로 처리
+    if (response.status >= 200 && response.status < 300) {
+      return { success: true };
+    }
+    
+    console.error('HTTP 오류:', response.status);
+    return Promise.reject(new Error('서버에서 오류가 발생했습니다: ' + response.status));
+  })
+  .then(data => {
+    console.log('삭제 성공:', data);
+    
+    // UI에서 선택된 항목 제거
+    workItems.value = workItems.value.filter(item => !selectedPasCodes.includes(item.PAS_CODE));
+    
+    // 모달 닫기
+    isDeleteModalOpen.value = false;
+    
+    // 마지막 페이지가 비게 되면 이전 페이지로 이동
+    if (totalPages.value === 0) {
+      currentPage.value = 1;
+    } else if (currentPage.value > totalPages.value) {
+      currentPage.value = totalPages.value;
+    }
+  })
+  .catch(error => {
+    console.error('삭제 요청 처리 오류:', error);
+    
+    // 모달 닫기 - 에러가 발생해도 사용자 경험을 위해 모달은 닫음
+    isDeleteModalOpen.value = false;
+  });
 };
 
 // 삭제 모달 닫기
@@ -571,6 +778,11 @@ text-align: center;
 border-bottom: none;
 }
 
+.clickable-title {
+  cursor: pointer;
+  color: #303030;
+}
+
 /* 유형 태그 스타일 */
 .type-tag {
 display: inline-flex;
@@ -579,7 +791,7 @@ justify-content: center;
 min-width: 50px;
 height: 28px;
 background-color: #f0f0f0;
-border-radius: 4px;
+border-radius: 12px;
 padding: 0 10px;
 font-size: 14px;
 color: #333;
@@ -589,6 +801,18 @@ font-weight: 400;
 .type-tag-combined {
 background-color: #e8f0fe;
 color: #4285f4;
+}
+
+/* 테이블이 비어있는 경우 */
+.empty-message {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+
+  width: 1473px;
+  height: 748px;
 }
 
 /* 추출 버튼 */

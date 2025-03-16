@@ -31,6 +31,14 @@
       @confirm="isConfirmModalOpen = false"
     />
 
+    <ConfirmModalComponent
+        :isOpen="isListLimitModalOpen"
+        :title="listLimitModalTitle"
+        :message="listLimitModalMessage"
+        @close="isListLimitModalOpen = false"
+        @confirm="isListLimitModalOpen = false"
+    />
+
     <GenerateQuestionModal 
       :isOpen="showGenerateQuestionModal" 
       @close="closeGenerateQuestionModal"
@@ -39,13 +47,14 @@
 </template>
 <script setup>
 import { ref, provide, onMounted, computed } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { useAuthStore } from "@/stores/auth";
 import PaymentUsage from '../PaymentUsage.vue';
 import InsertPassage from './QuestionMain/InsertPassage.vue';
 import BaseButton from '@/components/common/button/BaseButton.vue';
 import GenerateQuestionModal from '@/components/common/modal/type/generation/GenerateQuestionModal.vue';
 import LoadPassageModal from "@/components/common/modal/type/generation/LoadPassageModal.vue";
 import ConfirmModalComponent from '@/components/common/modal/type/ConfirmModalComponent.vue';
-import InputPassageTitle from '@/components/generation/passage/PassageContent/InputPassageTitle.vue';
 
 const showGenerateQuestionModal = ref(false);
 const showLoadPassageModal = ref(false);
@@ -53,6 +62,62 @@ const isConfirmModalOpen = ref(false);
 const paymentUsageRef = ref(null);
 const creditCountValue = ref(0); // 별도의 ref로 이용권 상태 관리
 const insertPassageRef = ref(null);
+
+// 라우터와 스토어 초기화
+const router = useRouter();
+const route = useRoute();
+const authStore = useAuthStore();
+
+// 현재 "최근 작업 내역"의 개수
+const recentListCount = ref(0);
+
+// "최근 작업 내역" 개수 가져오기
+const fetchListCount = () => {
+    const apiUrl = import.meta.env.VITE_API_URL;
+
+    fetch(`${apiUrl}/pass/select/count/recent`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+    })
+    .then(response => {
+        if (!response.ok) {
+            // 인증 오류 처리 (401)
+            if (response.status === 401) {
+                console.error('인증 오류(401): 로그인이 필요합니다');
+
+                // 인증 상태 초기화
+                authStore.user = null;
+                authStore.isAuthenticated = false;
+                localStorage.removeItem('authUser');
+
+                // 로그인 페이지로 리다이렉트
+                router.push({ 
+                    path: '/login', 
+                    query: { redirect: route.fullPath }
+                });
+
+                throw new Error('인증이 필요합니다');
+            }
+            return response.text().then(text => { throw new Error(text); });
+        }
+        return response.json();
+    })
+    .then(data => {
+        // 현재 "최근 작업 내역" 의 개수
+        recentListCount.value = data;
+    })
+    .catch(error => {
+        console.error("최근 작업 내역 개수 조회 실패 : ", error);
+    })
+};
+
+// 작업 내역 150개 이상인 경우, 띄울 모달창 정보
+const isListLimitModalOpen = ref(false);
+const listLimitModalTitle = ref("최근 작업 내역이 꽉 찼습니다.");
+const listLimitModalMessage = ref("생성할 문항을 저장할 공간이 부족합니다. 최근 작업 내역에서 공간을 확보하고 다시 시도하세요.");
 
 // PaymentUsage 컴포넌트에서 이용권 업데이트 시 호출될 함수
 const onCreditUpdate = (count) => {
@@ -68,6 +133,13 @@ const currentPassage = ref({
 const validateAndOpenModal = () => {
     // 이용권이 없는 경우 체크
     if (creditCountValue.value <= 0) {
+        return;
+    }
+
+    // 최근 작업 내역 개수가 150개 이상인지 확인
+    if (recentListCount.value >= 150) {
+        // 최근 작업 내역 제한 모달 표시
+        isListLimitModalOpen.value = true;
         return;
     }
     
@@ -128,6 +200,9 @@ const showLengthWarning = () => {
 
 // 컴포넌트 마운트 시 실행
 onMounted(() => {
+    // 최근 작업 내역 개수 가져오기
+    fetchListCount();
+
     // 로컬 스토리지에서 임시 저장된 지문 데이터 불러오기
     const savedPassageData = localStorage.getItem('tempPassageData');
     if (savedPassageData) {

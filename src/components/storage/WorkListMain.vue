@@ -6,6 +6,7 @@
     <div class="storage-worklistmain-subtitle">
       <span>전체</span>
       <P>({{ filteredWorkItems.length }}개)</P>
+      <v-pre v-if="searchQuery && hasSearchResults">"{{ searchQuery }}"에 대한 검색 결과입니다.</v-pre>
     </div>
 
     <div class="storage-worklistmain-search">
@@ -43,6 +44,7 @@
     <!-- 데이터가 있을 때만 테이블 표시 -->
     <div v-else class="storage-worklist-table">
       <div class="table-container">
+       <template v-if="computedWorkItems.length > 0">
         <table class="data-table">
           <thead>
             <tr>
@@ -63,11 +65,11 @@
                   <span class="checkbox-custom"></span>
                 </label>
               </td>
-              <td class="work-name" @contextmenu="showEditForm(index, $event)">
+              <td class="work-name" @contextmenu="showEditForm(index, $event)" @click="handleWorkItemClick(item)">
                 <div v-if="editingIndex === index">
                   <input type="text" v-model="item.PAS_TITLE" @blur="finishEditing" @keyup.enter="finishEditing" ref="editInput" class="edit-input"/>
                 </div>
-                <div v-else>
+                <div v-else class="clickable-title">
                   {{ item.PAS_TITLE }}
                 </div>
               </td>
@@ -91,6 +93,10 @@
             </tr>
           </tbody>
         </table>
+        </template>
+        <template v-else>
+          <span class="empty-message">최근 작업 내역이 없습니다.</span>
+        </template>
       </div>
     </div>
 
@@ -206,6 +212,104 @@ const fetchWorkItems = () => {
   })
 }
 
+
+// 작업명 클릭시, 해당 화면으로 이동
+const handleWorkItemClick = (item) => {
+  const apiUrl = import.meta.env.VITE_API_URL;
+  const pasCode = item.PAS_CODE;
+  // PAS_IS_GENERATED 값에 따라 API 및 페이지 분기처리
+  const isGeneratedText = item.PAS_IS_GENERATED;
+  const isPassage = isGeneratedText === '지문';
+    // '지문'인 경우 true, '문항'인 경우 false
+  // api 엔드 포인트 결정
+  const endpoint = isPassage
+    ? `${apiUrl}/pass/select/${pasCode}`
+    : `${apiUrl}/pass/ques/select/${pasCode}`;
+  // api 호출
+  fetch(endpoint, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    credentials: 'include'
+  })
+  .then(response => {
+    if (!response.ok) {
+      // 인증 오류 처리 (401)
+      if (response.status === 401) {
+        console.error('인증 오류(401): 로그인이 필요합니다');
+        
+        // 인증 상태 초기화
+        authStore.user = null;
+        authStore.isAuthenticated = false;
+        localStorage.removeItem('authUser');
+        
+        // 로그인 페이지로 리다이렉트
+        router.push({ 
+          path: '/login', 
+          query: { redirect: route.fullPath }
+        });
+        
+        throw new Error('인증이 필요합니다');
+      }
+      return response.text().then(text => { throw new Error(text); });
+    }
+    return response.json();
+  })
+  .then(data => {
+    console.log('가져온 데이터 : ', data);
+    if (isPassage) {
+      // 지문인 경우 - PassageContent.vue로 이동
+      // 데이터 형식 변환 및 저장
+      const passageData = {
+        pasCode: data.pasCode,
+        title: data.title,
+        type: data.type,
+        keyword: data.keyword,
+        content: data.content,
+        gist: data.gist
+      };
+      // 통합 키로 저장
+      localStorage.setItem('genieq-passage-data', JSON.stringify(passageData));;
+      // 지문 생성 페이지로 이동
+      router.push('/passage/create');
+    } else {
+      // 문항인 경우 - GenerateQuestion.vue로 이동
+      // 데이터 형식 변환 및 저장
+      const questionData = {
+        passage: {
+          pasCode: data.pasCode,
+          title: data.title,
+          type: data.type,
+          keyword: data.keyword,
+          content: data.content,
+          gist: data.gist,
+          questions: data.questions.map(q => ({
+            queCode: q.queCode,
+            queQuery: q.queQuery,
+            queOption: q.queOption,
+            queAnswer: q.queAnswer
+          }))
+        }
+      };
+      // 로컬 스토리지에 저장
+      localStorage.setItem('saveResponse', JSON.stringify(questionData));
+      
+      // 문항 생성 페이지로 이동
+      router.push({
+        path: '/questions/generate',
+        query: {from: route.path} // 현재 경로 전달
+      });
+    }
+  })
+  .catch(error => {
+    console.error('데이터 가져오기 실패:', error);
+    alert('데이터를 가져오는 중 오류가 발생했습니다.');
+  });
+}
+
+
+
 // 검색 관련 상태
 const searchQuery = ref('');
 
@@ -285,9 +389,64 @@ onUnmounted(() => {
   document.removeEventListener('click', closeContextMenu);
 });
 
-// 편집 완료
+
+// 편집 완료 및 서버 업데이트
 const finishEditing = () => {
-  editingIndex.value = -1;
+  if (editingIndex.value >= 0) {
+    const item = computedWorkItems.value[editingIndex.value];
+    const apiUrl = import.meta.env.VITE_API_URL;
+    
+    // API 호출하여 제목 업데이트 (PATCH 메서드 사용)
+    fetch(`${apiUrl}/pass/update/each`, {
+      method: 'PATCH', // PUT에서 PATCH로 변경
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include',
+      body: JSON.stringify({
+        pasCode: item.PAS_CODE,
+        title: item.PAS_TITLE,
+        content: item.PAS_KEYWORD || "" // content 필드가 필요한 경우 기존 값 유지
+      })
+    })
+    .then(response => {
+      if (!response.ok) {
+        console.error('이름 변경 응답 오류:', response.status);
+        throw new Error('이름 변경 실패');
+      }
+      
+      // 응답 형식 확인
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        return response.json();
+      } else {
+        return { success: true };
+      }
+    })
+    .then(data => {
+      console.log('이름 변경 성공:', data);
+      
+      // 원본 workItems 배열에서 해당 항목 찾아 업데이트
+      const originalItem = workItems.value.find(i => i.PAS_CODE === item.PAS_CODE);
+      if (originalItem) {
+        originalItem.PAS_TITLE = item.PAS_TITLE;
+      }
+    })
+    .catch(error => {
+      console.error('이름 변경 실패:', error);
+      // 실패해도 UI는 업데이트 (사용자 경험을 위해)
+      const originalItem = workItems.value.find(i => i.PAS_CODE === item.PAS_CODE);
+      if (originalItem) {
+        originalItem.PAS_TITLE = item.PAS_TITLE;
+      }
+    })
+    .finally(() => {
+      // 편집 모드 종료
+      editingIndex.value = -1;
+    });
+  } else {
+    editingIndex.value = -1;
+  }
 };
 
 // 메소드 정의 - 화살표 함수로 작성합니다
@@ -318,6 +477,7 @@ const handleFileSelection = (fileType) => {
 
   // 파일 추출 로직 구현
 };
+
 
 const toggleFavorite = (index) => {
   const item = computedWorkItems.value[index];
@@ -368,8 +528,8 @@ const maxVisiblePages = 5; // 한 번에 표시할 페이지 번호 최대 개�
 // 검색 텍스트 정규화 함수 개선
 const normalizeText = (str) => {
   if (!str) return '';
-  // 문자열로 변환 후 소문자화, 띄어쓰기 제거, 특수문자 제거
-  return str.toString().toLowerCase().replace(/[\s\W_]+/g, '');
+  // 문자열로 변환 후 소문자화, 띄어쓰기만 제거 (특수문자 제거하지 않음)
+  return str.toString().toLowerCase().replace(/\s+/g, '');
 };
 
 // advancedSearch 함수에서 해당 함수 사용
@@ -378,32 +538,33 @@ const advancedSearch = (items, query) => {
   if (!items || !Array.isArray(items) || items.length === 0) return [];
   
   const normalizedQuery = normalizeText(query);
-  
-  const prioritizedResults = items.map(item => {
+
+  return items.filter(item => {
     try {
-      const normalizedTitle = normalizeText(item.PAS_TITLE);
-      const normalizedKeyword = normalizeText(item.PAS_KEYWORD);
-      const normalizedType = normalizeText(item.PAS_IS_GENERATED);
-      
-      let priority = -1;
-      if (normalizedTitle.includes(normalizedQuery)) priority = 2;
-      else if (normalizedKeyword.includes(normalizedQuery)) priority = 1;
-      else if (normalizedType.includes(normalizedQuery)) priority = 0;
-      
-      return { item, priority };
+      // 각 필드별로 정규화 후 검색
+      const normalizedTitle = normalizeText(item.PAS_TITLE || '');
+      const normalizedKeyword = normalizeText(item.PAS_KEYWORD || '');
+      const normalizedType = normalizeText(item.PAS_IS_GENERATED || '');
+
+      // 정확한 매칭이 아닌 부분 문자열 검색 (includes)
+      return normalizedTitle.includes(normalizedQuery) ||
+        normalizedKeyword.includes(normalizedQuery) ||
+        normalizedType.includes(normalizedQuery);
     } catch (error) {
-      console.error('검색 중 오류 발생:', error, item);
-      return { item, priority: -1 };
+      console.error('검색 중 오류 발생 : ', error);
+      return false;
     }
-  }).filter(result => result.priority >= 0);
-  
-  prioritizedResults.sort((a, b) => b.priority - a.priority);
-  return prioritizedResults.map(result => result.item);
+  });
 };
 
 // 필터링된 작업 아이템 계산 (검색 기능)
 const filteredWorkItems = computed(() => {
   return advancedSearch(workItems.value, searchQuery.value);
+});
+
+// 검색 결과 유무 확인을 위한 computed 속성 (여기에 추가)
+const hasSearchResults = computed(() => {
+  return searchQuery.value && filteredWorkItems.value.length > 0;
 });
 
 // 총 페이지 수 계산
@@ -459,9 +620,11 @@ const lastPage = () => {
 // 삭제 모달 상태 관리
 const isDeleteModalOpen = ref(false);
 
-// 선택된 아이템들 찾기
+// 선택된 아이템들 찾기 (수정된 버전)
 const selectedItems = computed(() => {
-  return workItems.value.filter(item => item.checked);
+  const selected = workItems.value.filter(item => item.checked);
+  console.log('선택된 항목:', selected);
+  return selected;
 });
 
 // 삭제 버튼 클릭 시 모달 열기
@@ -471,16 +634,56 @@ const openDeleteModal = () => {
   }
 };
 
-// 선택된 아이템 삭제 확인 
 const confirmDelete = () => {
-  // 선택된 아이템 제거
-  workItems.value = workItems.value.filter(item => !item.checked);
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:9090';
+  const selectedPasCodes = selectedItems.value.map(item => item.PAS_CODE);
   
-  // 모달 닫기
-  isDeleteModalOpen.value = false;
+  // 선택된 항목이 없으면 작업 중단
+  if (selectedPasCodes.length === 0) {
+    console.log('삭제할 항목이 선택되지 않았습니다.');
+    return;
+  }
   
-  // 페이지 재계산
-  currentPage.value = Math.min(currentPage.value, totalPages.value);
+  // API 호출
+  fetch(`${apiUrl}/pass/remove/each`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    credentials: 'include',
+    body: JSON.stringify({
+      pasCodeList: selectedPasCodes
+    })
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('항목 삭제 실패');
+    }
+     // 응답 형식 확인
+     const contentType = response.headers.get("content-type");
+    if (contentType && contentType.includes("application/json")) {
+      return response.json();
+    } else {
+      return response.text().then(text => {
+        return { message: text };
+      });
+    }
+  })
+  .then(data => {
+    console.log('삭제 완료:', data);
+    
+    // UI에서 선택된 항목 제거
+    workItems.value = workItems.value.filter(item => !item.checked);
+    
+    // 모달 닫기
+    isDeleteModalOpen.value = false;
+    
+    // 페이지 재계산
+    currentPage.value = Math.min(currentPage.value, totalPages.value);
+  })
+  .catch(error => {
+    console.error('삭제 요청 실패:', error);
+  });
 };
 
 // 삭제 모달 닫기
@@ -537,11 +740,18 @@ const closeDeleteModal = () => {
   display: flex;
   align-items: flex-start;
   gap: 4px;
+  font-size: 10.33px;
   isolation: isolate;
   position: absolute;
   left: 292px;
   top: 90px;
   box-sizing: border-box;
+}
+
+
+.storage-worklistmain-subtitle v-pre {
+ margin-left: 40px;
+ font-weight: 600;
 }
 
 .storage-worklistmain-subtitle2 {
@@ -604,10 +814,6 @@ const closeDeleteModal = () => {
   /* height: 736px; */
   border-collapse: collapse;
   table-layout: fixed;
-}
-
-.data-table tbody {
-  /* height: 690px; */
 }
 .data-table th {
   text-align: left;
@@ -681,7 +887,10 @@ const closeDeleteModal = () => {
 .empty-row:last-child td {
   border-bottom: none;
 }
-
+.clickable-title {
+  cursor: pointer;
+  color: #303030;
+}
 /* 유형 태그 스타일 */
 .type-tag {
   display: inline-flex;
@@ -705,6 +914,18 @@ const closeDeleteModal = () => {
 .work-action {
   padding: 0;
   text-align: center;
+}
+
+/* 테이블이 비어있는 경우 */
+.empty-message {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+
+  width: 1473px;
+  height: 414px;
 }
 
 /* 추출 버튼 */
@@ -807,7 +1028,7 @@ const closeDeleteModal = () => {
 
 .search-container {
   position: relative;
-  width: 100%;
+  width: 248px;
   max-width: 300px;
 }
 

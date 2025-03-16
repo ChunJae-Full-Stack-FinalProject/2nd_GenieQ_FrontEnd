@@ -36,3 +36,6 @@ coverage
 # src/components/test
 # src/components/mypage
 # src/components/storage
+src/.gitignore2
+*merged.md
+src/.gitignore

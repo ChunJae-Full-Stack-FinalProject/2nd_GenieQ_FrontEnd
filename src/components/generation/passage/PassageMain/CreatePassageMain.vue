@@ -4,33 +4,33 @@
             <div class="edit-title">
                 <p id="passage-head">작업이름</p>
                 <input type="text" id="passage-title"
-                    placeholder="작업 이름을 입력해주세요." v-model="title"/>
+                    placeholder="작업 이름을 입력해주세요. (최대 50자)" v-model="title"/>
             </div>
             <div class="select-category-container">
                 <p id="select-category-head">지문 분야 선택</p>
                 <div class="select-category">
                     <div class="category-option">
-                        <input type="radio" id="human" name="category" checked @change="onCategoryChange('human')">
+                        <input type="radio" id="human" name="category" checked @change="onCategoryChange('인문')">
                         <label for="human">인문</label>
                     </div>
                     <div class="category-option">
-                        <input type="radio" id="art" name="category" @change="onCategoryChange('art')">
+                        <input type="radio" id="art" name="category" @change="onCategoryChange('예술')">
                         <label for="art">예술</label>
                     </div>
                     <div class="category-option">
-                        <input type="radio" id="social" name="category" @change="onCategoryChange('social')">
+                        <input type="radio" id="social" name="category" @change="onCategoryChange('사회')">
                         <label for="social">사회</label>
                     </div>
                     <div class="category-option">
-                        <input type="radio" id="culture" name="category" @change="onCategoryChange('culture')">
+                        <input type="radio" id="culture" name="category" @change="onCategoryChange('문화')">
                         <label for="culture">문화</label>
                     </div>
                     <div class="category-option">
-                        <input type="radio" id="science" name="category" @change="onCategoryChange('science')">
+                        <input type="radio" id="science" name="category" @change="onCategoryChange('과학')">
                         <label for="science">과학</label>
                     </div>
                     <div class="category-option">
-                        <input type="radio" id="other" name="category" @change="onCategoryChange('other')">
+                        <input type="radio" id="other" name="category" @change="onCategoryChange('기술')">
                         <label for="other">기술</label>
                     </div>
                 </div>
@@ -46,15 +46,23 @@
 </template>
 <script setup>
 import { ref, watch, defineExpose } from 'vue';
+const savePassageData = JSON.parse(localStorage.getItem('saveResponse'));
 
-const emit = defineEmits(['input-change']);
+const emit = defineEmits(['input-change', 'category-change','title-change']);
+const title = ref(savePassageData.passage?.title||'');
 const inputText = ref('');
 const selectedCategory = ref('human');
+
+const MAX_LENGTH = 50;
 
 // 카테고리 변경 함수 추가
 const onCategoryChange = (category) => {
     selectedCategory.value = category;
     emit('category-change', category);
+};
+
+const onTitleChange = () => {
+    emit('title-change', title.value);
 };
 
 const checkTextLength = () => {
@@ -73,10 +81,23 @@ watch(inputText, (newValue) => {
     emit('input-change', newValue);
 }, { immediate: true });
 
+watch(title, (newValue) => {
+    emit('title-change', newValue);
+}, { immediate: true });
+
+watch(title, (newValue) => {
+    // 최대 작업 이름 글자 수 제한 
+    if (newValue.length > MAX_LENGTH) {
+        // 최대 길이로 잘라서 다시 설정
+        title.value = newValue.substring(0, MAX_LENGTH);
+    }
+});
+
 defineExpose({
     resetForm() {
         inputText.value = '';
         selectedCategory.value = 'human';
+        title.value = '';
         // DOM에 직접 접근하여 라디오 버튼 상태 변경
         document.getElementById('human').checked = true;
     }
