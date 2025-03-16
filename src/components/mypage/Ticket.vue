@@ -106,7 +106,7 @@
                     <span class="date-separator">-</span>
                   <input type="date" class="date-input" v-model="endDate">
                 </div>
-                <button class="search-btn">검색</button>
+                <button class="search-btn" @click="fetchPaymentHistory">검색</button>
               </div>
               <div class="download-group">
                 <button class="download-btn">
@@ -127,9 +127,9 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="(item, index) in paginatedHistory" :key="item.id">
+                  <tr v-for="(item, index) in paginatedHistory" :key="item.payCode">
                     <td>{{ (currentPage - 1) * itemsPerPage + index + 1 }}</td>
-                    <td>{{ item.title }}</td>
+                    <td>{{ item.payName }}</td>
                     <td>{{ item.price }}</td>
                     <td>{{ item.date }}</td>
                   </tr>
@@ -165,7 +165,7 @@
 
     <!-- 구매 경고 모달 -->
     <WarningModalComponent :isOpen="isPurchaseWarningModal" 
-      title="이용권을 구매하시겠습니까?" :message="`${purchaseTicket}회의 이용권이 충전됩니다.`" 
+      title="이용권을 구매하시겠습니까?" :message="`${purchaseCount}회의 이용권이 충전됩니다.`" 
       cancelText="취소하기" confirmText="구매하기" 
       @close="closeWarningModal" @confirm="purchaseModal"
     />
@@ -203,6 +203,47 @@ const maxVisiblePages = 5;
 
 // 임시 결제 내역 데이터 (실제로는 API 요청으로 대체)
 const paymentHistory = ref([]);
+
+const fetchPaymentHistory = () => {
+  const apiUrl = import.meta.env.VITE_API_URL;
+ 
+  // 날짜가 비어있으면 기본값 설정
+  const startDateEncoded = encodeURIComponent(startDate.value || '1970-01-01');
+  const endDateEncoded = encodeURIComponent(endDate.value || getTodayFormatted());
+  
+  fetch(`${apiUrl}/paym/select/list?startDate=${startDateEncoded}&endDate=${endDateEncoded}&page=${currentPage.value}&size=${itemsPerPage}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: 'include'
+  })
+  .then(response => {
+    if (!response.ok) {
+      if (response.status === 401) {
+        console.error('인증 오류(401): 로그인이 필요합니다');
+        router.push({ path: '/login' });
+        throw new Error('인증이 필요합니다');
+      }
+      return response.json().then(text => { throw new Error(text) });
+    }
+    return response.json();
+  })
+  .then(data => {
+    console.log('결제 내역 데이터:', data);
+    paymentHistory.value = data.map(item => ({
+    payCode: item.payCode,
+    payName: item.payName,
+    price: item.price,
+    date: item.date
+  }));
+   
+  })
+  .catch(error => {
+    console.error("결제 내역 조회 오류:", error);
+  });
+};
+
 
 
 // 데이터 초기화 함수
@@ -250,6 +291,7 @@ const visiblePages = computed(() => {
 const changePage = (page) => {
   if (page >= 1 && page <= totalPages.value) {
     currentPage.value = page;
+    fetchPaymentHistory();
   }
 };
 
@@ -308,18 +350,94 @@ const updateDateRange = () => {
 // 구매하기 경고모달 관련 
 const purchaseTicket = ref(0);
 
+// ticCode에 따른 이용권 횟수 매핑
+const ticketMapping = {
+  1: 10,
+  2: 50,
+  3: 100
+};
+
 const openPurchaseWarningModal = (count) => {
-  purchaseTicket.value = count;
+   // ticCode로 매핑되도록 수정
+  if (count === 10) purchaseTicket.value = 1;
+  if (count === 50) purchaseTicket.value = 2;
+  if (count === 100) purchaseTicket.value = 3;
   isPurchaseWarningModal.value = true;
 };
+
+const purchaseCount = computed(() => {
+  return ticketMapping[purchaseTicket.value] || 0;
+});
+
+  const isProcessing = ref(false);
 
   // 구매확인 함수
   const purchaseModal = () => {
 
-    // 구매 로직 구현할 부분
+    if (isProcessing.value) return; // 중복 클릭 방지
+    isProcessing.value = true; //처리 중 상태 설정
 
-    closeWarningModal();
-  }
+     // 구매 로직 구현할 부분
+
+    const apiUrl = import.meta.env.VITE_API_URL;
+
+    fetch(`${apiUrl}/paym/insert/each`, {
+      method : 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include',
+      body: JSON.stringify({
+        ticCode: purchaseTicket.value
+      })
+    })
+    .then(response => {
+      console.log("서버 응답 상태 코드:", response.status);
+      if (!response.ok) {
+        // 인증 오류 처리 (401)
+        if (response.status === 401) {
+          // (추가) 로그 - 인증 오류 감지
+          console.error('인증 오류(401): 로그인이 필요합니다');
+          
+          // 인증 상태 초기화
+          authStore.user = null;
+          authStore.isAuthenticated = false;
+          localStorage.removeItem('authUser');
+          
+          // 로그인 페이지로 리다이렉트
+          router.push({ 
+          path: '/login', 
+          query: { redirect: route.fullPath }
+          });
+          
+          // 추가 처리를 중단하기 위한 에러 발생
+          throw new Error('인증이 필요합니다');
+        }
+        return response.text().then(text => { throw new Error(text); });
+      }
+      return response.text();
+    })
+    .then(data => {
+      console.log('결제 성공', data);
+
+      // 결제 성공 시 티켓 수 갱신
+      getTicketCount(); // 최신 티켓 수 다시 조회
+
+      // 결제 내역 즉시 갱신
+      paymentHistory.value = [];
+      fetchPaymentHistory();
+
+      closeWarningModal(); // 모달 닫기
+
+    })
+    .catch(error => {
+      console.error('결제 실패:', error);
+    })
+    .finally(() => {
+    // 처리 상태 해제 → 버튼 활성화
+    isProcessing.value = false;
+  });
+  };
 
 const closeWarningModal = () => {
   isPurchaseWarningModal.value = false;
@@ -333,6 +451,7 @@ const ticketCount = ref("n");
 onMounted(() => {
     // 컴포넌트 로드 시 티켓 정보 조회
   getTicketCount();
+  fetchPaymentHistory(); // 결제 내역 조회 
 });
 
   // 티켓 정보 조회 함수
@@ -368,9 +487,13 @@ function getTicketCount() {
         // 추가 처리를 중단하기 위한 에러 발생
         throw new Error('인증이 필요합니다');
       }
-      return response.text().then(text => { throw new Error(text); });
+    
+      return response.text().then(text => { 
+      if (!text) throw new Error('빈 응답');
+      return JSON.parse(text); 
+    });
     }
-    return response.text();
+    return response.json();
   })
   .then(data => {
     // 티켓 정보 갱신
@@ -381,8 +504,6 @@ function getTicketCount() {
     console.error("티켓 조회 실패:", error);
   });
 }
-
-
 
 // 컴포넌트 마운트 시 초기화
 onMounted(() => {
