@@ -122,7 +122,11 @@ const emitChange = () => {
 // 제목 수정 처리
 const handleTitleChange = (newTitle) => {
   title.value = newTitle || '';
-  emitChange();
+
+  emit('content-changed', {
+    title: title.value || '',
+    content: content.value || ''
+  });
 };
 
 // 내용이 변경될 때 이벤트 발생
@@ -378,22 +382,26 @@ onMounted(() => {
     if (props.initialContent) {
         setContent(props.initialContent);
     }
-    // 페이지 클릭 시 선택 영역 저장
-    document.addEventListener('mouseup', saveSelection);
-    document.addEventListener('keyup', saveSelection);
+
+    // 본문 영역에만 이벤트 리스너 추가
+    const contentDiv = document.getElementById('content-text');
+    if (contentDiv) {
+        contentDiv.addEventListener('mouseup', saveSelection);
+        contentDiv.addEventListener('keyup', saveSelection);
+    }
 
     updateTextLength(); // 초기 텍스트 길이 설정
 });
 
 watch(() => props.initialTitle, (newValue) => {
-  //console.log("제목 변경 감지: ", newValue);
+  console.log("제목 변경 감지: ", newValue);
   if (newValue !== undefined && newValue !== null) {
     title.value = newValue;
   }
 });
 
 watch(() => props.initialContent, (newValue) => {
-  //console.log(" 지문 변경 감지: ", newValue);
+  console.log(" 지문 변경 감지: ", newValue);
   if (newValue !== undefined && newValue !== null) {
     saveSelection();
     content.value = newValue;
