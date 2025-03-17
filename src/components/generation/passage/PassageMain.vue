@@ -175,13 +175,13 @@ const confirmCreatePassage = () => {
         if (authStore.userTicketCount <= 0) { throw new Error('이용권이 부족합니다. 이용권을 구매해주세요.'); }
         const requestData = {
             type_passage: selectedCategory.value,
-            keyword: inputText.value
+            keyword: [inputText.value]
         };
         // console.log('[1-2] 지문 생성 API 요청 데이터:', requestData);
 
         const apiUrl = import.meta.env.VITE_API_URL;
-        fetch(`${apiUrl}/api/test/generate-passage`, {
-        // fetch('http://10.41.1.56:7777/generate-passage', {
+        // fetch(`${apiUrl}/api/test/generate-passage`, {
+        fetch('http://10.41.1.56:7777/generate-passage', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(requestData)
