@@ -11,7 +11,7 @@
                 </div>
                 <div class="notice-main">
                     <ol class="notice-list">
-                        <li v-for="notice in notices" :key="index" class="list-item">
+                        <li v-for="notice in notices" :key="notice.NOT_CODE" class="list-item">
                             <router-link :to="`/notice/${notice.NOT_CODE}`" class="notice-link">
                                 {{ notice.NOT_TITLE }}
                             </router-link>
