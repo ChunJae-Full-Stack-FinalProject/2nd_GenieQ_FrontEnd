@@ -5,9 +5,9 @@
       <router-link to="/storage/worklistMina">
         <Icon icon="weui:arrow-outlined" width="24" height="24" id="arrow-icon" style="color: #303030" />
       </router-link>
-    </div>
-    <div class="storage-worklist-subtitle">
-      <span>최대 150개까지 보관됩니다.</span>
+      <div class="storage-worklist-subtitle">
+        <span>최대 150개까지 보관됩니다.</span>
+      </div>
     </div>
     <div class="storage-worklist-table">
       <div class="table-container">
@@ -52,7 +52,7 @@
     </div>
   
     <!-- 파일 선택 모달 -->
-    <FileSelectModal :isOpen="isModalOpen" @close="closeFileModal" @confirm="handleFileSelection"/>
+    <FileSelectModal :isOpen="isModalOpen" :pasCode="selectedItem?.PAS_CODE" @close="closeFileModal" @confirm="handleFileSelection"/>
   </div>
   </template>
   
@@ -301,19 +301,25 @@ const handleWorkItemClick = (item) => {
   
   <style scoped>
   .card-container {
-    width: 100%;
-    padding: 20px 30px 80px 20px;
+    width: 1472px;
+    height: calc(414px + 63px + 16px + 50px);
+
+    position: absolute;
+    top: 416px;
+    left: 292px;
   }
   
   .storage-worklist-title {
     display: flex;
     align-items: flex-start;
-    gap: 12px;
+    gap: 8px;
     isolation: isolate;
-    position: absolute;
-    left: 292px;
-    top: 385px;
     box-sizing: border-box;
+  }
+
+  #arrow-icon {
+    position: absolute;
+    top: 2px;
   }
   
   .storage-worklist-title > p {
@@ -323,42 +329,29 @@ const handleWorkItemClick = (item) => {
   }
   
   .storage-worklist-subtitle {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    isolation: isolate;
-    position: absolute;
-    left: 292px;
-    top: 418px;
-    box-sizing: border-box;
-  }
-  
-  .storage-worklist-subtitle span {
+    width: 491px;
+    font-family: 'Pretendard';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 19px;
+    color: #E84739;
     font-size: 16px;
     font-weight: 500;
-    margin: 0;
-    color: #E84739;
+
+    position: absolute;
+    top: 37px;
   }
   
   .storage-worklist-table {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-    isolation: isolate;
+    align-items: center;
+    padding: 0px;
+    gap: 20px;
+
     position: absolute;
-    width: 1472px;
-    height: 376px;
-    left: 292px;
-    top: 450px;  
-    background: #FFFFFF;
-    border-radius: 12px;
-    box-sizing: border-box;
-    overflow: hidden;
-  }
-  
-  td {
-    height: 29.21px;  
+    top: 73px;
   }
   
   .table-container {
@@ -368,9 +361,12 @@ const handleWorkItemClick = (item) => {
   }
   
   .data-table {
-    width: 100%;
+    width: 1472px;
+    height: 414px;
+    background-color: #FFFFFF;
     border-collapse: collapse;
     table-layout: fixed;
+    border-radius: 12px;
   }
   
   .data-table th {
@@ -378,29 +374,36 @@ const handleWorkItemClick = (item) => {
     padding: 10px 20px;    
     border-bottom: 1px solid #e1e1e1;
     font-weight: 700;
+    font-size: 20px;
     color: #424242;
   }
   
   .data-table td {
     text-align: left;
-    padding: 3.5px 20px;    
-    border-bottom: 1px solid #e1e1e1;
+    padding: 3.5px 20px;
     color: #424242;
     white-space: nowrap; 
     overflow: hidden;  
     text-overflow: ellipsis; 
   }
+
+  .data-table tr {
+    border-bottom: 1px solid #e1e1e1;
+  }
+  .data-table tr:last-child {
+    border-bottom: none;
+  }
   
   /* 열 너비 조정 */
   .data-table th:nth-child(1), .data-table td:nth-child(1) {
-    width: 20%;
+    width: 30%;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
   
   .data-table th:nth-child(2), .data-table td:nth-child(2) {
-    width: 30%;
+    width: 20%;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -408,6 +411,9 @@ const handleWorkItemClick = (item) => {
   
   .data-table th:nth-child(3), .data-table td:nth-child(3) {
     width: 10%;
+  }
+  .data-table th:nth-child(3) {
+    padding-left: 27px;
   }
   
   .data-table th:nth-child(4), .data-table td:nth-child(4) {
@@ -440,11 +446,11 @@ const handleWorkItemClick = (item) => {
     justify-content: center;
     min-width: 50px;
     height: 28px;
-    background-color: #f0f0f0;
+    background-color: #E1E1E1;
     border-radius: 12px;
     padding: 0 10px;
-    font-size: 14px;
-    color: #333;
+    font-size: 16px;
+    color: #424242;
     font-weight: 400;
   }
   

@@ -124,7 +124,7 @@
     />
 
     <!-- 파일 선택 모달 -->
-    <FileSelectModal :isOpen="isFileModalOpen" @close="closeFileModal" @confirm="handleFileSelect"/>
+    <FileSelectModal :isOpen="isFileModalOpen" :pasCode="pasCode" @close="closeFileModal" @confirm="handleFileSelect"/>
   </div>
 </template>
 <script setup>
@@ -164,6 +164,7 @@ const isEditWarningModalOpen = ref(false); // 문항 편집 경고 모달 상태
 const currentRecreateIndex = ref(null); // 현재 재생성하려는 문항 인덱스 추가
 const isFromRoute = ref(false); // 문항 생성 페이지로 오기 전 주소에 따라 "문항 추가" 버튼 비활성화
 const isProcessing = ref(false);
+const pasCode = ref(0);
 
 // EditQuestion 컴포넌트 참조
 const editQuestionRefs = ref([]);
@@ -482,29 +483,61 @@ const handleQuestionGeneration = () => {
     return;
   }
 
-  // 새 문항 데이터
-  const newQuestion = {
-    title: '새로운 문항: 다음 중 본문과 내용이 일치하는 것을 고르시오.',
-    questions: [
-      '문제가 바뀌는지 확인해보자',
-      'LLMs는 다른 AI 기술들과 전혀 다른 접근 방식을 사용한다.',
-      'ChatGPT는 LLMs의 가장 초기 모델 중 하나이다.',
-      'LLMs는 기업 환경에서만 사용되는 전문적인 도구이다.',
-      '연구자들은 LLMs의 성능을 줄이기 위해 노력하고 있다.'
-    ],
-    queAnswer: '①',
-    description: "으아아아아아아아아악 너무 힘들어요오오오오오오 살려줘 제에에에에ㅔㅇ바라라아ㅏ아아라"
-  };
+  try {
+    // localStorage에서 saveResponse 가져오기
+    const savedResponseData = localStorage.getItem('saveResponse');
+    if (!savedResponseData) {
+      console.error('저장된 응답 데이터가 없습니다.');
+      return;
+    }
 
-  // 기존 배열을 유지하면서 새 문항 추가
-  questionsData.value.push(newQuestion);
+    const savedResponse = JSON.parse(savedResponseData);
+    console.log('저장된 API 응답 데이터: ', savedResponse);
 
-  // 새로운 문항이 표시되는 페이지로 이동
-  currentSlide.value = questionsData.value.length - 1;
-  
+    if (savedResponse && savedResponse.passage && savedResponse.passage.questions && savedResponse.passage.questions.length > 0) {
+      // API 응답에서 가져온 문항 데이터
+      const apiQuestion = savedResponse.passage.questions[0];
+
+      // 새 문항 데이터 생성
+      const newQuestion = {
+        queQuery: apiQuestion.queQuery || '새 문항',
+        queOption: apiQuestion.queOption || ['문항 1','문항 2','문항 3','문항 4','문항 5'],
+        queAnswer: apiQuestion.queAnswer || '문항 해설',
+        description: ''
+      };
+
+      // 기존 배열을 유지하면서 새 문항 추가
+      questionsData.value.push(newQuestion);
+
+      // 새로운 문항이 표시되는 페이지로 이동
+      currentSlide.value = questionsData.value.length - 1;
+
+      console.log('새 문항이 추가되었습니다.', newQuestion);
+    } else {
+      console.error('API 응답에서 문항 데이터를 찾을 수 없습니다.');
+      // 데이터 구조 확인을 위해 로그 추가
+      console.log('savedResponse 구조:', savedResponse);
+      if (savedResponse && savedResponse.passage) {
+        console.log('passage 내용:', savedResponse.passage);
+      }
+    }
+  } catch (error) {
+    console.error('문항 생성 처리 중 오류 발생:', error);
+    
+    // 오류 발생 시 기본 문항 추가
+    const fallbackQuestion = {
+      queQuery: '새로운 문항: 다음 중 본문과 내용이 일치하는 것을 고르시오.',
+      queOption: ['문제가 바뀌는지 확인해보자', '두 번째 선택지', '세 번째 선택지', '네 번째 선택지', '다섯 번째 선택지'],
+      queAnswer: '해설 내용입니다.',
+      description: ''
+    };
+    
+    questionsData.value.push(fallbackQuestion);
+    currentSlide.value = questionsData.value.length - 1;
+  }
+
   // 모달 닫기
   showPaymentModal.value = false;
-  console.log(questionsData);
 };
 
 // const handleQuestionChange = (event, index) => {
@@ -615,6 +648,7 @@ onMounted(() => {
       passageData.value.title = saveResponse.value.passage?.title || '';
       passageData.value.content = saveResponse.value.passage?.content || '';
       questionsData.value = saveResponse.value.passage?.questions || [];
+      pasCode.value = saveResponse.value.passage?.pasCode || '';
     }
   } catch (error) {
     console.error('JSON 파싱 오류:', error);
