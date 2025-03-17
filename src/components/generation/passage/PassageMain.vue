@@ -36,10 +36,7 @@
             />
 
             <!-- 로딩 표시 추가 -->
-            <div v-if="isLoading" class="loading-overlay">
-                <div class="loading-spinner"></div>
-                <p>{{ loadingMessage }}</p>
-            </div>
+            <LoadingModal :isOpen="isLoading" :message="loadingMessage" />
         </div>
     </div>
 </template>
@@ -52,6 +49,7 @@ import ConfirmModalComponent from '@/components/common/modal/type/ConfirmModalCo
 import WarningModalComponent from '@/components/common/modal/type/WarningModalComponent.vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
+import LoadingModal from '@/components/common/modal/LoadingModal.vue';
 
 // 라우터 및 인증 스토어
 const router = useRouter();
@@ -194,7 +192,23 @@ const confirmCreatePassage = () => {
             savePassageToBackend(data);
         })
         .catch(error => {
-            alert('지문 생성 중 오류가 발생했습니다: ' + error.message);
+            console.log("test 서버로 요청을 대신합니다.");
+            alert('http://10.41.1.56:7777/generate-passage 서버로의 요청에 실패했습니다.\n 더미데이터값 호출로 대신합니다 ' + error.message);
+            
+            fetch(`${apiUrl}/api/test/generate-passage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestData)
+                })
+                .then(response => {
+                    if (!response.ok) { throw new Error(`API 호출 실패: ${response.status}`); }
+                    return response.json();
+                })
+                .then(data => {
+                    savePassageToBackend(data);
+                })
+                .catch(error => {
+                });
             isLoading.value = false;
             isProcessing.value = false;
         });
