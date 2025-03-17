@@ -60,8 +60,16 @@ const creditcount = ref(0); // 초기값 0
 const authStore = useAuthStore();
 
 // creditcount 변경 감지
-watch(creditcount, (newValue) => {
-    emit('credit-update', newValue);
+// 모달이 열릴 때마다 이용권 정보 갱신
+watch(() => props.isOpen, (newVal) => {
+  if (newVal === true) {
+    // 모달이 열릴 때 이용권 정보 갱신
+    authStore.updateTicketCount()
+      .then(count => {
+        creditcount.value = count;
+        // creditcount가 변경되면 위의 watch가 알아서 emit 처리
+      });
+  }
 });
 
 // creditcount를 외부에 노출
