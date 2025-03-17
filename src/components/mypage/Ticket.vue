@@ -109,7 +109,7 @@
                 <button class="search-btn" @click="fetchPaymentHistory">검색</button>
               </div>
               <div class="download-group">
-                <button class="download-btn">
+                <button class="download-btn" @click="downloadExcel">
                   <span>거래내역 다운로드</span>
                   <Icon class="download-icon" icon="ic:baseline-download" width="24" height="24"  style="color: #757575" />
                 </button>
@@ -178,6 +178,9 @@ import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import UsageHistoryModal from '@/components/common/modal/type/mypage/UsageHistoryModal.vue';
 import WarningModalComponent from '../common/modal/type/WarningModalComponent.vue';
+
+// <script setup> 내에 추가
+import * as XLSX from 'xlsx';
 
 // 라우터와 스토어 초기화
 const router = useRouter();
@@ -510,6 +513,81 @@ onMounted(() => {
   endDate.value = getTodayFormatted();
   initializeData();
 });
+
+const downloadExcel = () => {
+  try {
+    // 다운로드할 데이터 준비 및 총합 계산
+    let totalAmount = 0;
+    const dataToExport = filteredHistory.value.map((item, index) => {
+      const priceNumeric = parseInt(item.price.replace(/[^0-9]/g, ''));
+      totalAmount += priceNumeric;
+      
+      return {
+        '순번': index + 1,
+        '결제 내역': item.payName,
+        '금액': priceNumeric,
+        '결제 날짜': item.date
+      };
+    });
+
+    if (dataToExport.length === 0) {
+      alert('다운로드할 거래내역이 없습니다.');
+      return;
+    }
+
+    // 워크시트 생성
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    
+    // 범위 가져오기
+    const range = XLSX.utils.decode_range(worksheet['!ref']);
+    
+    // F열 헤더 추가 (F1)
+    const headerCell = XLSX.utils.encode_cell({ r: 0, c: 5 }); // F1
+    worksheet[headerCell] = { t: 's', v: '총합' };
+    
+    // F2 셀에 총합 추가
+    const totalCell = XLSX.utils.encode_cell({ r: 1, c: 5 }); // F2
+    worksheet[totalCell] = { t: 'n', v: totalAmount };
+    
+    // 범위 업데이트 (F열 포함)
+    worksheet['!ref'] = XLSX.utils.encode_range({
+      s: { r: range.s.r, c: range.s.c },
+      e: { r: range.e.r, c: Math.max(range.e.c, 5) } // F열까지 확장
+    });
+    
+    // 숫자 형식 적용
+    for (let row = range.s.r + 1; row <= range.e.r; row++) {
+      const cellRef = XLSX.utils.encode_cell({ r: row, c: 2 }); // C열(금액)
+      if (worksheet[cellRef]) {
+        worksheet[cellRef].t = 'n';
+      }
+    }
+    
+    // 열 너비 설정
+    const columnWidths = [
+      { wch: 10 }, // 순번
+      { wch: 30 }, // 결제 내역
+      { wch: 15 }, // 금액
+      { wch: 15 }, // 결제 날짜
+      { wch: 10 }, // E열
+      { wch: 15 }, // 총합
+    ];
+    worksheet['!cols'] = columnWidths;
+
+    // 워크북 생성 및 파일 저장
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, '결제 내역');
+    
+    const now = new Date();
+    const dateStr = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
+    const fileName = `GenieQ_결제내역_${dateStr}.xlsx`;
+
+    XLSX.writeFile(workbook, fileName);
+  } catch (error) {
+    console.error('엑셀 다운로드 중 오류 발생:', error);
+    alert('엑셀 다운로드 중 오류가 발생했습니다.');
+  }
+};
 </script>
   
 <style scoped>
