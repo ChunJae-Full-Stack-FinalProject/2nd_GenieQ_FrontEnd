@@ -7,6 +7,7 @@ import ImmediatelyComponent from '@/components/test/ImmediatelyComponent.vue'
 import ExampleView from '@/views/ExampleView.vue'
 import TermsView from '@/components/common/TermsView.vue'
 import PolicyView from '@/components/common/Privacy.vue'
+import { useAuthStore } from '@/stores/auth' 
 
 // 각 페이지의 라우트들 import
 import generationRoutes from './generation.routes'
@@ -15,12 +16,56 @@ import myPageRoutes from './mypage.routes'
 import strageRoutes from './storage.routes'
 
 // 로그인 상태 체크 가드
-const requireAuth = (to, from, next) => {
+const requireAuth = async (to, from, next) => {
   // localStorage에서 authUser가 있는지 확인
-  let isLoggedIn = localStorage.getItem('authUser') !== null;
-  if (isLoggedIn) { next()  
-  } else { next('/login') } // isLoggedIn == false 일 경우 /login 경로로 라우터 설정  
-}
+  let authUser = localStorage.getItem('authUser');
+  
+  // 인증 스토어 가져오기
+  const authStore = useAuthStore();
+  
+  if (authUser) {
+    console.log('[Router Guard] localStorage에 authUser 존재, 인증 상태 유지');
+    // authUser가 있으면 인증된 상태로 처리
+    authStore.setUser(JSON.parse(authUser));
+    next();
+  } else {
+    console.log('[Router Guard] localStorage에 authUser 없음, 세션 기반 인증 시도');
+    // authUser가 없지만 유효한 세션이 있을 수 있으므로 세션 확인
+    try {
+      // API URL 가져오기
+      const apiUrl = import.meta.env.VITE_API_URL;
+      
+      // 백엔드에 세션 유효성 확인 요청
+      const response = await fetch(`${apiUrl}/api/info/select/entire`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include' // 쿠키를 포함하여 요청
+      });
+      
+      if (response.ok) {
+        // 세션이 유효하고 사용자 정보를 받아옴
+        const userData = await response.json();
+        console.log('[Router Guard] 세션 유효, 사용자 정보 복원:', userData);
+        
+        // 인증 스토어와 localStorage 업데이트
+        authStore.setUser(userData);
+        localStorage.setItem('authUser', JSON.stringify(userData));
+        
+        // 이용권 정보도 함께 업데이트
+        await authStore.updateTicketCount();
+        
+        next();
+      } else {
+        // 세션이 유효하지 않음
+        console.log('[Router Guard] 세션 만료 또는 유효하지 않음, 로그인 페이지로 리다이렉트');
+        next('/login');
+      }
+    } catch (error) {
+      console.error('[Router Guard] 세션 확인 중 오류 발생:', error);
+      next('/login');
+    }
+  }
+};
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
