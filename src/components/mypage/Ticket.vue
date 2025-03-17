@@ -53,35 +53,43 @@
               <div class="package-card">
                 <div class="package-info">
                   <span class="package-title">지문/문항 생성 10회 이용권</span>
-                  <span class="package-price">10,000원</span>
                 </div>
-                <button class="purchase-btn" @click="openPurchaseWarningModal(10)">구매하기</button>
+                <div class="purchase-section">
+                  <div class="price-section">
+                    <span class="package-price">10,000원</span>
+                  </div>
+                  <button class="purchase-btn" @click="openPurchaseWarningModal(10)">구매하기</button>
+                </div>
               </div>
               
               <!-- 50회 이용권 -->
               <div class="package-card">
                 <div class="package-info">
                   <span class="package-title">지문/문항 생성 50회 이용권</span>
+                </div>
+                <div class="purchase-section">
                   <div class="price-section">
                     <span class="original-price">50,000원</span>
                     <span class="discount-rate">20% 할인</span>
                     <span class="package-price">40,000원</span>
                   </div>
+                  <button class="purchase-btn" @click="openPurchaseWarningModal(50)">구매하기</button>
                 </div>
-                <button class="purchase-btn" @click="openPurchaseWarningModal(50)">구매하기</button>
               </div>
               
               <!-- 100회 이용권 -->
               <div class="package-card">
                 <div class="package-info">
                   <span class="package-title">지문/문항 생성 100회 이용권</span>
+                </div>
+                <div class="purchase-section">
                   <div class="price-section">
                     <span class="original-price">100,000원</span>
                     <span class="discount-rate">30% 할인</span>
                     <span class="package-price">70,000원</span>
                   </div>
+                  <button class="purchase-btn" @click="openPurchaseWarningModal(100)">구매하기</button>
                 </div>
-                <button class="purchase-btn" @click="openPurchaseWarningModal(100)">구매하기</button>
               </div>
             </div>
           </div>
@@ -602,9 +610,8 @@ onMounted(() => {
 
 /* 구매 영역 전체 래퍼 */
 .purchase-wrapper {
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
   overflow: hidden;
+  padding-top: 15px;
 }
 
 .tab-section {
@@ -613,17 +620,9 @@ onMounted(() => {
   width: fit-content;
 }
 
-.tab-container {
-  display: flex;
-  background-color: #f7f7f7;
-  padding: 0;
-  width: fit-content; /* 콘텐츠에 맞게 너비 설정 */
-}
-
-
 .tab-btn {
   padding: 15px 24px;
-  font-size: 14px;
+  font-size: 16px;
   background: none;
   border: none;
   cursor: pointer;
@@ -648,83 +647,196 @@ onMounted(() => {
 /* 구매 컨테이너 */
 .purchase-container {
   background-color: white;
+  position: absolute;
+  width: 1472px;
+  height: 459px;
+  left: 20px;
+  top: 229px;
   padding: 24px;
+  background: #FFFFFF;
+  border-radius: 0px 12px 12px 12px;
+
 }
 
 /* 패키지 섹션 */
 .section-title {
-  font-size: 15px;
-  font-weight: 600;
-  margin-bottom: 20px;
-  color: #333;
+  font-size: 20px;
+  font-weight: 700;
+  color: #303030;
+
+  position: absolute;
+  top: 47px;
 }
 
 .package-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 20px;
+
+  position: absolute;
+  top: 108px;
 }
 
 .package-card {
+  box-sizing: border-box;
+
   display: flex;
-  justify-content: space-between;
+  flex-direction: row;
   align-items: center;
+  padding: 20px;
+  gap: 480px;
+
+  width: 1424px;
+  height: 87px;
+
+  background: #FFFFFF;
   border: 1px solid #BDBDBD;
-  border-radius: 4px;
-  padding: 16px 20px;   
+  border-radius: 8px;
 }
 
 .package-info {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex: 1;
-  margin-right: 20px;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0px;
+  gap: 8px;
+
+  width: 240px;
+  height: 30px;
+
+  flex: none;
+  order: 0;
+  flex-grow: 0;
 }
 
 .package-title {
-  font-size: 14px;
+  font-family: 'Pretendard';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 150%;
+  letter-spacing: -0.02em;
+
   color: #303030;
+}
+
+.purchase-section {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 0px;
+  gap: 100px;
+
+  width: 660px;
+  height: 47px;
+
+  flex: none;
+  order: 1;
+  flex-grow: 0;
 }
 
 .price-section {
   display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
   align-items: center;
+  padding: 0px;
   gap: 8px;
+
+  width: 251px;
+  height: 24px;
 }
 
 .original-price {
-  font-size: 13px; 
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 0px;
+  gap: 8px;
+
+  font-family: 'Pretendard';
+  font-style: normal;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 150%;
+
+  text-align: right;
+  letter-spacing: -0.02em;
+  text-decoration-line: line-through;
   color: #303030;
-  text-decoration: line-through;
+
+  flex: none;
+  order: 0;
+  flex-grow: 0;
 }
 
 .discount-rate {
-  font-size: 13px;
-  color: #ff9f40;
-  font-weight: 500;
+display: flex;
+flex-direction: row;
+justify-content: center;
+align-items: center;
+padding: 0px 10px;
+gap: 10px;
+
+font-family: 'Pretendard';
+font-style: normal;
+font-weight: 500;
+font-size: 16px;
+line-height: 150%;
+
+text-align: right;
+letter-spacing: -0.02em;
+color: #FF9F40;
+
+flex: none;
+order: 0;
+flex-grow: 0;
 }
 
 .package-price {
-  font-size: 14px;
-  font-weight: 600;
-  color: #ff9f40;
+display: flex;
+flex-direction: row;
+justify-content: center;
+align-items: center;
+padding: 0px 10px;
+gap: 10px;
+
+font-family: 'Pretendard';
+font-style: normal;
+font-weight: 700;
+font-size: 16px;
+line-height: 150%;
+
+text-align: right;
+letter-spacing: -0.02em;
+color: #FF9F40;
+
+flex: none;
+order: 0;
+flex-grow: 0;
 }
 
 .purchase-btn {
-  width: 15%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 8px;
+  gap: 8px;
 
-  background-color: #ff9f40;
-  color: white;
+  width: 248px;
+  height: 47px;
+
+  background: #FF9F40;
+  border-radius: 10px;
   border: none;
-  border-radius: 4px;
-  padding: 8px 16px;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  white-space: nowrap;
-  min-width: 80px;
-  text-align: center;
+  color: #FFFFFF;
+
+  flex: none;
+  order: 1;
+  flex-grow: 0;
 }
 
 .purchase-btn:hover {
