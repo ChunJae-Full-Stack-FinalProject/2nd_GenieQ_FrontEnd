@@ -503,7 +503,6 @@ const handleSaveButtonClick = () => {
 
                 throw new Error('인증이 필요합니다');
             }
-            return response.text().then(text => { throw new Error(text); });
         }
         return response.json();
     })
@@ -519,16 +518,19 @@ const handleSaveButtonClick = () => {
 
     
       savePassageData();
-      isSaved.value = true;
+      isSaved.value = false;
       hasManualSave.value = true;
       isContentChanged.value = false; // 저장 후 내용 변경 플래그를 false로 설정
       console.log('내용이 저장되었습니다:', { isContentChanged: isContentChanged.value, hasManualSave: hasManualSave.value });
+      isProcessing.value = false;
       return true;
     } else {
       showLengthWarning();
+      isProcessing.value = false;
       return false;
     }
   }
+  isProcessing.value = false;
   return false;
 };
 

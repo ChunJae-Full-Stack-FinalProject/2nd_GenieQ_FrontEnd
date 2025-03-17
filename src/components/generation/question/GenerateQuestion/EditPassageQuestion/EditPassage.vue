@@ -386,14 +386,14 @@ onMounted(() => {
 });
 
 watch(() => props.initialTitle, (newValue) => {
-  //console.log("제목 변경 감지: ", newValue);
+  console.log("제목 변경 감지: ", newValue);
   if (newValue !== undefined && newValue !== null) {
     title.value = newValue;
   }
 });
 
 watch(() => props.initialContent, (newValue) => {
-  //console.log(" 지문 변경 감지: ", newValue);
+  console.log(" 지문 변경 감지: ", newValue);
   if (newValue !== undefined && newValue !== null) {
     saveSelection();
     content.value = newValue;
