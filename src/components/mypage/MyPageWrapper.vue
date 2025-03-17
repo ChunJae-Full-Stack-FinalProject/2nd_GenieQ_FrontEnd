@@ -44,7 +44,7 @@ onMounted(()=> {
 /* 마이페이지 상단바 전체 스타일 */
 .mypage-header {
   position: absolute;
-  width: 1764px;
+  width: 100%;
   height: 182px;
   left: 156px;
   top: 0px;
