@@ -274,132 +274,131 @@ const handleRecreateGeneration = async () => {
   loadingMessage.value = '문항을 재생성 중입니다...';
 
   try {
-            // 임시 api 연결
-            const apiUrl = import.meta.env.VITE_API_URL;
+    const apiUrl = import.meta.env.VITE_API_URL;
 
-            // 1단계: 문항 생성 API 호출
-            const requestData = {
-                "custom_passage": saveResponse.value.passage?.content || '',
-                "type_question": route.query.pattern,
-                "type_question_detail": route.query.type,
-                "question_example": route.query.queExample,
-            };
+    // 1단계: 문항 생성 API 호출
+    const requestData = {
+        "custom_passage": saveResponse.value.passage?.content || '',
+        "type_question": route.query.pattern,
+        "type_question_detail": route.query.type,
+        "question_example": route.query.queExample,
+    };
 
-            console.log("Request Data:", requestData);
+    console.log("Request Data:", requestData);
 
-            const response = await fetch('http://10.41.1.56:7777/generate-question', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(requestData),
-            });
+    const response = await fetch('http://10.41.1.56:7777/generate-question', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData),
+    });
 
-            if (!response.ok) {
-              // 인증 오류 처리 (401)
-              if (response.status === 401) {
-                  console.error('인증 오류(401): 로그인이 필요합니다');
+    if (!response.ok) {
+      // 인증 오류 처리 (401)
+      if (response.status === 401) {
+          console.error('인증 오류(401): 로그인이 필요합니다');
 
-                  // 인증 상태 초기화
-                  authStore.user = null;
-                  authStore.isAuthenticated = false;
-                  localStorage.removeItem('authUser');
+          // 인증 상태 초기화
+          authStore.user = null;
+          authStore.isAuthenticated = false;
+          localStorage.removeItem('authUser');
 
-                  // 로그인 페이지로 리다이렉트
-                  router.push({ 
-                      path: '/login', 
-                      query: { redirect: route.fullPath }
-                  });
+          // 로그인 페이지로 리다이렉트
+          router.push({ 
+              path: '/login', 
+              query: { redirect: route.fullPath }
+          });
 
-                  throw new Error('인증이 필요합니다');
-              }
-              throw new Error(`문항 생성 실패: ${response.status}`);
-            }
-            
-            const result = await response.json();
-            console.log('문항 생성 성공:', result);
-            
-
-            //2단계: 문항 저장 API 호출
-            const newQuestion = {
-              "queQuery": result.generated_question,
-              "queOption": result.generated_option,
-              "queAnswer": result.generated_answer,
-              "description": result.generated_description
-            };
-
-            const saveRequestData = {
-              "type": saveResponse.value.passage.type,
-              "keyword": saveResponse.value.passage.keyword,
-              "title": saveResponse.value.passage?.title || '',
-              "content": saveResponse.value.passage?.content || '',
-              "gist": saveResponse.value.passage?.gist || '',
-              "isGenerated": 0,
-              "questions": [
-                ...questionsData.value, // 기존 질문 유지
-                newQuestion
-              ]
-            };
-
-            console.log("saveRequest: ", saveRequestData);
-
-            const updateResponse = await fetch(`${apiUrl}/pass/ques/update/${saveResponse.value.passage.pasCode}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: "include",
-                body: JSON.stringify(saveRequestData),
-            });
-
-            if (!updateResponse.ok) {
-              // 인증 오류 처리 (401)
-              if (response.status === 401) {
-                  console.error('인증 오류(401): 로그인이 필요합니다');
-
-                  // 인증 상태 초기화
-                  authStore.user = null;
-                  authStore.isAuthenticated = false;
-                  localStorage.removeItem('authUser');
-
-                  // 로그인 페이지로 리다이렉트
-                  router.push({ 
-                      path: '/login', 
-                      query: { redirect: route.fullPath }
-                  });
-
-                  throw new Error('인증이 필요합니다');
-              }
-              throw new Error(`문항 저장 실패: ${updateResponse.status}`);
-            }
-
-            
-            const updateResult = await updateResponse.json();
-            console.log('문항 저장 성공:', updateResult);
-
-            // 상태 업데이트
-            questionsData.value = [...questionsData.value, newQuestion]; // 기존 질문 + 새 질문 추가
-            saveResponse.value = {
-              ...saveResponse.value,
-              passage: updateResult // 저장된 값 갱신
-            };
-
-            //새 문항이 표시되도록 캐러셀 인덱스 업데이트
-            currentSlide.value = questionsData.value.length - 1;
-
-            localStorage.setItem('saveResponse', JSON.stringify(saveResponse.value));
-
-            console.log('저장된 값:', localStorage.getItem('saveResponse'));
-            isLoading.value = false;
-
-            // 모달 닫기
-            showRecreateModal.value = false;
-            isProcessing.value = true;     
-      } catch (error) {
-          console.error('API 요청 실패:', error);
-          alert(`오류 발생: ${error.message}`);
-          isProcessing.value = true;
+          throw new Error('인증이 필요합니다');
       }
+      throw new Error(`문항 생성 실패: ${response.status}`);
+    }
+    
+    const result = await response.json();
+    console.log('문항 생성 성공:', result);
+    
+
+    //2단계: 문항 저장 API 호출
+    const newQuestion = {
+      "queQuery": result.generated_question,
+      "queOption": result.generated_option,
+      "queAnswer": result.generated_answer,
+      "description": result.generated_description
+    };
+
+    const saveRequestData = {
+      "type": saveResponse.value.passage.type,
+      "keyword": saveResponse.value.passage.keyword,
+      "title": saveResponse.value.passage?.title || '',
+      "content": saveResponse.value.passage?.content || '',
+      "gist": saveResponse.value.passage?.gist || '',
+      "isGenerated": 0,
+      "questions": [
+        ...questionsData.value, // 기존 질문 유지
+        newQuestion
+      ]
+    };
+
+    console.log("saveRequest: ", saveRequestData);
+
+    const updateResponse = await fetch(`${apiUrl}/pass/ques/update/${saveResponse.value.passage.pasCode}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: "include",
+        body: JSON.stringify(saveRequestData),
+    });
+
+    if (!updateResponse.ok) {
+      // 인증 오류 처리 (401)
+      if (response.status === 401) {
+          console.error('인증 오류(401): 로그인이 필요합니다');
+
+          // 인증 상태 초기화
+          authStore.user = null;
+          authStore.isAuthenticated = false;
+          localStorage.removeItem('authUser');
+
+          // 로그인 페이지로 리다이렉트
+          router.push({ 
+              path: '/login', 
+              query: { redirect: route.fullPath }
+          });
+
+          throw new Error('인증이 필요합니다');
+      }
+      throw new Error(`문항 저장 실패: ${updateResponse.status}`);
+    }
+
+            
+    const updateResult = await updateResponse.json();
+    console.log('문항 저장 성공:', updateResult);
+
+    // 상태 업데이트
+    questionsData.value = [...questionsData.value, newQuestion]; // 기존 질문 + 새 질문 추가
+    saveResponse.value = {
+      ...saveResponse.value,
+      passage: updateResult // 저장된 값 갱신
+    };
+
+    //새 문항이 표시되도록 캐러셀 인덱스 업데이트
+    currentSlide.value = questionsData.value.length - 1;
+
+    localStorage.setItem('saveResponse', JSON.stringify(saveResponse.value));
+
+    console.log('저장된 값:', localStorage.getItem('saveResponse'));
+    isLoading.value = false;
+
+    // 모달 닫기
+    showRecreateModal.value = false;
+    isProcessing.value = true;     
+  } catch (error) {
+      console.error('API 요청 실패:', error);
+      alert(`오류 발생: ${error.message}`);
+      isProcessing.value = true;
+  }
 };
 
 // 문항 저장 함수 (백엔드 연동 시 구현 예정)
