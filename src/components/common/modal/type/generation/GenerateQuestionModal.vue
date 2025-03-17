@@ -235,6 +235,8 @@ const handleGenerateQuestion = async () => {
 
             console.log("saveRequest: ", saveRequestData);
 
+            const apiUrl = import.meta.env.VITE_API_URL;
+
             const saveResponse = await fetch(`${apiUrl}/pass/ques/insert/each`, {
                 method: 'POST',
                 headers: {

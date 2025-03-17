@@ -374,10 +374,12 @@ const handleRecreateGeneration = async () => {
             isLoading.value = false;
 
             // 모달 닫기
-            showRecreateModal.value = false;     
+            showRecreateModal.value = false;
+            isProcessing.value = true;     
       } catch (error) {
           console.error('API 요청 실패:', error);
           alert(`오류 발생: ${error.message}`);
+          isProcessing.value = true;
       }
 };
 
