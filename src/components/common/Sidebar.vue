@@ -48,8 +48,8 @@ const isActive = (path) => {
 <style scoped>
 .sidebar {
   width: 156px;
-  height: 100vh; /* 화면 높이에 맞춤 */
-  min-height: 100vh; /* 최소 높이 설정 */
+  height: 100%; /* 화면 높이에 맞춤 */
+  min-height: 100%; /* 최소 높이 설정 */
   background-color: #16252D;
   color: white;
   position: fixed;
