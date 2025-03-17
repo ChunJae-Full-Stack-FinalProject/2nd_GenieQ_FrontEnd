@@ -169,6 +169,14 @@
       cancelText="취소하기" confirmText="구매하기" 
       @close="closeWarningModal" @confirm="purchaseModal"
     />
+
+    <ConfirmModalComponent
+      :isOpen="isConfirmModalOpen"
+      title="확인"
+      message="구매가 완료되었습니다."
+      @close="isConfirmModalOpen = false"
+      @confirm="isConfirmModalOpen = false"
+    />
   </div>
 </template>
   
@@ -178,6 +186,7 @@ import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import UsageHistoryModal from '@/components/common/modal/type/mypage/UsageHistoryModal.vue';
 import WarningModalComponent from '../common/modal/type/WarningModalComponent.vue';
+import ConfirmModalComponent from '../common/modal/type/ConfirmModalComponent.vue';
 
 // 라우터와 스토어 초기화
 const router = useRouter();
@@ -187,6 +196,7 @@ const authStore = useAuthStore();
 // 모달 상태 관리
 const showUsageHistoryModal = ref(false);
 const isPurchaseWarningModal = ref(false);
+const isConfirmModalOpen = ref(false);
 
 // 활성화된 탭 상태 관리
 const activeTab = ref('usage');
@@ -427,8 +437,10 @@ const purchaseCount = computed(() => {
       paymentHistory.value = [];
       fetchPaymentHistory();
 
-      closeWarningModal(); // 모달 닫기
+      closeWarningModal(); // 경고 모달 닫기
 
+      // 결제 확인 모달 표시
+      isConfirmModalOpen.value = true;
     })
     .catch(error => {
       console.error('결제 실패:', error);
