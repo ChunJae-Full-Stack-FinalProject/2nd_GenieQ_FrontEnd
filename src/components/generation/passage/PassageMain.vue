@@ -166,7 +166,7 @@ const confirmCreatePassage = () => {
     isProcessing.value = true;
     isConfirmModalOpen.value = false;
     isLoading.value = true;
-    loadingMessage.value = '지문을 생성 중입니다...';
+    loadingMessage.value = '천재 교육 AI 가 지문을 생성 중입니다...';
 
 
     try {
@@ -193,7 +193,7 @@ const confirmCreatePassage = () => {
         })
         .catch(error => {
             console.log("test 서버로 요청을 대신합니다.");
-            alert('http://10.41.1.56:7777/generate-passage 서버로의 요청에 실패했습니다.\n 더미데이터값 호출로 대신합니다 ' + error.message);
+            alert('http://10.41.1.56:7777/generate-passage 서버로의 요청에 실패했습니다.\nhttp://43.202.6.90:9090/test/generate-passage 로 요청을 대신합니다.');
             
             fetch(`${apiUrl}/api/test/generate-passage`, {
                     method: 'POST',
