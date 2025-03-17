@@ -140,9 +140,6 @@ const handleGenerateQuestion = async () => {
     isProcessing.value = true;
 
 
-    isLoading.value = true;
-    loadingMessage.value = '문항을 생성 중입니다...';
-
     try {
         if (selectedQuestion.value) {
             // ✅ 로컬 스토리지에서 데이터 가져오기
@@ -156,6 +153,15 @@ const handleGenerateQuestion = async () => {
             localStorage.setItem('selectedQuestionData', JSON.stringify(selectedQuestion.value));
         }
 
+        // mode에 따라 다른 동작 수행
+        if (props.mode === 'generate') {
+            // GenerationQuestion 페이지에서 호출 (PaymentUsageModal 표시)
+            emit('openPaymentModal', {
+                pattern: selectedQuestion.value.pattern,
+                type: selectedQuestion.value.type,
+                queExample: selectedQuestion.value.title
+            });
+        } else {
 
             // const tempResponse = await fetch(`${apiUrl}/pass/ques/select/100`,{
             //     method: 'GET',
@@ -169,6 +175,9 @@ const handleGenerateQuestion = async () => {
 
             // const saveResult = await tempResponse.json();
             // console.log('임시 데이터 성공:', saveResult);
+
+            isLoading.value = true;
+            loadingMessage.value = '문항을 생성 중입니다...';
 
             // ✅ 1단계: 키워드 생성 API 호출
             const keywordRequestData = {
@@ -261,11 +270,6 @@ const handleGenerateQuestion = async () => {
             console.log('저장된 값:', localStorage.getItem('saveResponse'));
             isLoading.value = false;
 
-        // mode에 따라 다른 동작 수행
-        if (props.mode === 'generate') {
-            // GenerationQuestion 페이지에서 호출 (PaymentUsageModal 표시)
-            emit("openPaymentModal");
-        } else {
             // QuestionMain 페이지에서 호출 (페이지 이동)
             router.push({
                 path: '/questions/generate',

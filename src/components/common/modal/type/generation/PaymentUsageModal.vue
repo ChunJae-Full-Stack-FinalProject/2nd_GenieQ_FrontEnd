@@ -49,7 +49,11 @@ const emit = defineEmits(["close", "generate", 'credit-update']);
 
 const props = defineProps({
   isOpen: Boolean,
-  createText: {type: String, default: "생성하기"}
+  createText: {type: String, default: "생성하기"},
+  selectedQuestion: {
+    type: Object,
+    required: true
+  }
 });
 
 const creditcount = ref(0); // 초기값 0
