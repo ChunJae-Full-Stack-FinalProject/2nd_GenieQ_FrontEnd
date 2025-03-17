@@ -108,5 +108,7 @@ const isActive = (path) => {
 
 .highlight-q {
   color: #FF9F40;
+  font-weight: 600;
+  font-size: 25px;
 }
 </style>

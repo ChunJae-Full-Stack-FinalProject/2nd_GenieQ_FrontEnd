@@ -95,25 +95,38 @@ function getTicketCount() {
 }
 
 .card-title {
- font-family: 'Pretendard';
- font-weight: 500;
- font-size: 16px;
- line-height: 24px;
- color: #333333;
- margin: 0;
+    font-family: 'Pretendard';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 20px;
+    line-height: 150%;
+
+    display: flex;
+    align-items: center;
+    letter-spacing: -0.02em;
+    color: #303030;
 }
 
 .highlight {
- color: #FF9F40;
- font-weight: 500;
+    width: auto;
+    display: flex;
+    justify-content: right;
+    padding:3px;
+    color: #FF9F40;
+    font-weight: 700;
+    font-size: 20px;
 }
 
 .sub-text {
- font-family: 'Pretendard';
- font-size: 14px;
- line-height: 20px;
- color: #666666;
- margin-top: 5px;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 20px;
+    line-height: 150%;
+
+    display: flex;
+    align-items: center;
+    letter-spacing: -0.02em;
+    color: #424242;
 }
 
 .count-badge {

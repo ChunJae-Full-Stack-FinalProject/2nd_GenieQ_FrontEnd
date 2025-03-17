@@ -18,9 +18,9 @@
           v-model="searchQuery"
           @input="handleSearch"
         >
-      </div>
-      <div class="search-icon">
-        <Icon icon="iconamoon:search-light" width="20" height="20" style="color: #757575" />
+        <div class="search-icon">
+          <Icon icon="iconamoon:search-light" width="24px" height="24px" style="color: #757575" />
+        </div>
       </div>
     </div>
 
@@ -820,6 +820,7 @@ const closeDeleteModal = () => {
   padding: 10px 20px;    
   border-bottom: 1px solid #e1e1e1;
   font-weight: 700;
+  font-size: 20px;
   color: #424242;
 }
 
@@ -1027,21 +1028,30 @@ const closeDeleteModal = () => {
 }
 
 .search-container {
+  box-sizing: border-box;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 8px 16px;
+  gap: 16px;
+
   position: relative;
   width: 248px;
-  max-width: 300px;
+  height: 44px;
+
+  background: #FFFFFF;
+  border: 1px solid #757575;
+  border-radius: 6px;
+
 }
 
 .search-input {
-  /* width: 300px; */
-  height: 40px;
-  padding: 0 10px 0 15px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
+  width: 184px;
+  height: 28px;
+  border: none;
   font-size: 16px;
-  color: #333;
-  outline: none;
-  box-sizing: border-box;
+  color: #757575;
 }
 
 .search-input::placeholder {
@@ -1050,8 +1060,8 @@ const closeDeleteModal = () => {
 
 .search-icon {
   position: absolute;
-  top: 20px;
-  right: 15px;
+  top: 22px;
+  right: 10px;
   transform: translateY(-50%);
   cursor: pointer;
 }
@@ -1120,7 +1130,7 @@ const closeDeleteModal = () => {
   border: none;
   background: none;
   padding: 5px 10px;
-  font-size: 14px;
+  font-size: 16px;
   cursor: pointer;
   border-radius: 4px;
 }

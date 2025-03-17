@@ -315,8 +315,6 @@ const toggleFavorite = (index) => {
   gap: 12px;
   isolation: isolate;
   position: absolute;
-  width: 1472px;
-  height: 500px;
   left: 292px;
   top: 400px;  
   background: #FFFFFF;
@@ -342,7 +340,8 @@ td {
 }
 
 .data-table {
-  width: 100%;
+  width: 1472px;
+  height: 506px;
   border-collapse: collapse;
   table-layout: fixed;
 }
@@ -353,13 +352,21 @@ td {
   border-bottom: 1px solid #e1e1e1;
   font-family: 'Pretendard';
   font-weight: 700;
+  font-size: 20px;
   color: #424242;
+}
+
+.data-table tr {
+  border-bottom: 1px solid #e1e1e1;
+}
+
+.data-table tr:last-child {
+  border-bottom: none;
 }
 
 .data-table td {
   text-align: left;
-  padding: 3.5px 20px;    
-  border-bottom: 1px solid #e1e1e1;
+  padding: 3.5px 20px;
   font-weight: 300;
   font-family: 'Pretendard';
   color: #424242;
@@ -395,7 +402,6 @@ td {
 
 .data-table th:nth-child(5), .data-table td:nth-child(5) {
   width: 15%;
-  /* text-align: center; */
 }
 
 .data-table th:nth-child(6), .data-table td:nth-child(6) {
@@ -442,16 +448,18 @@ td {
 
 /* 추출 버튼 */
 .extract-btn {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  padding: 5px 8px;
-  gap: 8px;
-  width: 72px;
-  height: 34px;
-  background: #303030;
-  border-radius: 8px;
+display: flex;
+flex-direction: row;
+justify-content: center;
+align-items: center;
+padding: 5px 8px;
+gap: 8px;
+
+width: 72px;
+height: 34px;
+
+background: #303030;
+border-radius: 8px;
 }
 
 #btn-text {

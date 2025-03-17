@@ -310,12 +310,17 @@ padding: 20px 30px 80px 20px;
 .storage-likelist-title {
 display: flex;
 align-items: flex-start;
-gap: 12px;
+gap: 8px;
 isolation: isolate;
 position: absolute;
 left: 292px;
 top: 50px;
 box-sizing: border-box;
+}
+
+#arrow-icon {
+  position: absolute;
+  top: 2px;
 }
 
 .storage-likelist-table {
@@ -325,8 +330,6 @@ align-items: flex-start;
 gap: 12px;
 isolation: isolate;
 position: absolute;
-width: 1472px;
-height: 249px;
 left: 292px;
 top: 100px;  
 background: #FFFFFF;
@@ -341,10 +344,6 @@ font-weight: 700;
 margin: 0;
 }
 
-td {
-height: 29.21px;  
-}
-
 .table-container {
 width: 100%;
 overflow-x: auto;
@@ -352,9 +351,10 @@ overflow: hidden;
 }
 
 .data-table {
-width: 100%;
-border-collapse: collapse;
-table-layout: fixed;
+  width: 1472px;
+  height: 276px;
+  border-collapse: collapse;
+  table-layout: fixed;
 }
 
 .data-table th {
@@ -362,29 +362,36 @@ text-align: left;
 padding: 10px 20px;    
 border-bottom: 1px solid #e1e1e1;
 font-weight: 700;
+font-size: 20px;
 color: #424242;
 }
 
 .data-table td {
 text-align: left;
-padding: 3.5px 20px;    
-border-bottom: 1px solid #e1e1e1;
+padding: 3.5px 20px;
 color: #424242;
 white-space: nowrap; 
 overflow: hidden;  
 text-overflow: ellipsis; 
 }
 
+.data-table tr {
+  border-bottom: 1px solid #e1e1e1;
+}
+.data-table tr:last-child {
+  border-bottom: none;
+}
+
 /* 열 너비 조정 */
 .data-table th:nth-child(1), .data-table td:nth-child(1) {
-width: 20%;
+width: 30%;
 white-space: nowrap;
 overflow: hidden;
 text-overflow: ellipsis;
 }
 
 .data-table th:nth-child(2), .data-table td:nth-child(2) {
-width: 30%;
+width: 20%;
 white-space: nowrap;
 overflow: hidden;
 text-overflow: ellipsis;
@@ -392,6 +399,9 @@ text-overflow: ellipsis;
 
 .data-table th:nth-child(3), .data-table td:nth-child(3) {
 width: 10%;
+}
+.data-table th:nth-child(3) {
+  padding-left: 27px;
 }
 
 .data-table th:nth-child(4), .data-table td:nth-child(4) {
@@ -419,17 +429,17 @@ border-bottom-right-radius: 12px;
 
 /* 유형 태그 스타일 */
 .type-tag {
-display: inline-flex;
-align-items: center;
-justify-content: center;
-min-width: 50px;
-height: 28px;
-background-color: #f0f0f0;
-border-radius: 12px;
-padding: 0 10px;
-font-size: 14px;
-color: #333;
-font-weight: 400;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 50px;
+  height: 28px;
+  background-color: #E1E1E1;
+  border-radius: 12px;
+  padding: 0 10px;
+  font-size: 16px;
+  color: #424242;
+  font-weight: 400;
 }
 
 /* 테이블이 비어있는 경우 */
@@ -446,16 +456,16 @@ font-weight: 400;
 
 /* 추출 버튼 */
 .extract-btn {
-display: flex;
-flex-direction: row;
-justify-content: center;
-align-items: center;
-padding: 5px 8px;
-gap: 8px;
-width: 72px;
-height: 34px;
-background: #303030;
-border-radius: 8px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 5px 8px;
+  gap: 8px;
+  width: 72px;
+  height: 34px;
+  background: #303030;
+  border-radius: 8px;
 }
 
 #btn-text {

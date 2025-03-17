@@ -71,7 +71,7 @@ onMounted(()=> {
   font-size: 24px;
   line-height: 32px;
 
-  color: #000000;
+  color: #16252D;
 }
 
 /* 상단 탭 메뉴 */
@@ -79,46 +79,37 @@ onMounted(()=> {
   display: flex;
   flex-direction: row;
   align-items: center;
-  padding-left: 180px; 
-  gap: 40px; 
+  gap: 24px;
+
   position: absolute;
-  width: auto;
+  width: 1764px;
   height: 50px;
+  left: 156px;
   top: 131px;
 }
 
 /* 기본 탭 스타일 */
 .tab-menu span {
-  width: auto;
-  height: 30px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 20px;
+  gap: 10px;
+  height: 50px;
 
-  font-style: normal;
-  font-weight: 400;
   font-size: 20px;
-  line-height: 150%;
-
-  letter-spacing: -0.02em;
-  color: #303030;
+  font-weight: 400;
 }
 
 /* 선택된 탭 스타일 (볼드 + 밑줄) */
 .active-tab {
   font-weight: bold !important;
+  border-bottom: 2px solid #FF9F40
 }
 
 .active-tab {
   font-weight: bold !important;
   position: relative; /* 포지션 설정 */
-}
-
-/* active-tab에 아래 border 적용 */
-.active-tab::after {
-  content: "";
-  position: absolute;
-  bottom: -11px; /* 탭 메뉴의 bottom border와 일치하도록 조정 */
-  left: -10%;
-  width: 120%;
-  height: 2px;
-  background-color: #FF9F40;
 }
 </style>
