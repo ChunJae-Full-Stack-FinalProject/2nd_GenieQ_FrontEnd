@@ -139,6 +139,7 @@ const handleGenerateQuestion = async () => {
     if (isProcessing.value) return; // 중복 실행 방지
     isProcessing.value = true;
 
+
     isLoading.value = true;
     loadingMessage.value = '문항을 생성 중입니다...';
 
@@ -148,14 +149,13 @@ const handleGenerateQuestion = async () => {
             const savedPassageData = localStorage.getItem('tempPassageData');
             let passageData = null;
 
-            if (savedPassageData) {
-                passageData = JSON.parse(savedPassageData);
+        if (savedPassageData) {
+            passageData = JSON.parse(savedPassageData);
 
-                localStorage.setItem('generateQuestionPassageData', savedPassageData);
-                localStorage.setItem('selectedQuestionData', JSON.stringify(selectedQuestion.value));
-            }
-            // 임시 api 연결
-            const apiUrl = import.meta.env.VITE_API_URL;
+            localStorage.setItem('generateQuestionPassageData', savedPassageData);
+            localStorage.setItem('selectedQuestionData', JSON.stringify(selectedQuestion.value));
+        }
+
 
             // const tempResponse = await fetch(`${apiUrl}/pass/ques/select/100`,{
             //     method: 'GET',
@@ -272,22 +272,21 @@ const handleGenerateQuestion = async () => {
                     type: selectedQuestion.value.type,
                     queExample: selectedQuestion.value.title,
                 },
-                // state: {
-                //     questionData: selectedQuestion.value,
-                //     passageData: saveResult
-                // }
             });
         }
-            activePattern.value = null;
-            activeType.value = null;
-            activeDifficulty.value = null;
-            selectedQuestion.value = null;
-            emit("close");
-        }
-    } catch (error) {
-        console.error('API 요청 실패:', error);
-        alert(`오류 발생: ${error.message}`);
+
+        activePattern.value = null;
+        activeType.value = null;
+        activeDifficulty.value = null;
+        selectedQuestion.value = null;
+        emit("close");
     }
+} catch (error) {
+    console.error('API 요청 실패:', error);
+    alert(`오류 발생: ${error.message}`);
+} finally {
+    isProcessing.value = false;
+}
 };
 
 

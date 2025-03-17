@@ -96,7 +96,7 @@
           <label class="input-label">소속</label>
           <div class="select-wrapper">
             <select class="form-select" v-model="selectedOption">
-              <option>소속을 선택해 주세요.</option>
+              <option value="">소속을 선택해 주세요.</option>
               <option>고등교사</option>
               <option>초등교사</option>
               <option>중등교사</option>
