@@ -6,7 +6,7 @@
                 id="passage-title"
                 placeholder="작업 이름을 입력해 주세요. (최대 50자)"
                 v-model="title"
-                @input="emitTitleChange" />
+                @input="emitTitleChange($event)" />
     </div>
 </template>
 <script setup>
@@ -29,7 +29,10 @@ watch(title, (newValue) => {
 });
 
 // 수정된 제목을 부모 컴포넌트에 전달
-const emitTitleChange = () => {
+const emitTitleChange = (event) => {
+    if (event) {
+        event.stopPropagation();
+    }
     emit('title-changed', title.value || '');
 };
 
