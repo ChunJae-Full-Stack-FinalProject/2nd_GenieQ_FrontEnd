@@ -495,7 +495,7 @@ onMounted(async () => {
 
     // 이전 경로 확인 로직 추가
     const fromPath = route.query.from || '';
-    isFromRoute.value = fromPath.startsWith('/home') || fromPath.startsWith('/storage');
+    isFromRoute.value = localStorage.getItem('pathFromGenerate', 'true') !== 'true';;
 
     // 데이터 로드
     const loadedData = loadPassageData();
@@ -570,6 +570,7 @@ onMounted(async () => {
 onBeforeUnmount(() => {
     // 컴포넌트 해제 시 이벤트 리스너 제거
     window.removeEventListener('beforeunload', handleBeforeUnload);
+    localStorage.removeItem('pathFromGenerate');
     // 라우터 가드 제거
     if (routerGuard) {
         routerGuard();

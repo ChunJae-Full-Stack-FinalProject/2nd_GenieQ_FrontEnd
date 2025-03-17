@@ -189,6 +189,7 @@ const confirmCreatePassage = () => {
             return response.json();
         })
         .then(data => {
+            localStorage.setItem('pathFromGenerate', 'true');
             savePassageToBackend(data);
         })
         .catch(error => {
@@ -205,6 +206,7 @@ const confirmCreatePassage = () => {
                     return response.json();
                 })
                 .then(data => {
+                    localStorage.setItem('pathFromGenerate', 'true');
                     savePassageToBackend(data);
                 })
                 .catch(error => {
