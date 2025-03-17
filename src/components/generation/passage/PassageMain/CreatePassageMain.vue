@@ -21,10 +21,10 @@
                         <input type="radio" id="social" name="category" @change="onCategoryChange('사회')">
                         <label for="social">사회</label>
                     </div>
-                    <div class="category-option">
+                    <!-- <div class="category-option">
                         <input type="radio" id="culture" name="category" @change="onCategoryChange('문화')">
                         <label for="culture">문화</label>
-                    </div>
+                    </div> -->
                     <div class="category-option">
                         <input type="radio" id="science" name="category" @change="onCategoryChange('과학')">
                         <label for="science">과학</label>
