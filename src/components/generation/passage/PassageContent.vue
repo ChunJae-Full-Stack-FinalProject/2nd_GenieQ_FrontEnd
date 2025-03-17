@@ -129,7 +129,7 @@ const closeSaveSuccessModal = () => {
 };
 
 const handleGenerate = () => {
-    console.log('지문 재생성 시작');
+
     closePaymentUsageModal();
     // 재생성 처리 로직
     isLoading.value = true;
@@ -142,7 +142,7 @@ const handleGenerate = () => {
         keyword: keyword.value || '키워드'
     };
 
-    console.log('지문 재생성 API 요청 데이터:', requestData);
+
 
     fetch(`${apiUrl}/api/test/generate-passage`, {
         method: 'POST',
@@ -188,7 +188,7 @@ const handleGenerate = () => {
         alert('지문이 재생성되었습니다.');
     })
     .catch(error => {
-        console.error('지문 재생성 중 오류:', error);
+
         alert('지문 재생성 중 오류가 발생했습니다: ' + error.message);
     })
     .finally(() => {
@@ -211,7 +211,7 @@ const handleSaveButtonClick = () => {
         title: title.value,
         content: content.value
     };
-    console.log('📢 지문 업데이트 요청 데이터:', saveData);
+
     if (!pasCode.value) {
         alert('지문 코드가 없습니다. 저장할 수 없습니다.');
         isLoading.value = false;
@@ -243,7 +243,7 @@ const handleSaveButtonClick = () => {
         return response.json();
     })
     .then(responseData => {
-            console.log('업데이트 응답 데이터:', responseData);
+
             // 통합 데이터 구조로 저장
             const updatedData = {
                 pasCode: pasCode.value,
@@ -260,7 +260,7 @@ const handleSaveButtonClick = () => {
             hasManualSave.value = true;
         })
         .catch(error => {
-            console.error('지문 업데이트 중 오류:', error);
+
             alert('지문 저장 중 오류가 발생했습니다: ' + error.message);
         })
         .finally(() => {
@@ -300,7 +300,7 @@ const prepareDataForQuestions = () => {
     };
     // 통합 키로 저장 (QuestionMain에서 사용)
     localStorage.setItem('genieq-passage-for-question', JSON.stringify(passageForQuestion));
-    console.log('문항 생성을 위한 지문 데이터 준비:', passageForQuestion);
+
 };
 // 파일 모달 열기 함수
 const openFileModal = () => {
@@ -331,7 +331,7 @@ const handleFileSelect = async (fileType) => {
             pasCode: pasCode.value,
             fileType: fileType
         };
-        console.log('파일 추출 요청:', exportData);
+
         if (!pasCode.value) {
             throw new Error('지문 코드가 없습니다. 파일을 추출할 수 없습니다.');
         }
@@ -366,9 +366,9 @@ const handleFileSelect = async (fileType) => {
         document.body.appendChild(downloadLink);
         downloadLink.click();
         document.body.removeChild(downloadLink);
-        console.log('파일 추출 완료');
+
     } catch (error) {
-        console.error('파일 추출 중 오류:', error);
+
         alert('파일 추출 중 오류가 발생했습니다: ' + error.message);
     } finally {
         isLoading.value = false;
@@ -404,13 +404,13 @@ const hasUnsavedChanges = () => {
 };
 // 이동 취소 - 현재 화면 유지
 const cancelNavigation = () => {
-    console.log('네비게이션 취소됨');
+
     isWarningModalOpen.value = false;
     pendingRoute.value = null;
 };
 // 이동 확인 - 타겟 페이지로 이동
 const confirmNavigation = () => {
-    console.log('네비게이션 승인됨, 이동 실행');
+
     isWarningModalOpen.value = false;
     // 변경 사항이 있었지만, 사용자가 이동을 확인했으므로 관련 상태 초기화
     isContentChanged.value = false;
@@ -440,7 +440,7 @@ let routerGuard = null;
 // 로컬 스토리지에서 지문 데이터 로드
 const loadPassageData = () => {
     try {
-        console.log('[12] 로컬 스토리지에서 지문 데이터 로드 시도');
+
         // 통일된 키 사용
         const storedData = localStorage.getItem('genieq-passage-data');
         if (storedData) {
@@ -448,11 +448,11 @@ const loadPassageData = () => {
             try {
                 data = JSON.parse(storedData);
             } catch (parseError) {
-                console.error('[2] JSON 파싱 오류:', parseError);
+
                 return null;
             }
 
-            console.log('[12-1] 로컬 스토리지에서 데이터 로드 성공:', data);
+
             // 데이터 설정 - 백엔드 응답 구조(PAS_)와 프론트엔드 변수명(소문자) 모두 처리
             title.value = data.title || '';
             content.value = data.content || '';
@@ -486,14 +486,14 @@ const loadPassageData = () => {
             return data;
         }
     } catch (error) {
-        console.error('[12-3] 지문 데이터 로드 중 오류:', error);
+
     }
-    console.log('[12-4] 로드된 데이터 없음, 더미 데이터 반환');
+
     return null;
 };
 // 컴포넌트 마운트 시 실행
 onMounted(async () => {
-    console.log('[17] PassageContent 컴포넌트 마운트');
+
 
     // 이전 경로 확인 로직 추가
     const fromPath = route.query.from || '';
@@ -503,18 +503,18 @@ onMounted(async () => {
     const loadedData = loadPassageData();
     // 데이터가 있으면 컴포넌트에 적용
     if (loadedData) {
-        console.log('[17-1] 로드된 데이터를 컴포넌트에 적용 시작');
+
         // 본문과 제목 설정 - nextTick 사용
         nextTick(() => {
             if (passageContentRef.value) {
                 // 명시적으로 setContent와 setTitle 호출, 순서 변경
                 if (title.value) {
                     passageContentRef.value.setTitle(title.value);
-                    console.log('[17-2] 명시적으로 제목 설정:', title.value);
+
                 }
                 if (content.value) {
                     passageContentRef.value.setContent(content.value);
-                    console.log('[17-3] 본문 설정 완료, 길이:', content.value.length);
+
                 }
             }
 
@@ -526,9 +526,9 @@ onMounted(async () => {
                     keyword: keyword.value,
                     gist: summary.value.items || []
                 };
-                console.log('[17-4] 핵심 논점 설정 준비:', summaryData);
+
                 passageSummaryRef.value.setSummary(summaryData);
-                console.log('[17-5] 핵심 논점 설정 완료', summaryData);
+
             }
 
             // 컴포넌트 상태 초기화
@@ -537,7 +537,7 @@ onMounted(async () => {
         });
     } else {
         // (수정) 데이터가 없는 경우 이전 페이지로 리다이렉트
-        console.log('[17-6] 로드된 데이터 없음, 이전 페이지로 리다이렉트');
+
         alert('지문 데이터를 찾을 수 없습니다. 지문 생성 페이지로 이동합니다.');
         router.push('/passage');
         return; // 불필요한 코드 실행 방지
@@ -546,16 +546,16 @@ onMounted(async () => {
     window.addEventListener('beforeunload', handleBeforeUnload);
     // 전역 네비게이션 가드 설정
     routerGuard = router.beforeEach((to, from, next) => {
-        console.log('[23] 라우터 가드 호출됨', { from: from.path, to: to.path, current: route.path });
+
         // 현재 라우트에서 다른 라우트로 이동하는 경우에만 확인
         if (from.path === route.path && hasUnsavedChanges()) {
-            console.log('[24] 저장되지 않은 변경사항 감지됨, 네비게이션 중단 및 모달 표시');
+
             // 저장되지 않은 변경사항이 있다면 모달 표시하고 대기
             isWarningModalOpen.value = true;
             pendingRoute.value = to.fullPath; // 이동하려는 전체 경로 저장
             return false; // 네비게이션 중단
         }
-        console.log('[25] 네비게이션 계속 진행');
+
         return next(); // 네비게이션 계속
     });
     // 현재 상태 로그
@@ -576,12 +576,12 @@ onBeforeUnmount(() => {
     if (routerGuard) {
         routerGuard();
     }
-    console.log('PassageContent 컴포넌트 언마운트');
+
 });
 // 데이터가 변경될 때마다 호출될 콜백 함수
 // 이 함수를 자식 컴포넌트에서 호출하도록 구현하여 내용 변경 감지
 const handleContentChange = (data) => {
-    console.log('내용 변경 감지:', data);
+
     // (수정) data가 null이 아닌 경우에만 처리
     if (data) {
         // (수정) 명시적으로 제목과 내용 설정

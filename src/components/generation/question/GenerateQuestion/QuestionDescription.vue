@@ -100,7 +100,7 @@ watch(() => props.description, (newVal) => {
 });
 
 watch(() => props.isEditing, (newVal) => {
-    console.log('편집 모드 변경 : ', newVal);
+
 });
 </script>
 <style scoped>

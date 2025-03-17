@@ -110,9 +110,9 @@ const handleCreatePassage = () => {
     try {
         const titleElement = document.querySelector('#passage-title');
         passageTitle.value = titleElement ? titleElement.value : '지문 작업';
-        console.log('작업 이름:', passageTitle.value);
+
     } catch (error) {
-        console.error('작업 이름 가져오기 실패:', error);
+
         passageTitle.value = '지문 작업';
     }
     
@@ -150,7 +150,7 @@ const handleCreatePassage = () => {
         }
     })
     .catch(error => {
-        console.error('작업 내역 확인 중 오류 발생:', error);
+
     });
 };
 // 현재 "최근 작업 내역"의 개수 // 작업 내역 150개 이상인 경우, 띄울 모달창 정보
@@ -180,8 +180,8 @@ const confirmCreatePassage = () => {
         // console.log('[1-2] 지문 생성 API 요청 데이터:', requestData);
 
         const apiUrl = import.meta.env.VITE_API_URL;
-        fetch(`${apiUrl}/api/test/generate-passage`, {
-        // fetch('http://10.41.1.56:7777/generate-passage', {
+        // fetch(`${apiUrl}/api/test/generate-passage`, {
+        fetch('http://10.41.1.56:7777/generate-passage', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(requestData)
@@ -256,7 +256,7 @@ const savePassageToBackend = (data) => {
       };
 
       localStorage.setItem('genieq-passage-data', JSON.stringify(passageData)); // 로컬 스토리지에 저장
-      console.log('[2-3] 로컬 스토리지에 저장된 데이터:', passageData);
+
 
       router.push('/passage/create');
 

@@ -62,7 +62,7 @@ export const useAuthStore = defineStore('auth', {
         return parseInt(data) || 0;
       })
       .catch(error =>{
-        console.error("티켓 조회 실패:", error);
+
         return 0;
       });
     },

@@ -232,7 +232,7 @@ const handleGenerateQuestion = async () => {
             if (!tempResponse.ok) throw new Error(`문항 생성 실패: ${tempResponse.status}`);
 
             const saveResult = await tempResponse.json();
-            console.log('임시 데이터 성공:', saveResult);
+
 
             // // ✅ 1단계: 키워드 생성 API 호출
             // const keywordRequestData = {
@@ -318,7 +318,7 @@ const handleGenerateQuestion = async () => {
                 question: selectedQuestion.value,
                 passage: saveResult
             }));
-            console.log('저장된 값:', localStorage.getItem('saveResponse'));
+
             alert("문항 생성 및 저장 성공!");
 
         // mode에 따라 다른 동작 수행
@@ -346,7 +346,7 @@ const handleGenerateQuestion = async () => {
             emit("close");
         }
     } catch (error) {
-        console.error('API 요청 실패:', error);
+
         alert(`오류 발생: ${error.message}`);
     }
 };

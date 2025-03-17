@@ -71,12 +71,12 @@ onMounted(() => {
     // authStore의 updateTicketCount 메서드 호출
     authStore.updateTicketCount()
         .then(count => {
-            console.log("[PaymentUsage] 티켓 정보 로드 완료:", count);
+
             creditcount.value = count; // 반환된 값으로 creditcount 업데이트
             emit('credit-update', creditcount.value);
         })
         .catch(error => {
-            console.error("[PaymentUsage] 티켓 정보 로드 실패:", error);
+
             // 에러 발생 시 기본값 혹은 현재 authStore에 있는 값 사용
             creditcount.value = authStore.userTicketCount;
             emit('credit-update', creditcount.value);
@@ -100,7 +100,7 @@ const generateQuestion = () => {
     // 모달 닫기
     emit("close");
   } catch (error) {
-    console.error('문항 생성 중 오류:', error);
+
   }
 }
 
@@ -116,7 +116,7 @@ const goToTicketPage = () => {
     // 모달 닫기
     emit("close");
   } catch (error) {
-    console.error('페이지 이동 중 오류:', error);
+
   }
 };
 

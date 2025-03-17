@@ -15,7 +15,7 @@ const isLoginPage = computed(() => route.path === '/login');
 
 // 앱이 로드될 때 인증 상태 초기화
 onMounted(() => {
-  console.log('App 컴포넌트 마운트: 인증 상태 초기화');
+
   authStore.initializeAuth();
 });
 </script>
