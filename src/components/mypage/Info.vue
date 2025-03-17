@@ -506,9 +506,8 @@ onMounted(() => {
 .wrapper {
   position: absolute;
   top: 0px;
-  left: 0px;
+  left: 20px;
   width: 1764px;
-
 }
 
 #save-button {

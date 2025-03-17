@@ -37,10 +37,7 @@
         />
 
         <!-- 로딩 표시 추가 -->
-        <div v-if="isLoading" class="loading-overlay">
-            <div class="loading-spinner"></div>
-            <p>{{ loadingMessage }}</p>
-        </div>
+        <LoadingModal :isOpen="isLoading" :message="loadingMessage" />
     </div>
 </template>
 <script setup>
@@ -52,6 +49,7 @@ import FileSelectModal from '@/components/common/modal/type/FileSelectModal.vue'
 import ConfirmModalComponent from '@/components/common/modal/type/ConfirmModalComponent.vue';
 import WarningModalComponent from '@/components/common/modal/type/WarningModalComponent.vue';
 import PaymentUsageModal from '@/components/common/modal/type/generation/PaymentUsageModal.vue';
+import LoadingModal from '@/components/common/modal/LoadingModal.vue';
 import { ref, onMounted, onBeforeUnmount, getCurrentInstance, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { usePassageStore } from '@/stores/passage';

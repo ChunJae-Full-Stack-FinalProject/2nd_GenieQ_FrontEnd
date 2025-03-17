@@ -36,10 +36,7 @@
             />
 
             <!-- 로딩 표시 추가 -->
-            <div v-if="isLoading" class="loading-overlay">
-                <div class="loading-spinner"></div>
-                <p>{{ loadingMessage }}</p>
-            </div>
+            <LoadingModal :isOpen="isLoading" :message="loadingMessage" />
         </div>
     </div>
 </template>
@@ -52,6 +49,7 @@ import ConfirmModalComponent from '@/components/common/modal/type/ConfirmModalCo
 import WarningModalComponent from '@/components/common/modal/type/WarningModalComponent.vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
+import LoadingModal from '@/components/common/modal/LoadingModal.vue';
 
 // 라우터 및 인증 스토어
 const router = useRouter();
@@ -168,20 +166,20 @@ const confirmCreatePassage = () => {
     isProcessing.value = true;
     isConfirmModalOpen.value = false;
     isLoading.value = true;
-    loadingMessage.value = '지문을 생성 중입니다...';
+    loadingMessage.value = '천재 교육 AI 가 지문을 생성 중입니다...';
 
 
     try {
         if (authStore.userTicketCount <= 0) { throw new Error('이용권이 부족합니다. 이용권을 구매해주세요.'); }
         const requestData = {
             type_passage: selectedCategory.value,
-            keyword: inputText.value
+            keyword: [inputText.value]
         };
         // console.log('[1-2] 지문 생성 API 요청 데이터:', requestData);
 
         const apiUrl = import.meta.env.VITE_API_URL;
-        fetch(`${apiUrl}/api/test/generate-passage`, {
-        // fetch('http://10.41.1.56:7777/generate-passage', {
+        // fetch(`${apiUrl}/api/test/generate-passage`, {
+        fetch('http://10.41.1.56:7777/generate-passage', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(requestData)
@@ -194,7 +192,23 @@ const confirmCreatePassage = () => {
             savePassageToBackend(data);
         })
         .catch(error => {
-            alert('지문 생성 중 오류가 발생했습니다: ' + error.message);
+            console.log("test 서버로 요청을 대신합니다.");
+            alert('http://10.41.1.56:7777/generate-passage 서버로의 요청에 실패했습니다.\nhttp://43.202.6.90:9090/test/generate-passage 로 요청을 대신합니다.');
+            
+            fetch(`${apiUrl}/api/test/generate-passage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestData)
+                })
+                .then(response => {
+                    if (!response.ok) { throw new Error(`API 호출 실패: ${response.status}`); }
+                    return response.json();
+                })
+                .then(data => {
+                    savePassageToBackend(data);
+                })
+                .catch(error => {
+                });
             isLoading.value = false;
             isProcessing.value = false;
         });

@@ -33,7 +33,7 @@
         </div>
         <div class="passage-container">
             <p>지문</p>
-            <div id="passage-count"><span style="color: #FF9500;">{{ getTextLength() }}</span>/1700</div>
+            <div id="passage-count"><span style="color: #FF9500;">{{ textLength }}</span>/1700</div>
             <div id="passage-content-main">
                 <!-- 기본 텍스트 입력 영역 -->
                 <div id="content-text" 
@@ -86,12 +86,19 @@ const currentSymbolType = ref('㉠');
 const selectionStart = ref(0);
 const selectionEnd = ref(0);
 const isConfirmModalOpen = ref(false);
+const textLength = ref(0);
 
 // 글로벌 선택 상태 변수 추가
 let savedRange = null;
 
 // 사용자 정의 이벤트 발생
 const emit = defineEmits(['content-changed']);
+
+// 내용이 변경될 때마다 텍스트 길이 업데이트
+const updateTextLength = () => {
+  const contentDiv = document.getElementById('content-text');
+  textLength.value = contentDiv ? contentDiv.textContent.length : 0;
+};
 
 // 최대 글자 수 제한
 const checkMaxLength = () => {
@@ -126,6 +133,8 @@ const onContentChange = (skipSaveSelection = false) => {
     content.value = contentDiv.innerHTML || '';
   }
 
+  updateTextLength(); // 텍스트 길이 업데이트
+
   // 최대 글자 수 검사
   checkMaxLength();
 
@@ -138,11 +147,11 @@ const onContentChange = (skipSaveSelection = false) => {
 // 텍스트 길이 계산 함수
 const getTextLength = () => {
     const contentDiv = document.getElementById('content-text');
-    return contentDiv ? contentDiv.textContent.length : 0;
-};
+    if (!contentDiv) return 0;
 
-// 텍스트 길이 계산된 값
-const textLength = computed(() => getTextLength());
+    // HTML 태그를 제외한 순수 텍스트 길이만 반환
+    return contentDiv.textContent.length;
+};
 
 // 모달 닫기
 const closeConfirmModal = () => {
@@ -326,6 +335,7 @@ const setContent = (content) => {
         if (contentDiv) {
             contentDiv.innerHTML = content;
             contentText.value = content;
+            updateTextLength(); // 내용 설정 후 텍스트 길이 업데이트
         }
         //console.log('EditPassage - contentText 설정 후:', contentText.value);
     }
@@ -371,6 +381,8 @@ onMounted(() => {
     // 페이지 클릭 시 선택 영역 저장
     document.addEventListener('mouseup', saveSelection);
     document.addEventListener('keyup', saveSelection);
+
+    updateTextLength(); // 초기 텍스트 길이 설정
 });
 
 watch(() => props.initialTitle, (newValue) => {
@@ -386,6 +398,7 @@ watch(() => props.initialContent, (newValue) => {
     saveSelection();
     content.value = newValue;
     setContent(newValue); // 값이 변경되면 자동 반영
+    updateTextLength(); // 텍스트 길이 업데이트
     restoreSelection();
   }
 });

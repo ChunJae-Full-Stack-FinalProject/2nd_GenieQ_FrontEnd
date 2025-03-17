@@ -686,8 +686,6 @@ color: #FF9F40;
  gap: 12px;
  isolation: isolate;
  position: absolute;
- width: 1472px;
- height: 680px;
  left: 292px;
  top: 130px;  
  background: #FFFFFF;
@@ -697,15 +695,16 @@ color: #FF9F40;
 }
 
 .table-container {
-width: 100%;
-overflow-x: auto;
-overflow: hidden;
+  width: 100%;
+  overflow-x: auto;
+  overflow: hidden;
 }
 
 .data-table {
-width: 100%;
-border-collapse: collapse;
-table-layout: fixed;
+  width: 1472px;
+  height: 736px;
+  border-collapse: collapse;
+  table-layout: fixed;
 }
 
 .data-table th {
@@ -713,19 +712,25 @@ text-align: left;
 padding: 10px 20px;    
 border-bottom: 1px solid #e1e1e1;
 font-weight: 700;
+font-size: 20px;
 color: #424242;
 }
 
 .data-table td {
-text-align: left;
-padding: 3.5px 20px;    
-border-bottom: 1px solid #e1e1e1;
-color: #424242;
-white-space: nowrap; 
-overflow: hidden;  
-text-overflow: ellipsis; 
+  text-align: left;
+  padding: 3.5px 20px;    
+  color: #424242;
+  white-space: nowrap; 
+  overflow: hidden;  
+  text-overflow: ellipsis; 
 }
 
+.data-table tr {
+  border-bottom: 1px solid #e1e1e1;
+}
+.data-table tr:last-child {
+  border-bottom: none;
+}
 
 /* 열 너비 조정 */
 .data-table th:nth-child(1), .data-table td:nth-child(1) {
@@ -775,7 +780,7 @@ text-align: center;
 
 /* 마지막 빈 행은 테두리 없음 */
 .empty-row:last-child td {
-border-bottom: none;
+  border-bottom: none;
 }
 
 .clickable-title {
