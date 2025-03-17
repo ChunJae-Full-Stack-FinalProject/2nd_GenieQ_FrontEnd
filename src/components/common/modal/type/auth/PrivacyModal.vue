@@ -18,6 +18,14 @@ import { ref, onMounted } from "vue";
 import BaseModal from "../../BaseModal.vue";
 import BaseButton from "@/components/common/button/BaseButton.vue";
 
+//is open props 정의 = warn주의 문구 해결.
+const props = defineProps({
+  isOpen: {
+    type: Boolean,
+    default: false
+  }
+});
+
 const privacyText = ref("");
 const files = import.meta.glob("@/assets/policy/*.txt", { as: "raw" });
 
