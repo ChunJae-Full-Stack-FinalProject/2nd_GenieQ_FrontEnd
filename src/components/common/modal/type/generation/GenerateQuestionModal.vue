@@ -206,120 +206,87 @@ const handleGenerateQuestion = async () => {
     if (isProcessing.value) return; // 중복 실행 방지
     isProcessing.value = true;
 
-    try {
-        if (selectedQuestion.value) {
-            // ✅ 로컬 스토리지에서 데이터 가져오기
-            const savedPassageData = localStorage.getItem('tempPassageData');
-            let passageData = null;
+try {
+    if (selectedQuestion.value) {
+        // ✅ 로컬 스토리지에서 데이터 가져오기
+        const savedPassageData = localStorage.getItem('tempPassageData');
+        let passageData = null;
 
-            if (savedPassageData) {
-                passageData = JSON.parse(savedPassageData);
+        if (savedPassageData) {
+            passageData = JSON.parse(savedPassageData);
 
-                localStorage.setItem('generateQuestionPassageData', savedPassageData);
-                localStorage.setItem('selectedQuestionData', JSON.stringify(selectedQuestion.value));
-            }
-            // 임시 api 연결
-            const apiUrl = import.meta.env.VITE_API_URL;
+            localStorage.setItem('generateQuestionPassageData', savedPassageData);
+            localStorage.setItem('selectedQuestionData', JSON.stringify(selectedQuestion.value));
+        }
 
-            const tempResponse = await fetch(`${apiUrl}/pass/ques/select/100`,{
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: "include",
-            });
+        // 1. 키워드 생성 API 호출
+        const keywordRequestData = {
+            "custom_passage": passageData?.PAS_CONTENT || ''
+        };
 
-            if (!tempResponse.ok) throw new Error(`문항 생성 실패: ${tempResponse.status}`);
+        const keywordResponse = await fetch('http://10.41.1.56:7777/get-type-keyword', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(keywordRequestData)
+        });
 
-            const saveResult = await tempResponse.json();
-            console.log('임시 데이터 성공:', saveResult);
+        if (!keywordResponse.ok) throw new Error(`키워드 생성 실패: ${keywordResponse.status}`);
+        const keywordResult = await keywordResponse.json();
 
-            // // ✅ 1단계: 키워드 생성 API 호출
-            // const keywordRequestData = {
-            //     "custom_passage": passageData?.PAS_CONTENT || ''
-            // };
+        // 2. 문항 생성 API 호출
+        const requestData = {
+            "custom_passage": passageData?.PAS_CONTENT || '',
+            "type_question": selectedQuestion.value.pattern,
+            "type_question_detail": selectedQuestion.value.type,
+            "question_example": selectedQuestion.value.title,
+        };
+        
+        const response = await fetch('http://10.41.1.56:7777/generate-question', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestData),
+        });
 
-            // console.log("keywordRequestData:", keywordRequestData);
+        if (!response.ok) throw new Error(`문항 생성 실패: ${response.status}`);
+        const result = await response.json();
 
-            // const keywordResponse = await fetch('http://10.41.1.56:7777/get-type-keyword',{
-            //     method: 'POST',
-            //     headers: {
-            //         'Content-Type': 'application/json',
-            //     },
-            //     body: JSON.stringify(keywordRequestData),
-            // });
+        // 3. 문항 저장 API 호출
+        const apiUrl = import.meta.env.VITE_API_URL;
+        const saveRequestData = {
+            "type": keywordResult.type_passage,
+            "keyword": keywordResult.keyword,
+            "title": passageData?.PAS_TITLE || '',
+            "content": passageData?.PAS_CONTENT || '',
+            "gist": '',
+            "isGenerated": 0,
+            "questions":[{
+                "queQuery": result.generated_question,
+                "queOption": result.generated_option,
+                "queAnswer": result.generated_description
+            }]
+        };
 
-            // if (!keywordResponse.ok) throw new Error(`문항 생성 실패: ${keywordResponse.status}`);
+        const saveResponse = await fetch(`${apiUrl}/pass/ques/insert/each`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: "include",
+            body: JSON.stringify(saveRequestData),
+        });
+        
+        if (!saveResponse.ok) throw new Error(`문항 저장 실패: ${saveResponse.status}`);
+        const saveResult = await saveResponse.json();
 
-            // const keywordResult = await keywordResponse.json();
-            // console.log('키워드 성공:', keywordResult);
-            // console.log("키워드 분리!: ", keywordResult.type_passage)
-
-            // // ✅ 2단계: 문항 생성 API 호출
-            // const requestData = {
-            //     "custom_passage": passageData?.PAS_CONTENT || '',
-            //     "type_question": selectedQuestion.value.pattern,
-            //     "type_question_detail": selectedQuestion.value.type,
-            //     "question_example": selectedQuestion.value.title,
-            // };
-
-            // console.log("Request Data:", requestData);
-
-            // const response = await fetch('http://10.41.1.56:7777/generate-question', {
-            //     method: 'POST',
-            //     headers: {
-            //         'Content-Type': 'application/json',
-            //     },
-            //     body: JSON.stringify(requestData),
-            // });
-
-            // if (!response.ok) throw new Error(`문항 생성 실패: ${response.status}`);
-            
-            // const result = await response.json();
-            // console.log('문항 생성 성공:', result);
-
-            // // ✅ 3단계: 문항 저장 API 호출
-            // const saveRequestData = {
-            //     "type": keywordResult.type_passage,
-            //     "keyword": keywordResult.keyword,
-            //     "title": passageData?.PAS_TITLE || '',
-            //     "content": passageData?.PAS_CONTENT || '',
-            //     "gist": '',
-            //     "isGenerated": 0,
-            //     "questions":[{
-            //         "queQuery": result.generated_question,
-            //         "queOption": result.generated_option,
-            //         "queAnswer": result.generated_description
-            //     }]
-            // };
-
-            // console.log("saveRequest: ", saveRequestData);
-
-            // const apiUrl = import.meta.env.VITE_API_URL;
-
-            // const saveResponse = await fetch(`${apiUrl}/pass/ques/insert/each`, {
-            //     method: 'POST',
-            //     headers: {
-            //         'Content-Type': 'application/json',
-            //     },
-            //     credentials: "include",
-            //     body: JSON.stringify(saveRequestData),
-            // });
-
-            // if (!saveResponse.ok) throw new Error(`문항 저장 실패: ${saveResponse.status}`);
-            
-            // const saveResult = await saveResponse.json();
-            // console.log('문항 저장 성공:', saveResult);
-
-
-            // ✅ 작업 완료 후 상태 초기화 및 모달 닫기
-
-            localStorage.setItem('saveResponse', JSON.stringify({
-                question: selectedQuestion.value,
-                passage: saveResult
-            }));
-            console.log('저장된 값:', localStorage.getItem('saveResponse'));
-            alert("문항 생성 및 저장 성공!");
+        // 결과 저장
+        localStorage.setItem('saveResponse', JSON.stringify({
+            question: selectedQuestion.value,
+            passage: saveResult
+        }));
 
         // mode에 따라 다른 동작 수행
         if (props.mode === 'generate') {
@@ -332,23 +299,22 @@ const handleGenerateQuestion = async () => {
                 query: {
                     pattern: activePattern.value,
                     type: activeType.value
-                },
-                // state: {
-                //     questionData: selectedQuestion.value,
-                //     passageData: saveResult
-                // }
+                }
             });
         }
-            activePattern.value = null;
-            activeType.value = null;
-            activeDifficulty.value = null;
-            selectedQuestion.value = null;
-            emit("close");
-        }
-    } catch (error) {
-        console.error('API 요청 실패:', error);
-        alert(`오류 발생: ${error.message}`);
+
+        activePattern.value = null;
+        activeType.value = null;
+        activeDifficulty.value = null;
+        selectedQuestion.value = null;
+        emit("close");
     }
+} catch (error) {
+    console.error('API 요청 실패:', error);
+    alert(`오류 발생: ${error.message}`);
+} finally {
+    isProcessing.value = false;
+}
 };
 
 
