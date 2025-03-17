@@ -125,6 +125,8 @@
 
     <!-- 파일 선택 모달 -->
     <FileSelectModal :isOpen="isFileModalOpen" :pasCode="pasCode" @close="closeFileModal" @confirm="handleFileSelect"/>
+
+    <LoadingModal :isOpen="isLoading" :message="loadingMessage" />
   </div>
 </template>
 <script setup>
@@ -142,6 +144,7 @@ import ConfirmModalComponent from '@/components/common/modal/type/ConfirmModalCo
 import WarningModalComponent from '@/components/common/modal/type/WarningModalComponent.vue';
 import PaymentUsageModal from '@/components/common/modal/type/generation/PaymentUsageModal.vue';
 import FileSelectModal from '@/components/common/modal/type/FileSelectModal.vue';
+import LoadingModal from '@/components/common/modal/LoadingModal.vue';
 
 const isEditingGlobal = ref(false);
 const pattern = ref(null);
@@ -165,6 +168,8 @@ const currentRecreateIndex = ref(null); // 현재 재생성하려는 문항 인�
 const isFromRoute = ref(false); // 문항 생성 페이지로 오기 전 주소에 따라 "문항 추가" 버튼 비활성화
 const isProcessing = ref(false);
 const pasCode = ref(0);
+const isLoading = ref(false);
+const loadingMessage = ref('문항을 생성 중입니다...');
 
 // EditQuestion 컴포넌트 참조
 const editQuestionRefs = ref([]);
@@ -241,6 +246,9 @@ const handleRecreateGeneration = async () => {
 
   if (isProcessing.value) return; // 중복 실행 방지
   isProcessing.value = true;
+
+  isLoading.value = true;
+  loadingMessage.value = '문항을 재생성 중입니다...';
 
   try {
     console.log("pattern: ", route.query.pattern);
@@ -350,7 +358,6 @@ const handleRecreateGeneration = async () => {
             const updateResult = await updateResponse.json();
             console.log('문항 저장 성공:', updateResult);
 
-
             // 상태 업데이트
             questionsData.value = [...questionsData.value, newQuestion]; // 기존 질문 + 새 질문 추가
             saveResponse.value = {
@@ -364,7 +371,7 @@ const handleRecreateGeneration = async () => {
             localStorage.setItem('saveResponse', JSON.stringify(saveResponse.value));
 
             console.log('저장된 값:', localStorage.getItem('saveResponse'));
-            alert("문항 재생성 및 저장 성공!"); 
+            isLoading.value = false;
 
             // 모달 닫기
             showRecreateModal.value = false;     

@@ -92,6 +92,8 @@
             </div>
         </div>
     </BaseModal>
+
+    <LoadingModal :isOpen="isLoading" :message="loadingMessage" />
 </template>
 <script setup>
 import { ref, computed, watch} from "vue";
@@ -100,6 +102,7 @@ import BaseModal from "../../BaseModal.vue";
 import BaseButton from "@/components/common/button/BaseButton.vue";
 import PlainTooltip from '@/components/common/PlainTooltip.vue';
 import questionExample from '@/assets/data/questionExample.json';
+import LoadingModal from '@/components/common/modal/LoadingModal.vue';
 
 const router = useRouter();
 const emit = defineEmits(["close", "openPaymentModal"]);
@@ -120,6 +123,8 @@ const activeType = ref(null); // 서술 방식 선택값
 const activeDifficulty = ref(null); // 난이도 선택값
 const selectedQuestion = ref(null); // 선택된 문항을 ref로 저장
 const isProcessing = ref(false);
+const isLoading = ref(false);
+const loadingMessage = ref('문항을 생성 중입니다...');
 
 
 const closeModal = () => {
@@ -133,6 +138,9 @@ const closeModal = () => {
 const handleGenerateQuestion = async () => {
     if (isProcessing.value) return; // 중복 실행 방지
     isProcessing.value = true;
+
+    isLoading.value = true;
+    loadingMessage.value = '문항을 생성 중입니다...';
 
     try {
         if (selectedQuestion.value) {
@@ -249,7 +257,7 @@ const handleGenerateQuestion = async () => {
                 passage: saveResult
             }));
             console.log('저장된 값:', localStorage.getItem('saveResponse'));
-            alert("문항 생성 및 저장 성공!");
+            isLoading.value = false;
 
         // mode에 따라 다른 동작 수행
         if (props.mode === 'generate') {
