@@ -10,7 +10,7 @@
                 <img src="@/assets/icons/icon_passage.png" alt="지문생성" class="passage-icon" /> 
                  지문 생성
             </router-link>
-            <router-link to="/questions" class="nav-item" :class="{ 'active-box': isActive('/questions') }">
+            <router-link to="/questions" class="nav-item" :class="{ 'active-box': isActive('/questions') }" @click="clearPassageData">
                 <img src="@/assets/icons/icon_question.png" alt="문항생성" class="question-icon" /> 
                 문항 생성
             </router-link>
@@ -42,6 +42,10 @@ const isActive = (path) => {
     }
     // 다른 경로는 해당 경로로 시작하는지 확인
     return route.path.startsWith(path);
+};
+// 지문 데이터 제거 함수
+const clearPassageData = () => {
+    localStorage.removeItem('genieq-passage-data');
 };
 </script>
 
