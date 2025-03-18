@@ -15,24 +15,24 @@ const isLoginPage = computed(() => route.path === '/login');
 
 // 브라우저 창이 닫힐 때 실행될 함수
 const handleBeforeUnload = () => {
-  console.log('[App.vue] 브라우저 창 닫힘 감지: authUser 로컬 스토리지에서 제거');
   localStorage.removeItem('authUser');
   // 세션 쿠키는 브라우저가 유지하므로 다시 방문 시 세션 기반으로 복원 가능
 };
 
 // 앱이 로드될 때 인증 상태 초기화
 onMounted(() => {
-  console.log('App 컴포넌트 마운트: 인증 상태 초기화');
+  console.log('25년 3월 18일 오후 7시 15분 버전 업데이트');
+  console.log('- 파비콘 적용');
+  console.log('- 콘솔 로그 삭제');
+  console.log('- 문항 예제 데이터 수정');
   authStore.initializeAuth();
   
   // beforeunload 이벤트 리스너 등록
   window.addEventListener('beforeunload', handleBeforeUnload);
-  console.log('[App.vue] beforeunload 이벤트 리스너 등록 완료');
 });
 
 // 컴포넌트가 언마운트될 때 이벤트 리스너 제거
 onBeforeUnmount(() => {
-  console.log('[App.vue] 컴포넌트 언마운트: 이벤트 리스너 제거');
   window.removeEventListener('beforeunload', handleBeforeUnload);
 });
 
