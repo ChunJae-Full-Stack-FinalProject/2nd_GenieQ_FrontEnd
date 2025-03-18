@@ -154,7 +154,8 @@ const type = ref(null);
 const questionData = ref(null);
 const passageData = ref({
   title:'',
-  content: ''
+  content: '',
+  gist: ''
 });
 const isConfirmModalOpen = ref(false);
 const showGenerateQuestionModal = ref(false);
@@ -483,8 +484,6 @@ const handleContentChange = () => {
 
 // 저장 버튼 클릭 핸들러
 const handleSaveButtonClick = () => {
-  if (isProcessing.value) return; // 중복 실행 방지
-  isProcessing.value = true;
 
   updateEditingMode(false);
 
@@ -515,6 +514,9 @@ const handleSaveButtonClick = () => {
         "isGenerated": saveResponse.value.passage.isGenerated || 0,
         "questions": saveResponse.value.passage.questions || []
       };
+
+      if (isProcessing.value) return; // 중복 실행 방지
+      isProcessing.value = true;
 
       // 지문 저장 api
       fetch(`${apiUrl}/pass/ques/update/${pasCode}`, {
@@ -578,16 +580,13 @@ const handleSaveButtonClick = () => {
       hasManualSave.value = true;
       isContentChanged.value = false; // 저장 후 내용 변경 플래그를 false로 설정
       console.log('내용이 저장되었습니다:', { isContentChanged: isContentChanged.value, hasManualSave: hasManualSave.value });
-      isProcessing.value = false;
 
       return true;
     } else {
       showLengthWarning();
-      isProcessing.value = false;
       return false;
     }
   }
-  isProcessing.value = false;
   return false;
 };
 
@@ -783,76 +782,13 @@ const handleQuestionGeneration = async () => {
 
             // 모달 닫기
             showPaymentModal.value = false;
-            isProcessing.value = true;     
+            isProcessing.value = false;     
       } catch (error) {
           console.error('API 요청 실패:', error);
           alert(`오류 발생: ${error.message}`);
-          isProcessing.value = true;
+          isProcessing.value = false;
       }
 };
-
-
-//   try {
-//     // localStorage에서 saveResponse 가져오기
-//     const savedResponseData = localStorage.getItem('saveResponse');
-//     if (!savedResponseData) {
-//       console.error('저장된 응답 데이터가 없습니다.');
-//       return;
-//     }
-
-//     const savedResponse = JSON.parse(savedResponseData);
-//     console.log('저장된 API 응답 데이터: ', savedResponse);
-
-//     if (savedResponse && savedResponse.passage && savedResponse.passage.questions && savedResponse.passage.questions.length > 0) {
-//       // API 응답에서 가져온 문항 데이터
-//       const apiQuestion = savedResponse.passage.questions[0];
-
-//       // 새 문항 데이터 생성
-//       const newQuestion = {
-//         queQuery: apiQuestion.queQuery || '새 문항',
-//         queOption: apiQuestion.queOption || ['문항 1','문항 2','문항 3','문항 4','문항 5'],
-//         queAnswer: apiQuestion.queAnswer || '문항 해설',
-//         description: ''
-//       };
-
-//       // 기존 배열을 유지하면서 새 문항 추가
-//       questionsData.value.push(newQuestion);
-
-//       // 새로운 문항이 표시되는 페이지로 이동
-//       currentSlide.value = questionsData.value.length - 1;
-
-//       console.log('새 문항이 추가되었습니다.', newQuestion);
-//     } else {
-//       console.error('API 응답에서 문항 데이터를 찾을 수 없습니다.');
-//       // 데이터 구조 확인을 위해 로그 추가
-//       console.log('savedResponse 구조:', savedResponse);
-//       if (savedResponse && savedResponse.passage) {
-//         console.log('passage 내용:', savedResponse.passage);
-//       }
-//     }
-//   } catch (error) {
-//     console.error('문항 생성 처리 중 오류 발생:', error);
-    
-//     // 오류 발생 시 기본 문항 추가
-//     const fallbackQuestion = {
-//       queQuery: '새로운 문항: 다음 중 본문과 내용이 일치하는 것을 고르시오.',
-//       queOption: ['문제가 바뀌는지 확인해보자', '두 번째 선택지', '세 번째 선택지', '네 번째 선택지', '다섯 번째 선택지'],
-//       queAnswer: '해설 내용입니다.',
-//       description: ''
-//     };
-    
-//     questionsData.value.push(fallbackQuestion);
-//     currentSlide.value = questionsData.value.length - 1;
-//   }
-
-//   // 모달 닫기
-//   showPaymentModal.value = false;
-// };
-
-// const handleQuestionChange = (event, index) => {
-//   handleContentChange();
-//   // 필요한 경우, 특정 인덱스의 문항 데이터 업데이트
-// }
 
 const handleQuestionChange = (updatedData, index) => {
     if (!updatedData || index === undefined) return;

@@ -129,13 +129,12 @@ const loadPreviews  = () => {
     return response.json();
   })
   .then(data => {
-    console.log('미리보기 데이터 불러오기 성공:', data);
-
     // 응답 데이터 구조에 맞게 매핑
     passages.value = data.map(item => ({
       PAS_CODE: item.passageCode,
       PAS_TITLE: item.passageTitle,
       PAS_KEYWORD: item.subjectKeyword,
+      PAS_GIST: item.gist,
       PAS_DATE: item.date,
       PAS_CONTENT: item.content,
       PAS_FAVORITE: item.favorite

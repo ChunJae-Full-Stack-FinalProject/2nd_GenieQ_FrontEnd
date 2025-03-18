@@ -372,6 +372,7 @@ const handleWorkItemClick = (item) => {
   .data-table th {
     text-align: left;
     padding: 10px 20px;    
+    height: 46px;
     border-bottom: 1px solid #e1e1e1;
     font-weight: 700;
     font-size: 20px;
