@@ -198,8 +198,6 @@ const handleGenerateQuestion = async () => {
             if (!keywordResponse.ok) throw new Error(`문항 생성 실패: ${keywordResponse.status}`);
 
             const keywordResult = await keywordResponse.json();
-            console.log('키워드 성공:', keywordResult);
-            console.log("키워드 분리!: ", keywordResult.type_passage)
 
             // ✅ 2단계: 문항 생성 API 호출
             const requestData = {
@@ -232,7 +230,7 @@ const handleGenerateQuestion = async () => {
                 "keyword": keywordResult.keyword,
                 "title": passageData?.PAS_TITLE || '',
                 "content": passageData?.PAS_CONTENT || '',
-                "gist": '',
+                "gist": passageData?.PAS_GIST ||'',
                 "isGenerated": 0,
                 "questions":[{
                     "queQuery": result.generated_question,
@@ -267,7 +265,6 @@ const handleGenerateQuestion = async () => {
                 question: selectedQuestion.value,
                 passage: saveResult
             }));
-            console.log('저장된 값:', localStorage.getItem('saveResponse'));
             isLoading.value = false;
 
             // QuestionMain 페이지에서 호출 (페이지 이동)
