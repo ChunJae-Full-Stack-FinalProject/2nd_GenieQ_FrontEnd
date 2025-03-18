@@ -41,6 +41,7 @@ const toggleFAQ = (index) => {
   top: 0px;
   left: 0px;
   width: 1764px;
+  height: 1500px;
 }
 .faq-title {
   position: absolute;
@@ -204,7 +205,7 @@ const toggleFAQ = (index) => {
 
   font-family: 'Pretendard';
   font-style: normal;
-  font-weight: 600;
+  font-weight: 400;
   font-size: 16px;
   line-height: 150%;
 

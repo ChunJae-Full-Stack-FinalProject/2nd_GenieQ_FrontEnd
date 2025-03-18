@@ -13,7 +13,7 @@
 
       <div class="modal-content">
         <div class="modal-title">{{ title }}</div>
-        <div class="modal-msg">{{ message }}</div>
+        <div class="modal-msg" v-html="message"></div>
       </div>  
 
       <!-- ✅ 취소 & 실행 버튼 -->
@@ -75,7 +75,7 @@ const confirmAction = () => {
   justify-content: center;
   align-items: center;
   padding: 0px;
-  gap: 24px;
+  gap: 30px;
   width: 391px;
   height: 180px;
 }
@@ -128,9 +128,9 @@ const confirmAction = () => {
 }
 
 .modal-msg {
-  font-weight: 500;
+  font-weight: 400;
   font-size: 16px;
-  line-height: 24px;
+  /* line-height: 24px; */
   letter-spacing: -2%;
   text-align: center;
 }

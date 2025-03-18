@@ -21,8 +21,8 @@
         </nav>
 
         <div class="bottom-menu">
-            <router-link to="/mypage" class="nav-item" :class="{ 'active-text': isActive('/mypage') }">
-                <img src="@/assets/icons/icon_mypage.png" alt="마이페이지" class="mypage-icon" /> 
+            <router-link to="/mypage" class="nav-item mypage-item" :class="{ 'active-mypage': isActive('/mypage') }">
+                <div class="icon-mypage"></div>
                 마이페이지
             </router-link>
         </div>
@@ -99,9 +99,21 @@ const clearPassageData = () => {
   border-radius: 0; /*  둥근 모서리 제거 */
 }
 
-/* 마이페이지 선택 시 글씨 색만 변경 */
-.active-text {
-  color: #FF9F40 !important;
+.icon-mypage {
+    width: 20px;
+    height: 20px;
+    background-image: url('@/assets/icons/icon_mypage.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    transition: background-image 0.3s ease;
+}
+
+.active-mypage {
+    color: #FF9F40 !important;
+}
+
+.active-mypage .icon-mypage {
+    background-image: url('@/assets/icons/icon_mypageactive.png');
 }
 
 /* 마이페이지를 하단에 정렬 */
