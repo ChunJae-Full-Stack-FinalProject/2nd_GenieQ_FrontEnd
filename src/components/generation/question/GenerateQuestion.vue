@@ -484,8 +484,6 @@ const handleContentChange = () => {
 
 // 저장 버튼 클릭 핸들러
 const handleSaveButtonClick = () => {
-  if (isProcessing.value) return; // 중복 실행 방지
-  isProcessing.value = true;
 
   updateEditingMode(false);
 
@@ -516,6 +514,9 @@ const handleSaveButtonClick = () => {
         "isGenerated": saveResponse.value.passage.isGenerated || 0,
         "questions": saveResponse.value.passage.questions || []
       };
+
+      if (isProcessing.value) return; // 중복 실행 방지
+      isProcessing.value = true;
 
       // 지문 저장 api
       fetch(`${apiUrl}/pass/ques/update/${pasCode}`, {
@@ -579,16 +580,13 @@ const handleSaveButtonClick = () => {
       hasManualSave.value = true;
       isContentChanged.value = false; // 저장 후 내용 변경 플래그를 false로 설정
       console.log('내용이 저장되었습니다:', { isContentChanged: isContentChanged.value, hasManualSave: hasManualSave.value });
-      isProcessing.value = false;
 
       return true;
     } else {
       showLengthWarning();
-      isProcessing.value = false;
       return false;
     }
   }
-  isProcessing.value = false;
   return false;
 };
 
