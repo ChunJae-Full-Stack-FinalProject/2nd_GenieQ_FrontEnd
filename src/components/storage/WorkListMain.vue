@@ -5,8 +5,8 @@
     </div>
     <div class="storage-worklistmain-subtitle">
       <span>전체</span>
-      <P>({{ filteredWorkItems.length }}개)</P>
-      <v-pre v-if="searchQuery && hasSearchResults">"{{ searchQuery }}"에 대한 검색 결과입니다.</v-pre>
+      <p>({{ filteredWorkItems.length }}개)</p>
+      <span v-if="searchQuery && hasSearchResults">"{{ searchQuery }}"에 대한 검색 결과입니다.</span>
     </div>
 
     <div class="storage-worklistmain-search">
