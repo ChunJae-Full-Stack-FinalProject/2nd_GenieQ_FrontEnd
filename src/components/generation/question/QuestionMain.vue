@@ -129,7 +129,8 @@ const onCreditUpdate = (count) => {
 // 지문 상태 및 메서드
 const currentPassage = ref({
     PAS_TITLE: '',
-    PAS_CONTENT: ''
+    PAS_CONTENT: '',
+    PAS_GIST: ''
 });
 
 const validateAndOpenModal = () => {
@@ -156,23 +157,25 @@ const validateAndOpenModal = () => {
 
 // 지문 설정 함수
 const setPassage = (passage) => {
-    currentPassage.value = passage;
+    currentPassage.value.PAS_CONTENT = passage.PAS_CONTENT;
+    currentPassage.value.PAS_GIST = passage.PAS_GIST;
 };
 
 // 지문 초기화 함수
 const resetPassage = () => {
     currentPassage.value = {
         PAS_TITLE: '',
-        PAS_CONTENT: ''
+        PAS_CONTENT: '',
+        PAS_GIST:''
     };
 };
 
 const hasContent = computed(() => {
     return (
-    currentPassage.value.PAS_CONTENT &&
-    currentPassage.value.PAS_CONTENT.trim().length > 0 &&
-    insertPassageRef.value?.passageTitle && // 제목 입력 상태 체크
-    insertPassageRef.value?.passageTitle.trim().length > 0
+    (currentPassage.value.PAS_CONTENT &&
+    currentPassage.value.PAS_CONTENT.trim().length > 0) ||
+    (insertPassageRef.value?.passageTitle && // 제목 입력 상태 체크
+    insertPassageRef.value?.passageTitle.trim().length > 0)
   );
 });
 
@@ -212,7 +215,8 @@ onMounted(() => {
             const passageData = JSON.parse(savedPassageData);
             setPassage({
                 PAS_TITLE: passageData.PAS_TITLE || '',
-                PAS_CONTENT: passageData.PAS_CONTENT || ''
+                PAS_CONTENT: passageData.PAS_CONTENT || '',
+                PAS_GIST: passageData.PAS_GIST || '',
             });
             // 사용 후 삭제
             localStorage.removeItem('tempPassageData');

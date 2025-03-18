@@ -59,7 +59,7 @@ const gistText = computed(() => {
         } catch (error) {
             console.error('[gistText] localStorage 데이터 확인 중 오류:', error);
         }
-        
+        localStorage.removeItem('genieq-passage-data');
         return '핵심 논점이 없습니다.';
     }
 
