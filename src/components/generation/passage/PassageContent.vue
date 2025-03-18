@@ -332,8 +332,8 @@ const handleSaveButtonClick = () => {
     if (isProcessing.value) { return; }
     isProcessing.value = true;
     // 내용 검증
-    if (!content.value || content.value.length < 300) {
-        alert('300자 이상 입력해주세요.');
+    if (!content.value || content.value.length < 500) {
+        alert('500자 이상 입력해주세요.');
         return;
     }
     // 로딩 상태 활성화
