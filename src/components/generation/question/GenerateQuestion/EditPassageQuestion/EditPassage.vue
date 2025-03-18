@@ -146,6 +146,9 @@ const onContentChange = (skipSaveSelection = false) => {
   if (!skipSaveSelection) {
     saveSelection();
   }
+
+    // 내용 변경을 localStorage에 저장하여 부모 컴포넌트에 알림
+    localStorage.setItem('editPassageChanged', 'true');
 };
 
 // 텍스트 길이 계산 함수

@@ -166,6 +166,9 @@ const isFromRoute = ref(false); // 문항 생성 페이지로 오기 전 주소�
 const isProcessing = ref(false);
 const pasCode = ref(0);
 
+// 내용 변경 감지를 위한 타이머 설정
+let changeDetectionTimer = null;
+
 // EditQuestion 컴포넌트 참조
 const editQuestionRefs = ref([]);
 
@@ -747,6 +750,16 @@ onMounted(() => {
     localStorage.removeItem('saveResponse');
     return next(); // 네비게이션 계속
   });
+  
+    // localStorage 변경 감지 타이머 설정
+    changeDetectionTimer = setInterval(() => {
+    const hasChanged = localStorage.getItem('editPassageChanged') === 'true';
+    if (hasChanged) {
+      // 변경사항 있음 - 버튼 활성화
+      isContentChanged.value = true;
+      localStorage.removeItem('editPassageChanged');
+    }
+  }, 500); // 500ms마다 체크
 });
 
 onBeforeUnmount(() => {
@@ -757,6 +770,14 @@ onBeforeUnmount(() => {
   if (routerGuard) {
     routerGuard();
   }
+
+    // 타이머 정리
+    if (changeDetectionTimer) {
+    clearInterval(changeDetectionTimer);
+  }
+  
+  // localStorage 정리
+  localStorage.removeItem('editPassageChanged');
 });
 
 // provide 실행
