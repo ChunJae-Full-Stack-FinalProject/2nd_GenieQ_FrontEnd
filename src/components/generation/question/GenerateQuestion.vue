@@ -67,7 +67,7 @@
     </div>
         
     <div class="button-container">
-        <BaseButton text="문항 추가하기" type="type2" id="add-button" width="248px" height="54px" :disabled="isContentChanged || isFromRoute" @click="validateAndOpenModal"/>
+        <BaseButton text="문항 추가하기" type="type2" id="add-button" width="248px" height="54px" :disabled="isContentChanged || isFromRoute" @click="validateAndOpenModal('generate')"/>
         <BaseButton text="저장하기" type="type2" id="save-button" width="248px" height="54px" :disabled="!isContentChanged" @click="handleSaveButtonClick"/>
         <BaseButton text="추출하기" type="type2" id="download-button" width="248px" height="54px" :disabled="isContentChanged" @click="openFileModal"/>
     </div>
@@ -247,19 +247,26 @@ const handleDescriptionChange = (event, index) => {
 
 // 재생성하기 버튼 클릭 핸들러
 const handleRecreateButtonClick = (index) => {
-  console.log('재생성하기 버튼 클릭됨, 문항 인덱스:', index || currentSlide.value);
-  
-  // 현재 재생성하려는 문항 인덱스 저장
-  currentRecreateIndex.value = index !== undefined ? index : currentSlide.value;
-  
-  // 지문 길이 검증
-  if (!validatePassageLength()) {
-    showLengthWarning();
-  } else {
-    // PaymentUsageModal 표시
+    console.log('재생성하기 버튼 클릭됨, 문항 인덱스:', index || currentSlide.value);
+
+    // 현재 재생성하려는 문항 인덱스 저장
+    currentRecreateIndex.value = index !== undefined ? index : currentSlide.value;
+
+    // ✅ 지문 길이 검증이 필요하면 추가
+    if (!validatePassageLength()) {
+        showLengthWarning(); // 지문이 너무 짧을 경우 경고
+        return; // ✅ 검증 실패 시 함수 종료
+    }
+
+    selectedQuestion.value = {
+        mode: 'recreate',
+        title: questionsData.value[index].queQuery,
+        options: questionsData.value[index].queOption
+    };
+
     showRecreateModal.value = true;
-  }
 };
+
 
 // 재생성 실행 핸들러 (PaymentUsageModal에서 버튼 클릭 시 호출)
 const handleRecreateGeneration = async () => {
@@ -282,6 +289,7 @@ const handleRecreateGeneration = async () => {
         "type_question": route.query.pattern,
         "type_question_detail": route.query.type,
         "question_example": route.query.queExample,
+        "mode": "recreate"
     };
 
     console.log("Request Data:", requestData);
@@ -337,7 +345,8 @@ const handleRecreateGeneration = async () => {
       "questions": [
         ...questionsData.value, // 기존 질문 유지
         newQuestion
-      ]
+      ],
+      "mode": "recreate"
     };
 
     console.log("saveRequest: ", saveRequestData);
@@ -690,7 +699,9 @@ const handleQuestionGeneration = async () => {
               "questions": [
                 ...questionsData.value, // 기존 질문 유지
                 newQuestion
-              ]
+              ],
+               // ✅ 추가된 필드
+              "mode": "generate", // mode를 명확히 추가
             };
 
             console.log("saveRequest: ", saveRequestData);

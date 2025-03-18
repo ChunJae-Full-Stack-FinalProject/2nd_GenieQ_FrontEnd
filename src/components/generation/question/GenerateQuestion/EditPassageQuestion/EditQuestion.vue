@@ -79,8 +79,13 @@ const circledNumbers = ['①', '②', '③', '④', '⑤'];
 
 // 재생성 버튼 클릭 핸들러
 const handleRecreate = () => {
-    emit('recreate-question');
+    emit('recreate-question', {
+        mode: 'recreate', //mode 추가
+        title: title.value,
+        options: items.value
+    });
 };
+
 
 // 편집 버튼 클릭 핸들러 - 부모 컴포넌트에게 편집 요청을 알림
 const requestEditMode = () => {
