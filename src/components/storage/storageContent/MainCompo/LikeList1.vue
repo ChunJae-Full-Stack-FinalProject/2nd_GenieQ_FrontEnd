@@ -346,7 +346,7 @@ margin: 0;
 
 .table-container {
 width: 100%;
-height: 276px;
+height: 255px;
 overflow-x: auto;
 overflow: hidden;
 }
