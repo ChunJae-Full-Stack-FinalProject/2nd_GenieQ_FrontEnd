@@ -5,7 +5,7 @@
     </div>
     <div class="storage-likemain-subtitle">
       <span>전체</span>
-      <P>({{ computedWorkItems.length }}개)</P>
+      <p>({{ computedWorkItems.length }}개)</p>
     </div>
     <div class="storage-likemain-subtitle2">
     <span>삭제</span>
