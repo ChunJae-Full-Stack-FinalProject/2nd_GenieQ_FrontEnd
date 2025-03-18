@@ -75,7 +75,7 @@ const confirmAction = () => {
   justify-content: center;
   align-items: center;
   padding: 0px;
-  gap: 24px;
+  gap: 30px;
   width: 391px;
   height: 180px;
 }
