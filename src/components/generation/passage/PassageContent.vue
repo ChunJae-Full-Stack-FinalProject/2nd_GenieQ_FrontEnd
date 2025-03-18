@@ -389,8 +389,11 @@ const handleSaveButtonClick = () => {
             };
             // 로컬 스토리지 업데이트
             localStorage.setItem('genieq-passage-data', JSON.stringify(updatedData));
-            alert('지문 저장에 성공했습니다.');
-            hasManualSave.value = true;
+            isContentChanged.value = false; // 변경 내용이 없는 상태 (저장하기 비활성화)
+            hasManualSave.value = true; // 나머지 버튼 활성화
+
+            // 저장 성공 모달 표시
+            openSaveSuccessModal();
         })
         .catch(error => {
             // console.error('지문 업데이트 중 오류:', error);
