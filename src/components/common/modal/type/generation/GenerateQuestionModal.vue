@@ -56,7 +56,7 @@
             <div class="example-group">
                 <!-- ✅ 필터링된 리스트 -->
                 <div class="example-list">
-                    <div class="list-wrapper" v-if="filteredQuestions.length > 0 && (activePattern || activeType || activeDifficulty)">
+                    <div class="list-wrapper" v-if="filteredQuestions.length > 0 && (activePattern && activeType || activeDifficulty)">
                         <div
                             v-for="(item, index) in filteredQuestions"
                             :key="index"
