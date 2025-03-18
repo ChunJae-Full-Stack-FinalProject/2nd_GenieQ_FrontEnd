@@ -62,6 +62,8 @@ const isConfirmModalOpen = ref(false);
 const paymentUsageRef = ref(null);
 const creditCountValue = ref(0); // 별도의 ref로 이용권 상태 관리
 const insertPassageRef = ref(null);
+const passageTitle = ref('');
+const openPaymentModal =ref('');
 
 // 라우터와 스토어 초기화
 const router = useRouter();

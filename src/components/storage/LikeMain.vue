@@ -696,13 +696,14 @@ color: #FF9F40;
 
 .table-container {
   width: 100%;
+  height: 736px;
   overflow-x: auto;
   overflow: hidden;
 }
 
 .data-table {
   width: 1472px;
-  height: 736px;
+  height: 46px;
   border-collapse: collapse;
   table-layout: fixed;
 }
