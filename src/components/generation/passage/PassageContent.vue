@@ -68,6 +68,7 @@ const loadingMessage = ref('지문을 생성 중입니다.\n생성까지 최대 
 const isFromRoute = ref(false); // 이전 페이지의 루트 확인용
 const isSaveSuccessModalOpen = ref(false); // 저장 확인 모달 오픈
 const saveSuccessMessage = ref('지문이 저장되었습니다.'); // 저장 확인 모달 메시지
+const navigatingToQuestions = ref(false);// 이동 경로 추적을 위한 플래그 추가
 
 // 중복 요청 방지를 위한 처리 상태 플래그 추가
 const isProcessing = ref(false);
@@ -419,6 +420,7 @@ const handleConnectCreate = (event, navigate) => {
         // 저장된 상태라면 이동 준비
         // 지문 정보 수집 및 전달
         prepareDataForQuestions();
+        navigatingToQuestions.value = true; // 질문 페이지로 이동하는 플래그 설정
         navigate(event); // 네비게이션 실행
     } else {
         event.preventDefault(); // 글자 수가 충분하지 않으면 이동 방지
@@ -555,6 +557,7 @@ const confirmNavigation = () => {
     // 문항 생성 페이지로의 이동인 경우, 데이터 준비
     if (pendingRoute.value === '/questions') {
         prepareDataForQuestions();
+        navigatingToQuestions.value = true;
     }
     // 네비게이션 수행
     if (pendingRoute.value) {
@@ -685,12 +688,17 @@ onMounted(async () => {
     routerGuard = router.beforeEach((to, from, next) => {
         // console.log('[23] 라우터 가드 호출됨', { from: from.path, to: to.path, current: route.path });
         // 현재 라우트에서 다른 라우트로 이동하는 경우에만 확인
-        if (from.path === route.path && hasUnsavedChanges()) {
+        if (from.path === route.path) {
+            if (to.path === '/questions') {
+                navigatingToQuestions.value = true; // 이어서 문항 생성하기 페이지로 이동하는 경우 플래그 설정
+            }
             // console.log('[24] 저장되지 않은 변경사항 감지됨, 네비게이션 중단 및 모달 표시');
             // 저장되지 않은 변경사항이 있다면 모달 표시하고 대기
-            isWarningModalOpen.value = true;
-            pendingRoute.value = to.fullPath; // 이동하려는 전체 경로 저장
-            return false; // 네비게이션 중단
+            if (hasUnsavedChanges()) {
+                isWarningModalOpen.value = true;
+                pendingRoute.value = to.fullPath; // 이동하려는 전체 경로 저장
+                return false; // 네비게이션 중단
+            }
         }
         // console.log('[25] 네비게이션 계속 진행');
         return next(); // 네비게이션 계속
@@ -710,6 +718,13 @@ onBeforeUnmount(() => {
     // 컴포넌트 해제 시 이벤트 리스너 제거
     window.removeEventListener('beforeunload', handleBeforeUnload);
     localStorage.removeItem('pathFromGenerate');
+    // 질문 페이지로 이동하는 경우에만 데이터 유지, 그 외에는 삭제
+    if (!navigatingToQuestions.value) {
+        localStorage.removeItem('genieq-passage-data');
+        console.log('이어서 문항 생성하기가 아닌 다른 경로로 이동하여 지문 데이터 삭제됨');
+    } else {
+        console.log('이어서 문항 생성하기로 이동하여 지문 데이터 유지됨');
+    }
     // 라우터 가드 제거
     if (routerGuard) {
         routerGuard();

@@ -47,14 +47,34 @@ import { useAuthStore } from '@/stores/auth';
 const router = useRouter();
 const emit = defineEmits(["close", "generate", 'credit-update']);
 
+// const props = defineProps({
+//   isOpen: Boolean,
+//   createText: {type: String, default: "생성하기"},
+//   selectedQuestion: {
+//     type: Object,
+//     required: true
+//   }
+// });
+
 const props = defineProps({
-  isOpen: Boolean,
-  createText: {type: String, default: "생성하기"},
-  selectedQuestion: {
-    type: Object,
-    required: true
-  }
+    isOpen: {
+        type: Boolean,
+        required: true
+    },
+    createText: {
+        type: String,
+        default: '생성하기'
+    },
+    selectedQuestion: {
+        type: Object,
+        default: () => ({
+            mode: '',
+            title: '',
+            options: []
+        })
+    }
 });
+
 
 const creditcount = ref(0); // 초기값 0
 const authStore = useAuthStore();
