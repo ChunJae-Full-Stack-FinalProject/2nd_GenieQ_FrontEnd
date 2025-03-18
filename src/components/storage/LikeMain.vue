@@ -8,11 +8,11 @@
       <p>({{ computedWorkItems.length }}개)</p>
     </div>
     <div class="storage-likemain-subtitle2">
-    <span>삭제</span>
     <button 
       style="border: 0; background-color: transparent;"
-      @click="openDeleteModal"
-    >
+      @click="openDeleteModal" class="trash-btn"
+      >
+      <span>삭제</span>
       <Icon icon="cil:trash" class="trash" width="20" height="20" style="color: #303030" />
     </button>
   </div>
@@ -1036,6 +1036,25 @@ margin-left: 4px;
 
   .pagination span:hover:not(.active-page) {
     background-color: #f0f0f0;
+  }
 
+  .trash-btn {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 0px;
+    gap: 12px;
+    margin-right: 5px;
+  }
+  .trash-btn span {
+    font-family: 'Pretendard';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 150%;
+
+    letter-spacing: -0.02em;
+    color: #303030;
   }
 </style>

@@ -1,8 +1,8 @@
 <template>
   <div class="card-container">
     <div class="storage-worklist-title">
-      <p>최근 작업 내역</p>
-      <router-link to="/storage/worklistMina">
+      <router-link to="/storage/worklistMina" class="worklist-link">
+        <p>최근 작업 내역</p>
         <Icon icon="weui:arrow-outlined" width="24" height="24" id="arrow-icon" style="color: #303030" />
       </router-link>
       <div class="storage-worklist-subtitle">
@@ -308,6 +308,14 @@ const handleWorkItemClick = (item) => {
     top: 416px;
     left: 292px;
   }
+
+  .worklist-link {
+    display: flex;
+    gap: 8px;
+
+    text-decoration: none;
+    color: #303030;
+  }
   
   .storage-worklist-title {
     display: flex;
@@ -316,13 +324,8 @@ const handleWorkItemClick = (item) => {
     isolation: isolate;
     box-sizing: border-box;
   }
-
-  #arrow-icon {
-    position: absolute;
-    top: 2px;
-  }
   
-  .storage-worklist-title > p {
+  .storage-worklist-title p {
     font-size: 24px;
     font-weight: 700;
     margin: 0;

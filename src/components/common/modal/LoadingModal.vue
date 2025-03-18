@@ -2,7 +2,7 @@
     <div v-if="isOpen" class="loading-overlay">
       <div class="loading-content">
         <img :src="loadingImage" alt="Loading..." class="loading-icon" />
-        <p>{{ message }}</p>
+        <p style="white-space: pre-wrap;" class="loading-msg">{{ message }}</p>
       </div>
     </div>
   </template>
@@ -41,10 +41,11 @@
     height: 80px;
   }
   
-  p {
+  .loading-msg {
     margin-top: 16px;
     color: #fff;
     font-size: 18px;
+    text-align: center;
   }
   </style>
   

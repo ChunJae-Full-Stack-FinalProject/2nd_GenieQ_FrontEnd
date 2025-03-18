@@ -70,7 +70,7 @@
   <!-- 회원탈퇴 경고 모달 -->
   <WarningModalComponent
     :isOpen="showWithdrawalWarning"
-    title="서비스를 탈퇴하시겠습니까"
+    title="서비스를 탈퇴하시겠습니까?"
     message="탈퇴 시 남은 이용권은 소멸되며, 회원 정보 및 생성한 데이터는 즉시 파기됩니다."
     cancelText="취소하기"
     confirmText="탈퇴하기"
