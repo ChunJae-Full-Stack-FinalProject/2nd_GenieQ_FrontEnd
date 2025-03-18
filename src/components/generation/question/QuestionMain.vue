@@ -169,10 +169,10 @@ const resetPassage = () => {
 
 const hasContent = computed(() => {
     return (
-    currentPassage.value.PAS_CONTENT &&
-    currentPassage.value.PAS_CONTENT.trim().length > 0 &&
-    insertPassageRef.value?.passageTitle && // 제목 입력 상태 체크
-    insertPassageRef.value?.passageTitle.trim().length > 0
+    (currentPassage.value.PAS_CONTENT &&
+    currentPassage.value.PAS_CONTENT.trim().length > 0) ||
+    (insertPassageRef.value?.passageTitle && // 제목 입력 상태 체크
+    insertPassageRef.value?.passageTitle.trim().length > 0)
   );
 });
 
