@@ -56,7 +56,7 @@
             <div class="example-group">
                 <!-- ✅ 필터링된 리스트 -->
                 <div class="example-list">
-                    <div class="list-wrapper" v-if="filteredQuestions.length > 0 && (activePattern && activeType || activeDifficulty)">
+                    <div class="list-wrapper" v-if="filteredQuestions.length > 0">
                         <div
                             v-for="(item, index) in filteredQuestions"
                             :key="index"
@@ -124,7 +124,7 @@ const activeDifficulty = ref(null); // 난이도 선택값
 const selectedQuestion = ref(null); // 선택된 문항을 ref로 저장
 const isProcessing = ref(false);
 const isLoading = ref(false);
-const loadingMessage = ref('문항을 생성 중입니다...');
+const loadingMessage = ref('문항을 생성 중입니다.\n생성까지 최대 3분이 소요될 수 있습니다.');
 
 
 const closeModal = () => {
@@ -177,7 +177,7 @@ const handleGenerateQuestion = async () => {
             // console.log('임시 데이터 성공:', saveResult);
 
             isLoading.value = true;
-            loadingMessage.value = '문항을 생성 중입니다...';
+            loadingMessage.value = '문항을 생성 중입니다.\n생성까지 최대 3분이 소요될 수 있습니다.';
 
             // ✅ 1단계: 키워드 생성 API 호출
             const keywordRequestData = {
@@ -317,14 +317,14 @@ const questions = questionExample;
 
 // ✅ 선택된 라디오 버튼에 따라 자동 필터링
 const filteredQuestions = computed(() => {
-  if (!activePattern.value && !activeType.value && !activeDifficulty.value) {
+  if (!activePattern.value || !activeType.value && !activeDifficulty.value) {
     return []; // 필터가 선택되지 않았다면 빈 배열 반환
   }
   
   return questionExample.filter((q) => {
     return (
-      (activePattern.value === null || activePattern.value === "전체" || q.pattern === activePattern.value) &&
-      (activeType.value === null || activeType.value === "전체" || q.type === activeType.value) &&
+      (activePattern.value === "전체" || q.pattern === activePattern.value) &&
+      (activeType.value === "전체" || q.type === activeType.value) &&
       (activeDifficulty.value === null || activeDifficulty.value === "전체" || q.difficulty === activeDifficulty.value)
     );
   });

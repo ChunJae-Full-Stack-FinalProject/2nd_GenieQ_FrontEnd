@@ -172,7 +172,7 @@ const isFromRoute = ref(false); // 문항 생성 페이지로 오기 전 주소�
 const isProcessing = ref(false);
 const pasCode = ref(0);
 const isLoading = ref(false);
-const loadingMessage = ref('문항을 생성 중입니다...');
+const loadingMessage = ref('문항을 생성 중입니다.\n생성까지 최대 3분이 소요될 수 있습니다.');
 
 // 내용 변경 감지를 위한 타이머 설정
 let changeDetectionTimer = null;
@@ -275,7 +275,7 @@ const handleRecreateGeneration = async () => {
   isProcessing.value = true;
 
   isLoading.value = true;
-  loadingMessage.value = '문항을 재생성 중입니다...';
+  loadingMessage.value = '문항을 재생성 중입니다.\n재생성까지 최대 3분이 소요될 수 있습니다.';
 
   try {
     const apiUrl = import.meta.env.VITE_API_URL;
@@ -659,7 +659,7 @@ const handleQuestionGeneration = async () => {
   isProcessing.value = true;
 
   isLoading.value = true;
-  loadingMessage.value = '새로운 문항을 생성 중입니다...';
+  loadingMessage.value = '새로운 문항을 생성 중입니다.\n생성까지 최대 3분이 소요될 수 있습니다.';
 
   try {
             // 임시 api 연결
