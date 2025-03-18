@@ -348,7 +348,8 @@ td {
 
 .data-table th {
   text-align: left;
-  padding: 10px 20px;    
+  padding: 10px 20px;   
+  height: 46px; 
   border-bottom: 1px solid #e1e1e1;
   font-family: 'Pretendard';
   font-weight: 700;
