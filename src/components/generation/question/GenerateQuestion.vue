@@ -173,6 +173,9 @@ const pasCode = ref(0);
 const isLoading = ref(false);
 const loadingMessage = ref('문항을 생성 중입니다...');
 
+// 내용 변경 감지를 위한 타이머 설정
+let changeDetectionTimer = null;
+
 // EditQuestion 컴포넌트 참조
 const editQuestionRefs = ref([]);
 
@@ -481,7 +484,7 @@ const handleContentChange = () => {
 // 저장 버튼 클릭 핸들러
 const handleSaveButtonClick = () => {
   if (isProcessing.value) return; // 중복 실행 방지
-      isProcessing.value = true;
+  isProcessing.value = true;
 
   updateEditingMode(false);
 
@@ -489,11 +492,29 @@ const handleSaveButtonClick = () => {
     const isValid = editPassageRef.value.validateTextLength();
     
     if (isValid) {
+      // 저장 버튼 클릭 시 EditPassage 컴포넌트에서 최신 내용 가져오기
+      const currentContent = editPassageRef.value.getContent();
+      const currentTitle = editPassageRef.value.getTitle();
+      
+      // 로깅 확인
+      console.log("저장할 데이터:", { 
+        title: currentTitle, 
+        content: currentContent 
+      });
 
-      console.log("저장데이터: ", passageData.value);
       const apiUrl = import.meta.env.VITE_API_URL;
       const pasCode = saveResponse.value.passage.pasCode;
-      const selectedQuestion = saveResponse.value.question;
+      
+      // 올바른 요청 데이터 구조 생성
+      const requestData = {
+        "type": saveResponse.value.passage.type,
+        "keyword": saveResponse.value.passage.keyword,
+        "title": passageData.value.title,
+        "content": currentContent,
+        "gist": saveResponse.value.passage.gist || '',
+        "isGenerated": saveResponse.value.passage.isGenerated || 0,
+        "questions": saveResponse.value.passage.questions || []
+      };
 
       // 지문 저장 api
       fetch(`${apiUrl}/pass/ques/update/${pasCode}`, {
@@ -501,48 +522,64 @@ const handleSaveButtonClick = () => {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify(passageData.value),
+        body: JSON.stringify(requestData),
         credentials: 'include'
-    })
-    .then(response => {
-        if (!response.ok) {
-            // 인증 오류 처리 (401)
-            if (response.status === 401) {
-                console.error('인증 오류(401): 로그인이 필요합니다');
+      })
+      .then(response => {
+          if (!response.ok) {
+              // 인증 오류 처리 (401)
+              if (response.status === 401) {
+                  console.error('인증 오류(401): 로그인이 필요합니다');
 
-                // 인증 상태 초기화
-                authStore.user = null;
-                authStore.isAuthenticated = false;
-                localStorage.removeItem('authUser');
+                  // 인증 상태 초기화
+                  authStore.user = null;
+                  authStore.isAuthenticated = false;
+                  localStorage.removeItem('authUser');
 
-                // 로그인 페이지로 리다이렉트
-                router.push({ 
-                    path: '/login', 
-                    query: { redirect: route.fullPath }
-                });
+                  // 로그인 페이지로 리다이렉트
+                  router.push({ 
+                      path: '/login', 
+                      query: { redirect: route.fullPath }
+                  });
 
-                throw new Error('인증이 필요합니다');
-            }
-        }
-        return response.json();
-    })
-    .then(data => {
-        localStorage.setItem('saveResponse', JSON.stringify({
-            question: selectedQuestion,
-            passage: data
-        }))
-    })
-    .catch(error => {
-        console.error("문항 수정 실패 : ", error);
-    });
-
-    
+                  throw new Error('인증이 필요합니다');
+              }
+              throw new Error(`지문 저장 실패: ${response.status}`);
+          }
+          return response.json();
+      })
+      .then(data => {
+          // API 응답으로 받은 데이터로 saveResponse 업데이트
+          saveResponse.value = {
+              ...saveResponse.value,
+              passage: data
+          };
+          
+          // 업데이트된 데이터를 로컬스토리지에 저장
+          localStorage.setItem('saveResponse', JSON.stringify(saveResponse.value));
+          
+          // 상태 업데이트
+          isSaved.value = true;
+          hasManualSave.value = true;
+          isContentChanged.value = false;
+          
+          console.log('지문이 성공적으로 저장되었습니다:', data);
+      })
+      .catch(error => {
+          console.error("지문 수정 실패 : ", error);
+          alert("지문 저장에 실패했습니다.");
+      })
+      .finally(() => {
+          isProcessing.value = false;
+      });
+      
       savePassageData();
       isSaved.value = false;
       hasManualSave.value = true;
       isContentChanged.value = false; // 저장 후 내용 변경 플래그를 false로 설정
       console.log('내용이 저장되었습니다:', { isContentChanged: isContentChanged.value, hasManualSave: hasManualSave.value });
       isProcessing.value = false;
+
       return true;
     } else {
       showLengthWarning();
@@ -990,6 +1027,16 @@ onMounted(() => {
     localStorage.removeItem('saveResponse');
     return next(); // 네비게이션 계속
   });
+  
+    // localStorage 변경 감지 타이머 설정
+    changeDetectionTimer = setInterval(() => {
+    const hasChanged = localStorage.getItem('editPassageChanged') === 'true';
+    if (hasChanged) {
+      // 변경사항 있음 - 버튼 활성화
+      isContentChanged.value = true;
+      localStorage.removeItem('editPassageChanged');
+    }
+  }, 500); // 500ms마다 체크
 });
 
 onBeforeUnmount(() => {
@@ -1000,6 +1047,14 @@ onBeforeUnmount(() => {
   if (routerGuard) {
     routerGuard();
   }
+
+    // 타이머 정리
+    if (changeDetectionTimer) {
+    clearInterval(changeDetectionTimer);
+  }
+  
+  // localStorage 정리
+  localStorage.removeItem('editPassageChanged');
 });
 
 // provide 실행
