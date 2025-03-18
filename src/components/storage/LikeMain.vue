@@ -5,7 +5,7 @@
     </div>
     <div class="storage-likemain-subtitle">
       <span>전체</span>
-      <P>({{ computedWorkItems.length }}개)</P>
+      <p>({{ computedWorkItems.length }}개)</p>
     </div>
     <div class="storage-likemain-subtitle2">
     <span>삭제</span>
@@ -696,13 +696,14 @@ color: #FF9F40;
 
 .table-container {
   width: 100%;
+  height: 675px;
   overflow-x: auto;
   overflow: hidden;
 }
 
 .data-table {
   width: 1472px;
-  height: 736px;
+  height: 46px;
   border-collapse: collapse;
   table-layout: fixed;
 }
