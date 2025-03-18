@@ -696,7 +696,7 @@ color: #FF9F40;
 
 .table-container {
   width: 100%;
-  height: 736px;
+  height: 675px;
   overflow-x: auto;
   overflow: hidden;
 }
