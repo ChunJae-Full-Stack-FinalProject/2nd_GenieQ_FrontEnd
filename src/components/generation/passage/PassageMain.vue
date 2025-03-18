@@ -178,8 +178,8 @@ const confirmCreatePassage = () => {
         // console.log('[1-2] 지문 생성 API 요청 데이터:', requestData);
 
         const apiUrl = import.meta.env.VITE_API_URL;
-        fetch(`${apiUrl}/api/test/generate-passage`, {
-        // fetch('http://10.41.1.56:7777/generate-passage', {
+        //fetch(`${apiUrl}/api/test/generate-passage`, {
+        fetch('http://10.41.1.56:7777/generate-passage', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(requestData)
