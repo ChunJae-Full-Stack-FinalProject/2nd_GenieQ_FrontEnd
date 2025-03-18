@@ -58,7 +58,6 @@ onMounted(() => {
   // genieq-passage-data에서 데이터 로드
   try {
     const storedData = localStorage.getItem('genieq-passage-data');
-    console.log(storedData)
     if (storedData) {
       const data = JSON.parse(storedData);
 

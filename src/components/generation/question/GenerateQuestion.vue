@@ -154,7 +154,8 @@ const type = ref(null);
 const questionData = ref(null);
 const passageData = ref({
   title:'',
-  content: ''
+  content: '',
+  gist: ''
 });
 const isConfirmModalOpen = ref(false);
 const showGenerateQuestionModal = ref(false);
