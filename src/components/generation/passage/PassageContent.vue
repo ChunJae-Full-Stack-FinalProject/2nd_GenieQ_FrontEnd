@@ -21,7 +21,9 @@
         <WarningModalComponent :isOpen="isWarningModalOpen" title="작업을 중단하시겠습니까?" message="마지막 편집 내용은 저장되지 않습니다." cancelText="취소하기" confirmText="작업 중단하기" @close="cancelNavigation" @confirm="confirmNavigation" />
         <!-- 결제 사용 모달 -->
 
+        <!-- 재생성하기 결제 창 -->
         <PaymentUsageModal 
+            ref="paymentUsageModalRef"
             :isOpen="isPaymentUsageModalOpen"
             @close="closePaymentUsageModal"
             @generate="handleGenerate"
@@ -50,7 +52,7 @@ import ConfirmModalComponent from '@/components/common/modal/type/ConfirmModalCo
 import WarningModalComponent from '@/components/common/modal/type/WarningModalComponent.vue';
 import PaymentUsageModal from '@/components/common/modal/type/generation/PaymentUsageModal.vue';
 import LoadingModal from '@/components/common/modal/LoadingModal.vue';
-import { ref, onMounted, onBeforeUnmount, getCurrentInstance, nextTick } from 'vue';
+import { ref, onMounted, onBeforeUnmount, getCurrentInstance, nextTick, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { usePassageStore } from '@/stores/passage';
 import { useAuthStore } from '@/stores/auth';
@@ -62,11 +64,13 @@ const isContentChanged = ref(false); // 내용 변경 여부 추적 (초기 상�
 const isWarningModalOpen = ref(false); // 경고 모달 상태
 const isPaymentUsageModalOpen = ref(false); // 결제 사용 모달 상태
 const isLoading = ref(false); // 로딩 상태 추가
-const loadingMessage = ref('처리 중입니다...'); // 로딩 메시지
+const loadingMessage = ref('지문을 생성 중입니다...'); // 로딩 메시지
 const isFromRoute = ref(false); // 이전 페이지의 루트 확인용
 const isSaveSuccessModalOpen = ref(false); // 저장 확인 모달 오픈
 const saveSuccessMessage = ref('지문이 저장되었습니다.'); // 저장 확인 모달 메시지
 
+// 중복 요청 방지를 위한 처리 상태 플래그 추가
+const isProcessing = ref(false);
 // 네비게이션 관련 변수
 const pendingRoute = ref(null); // 대기 중인 라우트 정보 저장
 // 컴포넌트 참조
@@ -85,6 +89,7 @@ const router = useRouter();
 const passageStore = usePassageStore();
 const authStore = useAuthStore();
 
+const paymentUsageModalRef = ref(null);
 // 글자 수 체크 함수
 const checkContentLength = (event) => {
     // 내용 길이 검증
@@ -108,8 +113,20 @@ const openPaymentUsageModal = () => {
             keyword: keyword.value
         };
         localStorage.setItem('generateQuestionPassageData', JSON.stringify(passageData));
-        // 결제 사용 모달 열기
-        isPaymentUsageModalOpen.value = true;
+        
+        // 모달 열기 전에 이용권 정보 갱신
+        if (paymentUsageModalRef.value && paymentUsageModalRef.value.updateCreditCount) {
+            authStore.updateTicketCount().then(count => {
+                paymentUsageModalRef.value.updateCreditCount(count);
+                console.log('[LOG] 모달 열기 전 이용권 정보 갱신:', count);
+                
+                // 갱신 후 모달 열기
+                isPaymentUsageModalOpen.value = true;
+            });
+        } else {
+            // ref나 초기화 메서드가 없어도 모달은 열어줌
+            isPaymentUsageModalOpen.value = true;
+        }
     }
 };
 
@@ -126,44 +143,144 @@ const closeSaveSuccessModal = () => {
     isSaveSuccessModalOpen.value = false;
 };
 
+// 백엔드 API에 지문 저장 함수 (handleGenerate 함수에서 호출)
+const savePassageToBackend = (data) => {
+    if (!data || !data.generated_passage) {
+        console.error("savePassageToBackend: 유효하지 않은 데이터", data);
+        alert('지문 데이터가 유효하지 않습니다.');
+        isLoading.value = false;
+        isProcessing.value = false;
+        return;
+    }
+    
+    loadingMessage.value = '생성된 지문을 저장 중입니다...';
+    console.log("[LOG-1] 재생성된 데이터 저장 시도:", {
+        type: data.type_passage,
+        keyword: data.keyword,
+        content_length: data.generated_passage ? data.generated_passage.length : 0
+    });
+
+    const saveData = {
+        type: data.type_passage || type.value,
+        keyword: keyword.value,
+        title: title.value,
+        content: data.generated_passage,
+        gist: data.generated_core_point,
+        isGenerated: 1
+    };
+
+    // 백엔드 API 호출
+    const apiUrl = import.meta.env.VITE_API_URL;
+    fetch(`${apiUrl}/pass/insert/each`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(saveData)
+    })
+    .then(response => {
+      if (!response.ok) {
+        if (response.status === 401) {
+          authStore.user = null;
+          authStore.isAuthenticated = false;
+          localStorage.removeItem('authUser');
+          router.push({
+            path: '/login',
+            query: {redirect: router.currentRoute.value.fullPath}
+          });
+          throw new Error('인증이 필요합니다');
+        }
+        return response.text().then(text => {
+          throw new Error('저장 API 호출 실패: ' + text);
+        });
+      }
+      return response.json();
+    })
+    .then(responseData => {
+        authStore.updateTicketCount().then(newCount => {
+            console.log('[LOG] 재생성 후 이용권 업데이트 완료:', newCount);
+        }); // 차감된 이용권으로 update
+
+        const passageData = {
+            pasCode: responseData.pasCode,
+            title: saveData.title,
+            type: saveData.type,
+            keyword: saveData.keyword,
+            content: saveData.content,
+            gist: saveData.gist
+        };
+
+        localStorage.setItem('genieq-passage-data', JSON.stringify(passageData));
+
+        // 저장 성공 후 상태 업데이트
+        isContentChanged.value = false; // 변경 내용이 없는 상태로 설정
+        hasManualSave.value = true; // 저장된 상태로 설정
+
+        router.push('/passage/create');
+
+        // 상태 초기화
+        isLoading.value = false;
+        isProcessing.value = false;
+    })
+    .catch(error => {
+      console.error('[LOG-5] 저장 실패:', error);
+      alert('저장 중 오류가 발생했습니다: ' + error.message);
+      isLoading.value = false;
+      isProcessing.value = false;
+    });
+};
 const handleGenerate = () => {
-    console.log('지문 재생성 시작');
+    if (isProcessing.value) { return; }
+    console.log('[1] 지문 재생성 시작');
     closePaymentUsageModal();
     // 재생성 처리 로직
+    isProcessing.value = true;
     isLoading.value = true;
     loadingMessage.value = '지문 재생성 중입니다...';
 
-    // (수정) TestMemberController API 호출
-    const apiUrl = import.meta.env.VITE_API_URL;
+    // 로컬 스토리지에서 문자열로 데이터 가져오기
+    const savedGenerateDataStr = localStorage.getItem('genieq-passage-data');
+    
+    if (!savedGenerateDataStr) {
+        console.error('[2] 저장된 지문 데이터가 없습니다.');
+        isLoading.value = false;
+        return;
+    }
+    
+    // 문자열을 객체로 파싱
+    let savedGenerateData;
+    try {
+        savedGenerateData = JSON.parse(savedGenerateDataStr);
+        console.log('[3] 파싱된 지문 데이터:', savedGenerateData);
+    } catch (error) {
+        console.error('[4] 지문 데이터 파싱 오류:', error);
+        alert('지문 데이터 처리 중 오류가 발생했습니다.');
+        isLoading.value = false;
+        return;
+    }
+    
     const requestData = {
-        type_passage: type.value || '인문',
-        keyword: keyword.value || '키워드'
+        type_passage: savedGenerateData.type,
+        keyword: [savedGenerateData.keyword]
     };
 
-    console.log('지문 재생성 API 요청 데이터:', requestData);
-
+    const apiUrl = import.meta.env.VITE_API_URL;
     fetch(`${apiUrl}/api/test/generate-passage`, {
+    // fetch('http://10.41.1.56:7777/generate-passage', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestData)
     })
     .then(response => {
-        if (!response.ok) {
-            throw new Error(`API 호출 실패: ${response.status}`);
-        }
+        if (!response.ok) { throw new Error(`API 호출 실패: ${response.status}`); }
         return response.json();
     })
     .then(data => {
-        console.log('재생성된 지문 데이터:', {
-            content: data.generated_passage.substring(0, 50) + '...',
-            corePoints: data.generated_core_point
-        });
+        savePassageToBackend(data);
 
         // 재생성 결과 적용
         if (passageContentRef.value) {
             passageContentRef.value.setContent(data.generated_passage);
         }
-
         if (passageSummaryRef.value && typeof passageSummaryRef.value.setSummary === 'function') {
             const summaryData = {
                 subject: type.value,
@@ -172,7 +289,6 @@ const handleGenerate = () => {
             };
            passageSummaryRef.value.setSummary(summaryData);
         }
-
         // 상태 업데이트
         content.value = data.generated_passage;
         summary.value = {
@@ -180,21 +296,41 @@ const handleGenerate = () => {
             keyword: keyword.value,
             gist: data.generated_core_point
         };
-
-        isContentChanged.value = true;
-        hasManualSave.value = false;
-        alert('지문이 재생성되었습니다.');
+        
+        isContentChanged.value = false;
+        hasManualSave.value = true;
     })
     .catch(error => {
-        console.error('지문 재생성 중 오류:', error);
-        alert('지문 재생성 중 오류가 발생했습니다: ' + error.message);
+        console.log("test 서버로 요청을 대신합니다.");
+        // alert('http://10.41.1.56:7777/generate-passage 서버로의 요청에 실패했습니다.\nhttp://43.202.6.90:9090/test/generate-passage 로 요청을 대신합니다.');
+            
+        fetch(`${apiUrl}/api/test/generate-passage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestData)
+        })
+        .then(response => {
+            if (!response.ok) { throw new Error(`API 호출 실패: ${response.status}`); }
+            return response.json();
+        })
+        .then(data => {
+            localStorage.setItem('pathFromGenerate', 'true');
+            savePassageToBackend(data);
+        })
+        .catch(error => {
+        });
+        isLoading.value = false;
+        isProcessing.value = false;
     })
     .finally(() => {
         isLoading.value = false;
+        isProcessing.value = false;
     });
 };
 // 저장 버튼 클릭 핸들러
 const handleSaveButtonClick = () => {
+    if (isProcessing.value) { return; }
+    isProcessing.value = true;
     // 내용 검증
     if (!content.value || content.value.length < 300) {
         alert('300자 이상 입력해주세요.');
@@ -209,7 +345,7 @@ const handleSaveButtonClick = () => {
         title: title.value,
         content: content.value
     };
-    console.log('📢 지문 업데이트 요청 데이터:', saveData);
+    // console.log('📢 지문 업데이트 요청 데이터:', saveData);
     if (!pasCode.value) {
         alert('지문 코드가 없습니다. 저장할 수 없습니다.');
         isLoading.value = false;
@@ -254,15 +390,15 @@ const handleSaveButtonClick = () => {
             // 로컬 스토리지 업데이트
             localStorage.setItem('genieq-passage-data', JSON.stringify(updatedData));
             alert('지문 저장에 성공했습니다.');
-            isContentChanged.value = false;
             hasManualSave.value = true;
         })
         .catch(error => {
-            console.error('지문 업데이트 중 오류:', error);
+            // console.error('지문 업데이트 중 오류:', error);
             alert('지문 저장 중 오류가 발생했습니다: ' + error.message);
         })
         .finally(() => {
             isLoading.value = false;
+            isProcessing.value = false;
         });
 };
 // 이어서 문항 생성하기 버튼 클릭 시 데이터 저장
@@ -298,7 +434,7 @@ const prepareDataForQuestions = () => {
     };
     // 통합 키로 저장 (QuestionMain에서 사용)
     localStorage.setItem('genieq-passage-for-question', JSON.stringify(passageForQuestion));
-    console.log('문항 생성을 위한 지문 데이터 준비:', passageForQuestion);
+    // console.log('문항 생성을 위한 지문 데이터 준비:', passageForQuestion);
 };
 // 파일 모달 열기 함수
 const openFileModal = () => {
@@ -329,7 +465,7 @@ const handleFileSelect = async (fileType) => {
             pasCode: pasCode.value,
             fileType: fileType
         };
-        console.log('파일 추출 요청:', exportData);
+        // console.log('파일 추출 요청:', exportData);
         if (!pasCode.value) {
             throw new Error('지문 코드가 없습니다. 파일을 추출할 수 없습니다.');
         }
@@ -364,9 +500,9 @@ const handleFileSelect = async (fileType) => {
         document.body.appendChild(downloadLink);
         downloadLink.click();
         document.body.removeChild(downloadLink);
-        console.log('파일 추출 완료');
+        // console.log('파일 추출 완료');
     } catch (error) {
-        console.error('파일 추출 중 오류:', error);
+        // console.error('파일 추출 중 오류:', error);
         alert('파일 추출 중 오류가 발생했습니다: ' + error.message);
     } finally {
         isLoading.value = false;
@@ -402,13 +538,13 @@ const hasUnsavedChanges = () => {
 };
 // 이동 취소 - 현재 화면 유지
 const cancelNavigation = () => {
-    console.log('네비게이션 취소됨');
+    // console.log('네비게이션 취소됨');
     isWarningModalOpen.value = false;
     pendingRoute.value = null;
 };
 // 이동 확인 - 타겟 페이지로 이동
 const confirmNavigation = () => {
-    console.log('네비게이션 승인됨, 이동 실행');
+    // console.log('네비게이션 승인됨, 이동 실행');
     isWarningModalOpen.value = false;
     // 변경 사항이 있었지만, 사용자가 이동을 확인했으므로 관련 상태 초기화
     isContentChanged.value = false;
@@ -438,7 +574,7 @@ let routerGuard = null;
 // 로컬 스토리지에서 지문 데이터 로드
 const loadPassageData = () => {
     try {
-        console.log('[12] 로컬 스토리지에서 지문 데이터 로드 시도');
+        // console.log('[12] 로컬 스토리지에서 지문 데이터 로드 시도');
         // 통일된 키 사용
         const storedData = localStorage.getItem('genieq-passage-data');
         if (storedData) {
@@ -450,7 +586,7 @@ const loadPassageData = () => {
                 return null;
             }
 
-            console.log('[12-1] 로컬 스토리지에서 데이터 로드 성공:', data);
+            // console.log('[12-1] 로컬 스토리지에서 데이터 로드 성공:', data);
             // 데이터 설정 - 백엔드 응답 구조(PAS_)와 프론트엔드 변수명(소문자) 모두 처리
             title.value = data.title || '';
             content.value = data.content || '';
@@ -484,35 +620,35 @@ const loadPassageData = () => {
             return data;
         }
     } catch (error) {
-        console.error('[12-3] 지문 데이터 로드 중 오류:', error);
+        // console.error('[12-3] 지문 데이터 로드 중 오류:', error);
     }
-    console.log('[12-4] 로드된 데이터 없음, 더미 데이터 반환');
+    // console.log('[12-4] 로드된 데이터 없음, 더미 데이터 반환');
     return null;
 };
 // 컴포넌트 마운트 시 실행
 onMounted(async () => {
-    console.log('[17] PassageContent 컴포넌트 마운트');
+    // console.log('[17] PassageContent 컴포넌트 마운트');
 
     // 이전 경로 확인 로직 추가
     const fromPath = route.query.from || '';
-    isFromRoute.value = fromPath.startsWith('/home') || fromPath.startsWith('/storage');
+    isFromRoute.value = localStorage.getItem('pathFromGenerate', 'true') !== 'true';;
 
     // 데이터 로드
     const loadedData = loadPassageData();
     // 데이터가 있으면 컴포넌트에 적용
     if (loadedData) {
-        console.log('[17-1] 로드된 데이터를 컴포넌트에 적용 시작');
+        // console.log('[17-1] 로드된 데이터를 컴포넌트에 적용 시작');
         // 본문과 제목 설정 - nextTick 사용
         nextTick(() => {
             if (passageContentRef.value) {
                 // 명시적으로 setContent와 setTitle 호출, 순서 변경
                 if (title.value) {
                     passageContentRef.value.setTitle(title.value);
-                    console.log('[17-2] 명시적으로 제목 설정:', title.value);
+                    // console.log('[17-2] 명시적으로 제목 설정:', title.value);
                 }
                 if (content.value) {
                     passageContentRef.value.setContent(content.value);
-                    console.log('[17-3] 본문 설정 완료, 길이:', content.value.length);
+                    // console.log('[17-3] 본문 설정 완료, 길이:', content.value.length);
                 }
             }
 
@@ -524,9 +660,9 @@ onMounted(async () => {
                     keyword: keyword.value,
                     gist: summary.value.items || []
                 };
-                console.log('[17-4] 핵심 논점 설정 준비:', summaryData);
+                // console.log('[17-4] 핵심 논점 설정 준비:', summaryData);
                 passageSummaryRef.value.setSummary(summaryData);
-                console.log('[17-5] 핵심 논점 설정 완료', summaryData);
+                // console.log('[17-5] 핵심 논점 설정 완료', summaryData);
             }
 
             // 컴포넌트 상태 초기화
@@ -535,7 +671,7 @@ onMounted(async () => {
         });
     } else {
         // (수정) 데이터가 없는 경우 이전 페이지로 리다이렉트
-        console.log('[17-6] 로드된 데이터 없음, 이전 페이지로 리다이렉트');
+        // console.log('[17-6] 로드된 데이터 없음, 이전 페이지로 리다이렉트');
         alert('지문 데이터를 찾을 수 없습니다. 지문 생성 페이지로 이동합니다.');
         router.push('/passage');
         return; // 불필요한 코드 실행 방지
@@ -544,37 +680,38 @@ onMounted(async () => {
     window.addEventListener('beforeunload', handleBeforeUnload);
     // 전역 네비게이션 가드 설정
     routerGuard = router.beforeEach((to, from, next) => {
-        console.log('[23] 라우터 가드 호출됨', { from: from.path, to: to.path, current: route.path });
+        // console.log('[23] 라우터 가드 호출됨', { from: from.path, to: to.path, current: route.path });
         // 현재 라우트에서 다른 라우트로 이동하는 경우에만 확인
         if (from.path === route.path && hasUnsavedChanges()) {
-            console.log('[24] 저장되지 않은 변경사항 감지됨, 네비게이션 중단 및 모달 표시');
+            // console.log('[24] 저장되지 않은 변경사항 감지됨, 네비게이션 중단 및 모달 표시');
             // 저장되지 않은 변경사항이 있다면 모달 표시하고 대기
             isWarningModalOpen.value = true;
             pendingRoute.value = to.fullPath; // 이동하려는 전체 경로 저장
             return false; // 네비게이션 중단
         }
-        console.log('[25] 네비게이션 계속 진행');
+        // console.log('[25] 네비게이션 계속 진행');
         return next(); // 네비게이션 계속
     });
     // 현재 상태 로그
-    console.log('[26] 현재 상태 값:', {
-        title: title.value,
-        contentLength: content.value?.length || 0,
-        pasCode: pasCode.value,
-        type: type.value,
-        keyword: keyword.value,
-        isContentChanged: isContentChanged.value,
-        hasManualSave: hasManualSave.value
-    });
+    // console.log('[26] 현재 상태 값:', {
+    //     title: title.value,
+    //     contentLength: content.value?.length || 0,
+    //     pasCode: pasCode.value,
+    //     type: type.value,
+    //     keyword: keyword.value,
+    //     isContentChanged: isContentChanged.value,
+    //     hasManualSave: hasManualSave.value
+    // });
 });
 onBeforeUnmount(() => {
     // 컴포넌트 해제 시 이벤트 리스너 제거
     window.removeEventListener('beforeunload', handleBeforeUnload);
+    localStorage.removeItem('pathFromGenerate');
     // 라우터 가드 제거
     if (routerGuard) {
         routerGuard();
     }
-    console.log('PassageContent 컴포넌트 언마운트');
+    // console.log('PassageContent 컴포넌트 언마운트');
 });
 // 데이터가 변경될 때마다 호출될 콜백 함수
 // 이 함수를 자식 컴포넌트에서 호출하도록 구현하여 내용 변경 감지
