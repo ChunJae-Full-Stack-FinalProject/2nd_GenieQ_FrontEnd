@@ -1,7 +1,7 @@
 <template>
 <BaseModal :isOpen="isOpen" width="795.67px" height="625.17px" @close="closeModal">
   <div class="history-modaltitle" style="text-align: start;">
-      <p class="history-title">이용권님의 이용권 정보</p>
+      <p class="history-title">이용 내역 조회</p>
       <p class="history-subtitle">이용권 충전후 사용가능한 내역입니다.</p>
   </div>
     <div class="history-section">           
@@ -80,6 +80,10 @@ import BaseModal from "../../BaseModal.vue";
 import BaseButton from "@/components/common/button/BaseButton.vue";
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
+
+
+// 사용자 정보를 computed 속성으로 가져오기
+const userData = computed(() => authStore.userInfo);
 
 const emit = defineEmits(['close']);
 

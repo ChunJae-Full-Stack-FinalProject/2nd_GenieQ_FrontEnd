@@ -103,7 +103,7 @@
    <!-- 삭제 경고 모달 -->
    <WarningModalComponent 
     :isOpen="isDeleteModalOpen"
-    title="선택하 자료를 삭제하시겠습니까?"
+    title="선택한 자료를 삭제하시겠습니까?"
     :message="`삭제를 진행한 자료는 영구 삭제됩니다.`"
     cancelText="취소"
     confirmText="삭제"
@@ -730,7 +730,7 @@ color: #424242;
   border-bottom: 1px solid #e1e1e1;
 }
 .data-table tr:last-child {
-  border-bottom: none;
+  /* border-bottom: none; */
 }
 
 /* 열 너비 조정 */
