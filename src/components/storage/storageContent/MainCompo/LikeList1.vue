@@ -346,13 +346,14 @@ margin: 0;
 
 .table-container {
 width: 100%;
+height: 276px;
 overflow-x: auto;
 overflow: hidden;
 }
 
 .data-table {
   width: 1472px;
-  height: 276px;
+  height: 46px;
   border-collapse: collapse;
   table-layout: fixed;
 }
