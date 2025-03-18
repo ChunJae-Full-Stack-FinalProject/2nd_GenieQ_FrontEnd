@@ -730,7 +730,7 @@ color: #424242;
   border-bottom: 1px solid #e1e1e1;
 }
 .data-table tr:last-child {
-  border-bottom: none;
+  /* border-bottom: none; */
 }
 
 /* 열 너비 조정 */
