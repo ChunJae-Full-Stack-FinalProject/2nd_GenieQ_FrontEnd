@@ -51,7 +51,7 @@
     </div>
 
     <!-- 파일 선택 모달 -->
-    <FileSelectModal :isOpen="isModalOpen" @close="closeFileModal" @confirm="handleFileSelection"/>
+    <FileSelectModal :isOpen="isModalOpen" :pasCode="selectedItem?.PAS_CODE" @close="closeFileModal" @confirm="handleFileSelection"/>
   </div>
 </template>
 
