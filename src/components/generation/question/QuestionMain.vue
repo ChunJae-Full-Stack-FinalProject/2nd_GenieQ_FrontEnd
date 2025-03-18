@@ -156,7 +156,7 @@ const validateAndOpenModal = () => {
 
 // 지문 설정 함수
 const setPassage = (passage) => {
-    currentPassage.value = passage;
+    currentPassage.value.PAS_CONTENT = passage.PAS_CONTENT;
 };
 
 // 지문 초기화 함수
