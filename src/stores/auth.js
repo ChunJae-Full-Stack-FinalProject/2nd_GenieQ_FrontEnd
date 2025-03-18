@@ -1,5 +1,6 @@
 // src/stores/auth.js
 import { defineStore } from 'pinia';
+import { initSessionKeepAlive } from '../utils/sessionKeepAlive';
 
 export const useAuthStore = defineStore('auth', {
   // state는 상태(데이터) 저장 -> 반응형이기 때문에 상태가 변경되면 컴포넌트에서 즉시 반영
@@ -27,12 +28,35 @@ export const useAuthStore = defineStore('auth', {
   //상태 수정 및 비동기 처리
   //로그인 api 호출 후 상태 업데이트는 actions에서 처리
   actions: {
+     // 세션 유지 시작 메서드
+     startSessionKeepAlive() {
+      // 이미 실행 중이면 중복 실행 방지
+      if (this.sessionKeepAliveCleanup) {
+        return;
+      }
+      
+      console.log('세션 유지 기능 시작');
+      this.sessionKeepAliveCleanup = initSessionKeepAlive();
+    },
+    
+    // 세션 유지 중지 메서드
+    stopSessionKeepAlive() {
+      if (this.sessionKeepAliveCleanup) {
+        this.sessionKeepAliveCleanup();
+        this.sessionKeepAliveCleanup = null;
+        console.log('세션 유지 기능 중지');
+      }
+    },
+
     // 사용자 정보 설정 (로그인 페이지에서 직접 호출)
     setUser(userData) {
       this.user = userData; 
       this.isAuthenticated = true;//인증상태
       this.error = null;
       console.log('Auth Store: 사용자 정보 설정됨', userData); // (추가) 로그: 사용자 정보 설정
+
+      // 로그인 상태가 되면 세션 유지 시작
+      this.startSessionKeepAlive();
     },
 
     //사용자 티켓 정보만 업데이트 하는 메서드
@@ -99,6 +123,9 @@ export const useAuthStore = defineStore('auth', {
           
           // 로컬 스토리지에 사용자 상태 저장 (새로고침 시 상태 유지)
           localStorage.setItem('authUser', JSON.stringify(userData));
+
+          // 세션 유지 기능 시작
+          this.startSessionKeepAlive();
           
           // 성공 상태를 호출한 쪽에 반환
           resolve({ success: true, user: userData });
@@ -119,6 +146,9 @@ export const useAuthStore = defineStore('auth', {
       this.isLoading = true;
       
       console.log('로그아웃 시도'); // (추가) 로그: 로그아웃 시도
+
+      // 세션 유지 기능 중지
+      this.stopSessionKeepAlive();
       
       return new Promise((resolve, reject) => {
         const apiUrl = import.meta.env.VITE_API_URL;
@@ -156,6 +186,9 @@ export const useAuthStore = defineStore('auth', {
           this.user = JSON.parse(storedUser);
           this.isAuthenticated = true;
           console.log('인증 상태 복원됨:', this.user); // (추가) 로그: 인증 상태 복원
+          
+          // 인증 상태가 복원되면 세션 유지 기능 시작
+          this.startSessionKeepAlive();
         } catch (error) {
           console.error('저장된 인증 정보 파싱 오류:', error); // (추가) 로그: 인증 정보 파싱 오류
           localStorage.removeItem('authUser');
