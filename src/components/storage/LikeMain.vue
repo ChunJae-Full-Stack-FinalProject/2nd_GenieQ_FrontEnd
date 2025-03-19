@@ -5,14 +5,14 @@
     </div>
     <div class="storage-likemain-subtitle">
       <span>전체</span>
-      <P>({{ computedWorkItems.length }}개)</P>
+      <p>({{ computedWorkItems.length }}개)</p>
     </div>
     <div class="storage-likemain-subtitle2">
-    <span>삭제</span>
     <button 
       style="border: 0; background-color: transparent;"
-      @click="openDeleteModal"
-    >
+      @click="openDeleteModal" class="trash-btn"
+      >
+      <span>삭제</span>
       <Icon icon="cil:trash" class="trash" width="20" height="20" style="color: #303030" />
     </button>
   </div>
@@ -103,7 +103,7 @@
    <!-- 삭제 경고 모달 -->
    <WarningModalComponent 
     :isOpen="isDeleteModalOpen"
-    title="선택하 자료를 삭제하시겠습니까?"
+    title="선택한 자료를 삭제하시겠습니까?"
     :message="`삭제를 진행한 자료는 영구 삭제됩니다.`"
     cancelText="취소"
     confirmText="삭제"
@@ -696,13 +696,14 @@ color: #FF9F40;
 
 .table-container {
   width: 100%;
+  height: 675px;
   overflow-x: auto;
   overflow: hidden;
 }
 
 .data-table {
   width: 1472px;
-  height: 736px;
+  height: 46px;
   border-collapse: collapse;
   table-layout: fixed;
 }
@@ -729,7 +730,7 @@ color: #424242;
   border-bottom: 1px solid #e1e1e1;
 }
 .data-table tr:last-child {
-  border-bottom: none;
+  /* border-bottom: none; */
 }
 
 /* 열 너비 조정 */
@@ -1035,6 +1036,25 @@ margin-left: 4px;
 
   .pagination span:hover:not(.active-page) {
     background-color: #f0f0f0;
+  }
 
+  .trash-btn {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 0px;
+    gap: 12px;
+    margin-right: 5px;
+  }
+  .trash-btn span {
+    font-family: 'Pretendard';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 150%;
+
+    letter-spacing: -0.02em;
+    color: #303030;
   }
 </style>

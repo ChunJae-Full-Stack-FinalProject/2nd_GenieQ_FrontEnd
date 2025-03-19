@@ -24,6 +24,8 @@
     background: url("@/assets/images/guide_image.png") no-repeat;
     border-radius: 8px;
     box-sizing: border-box;
+
+    text-decoration: none;
 }
 .top-container{
     box-sizing: border-box;

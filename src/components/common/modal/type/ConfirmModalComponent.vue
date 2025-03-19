@@ -3,7 +3,7 @@
     <div class="modal-content-group">
         <div class="modal-content">
             <div class="modal-title">{{ title }}</div>
-            <div class="modal-msg">{{ message }}</div>
+            <div class="modal-msg" v-html="message"></div>
         </div>
     <BaseButton text="확인" type="type1" width="224px" height="46px" @click="confirmAction" />
     </div>

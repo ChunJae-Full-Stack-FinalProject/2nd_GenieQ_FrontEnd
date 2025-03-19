@@ -67,7 +67,7 @@
     </div>
         
     <div class="button-container">
-        <BaseButton text="문항 추가하기" type="type2" id="add-button" width="248px" height="54px" :disabled="isContentChanged || isFromRoute" @click="validateAndOpenModal"/>
+        <BaseButton text="문항 추가하기" type="type2" id="add-button" width="248px" height="54px" :disabled="isContentChanged || isFromRoute" @click="validateAndOpenModal('generate')"/>
         <BaseButton text="저장하기" type="type2" id="save-button" width="248px" height="54px" :disabled="!isContentChanged" @click="handleSaveButtonClick"/>
         <BaseButton text="추출하기" type="type2" id="download-button" width="248px" height="54px" :disabled="isContentChanged" @click="openFileModal"/>
     </div>
@@ -77,7 +77,7 @@
       createText="다음"
       mode="generate"
       @close="showGenerateQuestionModal = false"
-      @openPaymentModal="showPaymentModal = true"
+      @openPaymentModal="handleUpdateQuestion"
     />
     <!-- PaymentUsageModal 컴포넌트 -->
     <PaymentUsageModal 
@@ -85,6 +85,7 @@
       createText="문항 추가하기" 
       @close="showPaymentModal = false"
       @generate="handleQuestionGeneration"
+      :selected-question="selectedQuestion"
     />
 
     <!-- 재생성 모달 추가 -->
@@ -93,6 +94,7 @@
       createText="재생성하기" 
       @close="showRecreateModal = false"
       @generate="handleRecreateGeneration"
+      :selected-question="selectedQuestion"
     />
     
     <ConfirmModalComponent
@@ -152,7 +154,8 @@ const type = ref(null);
 const questionData = ref(null);
 const passageData = ref({
   title:'',
-  content: ''
+  content: '',
+  gist: ''
 });
 const isConfirmModalOpen = ref(false);
 const showGenerateQuestionModal = ref(false);
@@ -169,7 +172,10 @@ const isFromRoute = ref(false); // 문항 생성 페이지로 오기 전 주소�
 const isProcessing = ref(false);
 const pasCode = ref(0);
 const isLoading = ref(false);
-const loadingMessage = ref('문항을 생성 중입니다...');
+const loadingMessage = ref('문항을 생성 중입니다.\n생성까지 최대 3분이 소요될 수 있습니다.');
+
+// 내용 변경 감지를 위한 타이머 설정
+let changeDetectionTimer = null;
 
 // EditQuestion 컴포넌트 참조
 const editQuestionRefs = ref([]);
@@ -178,6 +184,12 @@ const editQuestionRefs = ref([]);
 const currentSlide = ref(0);
 
 const saveResponse = ref({});
+
+const selectedQuestion = ref({
+  pattern: '',
+  type: '',
+  queExample: ''
+});
 
 // try {
 //   const data = localStorage.getItem('saveResponse');
@@ -192,6 +204,21 @@ const saveResponse = ref({});
 const questionsData = ref([]);
 
 const authStore = useAuthStore();
+
+// ✅ 값 저장 후 PaymentUsageModal 열기
+const handleUpdateQuestion = (data) => {
+  if (data) {
+    console.log("부모에서 받은 값: ", data);
+    selectedQuestion.value = {
+      pattern: data.pattern || '',
+      type: data.type || '',
+      queExample: data.queExample || ''
+    };
+
+    // ✅ PaymentUsageModal 열기
+    showPaymentModal.value = true;
+  }
+};
 
 // 제목 및 지문 수정
 const handlePassageChange = (updatedData) => {
@@ -224,19 +251,26 @@ const handleDescriptionChange = (event, index) => {
 
 // 재생성하기 버튼 클릭 핸들러
 const handleRecreateButtonClick = (index) => {
-  console.log('재생성하기 버튼 클릭됨, 문항 인덱스:', index || currentSlide.value);
-  
-  // 현재 재생성하려는 문항 인덱스 저장
-  currentRecreateIndex.value = index !== undefined ? index : currentSlide.value;
-  
-  // 지문 길이 검증
-  if (!validatePassageLength()) {
-    showLengthWarning();
-  } else {
-    // PaymentUsageModal 표시
+    console.log('재생성하기 버튼 클릭됨, 문항 인덱스:', index || currentSlide.value);
+
+    // 현재 재생성하려는 문항 인덱스 저장
+    currentRecreateIndex.value = index !== undefined ? index : currentSlide.value;
+
+    // ✅ 지문 길이 검증이 필요하면 추가
+    if (!validatePassageLength()) {
+        showLengthWarning(); // 지문이 너무 짧을 경우 경고
+        return; // ✅ 검증 실패 시 함수 종료
+    }
+
+    selectedQuestion.value = {
+        mode: 'recreate',
+        title: questionsData.value[index].queQuery,
+        options: questionsData.value[index].queOption
+    };
+
     showRecreateModal.value = true;
-  }
 };
+
 
 // 재생성 실행 핸들러 (PaymentUsageModal에서 버튼 클릭 시 호출)
 const handleRecreateGeneration = async () => {
@@ -248,139 +282,136 @@ const handleRecreateGeneration = async () => {
   isProcessing.value = true;
 
   isLoading.value = true;
-  loadingMessage.value = '문항을 재생성 중입니다...';
+  loadingMessage.value = '문항을 재생성 중입니다.\n재생성까지 최대 3분이 소요될 수 있습니다.';
 
   try {
-    console.log("pattern: ", route.query.pattern);
-    console.log("type: ", route.query.type);
-    console.log("queExample: ", route.query.queExample);
+    const apiUrl = import.meta.env.VITE_API_URL;
 
-            // 임시 api 연결
-            const apiUrl = import.meta.env.VITE_API_URL;
+    // 1단계: 문항 생성 API 호출
+    const requestData = {
+        "custom_passage": saveResponse.value.passage?.content || '',
+        "type_question": route.query.pattern,
+        "type_question_detail": route.query.type,
+        "question_example": route.query.queExample,
+        "mode": "recreate"
+    };
 
-            // 1단계: 문항 생성 API 호출
-            const requestData = {
-                "custom_passage": saveResponse.value.passage?.content || '',
-                "type_question": route.query.pattern,
-                "type_question_detail": route.query.type,
-                "question_example": route.query.queExample,
-            };
+    console.log("Request Data:", requestData);
 
-            console.log("Request Data:", requestData);
+    const response = await fetch('http://10.41.1.56:7777/generate-question', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData),
+    });
 
-            const response = await fetch('http://10.41.1.56:7777/generate-question', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(requestData),
-            });
+    if (!response.ok) {
+      // 인증 오류 처리 (401)
+      if (response.status === 401) {
+          console.error('인증 오류(401): 로그인이 필요합니다');
 
-            if (!response.ok) {
-              // 인증 오류 처리 (401)
-              if (response.status === 401) {
-                  console.error('인증 오류(401): 로그인이 필요합니다');
+          // 인증 상태 초기화
+          authStore.user = null;
+          authStore.isAuthenticated = false;
+          localStorage.removeItem('authUser');
 
-                  // 인증 상태 초기화
-                  authStore.user = null;
-                  authStore.isAuthenticated = false;
-                  localStorage.removeItem('authUser');
+          // 로그인 페이지로 리다이렉트
+          router.push({ 
+              path: '/login', 
+              query: { redirect: route.fullPath }
+          });
 
-                  // 로그인 페이지로 리다이렉트
-                  router.push({ 
-                      path: '/login', 
-                      query: { redirect: route.fullPath }
-                  });
-
-                  throw new Error('인증이 필요합니다');
-              }
-              throw new Error(`문항 생성 실패: ${response.status}`);
-            }
-            
-            const result = await response.json();
-            console.log('문항 생성 성공:', result);
-            
-
-            //2단계: 문항 저장 API 호출
-            const newQuestion = {
-              "queQuery": result.generated_question,
-              "queOption": result.generated_option,
-              "queAnswer": result.generated_answer,
-              "description": result.generated_description
-            };
-
-            const saveRequestData = {
-              "type": saveResponse.value.passage.type,
-              "keyword": saveResponse.value.passage.keyword,
-              "title": saveResponse.value.passage?.title || '',
-              "content": saveResponse.value.passage?.content || '',
-              "gist": saveResponse.value.passage?.gist || '',
-              "isGenerated": 0,
-              "questions": [
-                ...questionsData.value, // 기존 질문 유지
-                newQuestion
-              ]
-            };
-
-            console.log("saveRequest: ", saveRequestData);
-
-            const updateResponse = await fetch(`${apiUrl}/pass/ques/update/${saveResponse.value.passage.pasCode}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: "include",
-                body: JSON.stringify(saveRequestData),
-            });
-
-            if (!updateResponse.ok) {
-              // 인증 오류 처리 (401)
-              if (response.status === 401) {
-                  console.error('인증 오류(401): 로그인이 필요합니다');
-
-                  // 인증 상태 초기화
-                  authStore.user = null;
-                  authStore.isAuthenticated = false;
-                  localStorage.removeItem('authUser');
-
-                  // 로그인 페이지로 리다이렉트
-                  router.push({ 
-                      path: '/login', 
-                      query: { redirect: route.fullPath }
-                  });
-
-                  throw new Error('인증이 필요합니다');
-              }
-              throw new Error(`문항 저장 실패: ${updateResponse.status}`);
-            }
-
-            
-            const updateResult = await updateResponse.json();
-            console.log('문항 저장 성공:', updateResult);
-
-            // 상태 업데이트
-            questionsData.value = [...questionsData.value, newQuestion]; // 기존 질문 + 새 질문 추가
-            saveResponse.value = {
-              ...saveResponse.value,
-              passage: updateResult // 저장된 값 갱신
-            };
-
-            //새 문항이 표시되도록 캐러셀 인덱스 업데이트
-            currentSlide.value = questionsData.value.length - 1;
-
-            localStorage.setItem('saveResponse', JSON.stringify(saveResponse.value));
-
-            console.log('저장된 값:', localStorage.getItem('saveResponse'));
-            isLoading.value = false;
-
-            // 모달 닫기
-            showRecreateModal.value = false;
-            isProcessing.value = true;     
-      } catch (error) {
-          console.error('API 요청 실패:', error);
-          alert(`오류 발생: ${error.message}`);
-          isProcessing.value = true;
+          throw new Error('인증이 필요합니다');
       }
+      throw new Error(`문항 생성 실패: ${response.status}`);
+    }
+    
+    const result = await response.json();
+    console.log('문항 생성 성공:', result);
+    
+
+    //2단계: 문항 저장 API 호출
+    const newQuestion = {
+      "queQuery": result.generated_question,
+      "queOption": result.generated_option,
+      "queAnswer": result.generated_answer,
+      "description": result.generated_description
+    };
+
+    const saveRequestData = {
+      "type": saveResponse.value.passage.type,
+      "keyword": saveResponse.value.passage.keyword,
+      "title": saveResponse.value.passage?.title || '',
+      "content": saveResponse.value.passage?.content || '',
+      "gist": saveResponse.value.passage?.gist || '',
+      "isGenerated": 0,
+      "questions": [
+        ...questionsData.value, // 기존 질문 유지
+        newQuestion
+      ],
+      "mode": "recreate"
+    };
+
+    console.log("saveRequest: ", saveRequestData);
+
+    const updateResponse = await fetch(`${apiUrl}/pass/ques/update/${saveResponse.value.passage.pasCode}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: "include",
+        body: JSON.stringify(saveRequestData),
+    });
+
+    if (!updateResponse.ok) {
+      // 인증 오류 처리 (401)
+      if (response.status === 401) {
+          console.error('인증 오류(401): 로그인이 필요합니다');
+
+          // 인증 상태 초기화
+          authStore.user = null;
+          authStore.isAuthenticated = false;
+          localStorage.removeItem('authUser');
+
+          // 로그인 페이지로 리다이렉트
+          router.push({ 
+              path: '/login', 
+              query: { redirect: route.fullPath }
+          });
+
+          throw new Error('인증이 필요합니다');
+      }
+      throw new Error(`문항 저장 실패: ${updateResponse.status}`);
+    }
+
+            
+    const updateResult = await updateResponse.json();
+    console.log('문항 저장 성공:', updateResult);
+
+    // 상태 업데이트
+    questionsData.value = [...questionsData.value, newQuestion]; // 기존 질문 + 새 질문 추가
+    saveResponse.value = {
+      ...saveResponse.value,
+      passage: updateResult // 저장된 값 갱신
+    };
+
+    //새 문항이 표시되도록 캐러셀 인덱스 업데이트
+    currentSlide.value = questionsData.value.length - 1;
+
+    localStorage.setItem('saveResponse', JSON.stringify(saveResponse.value));
+
+    console.log('저장된 값:', localStorage.getItem('saveResponse'));
+    isLoading.value = false;
+
+    // 모달 닫기
+    showRecreateModal.value = false;
+    isProcessing.value = true;     
+  } catch (error) {
+      console.error('API 요청 실패:', error);
+      alert(`오류 발생: ${error.message}`);
+      isProcessing.value = true;
+  }
 };
 
 // 문항 저장 함수 (백엔드 연동 시 구현 예정)
@@ -462,8 +493,6 @@ const handleContentChange = () => {
 
 // 저장 버튼 클릭 핸들러
 const handleSaveButtonClick = () => {
-  if (isProcessing.value) return; // 중복 실행 방지
-      isProcessing.value = true;
 
   updateEditingMode(false);
 
@@ -471,21 +500,33 @@ const handleSaveButtonClick = () => {
     const isValid = editPassageRef.value.validateTextLength();
     
     if (isValid) {
+      // 저장 버튼 클릭 시 EditPassage 컴포넌트에서 최신 내용 가져오기
+      const currentContent = editPassageRef.value.getContent();
+      const currentTitle = editPassageRef.value.getTitle();
+      
+      // 로깅 확인
+      console.log("저장할 데이터:", { 
+        title: currentTitle, 
+        content: currentContent 
+      });
 
-      console.log("저장데이터: ", passageData.value);
       const apiUrl = import.meta.env.VITE_API_URL;
       const pasCode = saveResponse.value.passage.pasCode;
       // const selectedQuestion = saveResponse.value.question;
-
+      
+      // 올바른 요청 데이터 구조 생성
       const requestData = {
         "type": saveResponse.value.passage.type,
         "keyword": saveResponse.value.passage.keyword,
         "title": passageData.value.title,
-        "content": passageData.value.content,
+        "content": currentContent,
         "gist": saveResponse.value.passage.gist || '',
         "isGenerated": saveResponse.value.passage.isGenerated || 0,
         "questions": saveResponse.value.passage.questions || []
       };
+
+      if (isProcessing.value) return; // 중복 실행 방지
+      isProcessing.value = true;
 
       // 지문 저장 api
       fetch(`${apiUrl}/pass/ques/update/${pasCode}`, {
@@ -493,64 +534,67 @@ const handleSaveButtonClick = () => {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify(passageData.value),
+        body: JSON.stringify(requestData),
         credentials: 'include'
-    })
-    .then(response => {
-        if (!response.ok) {
-            // 인증 오류 처리 (401)
-            if (response.status === 401) {
-                console.error('인증 오류(401): 로그인이 필요합니다');
+      })
+      .then(response => {
+          if (!response.ok) {
+              // 인증 오류 처리 (401)
+              if (response.status === 401) {
+                  console.error('인증 오류(401): 로그인이 필요합니다');
 
-                // 인증 상태 초기화
-                authStore.user = null;
-                authStore.isAuthenticated = false;
-                localStorage.removeItem('authUser');
+                  // 인증 상태 초기화
+                  authStore.user = null;
+                  authStore.isAuthenticated = false;
+                  localStorage.removeItem('authUser');
 
-                // 로그인 페이지로 리다이렉트
-                router.push({ 
-                    path: '/login', 
-                    query: { redirect: route.fullPath }
-                });
-
-                throw new Error('인증이 필요합니다');
-            }
-        }
-        return response.json();
-    })
-    .then(data => {
-      // API 응답으로 받은 데이터로 saveResponse 업데이트
-      saveResponse.value = {
-          ...saveResponse.value,
-          passage: data
-      };
+                  // 로그인 페이지로 리다이렉트
+                  router.push({ 
+                      path: '/login', 
+                      query: { redirect: route.fullPath }
+                  });
+                  throw new Error('인증이 필요합니다');
+              }
+              throw new Error(`지문 저장 실패: ${response.status}`);
+          }
+          return response.json();
+      })
+      .then(data => {
+          // API 응답으로 받은 데이터로 saveResponse 업데이트
+          saveResponse.value = {
+              ...saveResponse.value,
+              passage: data
+          };
+          
+          // 업데이트된 데이터를 로컬스토리지에 저장
+          localStorage.setItem('saveResponse', JSON.stringify(saveResponse.value));
+          
+          // 상태 업데이트
+          isSaved.value = true;
+          hasManualSave.value = true;
+          isContentChanged.value = false;
+          
+          console.log('지문이 성공적으로 저장되었습니다:', data);
+      })
+      .catch(error => {
+          console.error("지문 수정 실패 : ", error);
+          alert("지문 저장에 실패했습니다.");
+      })
+      .finally(() => {
+          isProcessing.value = false;
+      });
       
-      // 업데이트된 데이터를 로컬스토리지에 저장
-      localStorage.setItem('saveResponse', JSON.stringify(saveResponse.value));
-      
-      // 상태 업데이트
-      isSaved.value = true;
+      savePassageData();
+      isSaved.value = false;
       hasManualSave.value = true;
-      isContentChanged.value = false;
-      
-      console.log('지문이 성공적으로 저장되었습니다:', data);
-    })
-    .catch(error => {
-        console.error("문항 수정 실패 : ", error);
-        alert("지문 저장에 실패했습니다.");
-    })
-    .finally(() => {
-      isProcessing.value = false;
-    });
-    
+      isContentChanged.value = false; // 저장 후 내용 변경 플래그를 false로 설정
+      console.log('내용이 저장되었습니다:', { isContentChanged: isContentChanged.value, hasManualSave: hasManualSave.value });
       return true;
     } else {
       showLengthWarning();
-      isProcessing.value = false;
       return false;
     }
   }
-  isProcessing.value = false;
   return false;
 };
 
@@ -614,72 +658,147 @@ const handleFileSelect = (fileType) => {
 };
 
 // 문항 생성 처리 함수
-const handleQuestionGeneration = () => {
+const handleQuestionGeneration = async () => {
   if (showPaymentModal.value === false) {
     return;
   }
 
+  if (isProcessing.value) return; // 중복 실행 방지
+  isProcessing.value = true;
+
+  isLoading.value = true;
+  loadingMessage.value = '새로운 문항을 생성 중입니다.\n생성까지 최대 3분이 소요될 수 있습니다.';
+
   try {
-    // localStorage에서 saveResponse 가져오기
-    const savedResponseData = localStorage.getItem('saveResponse');
-    if (!savedResponseData) {
-      console.error('저장된 응답 데이터가 없습니다.');
-      return;
-    }
+            // 임시 api 연결
+            const apiUrl = import.meta.env.VITE_API_URL;
 
-    const savedResponse = JSON.parse(savedResponseData);
-    console.log('저장된 API 응답 데이터: ', savedResponse);
+            // 1단계: 문항 생성 API 호출
+            const requestData = {
+                "custom_passage": saveResponse.value.passage?.content || '',
+                "type_question": selectedQuestion.value.pattern,
+                "type_question_detail": selectedQuestion.value.type,
+                "question_example": selectedQuestion.value.queExample,
+            };
 
-    if (savedResponse && savedResponse.passage && savedResponse.passage.questions && savedResponse.passage.questions.length > 0) {
-      // API 응답에서 가져온 문항 데이터
-      const apiQuestion = savedResponse.passage.questions[0];
+            console.log("Request Data:", requestData);
 
-      // 새 문항 데이터 생성
-      const newQuestion = {
-        queQuery: apiQuestion.queQuery || '새 문항',
-        queOption: apiQuestion.queOption || ['문항 1','문항 2','문항 3','문항 4','문항 5'],
-        queAnswer: apiQuestion.queAnswer || '문항 해설',
-        description: ''
-      };
+            const response = await fetch('http://10.41.1.56:7777/generate-question', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestData),
+            });
 
-      // 기존 배열을 유지하면서 새 문항 추가
-      questionsData.value.push(newQuestion);
+            if (!response.ok) {
+              // 인증 오류 처리 (401)
+              if (response.status === 401) {
+                  console.error('인증 오류(401): 로그인이 필요합니다');
 
-      // 새로운 문항이 표시되는 페이지로 이동
-      currentSlide.value = questionsData.value.length - 1;
+                  // 인증 상태 초기화
+                  authStore.user = null;
+                  authStore.isAuthenticated = false;
+                  localStorage.removeItem('authUser');
 
-      console.log('새 문항이 추가되었습니다.', newQuestion);
-    } else {
-      console.error('API 응답에서 문항 데이터를 찾을 수 없습니다.');
-      // 데이터 구조 확인을 위해 로그 추가
-      console.log('savedResponse 구조:', savedResponse);
-      if (savedResponse && savedResponse.passage) {
-        console.log('passage 내용:', savedResponse.passage);
+                  // 로그인 페이지로 리다이렉트
+                  router.push({ 
+                      path: '/login', 
+                      query: { redirect: route.fullPath }
+                  });
+
+                  throw new Error('인증이 필요합니다');
+              }
+              throw new Error(`문항 생성 실패: ${response.status}`);
+            }
+            
+            const result = await response.json();
+            console.log('문항 생성 성공:', result);
+            
+
+            //2단계: 문항 저장 API 호출
+            const newQuestion = {
+              "queQuery": result.generated_question,
+              "queOption": result.generated_option,
+              "queAnswer": result.generated_answer,
+              "description": result.generated_description
+            };
+
+            const saveRequestData = {
+              "type": saveResponse.value.passage.type,
+              "keyword": saveResponse.value.passage.keyword,
+              "title": saveResponse.value.passage?.title || '',
+              "content": saveResponse.value.passage?.content || '',
+              "gist": saveResponse.value.passage?.gist || '',
+              "isGenerated": 0,
+              "questions": [
+                ...questionsData.value, // 기존 질문 유지
+                newQuestion
+              ],
+               // ✅ 추가된 필드
+              "mode": "generate", // mode를 명확히 추가
+            };
+
+            console.log("saveRequest: ", saveRequestData);
+
+            const updateResponse = await fetch(`${apiUrl}/pass/ques/update/${saveResponse.value.passage.pasCode}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: "include",
+                body: JSON.stringify(saveRequestData),
+            });
+
+            if (!updateResponse.ok) {
+              // 인증 오류 처리 (401)
+              if (response.status === 401) {
+                  console.error('인증 오류(401): 로그인이 필요합니다');
+
+                  // 인증 상태 초기화
+                  authStore.user = null;
+                  authStore.isAuthenticated = false;
+                  localStorage.removeItem('authUser');
+
+                  // 로그인 페이지로 리다이렉트
+                  router.push({ 
+                      path: '/login', 
+                      query: { redirect: route.fullPath }
+                  });
+
+                  throw new Error('인증이 필요합니다');
+              }
+              throw new Error(`문항 저장 실패: ${updateResponse.status}`);
+            }
+
+            
+            const updateResult = await updateResponse.json();
+            console.log('문항 저장 성공:', updateResult);
+
+            // 상태 업데이트
+            questionsData.value = [...questionsData.value, newQuestion]; // 기존 질문 + 새 질문 추가
+            saveResponse.value = {
+              ...saveResponse.value,
+              passage: updateResult // 저장된 값 갱신
+            };
+
+            //새 문항이 표시되도록 캐러셀 인덱스 업데이트
+            currentSlide.value = questionsData.value.length - 1;
+
+            localStorage.setItem('saveResponse', JSON.stringify(saveResponse.value));
+
+            console.log('저장된 값:', localStorage.getItem('saveResponse'));
+            isLoading.value = false;
+
+            // 모달 닫기
+            showPaymentModal.value = false;
+            isProcessing.value = false;     
+      } catch (error) {
+          console.error('API 요청 실패:', error);
+          alert(`오류 발생: ${error.message}`);
+          isProcessing.value = false;
       }
-    }
-  } catch (error) {
-    console.error('문항 생성 처리 중 오류 발생:', error);
-    
-    // 오류 발생 시 기본 문항 추가
-    const fallbackQuestion = {
-      queQuery: '새로운 문항: 다음 중 본문과 내용이 일치하는 것을 고르시오.',
-      queOption: ['문제가 바뀌는지 확인해보자', '두 번째 선택지', '세 번째 선택지', '네 번째 선택지', '다섯 번째 선택지'],
-      queAnswer: '해설 내용입니다.',
-      description: ''
-    };
-    
-    questionsData.value.push(fallbackQuestion);
-    currentSlide.value = questionsData.value.length - 1;
-  }
-
-  // 모달 닫기
-  showPaymentModal.value = false;
 };
-
-// const handleQuestionChange = (event, index) => {
-//   handleContentChange();
-//   // 필요한 경우, 특정 인덱스의 문항 데이터 업데이트
-// }
 
 const handleQuestionChange = (updatedData, index) => {
     if (!updatedData || index === undefined) return;
@@ -854,6 +973,16 @@ onMounted(() => {
     localStorage.removeItem('saveResponse');
     return next(); // 네비게이션 계속
   });
+  
+    // localStorage 변경 감지 타이머 설정
+    changeDetectionTimer = setInterval(() => {
+    const hasChanged = localStorage.getItem('editPassageChanged') === 'true';
+    if (hasChanged) {
+      // 변경사항 있음 - 버튼 활성화
+      isContentChanged.value = true;
+      localStorage.removeItem('editPassageChanged');
+    }
+  }, 500); // 500ms마다 체크
 });
 
 onBeforeUnmount(() => {
@@ -864,6 +993,14 @@ onBeforeUnmount(() => {
   if (routerGuard) {
     routerGuard();
   }
+
+    // 타이머 정리
+    if (changeDetectionTimer) {
+    clearInterval(changeDetectionTimer);
+  }
+  
+  // localStorage 정리
+  localStorage.removeItem('editPassageChanged');
 });
 
 // provide 실행

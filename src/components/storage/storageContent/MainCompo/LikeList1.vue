@@ -1,8 +1,8 @@
 <template>
   <div class="card-container">
     <div class="storage-likelist-title">
-      <p>즐겨찾기</p>
-      <router-link to="/storage/likelistMina">
+      <router-link to="/storage/likelistMina" class="worklist-link">
+        <p>즐겨찾기</p>
         <Icon icon="weui:arrow-outlined" width="24" height="24" id="arrow-icon" style="color: #303030" />
       </router-link>
     </div>
@@ -302,25 +302,22 @@ fetch(`${apiUrl}/pass/favo`, {
 </script>
 
 <style scoped>
-.card-container {
-width: 100%;
-padding: 20px 30px 80px 20px;
+.worklist-link {
+  display: flex;
+  gap: 8px;
+
+  text-decoration: none;
+  color: #303030;
 }
 
 .storage-likelist-title {
 display: flex;
 align-items: flex-start;
-gap: 8px;
 isolation: isolate;
 position: absolute;
 left: 292px;
 top: 50px;
 box-sizing: border-box;
-}
-
-#arrow-icon {
-  position: absolute;
-  top: 2px;
 }
 
 .storage-likelist-table {
@@ -338,7 +335,7 @@ box-sizing: border-box;
 overflow: hidden; /* 내부 요소가 border-radius를 넘지 않도록 */
 }
 
-.storage-likelist-title > p {
+.storage-likelist-title p {
 font-size: 24px;
 font-weight: 700;
 margin: 0;
@@ -346,13 +343,14 @@ margin: 0;
 
 .table-container {
 width: 100%;
+height: 255px;
 overflow-x: auto;
 overflow: hidden;
 }
 
 .data-table {
   width: 1472px;
-  height: 276px;
+  height: 46px;
   border-collapse: collapse;
   table-layout: fixed;
 }

@@ -10,7 +10,7 @@
                 <img src="@/assets/icons/icon_passage.png" alt="지문생성" class="passage-icon" /> 
                  지문 생성
             </router-link>
-            <router-link to="/questions" class="nav-item" :class="{ 'active-box': isActive('/questions') }">
+            <router-link to="/questions" class="nav-item" :class="{ 'active-box': isActive('/questions') }" @click="clearPassageData">
                 <img src="@/assets/icons/icon_question.png" alt="문항생성" class="question-icon" /> 
                 문항 생성
             </router-link>
@@ -21,8 +21,8 @@
         </nav>
 
         <div class="bottom-menu">
-            <router-link to="/mypage" class="nav-item" :class="{ 'active-text': isActive('/mypage') }">
-                <img src="@/assets/icons/icon_mypage.png" alt="마이페이지" class="mypage-icon" /> 
+            <router-link to="/mypage" class="nav-item mypage-item" :class="{ 'active-mypage': isActive('/mypage') }">
+                <div class="icon-mypage"></div>
                 마이페이지
             </router-link>
         </div>
@@ -42,6 +42,10 @@ const isActive = (path) => {
     }
     // 다른 경로는 해당 경로로 시작하는지 확인
     return route.path.startsWith(path);
+};
+// 지문 데이터 제거 함수
+const clearPassageData = () => {
+    localStorage.removeItem('genieq-passage-data');
 };
 </script>
 
@@ -95,9 +99,21 @@ const isActive = (path) => {
   border-radius: 0; /*  둥근 모서리 제거 */
 }
 
-/* 마이페이지 선택 시 글씨 색만 변경 */
-.active-text {
-  color: #FF9F40 !important;
+.icon-mypage {
+    width: 20px;
+    height: 20px;
+    background-image: url('@/assets/icons/icon_mypage.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    transition: background-image 0.3s ease;
+}
+
+.active-mypage {
+    color: #FF9F40 !important;
+}
+
+.active-mypage .icon-mypage {
+    background-image: url('@/assets/icons/icon_mypageactive.png');
 }
 
 /* 마이페이지를 하단에 정렬 */

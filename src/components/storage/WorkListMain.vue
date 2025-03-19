@@ -5,8 +5,8 @@
     </div>
     <div class="storage-worklistmain-subtitle">
       <span>전체</span>
-      <P>({{ filteredWorkItems.length }}개)</P>
-      <v-pre v-if="searchQuery && hasSearchResults">"{{ searchQuery }}"에 대한 검색 결과입니다.</v-pre>
+      <p>({{ filteredWorkItems.length }}개)</p>
+      <span v-if="searchQuery && hasSearchResults">"{{ searchQuery }}"에 대한 검색 결과입니다.</span>
     </div>
 
     <div class="storage-worklistmain-search">
@@ -25,14 +25,14 @@
     </div>
 
     <div class="storage-worklistmain-subtitle2">
-    <span>삭제</span>
-    <button 
-      style="border: 0; background-color: transparent;"
-      @click="openDeleteModal"
-    >
-      <Icon icon="cil:trash" class="trash" width="20" height="20" style="color: #303030" />
-    </button>
-  </div>
+      <button 
+        style="border: 0; background-color: transparent;"
+        @click="openDeleteModal" class="trash-btn"
+        >
+        <span>삭제</span>
+        <Icon icon="cil:trash" class="trash" width="20" height="20" style="color: #303030" />
+      </button>
+    </div>
 
     <!-- 검색 결과가 없을 때 표시할 중앙 메시지 -->
     <div v-if="filteredWorkItems.length === 0 && searchQuery" class="no-results-container">
@@ -129,7 +129,7 @@
     <!-- 삭제 경고 모달 -->
     <WarningModalComponent 
       :isOpen="isDeleteModalOpen"
-      title="선택하 자료를 삭제하시겠습니까?"
+      title="선택한 자료를 삭제하시겠습니까?"
       :message="`삭제를 진행한 자료는 영구 삭제됩니다.`"
       cancelText="취소"
       confirmText="삭제"
@@ -1151,5 +1151,25 @@ const closeDeleteModal = () => {
 
 .pagination span:hover:not(.active-page) {
   background-color: #f0f0f0;
+}
+
+.trash-btn {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 0px;
+  gap: 12px;
+  margin-right: 5px;
+}
+.trash-btn span {
+  font-family: 'Pretendard';
+  font-style: normal;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 150%;
+
+  letter-spacing: -0.02em;
+  color: #303030;
 }
 </style>

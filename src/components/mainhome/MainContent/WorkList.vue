@@ -1,8 +1,10 @@
 <template>
   <div class="card-container">
     <div class="worklist-title">
+      <router-link to="/storage/worklistMina" class="worklist-link">
         <p>최근 작업 내역</p>
-        <router-link to="/storage/worklistMina"><Icon icon="weui:arrow-outlined" width="24" height="24" id="arrow-icon" style="color: #303030" /></router-link>
+        <Icon icon="weui:arrow-outlined" width="24" height="24" id="arrow-icon" style="color: #303030" />
+      </router-link>
     </div>
     <div class="worklist-table">
       <div class="table-container">
@@ -49,7 +51,7 @@
     </div>
 
     <!-- 파일 선택 모달 -->
-    <FileSelectModal :isOpen="isModalOpen" @close="closeFileModal" @confirm="handleFileSelection"/>
+    <FileSelectModal :isOpen="isModalOpen" :pasCode="selectedItem?.PAS_CODE" @close="closeFileModal" @confirm="handleFileSelection"/>
   </div>
 </template>
 
@@ -297,10 +299,17 @@ const toggleFavorite = (index) => {
 </script>
 
 <style scoped>
+.worklist-link {
+  display: flex;
+  gap: 8px;
+
+  text-decoration: none;
+  color: #303030;
+}
+
 .worklist-title {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
   isolation: isolate;
   position: absolute;
   left: 292px;
@@ -348,7 +357,8 @@ td {
 
 .data-table th {
   text-align: left;
-  padding: 10px 20px;    
+  padding: 10px 20px;   
+  height: 46px; 
   border-bottom: 1px solid #e1e1e1;
   font-family: 'Pretendard';
   font-weight: 700;

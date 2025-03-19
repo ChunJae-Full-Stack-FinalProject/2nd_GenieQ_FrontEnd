@@ -2,7 +2,7 @@
     <div v-if="isOpen" class="loading-overlay">
       <div class="loading-content">
         <img :src="loadingImage" alt="Loading..." class="loading-icon" />
-        <p>{{ message }}</p>
+        <p style="white-space: pre-wrap;" class="loading-msg">{{ message }}</p>
       </div>
     </div>
   </template>
@@ -21,8 +21,8 @@
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    height: 100%;
     background-color: rgba(0, 0, 0, 0.5); /* 반투명 배경 */
     display: flex;
     justify-content: center;
@@ -41,10 +41,11 @@
     height: 80px;
   }
   
-  p {
+  .loading-msg {
     margin-top: 16px;
     color: #fff;
     font-size: 18px;
+    text-align: center;
   }
   </style>
   

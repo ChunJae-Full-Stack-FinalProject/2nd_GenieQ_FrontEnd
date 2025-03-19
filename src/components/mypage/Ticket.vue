@@ -1,6 +1,6 @@
 <template>
   <div class="ticket-container">
-    <h2 class="ticket-title">이용권님의 이용권 정보</h2>
+    <h2 class="ticket-title">{{ userData.name }}님의 이용권 정보</h2>
     
 
     <div class="info-section">
@@ -203,6 +203,9 @@ import * as XLSX from 'xlsx';
 const router = useRouter();
 const route = useRoute();
 const authStore = useAuthStore();
+
+// 사용자 정보를 computed 속성으로 가져오기
+const userData = computed(() => authStore.userInfo);
 
 // 모달 상태 관리
 const showUsageHistoryModal = ref(false);

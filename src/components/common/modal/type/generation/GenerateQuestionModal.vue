@@ -56,7 +56,7 @@
             <div class="example-group">
                 <!-- ✅ 필터링된 리스트 -->
                 <div class="example-list">
-                    <div class="list-wrapper" v-if="filteredQuestions.length > 0 && (activePattern || activeType || activeDifficulty)">
+                    <div class="list-wrapper" v-if="filteredQuestions.length > 0">
                         <div
                             v-for="(item, index) in filteredQuestions"
                             :key="index"
@@ -124,7 +124,7 @@ const activeDifficulty = ref(null); // 난이도 선택값
 const selectedQuestion = ref(null); // 선택된 문항을 ref로 저장
 const isProcessing = ref(false);
 const isLoading = ref(false);
-const loadingMessage = ref('문항을 생성 중입니다...');
+const loadingMessage = ref('문항을 생성 중입니다.\n생성까지 최대 3분이 소요될 수 있습니다.');
 
 
 const closeModal = () => {
@@ -140,9 +140,6 @@ const handleGenerateQuestion = async () => {
     isProcessing.value = true;
 
 
-    isLoading.value = true;
-    loadingMessage.value = '문항을 생성 중입니다...';
-
     try {
         if (selectedQuestion.value) {
             // ✅ 로컬 스토리지에서 데이터 가져오기
@@ -156,6 +153,15 @@ const handleGenerateQuestion = async () => {
             localStorage.setItem('selectedQuestionData', JSON.stringify(selectedQuestion.value));
         }
 
+        // mode에 따라 다른 동작 수행
+        if (props.mode === 'generate') {
+            // GenerationQuestion 페이지에서 호출 (PaymentUsageModal 표시)
+            emit('openPaymentModal', {
+                pattern: selectedQuestion.value.pattern,
+                type: selectedQuestion.value.type,
+                queExample: selectedQuestion.value.title
+            });
+        } else {
 
             // const tempResponse = await fetch(`${apiUrl}/pass/ques/select/100`,{
             //     method: 'GET',
@@ -169,6 +175,9 @@ const handleGenerateQuestion = async () => {
 
             // const saveResult = await tempResponse.json();
             // console.log('임시 데이터 성공:', saveResult);
+
+            isLoading.value = true;
+            loadingMessage.value = '문항을 생성 중입니다.\n생성까지 최대 3분이 소요될 수 있습니다.';
 
             // ✅ 1단계: 키워드 생성 API 호출
             const keywordRequestData = {
@@ -189,8 +198,6 @@ const handleGenerateQuestion = async () => {
             if (!keywordResponse.ok) throw new Error(`문항 생성 실패: ${keywordResponse.status}`);
 
             const keywordResult = await keywordResponse.json();
-            console.log('키워드 성공:', keywordResult);
-            console.log("키워드 분리!: ", keywordResult.type_passage)
 
             // ✅ 2단계: 문항 생성 API 호출
             const requestData = {
@@ -223,7 +230,7 @@ const handleGenerateQuestion = async () => {
                 "keyword": keywordResult.keyword,
                 "title": passageData?.PAS_TITLE || '',
                 "content": passageData?.PAS_CONTENT || '',
-                "gist": '',
+                "gist": passageData?.PAS_GIST ||'',
                 "isGenerated": 0,
                 "questions":[{
                     "queQuery": result.generated_question,
@@ -258,14 +265,8 @@ const handleGenerateQuestion = async () => {
                 question: selectedQuestion.value,
                 passage: saveResult
             }));
-            console.log('저장된 값:', localStorage.getItem('saveResponse'));
             isLoading.value = false;
 
-        // mode에 따라 다른 동작 수행
-        if (props.mode === 'generate') {
-            // GenerationQuestion 페이지에서 호출 (PaymentUsageModal 표시)
-            emit("openPaymentModal");
-        } else {
             // QuestionMain 페이지에서 호출 (페이지 이동)
             router.push({
                 path: '/questions/generate',
@@ -316,14 +317,14 @@ const questions = questionExample;
 
 // ✅ 선택된 라디오 버튼에 따라 자동 필터링
 const filteredQuestions = computed(() => {
-  if (!activePattern.value && !activeType.value && !activeDifficulty.value) {
+  if (!activePattern.value || !activeType.value && !activeDifficulty.value) {
     return []; // 필터가 선택되지 않았다면 빈 배열 반환
   }
   
   return questionExample.filter((q) => {
     return (
-      (activePattern.value === null || activePattern.value === "전체" || q.pattern === activePattern.value) &&
-      (activeType.value === null || activeType.value === "전체" || q.type === activeType.value) &&
+      (activePattern.value === "전체" || q.pattern === activePattern.value) &&
+      (activeType.value === "전체" || q.type === activeType.value) &&
       (activeDifficulty.value === null || activeDifficulty.value === "전체" || q.difficulty === activeDifficulty.value)
     );
   });
