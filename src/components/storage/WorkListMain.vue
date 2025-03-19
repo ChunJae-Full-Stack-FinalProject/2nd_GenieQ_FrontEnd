@@ -1,9 +1,9 @@
 <template>
   <div class="card-container">
     <div class="storage-worklistmain-title">
-      <p>최근 작업 내역</p>
+      <p class="listTitle">최근 작업 내역</p>
     </div>
-    <div class="storage-worklistmain-subtitle">
+    <div class="storage-worklistmain-subtitle listTitle">
       <span>전체</span>
       <p>({{ filteredWorkItems.length }}개)</p>
       <span v-if="searchQuery && hasSearchResults">"{{ searchQuery }}"에 대한 검색 결과입니다.</span>
@@ -29,7 +29,7 @@
         style="border: 0; background-color: transparent;"
         @click="openDeleteModal" class="trash-btn"
         >
-        <span>삭제</span>
+        <span  class="listTitle">삭제</span>
         <Icon icon="cil:trash" class="trash" width="20" height="20" style="color: #303030" />
       </button>
     </div>
