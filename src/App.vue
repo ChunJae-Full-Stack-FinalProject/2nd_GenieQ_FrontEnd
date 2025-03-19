@@ -34,8 +34,8 @@ onMounted(() => {
   console.log('- 테이블 데이터 개수 부족할 때 각 tr 높이 조정');
   console.log('25-03-19 16:45 version');
   console.log('- 문항 재생성 & 추가시 오류 해결');
-  console.log('25-03-19 22:42 version');
-  console.log('일부 디자인 개선 body 길이, 타이틀 줄바꿈 문제 해결');
+  console.log('25-03-19 23:32 version');
+  console.log('일부 디자인 문제 해결');
   
   authStore.initializeAuth();
   

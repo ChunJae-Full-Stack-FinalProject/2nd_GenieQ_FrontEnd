@@ -50,6 +50,12 @@ onMounted(()=> {
   top: 0px;
   background: #FFFFFF;
 }
+/* 화면 너비가 1920px 이하일 때 width를 조정 */
+@media (max-width: 1920px) {
+  .mypage-header {
+    width: 1920px; /* 너비 조정 */
+  }
+}
 
 /* "마이페이지" 제목 스타일 */
 .page-title {
