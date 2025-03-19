@@ -406,11 +406,11 @@ const handleRecreateGeneration = async () => {
 
     // 모달 닫기
     showRecreateModal.value = false;
-    isProcessing.value = true;     
+    isProcessing.value = false;     
   } catch (error) {
       console.error('API 요청 실패:', error);
       alert(`오류 발생: ${error.message}`);
-      isProcessing.value = true;
+      isProcessing.value = false;
   }
 };
 
