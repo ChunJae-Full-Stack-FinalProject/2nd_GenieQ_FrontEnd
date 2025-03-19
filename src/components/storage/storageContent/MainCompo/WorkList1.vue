@@ -349,30 +349,34 @@
     align-items: center;
     padding: 0px;
     gap: 20px;
-
+    height: calc(46px * 9);
     position: absolute;
     top: 73px;
+    background: #FFFFFF;
+    border-radius: 12px;
+    box-sizing: border-box;
+    overflow: hidden;
   }
   
   .table-container {
     width: 100%;
+    height: 500px;
     overflow-x: auto;
     overflow: hidden;
   }
   
   .data-table {
     width: 1472px;
-    height: 414px;
     background-color: #FFFFFF;
     border-collapse: collapse;
     table-layout: fixed;
     border-radius: 12px;
+    height: 46px;
   }
   
   .data-table th {
     text-align: left;
     padding: 10px 20px;    
-    height: 46px;
     border-bottom: 1px solid #e1e1e1;
     font-weight: 700;
     font-size: 20px;

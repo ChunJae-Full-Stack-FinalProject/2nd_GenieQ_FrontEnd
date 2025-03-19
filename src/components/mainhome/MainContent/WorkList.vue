@@ -317,6 +317,7 @@ const toggleFavorite = (index) => {
   position: absolute;
   left: 292px;
   top: 400px;  
+  height: calc(46px * 11);
   background: #FFFFFF;
   border-radius: 12px;
   box-sizing: border-box;
@@ -341,7 +342,7 @@ td {
 
 .data-table {
   width: 1472px;
-  height: 506px;
+  height: 46px;
   border-collapse: collapse;
   table-layout: fixed;
 }
