@@ -352,7 +352,7 @@
     align-items: center;
     padding: 0px;
     gap: 20px;
-    height: calc(46px * 9);
+    height: 378px;
     position: absolute;
     top: 73px;
     background: #FFFFFF;

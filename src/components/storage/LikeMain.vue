@@ -696,7 +696,7 @@ color: #FF9F40;
 
 .table-container {
   width: 100%;
-  height: 675px;
+  height: 736px;
   overflow-x: auto;
   overflow: hidden;
 }
@@ -728,6 +728,7 @@ color: #424242;
 
 .data-table tr {
   border-bottom: 1px solid #e1e1e1;
+  height: 46px;
 }
 .data-table tr:last-child {
   /* border-bottom: none; */
