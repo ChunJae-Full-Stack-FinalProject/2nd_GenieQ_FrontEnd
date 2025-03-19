@@ -326,7 +326,7 @@ const toggleFavorite = (index) => {
   position: absolute;
   left: 292px;
   top: 400px;  
-  height: calc(46px * 11);
+  height: 465px;
   background: #FFFFFF;
   border-radius: 12px;
   box-sizing: border-box;
