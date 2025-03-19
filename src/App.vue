@@ -25,6 +25,13 @@ onMounted(() => {
   console.log('- 파비콘 적용');
   console.log('- 콘솔 로그 삭제');
   console.log('- 문항 예제 데이터 수정');
+  console.log('25년 3월 19일 오후 12시 36분 버전 업데이트');
+  console.log('- 문항 유형 생성하기 버튼 비활성화 문제 수정');
+  console.log('25년 3월 19일 오후 1시 30분 버전 업데이트');
+  console.log('- 요청 주소 변경');
+  console.log('25년 3월 19일 오후 2시 48분 버전 업데이트');
+  console.log('- 테이블 데이터 개수 부족할 때 각 tr 높이 조정')
+  
   authStore.initializeAuth();
   
   // beforeunload 이벤트 리스너 등록
