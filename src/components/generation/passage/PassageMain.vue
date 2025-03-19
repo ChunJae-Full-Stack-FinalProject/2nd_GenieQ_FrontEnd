@@ -233,7 +233,7 @@ const savePassageToBackend = (data) => {
         gist: data.generated_core_point,
         isGenerated: 1
     };
-    console.log("saveDate",saveData);
+    // console.log("saveDate",saveData);
 
     // 백엔드 API 호출
     const apiUrl = import.meta.env.VITE_API_URL;

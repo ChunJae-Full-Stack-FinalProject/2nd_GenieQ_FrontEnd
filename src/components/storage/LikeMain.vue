@@ -147,7 +147,7 @@ const fetchWorkItems = () => {
       // 인증 오류 처리 (401)
       if (response.status === 401) {
         // (추가) 로그 - 인증 오류 감지
-        console.error('인증 오류(401): 로그인이 필요합니다');
+
 
         // 인증 상태 초기화
         authStore.user = null;
@@ -180,7 +180,7 @@ const fetchWorkItems = () => {
     }));
   })
   .catch(error => {
-    console.error('최근 작업 리스트 불러오기 실패: ', error);
+
   })
 };
 
@@ -211,7 +211,7 @@ const handleWorkItemClick = (item) => {
     if (!response.ok) {
       // 인증 오류 처리 (401)
       if (response.status === 401) {
-        console.error('인증 오류(401): 로그인이 필요합니다');
+
         
         // 인증 상태 초기화
         authStore.user = null;
@@ -231,7 +231,7 @@ const handleWorkItemClick = (item) => {
     return response.json();
   })
   .then(data => {
-    console.log('가져온 데이터 : ', data);
+
 
     if (isPassage) {
       // 지문인 경우 - PassageContent.vue로 이동
@@ -281,7 +281,7 @@ const handleWorkItemClick = (item) => {
     }
   })
   .catch(error => {
-    console.error('데이터 가져오기 실패:', error);
+
     alert('데이터를 가져오는 중 오류가 발생했습니다.');
   });
 }
@@ -372,7 +372,7 @@ const finishEditing = () => {
     })
     .then(response => {
       if (!response.ok) {
-        console.error('이름 변경 응답 오류:', response.status);
+
         throw new Error('이름 변경 실패');
       }
       
@@ -385,7 +385,7 @@ const finishEditing = () => {
       }
     })
     .then(data => {
-      console.log('이름 변경 성공:', data);
+
       
       // 원본 workItems 배열에서 해당 항목 찾아 업데이트
       const originalItem = workItems.value.find(i => i.PAS_CODE === item.PAS_CODE);
@@ -394,7 +394,7 @@ const finishEditing = () => {
       }
     })
     .catch(error => {
-      console.error('이름 변경 실패:', error);
+
       // 실패해도 UI는 업데이트 (사용자 경험을 위해)
       const originalItem = workItems.value.find(i => i.PAS_CODE === item.PAS_CODE);
       if (originalItem) {
@@ -413,7 +413,7 @@ const finishEditing = () => {
 // 메소드 정의 - 화살표 함수로 작성합니다
 const extractItem = (item) => {
   // 추출 버튼 클릭 시 실행될 로직
-  console.log('추출 버튼 클릭:', item);
+
 };
 
 // 모달 상태 관리
@@ -433,8 +433,8 @@ const closeFileModal = () => {
 
 // 파일 형식 선택 후 처리
 const handleFileSelection = (fileType) => {
-  console.log('선택된 파일 형식:', fileType);
-  console.log('선택된 작업 아이템:', selectedItem.value);
+
+
 
   // 파일 추출 로직 구현
 }
@@ -464,7 +464,7 @@ const toggleFavorite = (index) => {
     return response.json();
   })
   .then(data => {
-    console.log('즐겨찾기 업데이트 성공:', data);
+
     
     // 서버에서 반환한 업데이트된 데이터로 항목 상태 갱신
     if (data.isFavorite !== undefined) {
@@ -475,7 +475,7 @@ const toggleFavorite = (index) => {
     }
   })
   .catch(error => {
-    console.error('즐겨찾기 업데이트 실패:', error);
+
     // 에러 시 사용자에게 알림을 표시할 수 있습니다
   });
 };
@@ -541,7 +541,7 @@ const isDeleteModalOpen = ref(false);
 // 선택된 아이템들 찾기 (수정된 버전)
 const selectedItems = computed(() => {
   const selected = workItems.value.filter(item => item.checked);
-  console.log('선택된 항목:', selected);
+
   return selected;
 });
 
@@ -558,11 +558,11 @@ const confirmDelete = () => {
   
   // 선택된 항목이 없으면 작업 중단
   if (selectedPasCodes.length === 0) {
-    console.log('삭제할 항목이 선택되지 않았습니다.');
+
     return;
   }
   
-  console.log('삭제 요청:', selectedPasCodes);
+
   
   // API 호출
   fetch(`${apiUrl}/pass/remove/each`, {
@@ -581,11 +581,11 @@ const confirmDelete = () => {
       return { success: true };
     }
     
-    console.error('HTTP 오류:', response.status);
+
     return Promise.reject(new Error('서버에서 오류가 발생했습니다: ' + response.status));
   })
   .then(data => {
-    console.log('삭제 성공:', data);
+
     
     // UI에서 선택된 항목 제거
     workItems.value = workItems.value.filter(item => !selectedPasCodes.includes(item.PAS_CODE));
@@ -601,7 +601,7 @@ const confirmDelete = () => {
     }
   })
   .catch(error => {
-    console.error('삭제 요청 처리 오류:', error);
+
     
     // 모달 닫기 - 에러가 발생해도 사용자 경험을 위해 모달은 닫음
     isDeleteModalOpen.value = false;

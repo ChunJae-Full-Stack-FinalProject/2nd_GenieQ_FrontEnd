@@ -201,7 +201,7 @@ const changePassword = () => {
         if (!response.ok) {
             // 인증 오류 처리 (401)
             if (response.status === 401) {
-                console.error('인증 오류(401): 로그인이 필요합니다');
+                // console.error('인증 오류(401): 로그인이 필요합니다');
                 
                 // 인증 상태 초기화
                 authStore.user = null;
@@ -220,7 +220,7 @@ const changePassword = () => {
             // 현재 비밀번호 불일치 오류 처리 (400 또는 403)
             if (response.status === 400 || response.status === 403) {
                 return response.text().then(text => {
-                    console.log('서버 오류 응답:', text);
+                    // console.log('서버 오류 응답:', text);
                     
                     // 현재 비밀번호 오류 처리
                     currentPasswordError.value = '비밀번호가 일치하지 않습니다.';
@@ -255,15 +255,15 @@ const changePassword = () => {
         }
     })
     .then(data => {
-        console.log('비밀번호 변경 성공:', data);
+        // console.log('비밀번호 변경 성공:', data);
         // 성공 시에만 모달 창을 닫고 완료 모달 표시
         closeModal();
         showPasswordChangeComplete.value = true;
-        console.log('모달 상태:', showPasswordChangeComplete.value);
+        // console.log('모달 상태:', showPasswordChangeComplete.value);
     })
     .catch(err => {
         // 에러가 있는 경우에는 모달 창을 닫지 않음
-        console.error('비밀번호 변경 오류:', err);
+        // console.error('비밀번호 변경 오류:', err);
         // 로딩 상태만 해제
         isLoading.value = false;
     })
@@ -273,7 +273,7 @@ const changePassword = () => {
         if (isLoading.value) {
             isLoading.value = false;
         }
-        console.log('작업 완료 후 모달 상태:', showPasswordChangeComplete.value);
+        // console.log('작업 완료 후 모달 상태:', showPasswordChangeComplete.value);
     });
 };
 
@@ -322,19 +322,19 @@ const validateConfirmPassword = () => {
 // 컴포넌트 마운트 시 로그인 상태 확인 및 얼럿 방지 설정
 onMounted(() => {
     if (!authStore.isAuthenticated) {
-        console.log('인증 상태 없음: 로그인이 필요합니다');
+        // console.log('인증 상태 없음: 로그인이 필요합니다');
     }
     
     // 브라우저의 기본 alert 차단
     // 1. 처리되지 않은 Promise 거부 이벤트 가로채기
     window.onunhandledrejection = (event) => {
         event.preventDefault();
-        console.error('처리되지 않은 Promise 거부:', event.reason);
+        // console.error('처리되지 않은 Promise 거부:', event.reason);
     };
     
     // 2. window.onerror 이벤트 가로채기
     window.onerror = (message, source, lineno, colno, error) => {
-        console.error('전역 오류 발생:', { message, source, lineno, colno, error });
+        // console.error('전역 오류 발생:', { message, source, lineno, colno, error });
         return true; // 기본 오류 처리 방지
     };
     
@@ -347,17 +347,17 @@ onMounted(() => {
     
     // 4. window.alert, window.confirm, window.prompt 메서드 무력화
     window.alert = function(message) {
-        console.log('Alert 차단됨:', message);
+        // console.log('Alert 차단됨:', message);
         return true;
     };
     
     window.confirm = function(message) {
-        console.log('Confirm 차단됨:', message);
+        // console.log('Confirm 차단됨:', message);
         return true;
     };
     
     window.prompt = function(message, defaultValue) {
-        console.log('Prompt 차단됨:', message);
+        // console.log('Prompt 차단됨:', message);
         return defaultValue || '';
     };
 });

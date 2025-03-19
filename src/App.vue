@@ -30,7 +30,9 @@ onMounted(() => {
   console.log('25년 3월 19일 오후 1시 30분 버전 업데이트');
   console.log('- 요청 주소 변경');
   console.log('25년 3월 19일 오후 2시 48분 버전 업데이트');
-  console.log('- 테이블 데이터 개수 부족할 때 각 tr 높이 조정')
+  console.log('- 테이블 데이터 개수 부족할 때 각 tr 높이 조정');
+  console.log('25년 3월 19일 오후 4시 45분 버전 업데이트');
+  console.log('- 문항 재생성 & 추가시 오류 해결');
   
   authStore.initializeAuth();
   

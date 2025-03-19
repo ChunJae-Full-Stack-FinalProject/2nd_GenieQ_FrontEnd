@@ -41,12 +41,12 @@ function getTicketCount() {
      credentials: 'include' // 쿠키를 포함시켜 세션 유지
  })
  .then(response => {
-     console.log("서버 응답 상태 코드:", response.status);
+
      if (!response.ok) {
          // 인증 오류 처리 (401)
          if (response.status === 401) {
              // (추가) 로그 - 인증 오류 감지
-             console.error('인증 오류(401): 로그인이 필요합니다');
+
              
              // 인증 상태 초기화
              authStore.user = null;
@@ -68,11 +68,11 @@ function getTicketCount() {
  })
  .then(data => {
      // 티켓 정보 갱신
-     console.log("티켓 수량:", data);
+
      ticketCount.value = data;
  })
  .catch(error => {
-     console.error("티켓 조회 실패:", error);
+
  });
 }
 </script>

@@ -98,7 +98,7 @@
       if (!response.ok) {
         // 인증 오류 처리 (401)
         if (response.status === 401) {
-          console.error('인증 오류(401): 로그인이 필요합니다');
+
   
           // 인증 상태 초기화
           authStore.user = null;
@@ -129,7 +129,7 @@
       }));
     })
     .catch(error => {
-      console.error('최근 작업 리스트 불러오기 실패: ', error);
+
     });
   };
   
@@ -160,7 +160,7 @@
     if (!response.ok) {
       // 인증 오류 처리 (401)
       if (response.status === 401) {
-        console.error('인증 오류(401): 로그인이 필요합니다');
+
         
         // 인증 상태 초기화
         authStore.user = null;
@@ -180,7 +180,7 @@
     return response.json();
   })
   .then(data => {
-    console.log('가져온 데이터 : ', data);
+
 
     if (isPassage) {
       // 지문인 경우 - PassageContent.vue로 이동
@@ -230,7 +230,7 @@
     }
   })
   .catch(error => {
-    console.error('데이터 가져오기 실패:', error);
+
     alert('데이터를 가져오는 중 오류가 발생했습니다.');
   });
 }
@@ -252,8 +252,8 @@
   
   // 파일 형식 선택 후 처리
   const handleFileSelection = (fileType) => {
-    console.log('선택된 파일 형식:', fileType);
-    console.log('선택된 작업 아이템:', selectedItem.value);
+
+
   
     // 파일 추출 로직 구현
   };
@@ -283,7 +283,7 @@
       return response.json();
     })
     .then(data => {
-      console.log('즐겨찾기 업데이트 성공:', data);
+
       
       // 서버에서 반환한 업데이트된 데이터로 항목 상태 갱신
       if (data.isFavorite !== undefined) {
@@ -294,7 +294,7 @@
       }
     })
     .catch(error => {
-      console.error('즐겨찾기 업데이트 실패:', error);
+
     });
   };
   </script>

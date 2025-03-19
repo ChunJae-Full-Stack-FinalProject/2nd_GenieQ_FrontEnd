@@ -195,7 +195,7 @@ const updateDateRange = () => {
 // 🔥 모달이 열릴 때 실행되도록 watch 추가
 watch(() => props.isOpen, (newValue) => {
   if (newValue) {
-    console.log('모달 열림 상태 감지');
+
     initialState(); // 상태 초기화
     loadUsageList(); // 데이터 로드
   }
@@ -230,7 +230,7 @@ const loadUsageList = () =>{
     if (!response.ok) {
       if (response.status === 401) {
           // (추가) 로그 - 인증 오류 감지
-          console.error('인증 오류(401): 로그인이 필요합니다');
+
 
           // 인증 상태 초기화
           authStore.user = null;
@@ -251,7 +251,7 @@ const loadUsageList = () =>{
     return response.json();
   })
   .then(data => {
-    console.log('이용내역 데이터 불러오기 성공:', data);
+
 
     // 응답 데이터 구조에 맞게 매핑
     usageHistory.value = data.map(item => ({
@@ -263,7 +263,7 @@ const loadUsageList = () =>{
     }));
   })
   .catch(error => {
-    console.error('이용내역 데이터 불러오기 실패:', error);
+
   })
 };
 </script>

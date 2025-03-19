@@ -45,7 +45,7 @@ export const usePassageStore = defineStore('passage', {
                     // 인증 오류 처리 (401)
                     if (response.status === 401) {
                         // (추가) 로그 - 인증 오류 감지
-                        console.error('인증 오류(401): 로그인이 필요합니다');
+
         
                         // 인증 상태 초기화
                         const authStore = useAuthStore();
@@ -88,7 +88,7 @@ export const usePassageStore = defineStore('passage', {
                 return Promise.resolve({ success: true, passage: data });
             })
             .catch(error => {
-                console.error('지문 저장 오류:', error);
+
                 this.error = error.message || '지문 저장 중 오류가 발생했습니다.';
                 return Promise.reject({ success: false, error: this.error });
             })

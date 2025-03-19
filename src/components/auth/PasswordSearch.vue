@@ -123,7 +123,7 @@ const sendVerificationEmail = () => {
     const encodedEmail = encodeURIComponent(email.value);
     
     // 디버깅용 로그
-    console.log('요청 URL:', `${apiUrl}/api/auth/select/email?email=${encodedEmail}`);
+
     
     // GET 요청
     fetch(`${apiUrl}/api/auth/select/email?email=${encodedEmail}`, {
@@ -134,7 +134,7 @@ const sendVerificationEmail = () => {
     })
     .then(response => {
       // 응답 상태 디버깅
-      console.log('응답 상태:', response.status);
+
       
       // 403 상태 코드를 받으면 이메일이 존재하지 않는 것으로 처리
       if (response.status === 403) {
@@ -159,18 +159,18 @@ const sendVerificationEmail = () => {
         reply_to: "no-reply@genieq.com"
       };
       
-      console.log('이메일 전송 시작');
+
       return emailjs.send('service_gamja', 'template_zcvkxgp', templateParams);
     })
     .then(result => {
       // 이 블록은 이메일 발송이 성공한 경우에만 실행됨
-      console.log('이메일 발송 성공!', result);
-      console.log('생성된 인증코드:', generatedCode.value);
+
+
       isEmailSent.value = true;
       startTimer(); // 타이머 시작
     })
     .catch(error => {
-      console.error('처리 중 에러 발생:', error);
+
       
       // 에러 메시지 설정
       if (error.message === '존재하지 않는 이메일입니다.') {
@@ -332,7 +332,7 @@ const sendTempPassword = () => {
         throw new Error(errorText || '서버에서 비밀번호 변경에 실패했습니다.');
       });
     }
-    console.log('백엔드 비밀번호 변경 성공!');
+
     return response.text(); // 성공 메시지 반환 (필요하면)
   })
 
@@ -353,8 +353,8 @@ const sendTempPassword = () => {
     templateParams
   )
   .then(() => {
-    console.log('임시 비밀번호 발송 성공!');
-    console.log('이메일 발송 성공!', tempPassword);
+
+
     isSending.value = false;
     // 다음 페이지로 이동 (Router-link 대신 프로그래밍 방식으로 이동)
     router.push({
@@ -363,7 +363,7 @@ const sendTempPassword = () => {
     });
   })
   .catch((error) => {
-    console.error('이메일 발송 실패:', error);
+
     alert('임시 비밀번호 발송에 실패했습니다. 다시 시도해주세요.');
     isSending.value = false;
   });

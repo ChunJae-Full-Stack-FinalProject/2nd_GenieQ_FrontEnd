@@ -65,9 +65,9 @@ const loginFailed = ref(false);
 
 // 컴포넌트 마운트 시 이미 로그인되어 있으면 홈으로 리디렉션
 onMounted(() => {
-  console.log(authStore.isLoggedIn);
+
   if (authStore.isLoggedIn) {
-    console.log('이미 로그인되어 있음, 홈으로 리디렉션');
+
     router.push('/home');
   }
   // 테스트 계정 정보 알림 - 처음 방문 시에만 표시
@@ -95,12 +95,12 @@ const loginHandler = () => {
   // 오류가 있으면 로그인 중단
   if (emailError.value || !email.value || !password.value) return;
 
-  console.log('로그인 시도:', { email: email.value, password: password.value });
+
   // 로그인 진행
   loginError.value = ''; // 이전 오류 초기화
   isLoading.value = true;
   
-  console.log('로그인 핸들러: 로그인 시작'); // (추가) 로그: 로그인 시작
+  // console.log('로그인 핸들러: 로그인 시작'); // (추가) 로그: 로그인 시작
   
   const loginData = {
     memEmail: email.value,
@@ -116,14 +116,14 @@ const loginHandler = () => {
     body: JSON.stringify(loginData)
   })
   .then(response => {
-    console.log("요청 시도");
+
     if (!response.ok) {
       return response.text().then(text => { throw new Error(text || '로그인에 실패했습니다.'); });
     }
     return response.json();
   })
   .then(userData => {
-    console.log('로그인 성공:', userData); // (추가) 로그: 로그인 성공
+    // console.log('로그인 성공:', userData); // (추가) 로그: 로그인 성공
     
     // 사용자 정보 상태 업데이트
     authStore.setUser(userData);
@@ -132,11 +132,11 @@ const loginHandler = () => {
     localStorage.setItem('authUser', JSON.stringify(userData));
     
     // 홈으로 리디렉션
-    console.log('로그인 성공, 홈으로 리디렉션'); // (추가) 로그: 로그인 성공
+    // console.log('로그인 성공, 홈으로 리디렉션'); // (추가) 로그: 로그인 성공
     router.push('/home');
   })
   .catch(error => {
-    console.error('로그인 오류:', error); // (추가) 로그: 로그인 오류
+    // console.error('로그인 오류:', error); // (추가) 로그: 로그인 오류
     loginFailed.value = true; // 로그인 실패 상태 활성화
   })
   .finally(() => {

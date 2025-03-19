@@ -24,12 +24,12 @@ const requireAuth = async (to, from, next) => {
   const authStore = useAuthStore();
   
   if (authUser) {
-    console.log('[Router Guard] localStorage에 authUser 존재, 인증 상태 유지');
+
     // authUser가 있으면 인증된 상태로 처리
     authStore.setUser(JSON.parse(authUser));
     next();
   } else {
-    console.log('[Router Guard] localStorage에 authUser 없음, 세션 기반 인증 시도');
+
     // authUser가 없지만 유효한 세션이 있을 수 있으므로 세션 확인
     try {
       // API URL 가져오기
@@ -45,7 +45,7 @@ const requireAuth = async (to, from, next) => {
       if (response.ok) {
         // 세션이 유효하고 사용자 정보를 받아옴
         const userData = await response.json();
-        console.log('[Router Guard] 세션 유효, 사용자 정보 복원:', userData);
+
         
         // 인증 스토어와 localStorage 업데이트
         authStore.setUser(userData);
@@ -57,11 +57,11 @@ const requireAuth = async (to, from, next) => {
         next();
       } else {
         // 세션이 유효하지 않음
-        console.log('[Router Guard] 세션 만료 또는 유효하지 않음, 로그인 페이지로 리다이렉트');
+
         next('/login');
       }
     } catch (error) {
-      console.error('[Router Guard] 세션 확인 중 오류 발생:', error);
+
       next('/login');
     }
   }
