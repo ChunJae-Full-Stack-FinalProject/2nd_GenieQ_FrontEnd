@@ -134,7 +134,7 @@
   };
   
   // 작업명 클릭시, 해당 화면으로 이동
-const handleWorkItemClick = (item) => {
+  const handleWorkItemClick = (item) => {
   const apiUrl = import.meta.env.VITE_API_URL;
   const pasCode = item.PAS_CODE;
 
