@@ -64,7 +64,7 @@ const isContentChanged = ref(false); // 내용 변경 여부 추적 (초기 상�
 const isWarningModalOpen = ref(false); // 경고 모달 상태
 const isPaymentUsageModalOpen = ref(false); // 결제 사용 모달 상태
 const isLoading = ref(false); // 로딩 상태 추가
-const loadingMessage = ref('지문을 생성 중입니다...'); // 로딩 메시지
+const loadingMessage = ref('지문을 생성 중입니다.\n생성까지 최대 3분이 소요될 수 있습니다.'); // 로딩 메시지
 const isFromRoute = ref(false); // 이전 페이지의 루트 확인용
 const isSaveSuccessModalOpen = ref(false); // 저장 확인 모달 오픈
 const saveSuccessMessage = ref('지문이 저장되었습니다.'); // 저장 확인 모달 메시지
@@ -236,7 +236,7 @@ const handleGenerate = () => {
     // 재생성 처리 로직
     isProcessing.value = true;
     isLoading.value = true;
-    loadingMessage.value = '지문 재생성 중입니다...';
+    loadingMessage.value = '지문을 재생성 중입니다.\n재생성까지 최대 3분이 소요될 수 있습니다.';
 
     // 로컬 스토리지에서 문자열로 데이터 가져오기
     const savedGenerateDataStr = localStorage.getItem('genieq-passage-data');
@@ -333,8 +333,8 @@ const handleSaveButtonClick = () => {
     if (isProcessing.value) { return; }
     isProcessing.value = true;
     // 내용 검증
-    if (!content.value || content.value.length < 300) {
-        alert('300자 이상 입력해주세요.');
+    if (!content.value || content.value.length < 500) {
+        alert('500자 이상 입력해주세요.');
         return;
     }
     // 로딩 상태 활성화
@@ -390,8 +390,11 @@ const handleSaveButtonClick = () => {
             };
             // 로컬 스토리지 업데이트
             localStorage.setItem('genieq-passage-data', JSON.stringify(updatedData));
-            alert('지문 저장에 성공했습니다.');
-            hasManualSave.value = true;
+            isContentChanged.value = false; // 변경 내용이 없는 상태 (저장하기 비활성화)
+            hasManualSave.value = true; // 나머지 버튼 활성화
+
+            // 저장 성공 모달 표시
+            openSaveSuccessModal();
         })
         .catch(error => {
             // console.error('지문 업데이트 중 오류:', error);

@@ -56,7 +56,7 @@
         <template v-else>
           <BaseButton text="닫기" type="type3" width="140px" height="54px" @click="closeModal"/>
         </template>
-        <BaseButton text="불러오기" type="type1" width="182px" height="54px" :disabled="!selectedPassage" @click.stop="handleLoadPassage"/>
+        <BaseButton text="불러오기" type="type1" width="182px" height="54px" @click.stop="handleLoadPassage"/>
       </div>
     </div>
   </BaseModal>
@@ -150,6 +150,19 @@ const handleLoadPassage = () => {
   if (selectedPassage.value) {
     // 부모 컴포넌트에 선택한 지문 전달
     emit("loadPassage", selectedPassage.value);
+  } 
+  // 미리보기는 아니지만 활성화된 아이템 ID가 있는 경우
+  else if (selectedPassageId.value) {
+    const activePassage = filteredPassages.value.find(
+      p => p.PAS_CODE === selectedPassageId.value
+    );
+    if (activePassage) {
+      emit("loadPassage", activePassage);
+    }
+  }
+  // 위 두 경우가 모두 아니고 필터링된 목록에 지문이 있는 경우
+  else if (filteredPassages.value.length > 0) {
+    emit("loadPassage", filteredPassages.value[0]);
   }
 };
 
@@ -302,6 +315,7 @@ const contentAreaClass = computed(() => {
   height: 582px;
   border-radius: 12px;
   border: 1px solid #BDBDBD;
+  background-color: #FFFFFF;
   align-self: center;
   padding: 11px 20px;
 }
