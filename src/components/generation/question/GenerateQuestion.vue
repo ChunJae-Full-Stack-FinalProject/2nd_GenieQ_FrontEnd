@@ -475,7 +475,17 @@ const handleSaveButtonClick = () => {
       console.log("저장데이터: ", passageData.value);
       const apiUrl = import.meta.env.VITE_API_URL;
       const pasCode = saveResponse.value.passage.pasCode;
-      const selectedQuestion = saveResponse.value.question;
+      // const selectedQuestion = saveResponse.value.question;
+
+      const requestData = {
+        "type": saveResponse.value.passage.type,
+        "keyword": saveResponse.value.passage.keyword,
+        "title": passageData.value.title,
+        "content": passageData.value.content,
+        "gist": saveResponse.value.passage.gist || '',
+        "isGenerated": saveResponse.value.passage.isGenerated || 0,
+        "questions": saveResponse.value.passage.questions || []
+      };
 
       // 지문 저장 api
       fetch(`${apiUrl}/pass/ques/update/${pasCode}`, {
@@ -509,22 +519,30 @@ const handleSaveButtonClick = () => {
         return response.json();
     })
     .then(data => {
-        localStorage.setItem('saveResponse', JSON.stringify({
-            question: selectedQuestion,
-            passage: data
-        }))
+      // API 응답으로 받은 데이터로 saveResponse 업데이트
+      saveResponse.value = {
+          ...saveResponse.value,
+          passage: data
+      };
+      
+      // 업데이트된 데이터를 로컬스토리지에 저장
+      localStorage.setItem('saveResponse', JSON.stringify(saveResponse.value));
+      
+      // 상태 업데이트
+      isSaved.value = true;
+      hasManualSave.value = true;
+      isContentChanged.value = false;
+      
+      console.log('지문이 성공적으로 저장되었습니다:', data);
     })
     .catch(error => {
         console.error("문항 수정 실패 : ", error);
-    });
-
-    
-      savePassageData();
-      isSaved.value = false;
-      hasManualSave.value = true;
-      isContentChanged.value = false; // 저장 후 내용 변경 플래그를 false로 설정
-      console.log('내용이 저장되었습니다:', { isContentChanged: isContentChanged.value, hasManualSave: hasManualSave.value });
+        alert("지문 저장에 실패했습니다.");
+    })
+    .finally(() => {
       isProcessing.value = false;
+    });
+    
       return true;
     } else {
       showLengthWarning();
