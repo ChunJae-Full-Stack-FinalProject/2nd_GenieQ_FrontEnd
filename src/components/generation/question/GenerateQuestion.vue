@@ -512,6 +512,7 @@ const handleSaveButtonClick = () => {
 
       const apiUrl = import.meta.env.VITE_API_URL;
       const pasCode = saveResponse.value.passage.pasCode;
+      // const selectedQuestion = saveResponse.value.question;
       
       // 올바른 요청 데이터 구조 생성
       const requestData = {
@@ -552,7 +553,6 @@ const handleSaveButtonClick = () => {
                       path: '/login', 
                       query: { redirect: route.fullPath }
                   });
-
                   throw new Error('인증이 필요합니다');
               }
               throw new Error(`지문 저장 실패: ${response.status}`);
@@ -589,7 +589,6 @@ const handleSaveButtonClick = () => {
       hasManualSave.value = true;
       isContentChanged.value = false; // 저장 후 내용 변경 플래그를 false로 설정
       console.log('내용이 저장되었습니다:', { isContentChanged: isContentChanged.value, hasManualSave: hasManualSave.value });
-
       return true;
     } else {
       showLengthWarning();
