@@ -2,7 +2,7 @@
   <div class="card-container">
     <div class="worklist-title">
       <router-link to="/storage/worklistMina" class="worklist-link">
-        <p>최근 작업 내역</p>
+        <p class="listTitle">최근 작업 내역</p>
         <Icon icon="weui:arrow-outlined" width="24" height="24" id="arrow-icon" style="color: #303030" />
       </router-link>
     </div>

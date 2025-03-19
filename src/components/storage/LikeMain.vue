@@ -1,9 +1,9 @@
 <template>
   <div class="card-container">
     <div class="storage-likemain-title">
-      <p>즐겨찾기</p>
+      <p class="listTitle">즐겨찾기</p>
     </div>
-    <div class="storage-likemain-subtitle">
+    <div class="storage-likemain-subtitle listTitle">
       <span>전체</span>
       <p>({{ computedWorkItems.length }}개)</p>
     </div>
@@ -12,7 +12,7 @@
       style="border: 0; background-color: transparent;"
       @click="openDeleteModal" class="trash-btn"
       >
-      <span>삭제</span>
+      <span class="listTitle">삭제</span>
       <Icon icon="cil:trash" class="trash" width="20" height="20" style="color: #303030" />
     </button>
   </div>
