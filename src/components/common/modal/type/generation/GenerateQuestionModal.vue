@@ -179,25 +179,25 @@ const handleGenerateQuestion = async () => {
             isLoading.value = true;
             loadingMessage.value = '문항을 생성 중입니다.\n생성까지 최대 3분이 소요될 수 있습니다.';
 
-            // ✅ 1단계: 키워드 생성 API 호출
-            const keywordRequestData = {
-                "custom_passage": passageData?.PAS_CONTENT || ''
-            };
+            // // ✅ 1단계: 키워드 생성 API 호출
+            // const keywordRequestData = {
+            //     "custom_passage": passageData?.PAS_CONTENT || ''
+            // };
 
-            console.log("keywordRequestData:", keywordRequestData);
+            // console.log("keywordRequestData:", keywordRequestData);
 
 
-            const keywordResponse = await fetch('http://10.41.1.56:7777/get-type-keyword',{
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(keywordRequestData),
-            });
+            // const keywordResponse = await fetch('http://api.chunjae-it-edu.com/get-type-keyword',{
+            //     method: 'POST',
+            //     headers: {
+            //         'Content-Type': 'application/json',
+            //     },
+            //     body: JSON.stringify(keywordRequestData),
+            // });
 
-            if (!keywordResponse.ok) throw new Error(`문항 생성 실패: ${keywordResponse.status}`);
+            // if (!keywordResponse.ok) throw new Error(`문항 생성 실패: ${keywordResponse.status}`);
 
-            const keywordResult = await keywordResponse.json();
+            // const keywordResult = await keywordResponse.json();
 
             // ✅ 2단계: 문항 생성 API 호출
             const requestData = {
@@ -209,7 +209,7 @@ const handleGenerateQuestion = async () => {
 
             console.log("Request Data:", requestData);
 
-            const response = await fetch('http://10.41.1.56:7777/generate-question', {
+            const response = await fetch('http://api.chunjae-it-edu.com/generate-question', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -226,8 +226,8 @@ const handleGenerateQuestion = async () => {
             // ✅ 3단계: 문항 저장 API 호출
 
             const saveRequestData = {
-                "type": keywordResult.type_passage,
-                "keyword": keywordResult.keyword,
+                "type": result.type_passage,
+                "keyword": result.keyword[0],
                 "title": passageData?.PAS_TITLE || '',
                 "content": passageData?.PAS_CONTENT || '',
                 "gist": passageData?.PAS_GIST ||'',

@@ -179,7 +179,7 @@ const confirmCreatePassage = () => {
 
         const apiUrl = import.meta.env.VITE_API_URL;
         //fetch(`${apiUrl}/api/test/generate-passage`, {
-        fetch('http://10.41.1.56:7777/generate-passage', {
+        fetch('http://api.chunjae-it-edu.com/generate-passage', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(requestData)
@@ -194,7 +194,7 @@ const confirmCreatePassage = () => {
         })
         .catch(error => {
             // console.log("test 서버로 요청을 대신합니다.");
-            alert('http://10.41.1.56:7777/generate-passage 서버로의 요청에 실패했습니다.\nhttp://43.202.6.90:9090/test/generate-passage 로 요청을 대신합니다.');
+            alert('http://api.chunjae-it-edu.com/generate-passage 서버로의 요청에 실패했습니다.\nhttp://43.202.6.90:9090/test/generate-passage 로 요청을 대신합니다.');
             
             fetch(`${apiUrl}/api/test/generate-passage`, {
                     method: 'POST',

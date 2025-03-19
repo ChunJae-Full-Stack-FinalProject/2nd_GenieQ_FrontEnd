@@ -298,7 +298,7 @@ const handleRecreateGeneration = async () => {
 
     console.log("Request Data:", requestData);
 
-    const response = await fetch('http://10.41.1.56:7777/generate-question', {
+    const response = await fetch('http://api.chunjae-it-edu.com/generate-question', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -683,7 +683,7 @@ const handleQuestionGeneration = async () => {
 
             console.log("Request Data:", requestData);
 
-            const response = await fetch('http://10.41.1.56:7777/generate-question', {
+            const response = await fetch('http://api.chunjae-it-edu.com/generate-question', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
