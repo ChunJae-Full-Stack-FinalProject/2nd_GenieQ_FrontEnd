@@ -265,8 +265,8 @@ const handleGenerate = () => {
     };
 
     const apiUrl = import.meta.env.VITE_API_URL;
-    fetch(`${apiUrl}/api/test/generate-passage`, {
-    // fetch('http://api.chunjae-it-edu.com/generate-passage', {
+    // fetch(`${apiUrl}/api/test/generate-passage`, {
+    fetch('http://api.chunjae-it-edu.com/generate-passage', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestData)
