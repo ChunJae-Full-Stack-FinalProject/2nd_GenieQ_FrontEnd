@@ -595,7 +595,92 @@ const handleSaveButtonClick = () => {
 
       return true;
     } else {
-      showLengthWarning();
+      if(!isFromRoute.value) {
+        showLengthWarning();
+      } else {
+        // fromRoute가 있을 경우에는 모달 경고 없이 저장 진행
+        const currentContent = editPassageRef.value.getContent();
+      const currentTitle = editPassageRef.value.getTitle();
+
+      const apiUrl = import.meta.env.VITE_API_URL;
+      const pasCode = saveResponse.value.passage.pasCode;
+      // const selectedQuestion = saveResponse.value.question;
+      
+      // 올바른 요청 데이터 구조 생성
+      const requestData = {
+        "type": saveResponse.value.passage.type,
+        "keyword": saveResponse.value.passage.keyword,
+        "title": passageData.value.title,
+        "content": currentContent,
+        "gist": saveResponse.value.passage.gist || '',
+        "isGenerated": saveResponse.value.passage.isGenerated || 0,
+        "questions": saveResponse.value.passage.questions || []
+      };
+
+      if (isProcessing.value) return; // 중복 실행 방지
+      isProcessing.value = true;
+
+      // 지문 저장 api
+      fetch(`${apiUrl}/pass/ques/update/${pasCode}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestData),
+        credentials: 'include'
+      })
+      .then(response => {
+          if (!response.ok) {
+              // 인증 오류 처리 (401)
+              if (response.status === 401) {
+
+
+                  // 인증 상태 초기화
+                  authStore.user = null;
+                  authStore.isAuthenticated = false;
+                  localStorage.removeItem('authUser');
+
+                  // 로그인 페이지로 리다이렉트
+                  router.push({ 
+                      path: '/login', 
+                      query: { redirect: route.fullPath }
+                  });
+                  throw new Error('인증이 필요합니다');
+              }
+              throw new Error(`지문 저장 실패: ${response.status}`);
+          }
+          return response.json();
+      })
+      .then(data => {
+          // API 응답으로 받은 데이터로 saveResponse 업데이트
+          saveResponse.value = {
+              ...saveResponse.value,
+              passage: data
+          };
+          
+          // 업데이트된 데이터를 로컬스토리지에 저장
+          localStorage.setItem('saveResponse', JSON.stringify(saveResponse.value));
+          
+          // 상태 업데이트
+          isSaved.value = true;
+          hasManualSave.value = true;
+          isContentChanged.value = false;
+        })
+        .catch(error => {
+            alert("지문 저장에 실패했습니다.");
+        })
+        .finally(() => {
+            isProcessing.value = false;
+        });
+        
+        savePassageData();
+        isSaved.value = false;
+        hasManualSave.value = true;
+        isContentChanged.value = false; // 저장 후 내용 변경 플래그를 false로 설정
+
+        return true;
+      }
+
       return false;
     }
   }
