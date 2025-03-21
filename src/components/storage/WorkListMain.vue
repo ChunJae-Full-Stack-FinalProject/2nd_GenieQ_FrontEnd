@@ -398,8 +398,8 @@ const finishEditing = () => {
     const apiUrl = import.meta.env.VITE_API_URL;
     
     // API 호출하여 제목 업데이트 (PATCH 메서드 사용)
-    fetch(`${apiUrl}/pass/update/each`, {
-      method: 'PATCH', // PUT에서 PATCH로 변경
+    fetch(`${apiUrl}/pass/update/title`, {
+      method: 'put', // PUT에서 PATCH로 변경 기존 // 2025-03-21 each -> title  PATCH-> PUT 로 수정완료 
       headers: {
         'Content-Type': 'application/json'
       },
