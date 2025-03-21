@@ -97,13 +97,26 @@
       :selected-question="selectedQuestion"
     />
     
+    <!-- 500자 이하의 지문으로 문항 추가하기 클릭할 경우 -->
     <ConfirmModalComponent
       :isOpen="isConfirmModalOpen"
-      title="글자 수를 확인해 주세요."
-      message="500자 이하의 지문으로 정상적인 문항을 생성하기 어렵습니다. 충분한 지문을 입력해 주세요."
+      title="문항 생성이 불가합니다."
+      message="500자 이하의 지문으로 정상적인 문항을 생성하기 어렵습니다.<br>충분한 지문을 입력해 주세요."
       @close="isConfirmModalOpen = false"
       @confirm="isConfirmModalOpen = false"
     />
+
+    <!-- 500자 이하의 지문으로 저장하기 클릭할 경우 -->
+    <WarningModalComponent
+      :isOpen="isLengthWarning"
+      title="글자 수를 확인해주세요."
+      message="500자 이하의 지문으로는 새로운 문항을 추가하기 어렵습니다.<br>그래도 저장하시겠습니까?"
+      cancelText="취소하기"
+      confirmText="저장하기"
+      @close="cancelLengthWarning"
+      @confirm="confirmLengthWarning"
+    />
+
     <WarningModalComponent 
       :isOpen="isWarningModalOpen" 
       title="작업을 중단하시겠습니까?" 
@@ -158,6 +171,7 @@ const passageData = ref({
   gist: ''
 });
 const isConfirmModalOpen = ref(false);
+const isLengthWarning = ref(false);
 const showGenerateQuestionModal = ref(false);
 const showPaymentModal = ref(false); // PaymentUsageModal 상태
 const showRecreateModal = ref(false); // 재생성하기 모달 상태 추가
@@ -251,21 +265,18 @@ const handleDescriptionChange = (event, index) => {
 
 // 재생성하기 버튼 클릭 핸들러
 const handleRecreateButtonClick = (index) => {
-
-
     // 현재 재생성하려는 문항 인덱스 저장
     currentRecreateIndex.value = index !== undefined ? index : currentSlide.value;
 
     // ✅ 지문 길이 검증이 필요하면 추가
     if (!validatePassageLength()) {
-        showLengthWarning(); // 지문이 너무 짧을 경우 경고
-        return; // ✅ 검증 실패 시 함수 종료
+      showLengthConfirm(); // 지문이 너무 짧을 경우 경고
+      return; // ✅ 검증 실패 시 함수 종료
     }
-
     selectedQuestion.value = {
-        mode: 'recreate',
-        title: questionsData.value[index].queQuery,
-        options: questionsData.value[index].queOption
+      mode: 'recreate',
+      title: questionsData.value[index].queQuery,
+      options: questionsData.value[index].queOption
     };
 
     showRecreateModal.value = true;
@@ -491,104 +502,100 @@ const handleContentChange = () => {
 
 };
 
+// 실제 저장 로직 (모달 분기처리하면서 저장 로직 3번 반복으로 인해 별도로 선언함)
+const performSave = () => {
+  const currentContent = editPassageRef.value.getContent();
+  const currentTitle = editPassageRef.value.getTitle();
+
+  const apiUrl = import.meta.env.VITE_API_URL;
+  const pasCode = saveResponse.value.passage.pasCode;
+  // const selectedQuestion = saveResponse.value.question;
+  
+  // 올바른 요청 데이터 구조 생성
+  const requestData = {
+    "type": saveResponse.value.passage.type,
+    "keyword": saveResponse.value.passage.keyword,
+    "title": passageData.value.title,
+    "content": currentContent,
+    "gist": saveResponse.value.passage.gist || '',
+    "isGenerated": saveResponse.value.passage.isGenerated || 0,
+    "questions": saveResponse.value.passage.questions || []
+  };
+
+  if (isProcessing.value) return; // 중복 실행 방지
+  isProcessing.value = true;
+
+  // 지문 저장 api
+  fetch(`${apiUrl}/pass/ques/update/${pasCode}`, {
+    method: 'PUT',
+    headers: {
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(requestData),
+    credentials: 'include'
+  })
+  .then(response => {
+    if (!response.ok) {
+      // 인증 오류 처리 (401)
+      if (response.status === 401) {
+        // 인증 상태 초기화
+        authStore.user = null;
+        authStore.isAuthenticated = false;
+        localStorage.removeItem('authUser');
+
+        // 로그인 페이지로 리다이렉트
+        router.push({ 
+            path: '/login', 
+            query: { redirect: route.fullPath }
+        });
+        throw new Error('인증이 필요합니다');
+      }
+      throw new Error(`지문 저장 실패: ${response.status}`);
+    }
+    return response.json();
+  })
+  .then(data => {
+      // API 응답으로 받은 데이터로 saveResponse 업데이트
+      saveResponse.value = {
+          ...saveResponse.value,
+          passage: data
+      };
+      
+      // 업데이트된 데이터를 로컬스토리지에 저장
+      localStorage.setItem('saveResponse', JSON.stringify(saveResponse.value));
+      
+      // 상태 업데이트
+      isSaved.value = true;
+      hasManualSave.value = true;
+      isContentChanged.value = false;
+  })
+  .catch(error => {
+      alert("지문 저장에 실패했습니다.");
+  })
+  .finally(() => {
+      isProcessing.value = false;
+  });
+  
+  savePassageData();
+  isSaved.value = false;
+  hasManualSave.value = true;
+  isContentChanged.value = false; // 저장 후 내용 변경 플래그를 false로 설정
+
+  return true;
+};
+
 // 저장 버튼 클릭 핸들러
 const handleSaveButtonClick = () => {
-
   updateEditingMode(false);
 
   if (editPassageRef.value) {
     const isValid = editPassageRef.value.validateTextLength();
     
-    if (isValid) {
+    if (isValid || isFromRoute.value) {
+      // 자료실에서 온 경우, 모달 노출 없이 바로 저장
+
       // 저장 버튼 클릭 시 EditPassage 컴포넌트에서 최신 내용 가져오기
-      const currentContent = editPassageRef.value.getContent();
-      const currentTitle = editPassageRef.value.getTitle();
-      
-      // // 로깅 확인
-      // console.log("저장할 데이터:", { 
-      //   title: currentTitle, 
-      //   content: currentContent 
-      // });
-
-      const apiUrl = import.meta.env.VITE_API_URL;
-      const pasCode = saveResponse.value.passage.pasCode;
-      // const selectedQuestion = saveResponse.value.question;
-      
-      // 올바른 요청 데이터 구조 생성
-      const requestData = {
-        "type": saveResponse.value.passage.type,
-        "keyword": saveResponse.value.passage.keyword,
-        "title": passageData.value.title,
-        "content": currentContent,
-        "gist": saveResponse.value.passage.gist || '',
-        "isGenerated": saveResponse.value.passage.isGenerated || 0,
-        "questions": saveResponse.value.passage.questions || []
-      };
-
-      if (isProcessing.value) return; // 중복 실행 방지
-      isProcessing.value = true;
-
-      // 지문 저장 api
-      fetch(`${apiUrl}/pass/ques/update/${pasCode}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(requestData),
-        credentials: 'include'
-      })
-      .then(response => {
-          if (!response.ok) {
-              // 인증 오류 처리 (401)
-              if (response.status === 401) {
-
-
-                  // 인증 상태 초기화
-                  authStore.user = null;
-                  authStore.isAuthenticated = false;
-                  localStorage.removeItem('authUser');
-
-                  // 로그인 페이지로 리다이렉트
-                  router.push({ 
-                      path: '/login', 
-                      query: { redirect: route.fullPath }
-                  });
-                  throw new Error('인증이 필요합니다');
-              }
-              throw new Error(`지문 저장 실패: ${response.status}`);
-          }
-          return response.json();
-      })
-      .then(data => {
-          // API 응답으로 받은 데이터로 saveResponse 업데이트
-          saveResponse.value = {
-              ...saveResponse.value,
-              passage: data
-          };
-          
-          // 업데이트된 데이터를 로컬스토리지에 저장
-          localStorage.setItem('saveResponse', JSON.stringify(saveResponse.value));
-          
-          // 상태 업데이트
-          isSaved.value = true;
-          hasManualSave.value = true;
-          isContentChanged.value = false;
-          
-
-      })
-      .catch(error => {
-
-          alert("지문 저장에 실패했습니다.");
-      })
-      .finally(() => {
-          isProcessing.value = false;
-      });
-      
-      savePassageData();
-      isSaved.value = false;
-      hasManualSave.value = true;
-      isContentChanged.value = false; // 저장 후 내용 변경 플래그를 false로 설정
-
+      performSave();
       return true;
     } else {
       showLengthWarning();
@@ -602,7 +609,6 @@ const handleSaveButtonClick = () => {
 const savePassageData = () => {
   if (passageData.value) {
     localStorage.setItem('generateQuestionPassageData', JSON.stringify(passageData.value));
-
   }
 };
 
@@ -619,15 +625,32 @@ const validatePassageLength = () => {
   return false;
 };
 
-// showLengthWarning 함수
-const showLengthWarning = () => {
+// showLengthConfirm 함수
+const showLengthConfirm = () => {
   isConfirmModalOpen.value = true;
 };
+
+// showLengthWarning 함수
+const showLengthWarning = () => {
+  isLengthWarning.value = true;
+}
+
+  // 취소 버튼 클릭
+  const cancelLengthWarning = () => {
+    isLengthWarning.value = false;
+  };
+
+  // 저장 버튼 클릭
+  const confirmLengthWarning = () => {
+    isLengthWarning.value = false;
+    // 저장 실행 함수 호출
+    performSave();
+  }
 
 // validateAndOpenModal 함수 수정
 const validateAndOpenModal = () => {
   if (!validatePassageLength()) {
-    showLengthWarning();
+    showLengthConfirm();
   } else {
     localStorage.setItem('tempPassageData', JSON.stringify(passageData.value));
     // GenerateQuestion 표시
@@ -639,7 +662,7 @@ const validateAndOpenModal = () => {
 const openFileModal = () => {
   // 지문 길이 검증
   if (!validatePassageLength()) {
-    showLengthWarning();
+    showLengthConfirm();
   } else {
     isFileModalOpen.value = true;
   }
@@ -868,7 +891,6 @@ const handleBeforeUnload = (e) => {
 
 // 이동 취소 - 현재 화면 유지
 const cancelNavigation = () => {
-
   isWarningModalOpen.value = false;
   pendingRoute.value = null;
 };
@@ -1026,10 +1048,6 @@ watch(currentSlide, (newSlide) => {
 });
 </script>
 <style scoped>
-.app-container {
-  width: 100%;
-  padding: 20px 30px 480px 20px;
-}
 #main-head {
   position: absolute;
   width: 90px;

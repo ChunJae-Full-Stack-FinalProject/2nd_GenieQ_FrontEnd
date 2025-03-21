@@ -439,6 +439,7 @@ defineExpose({
 
     width: 522px;
     height: 442px;
+    line-height: 200%;
 
     background: #FFFFFF;
     border: 1px solid #BDBDBD;

@@ -8,7 +8,7 @@
 
     <div class="select-category-container">
         <p id="sub-title">생성 결과</p>
-        <div id="text-count"><span style="color: #FF9500;">{{ content.length }}</span>/1700</div>
+        <div id="text-count"><span style="color: #FF9500;">{{ content.length }}</span>/2300</div>
         <div id="passage-content-main">
             <textarea id="content-text" placeholder="본문을 입력해주세요." v-model="content" @input="handleInput"></textarea>
         </div>
@@ -34,7 +34,7 @@ const emit = defineEmits(['content-changed']);
 
 // 초기 텍스트 길이 설정
 const MIN_LENGTH = 300;
-const MAX_LENGTH = 1700;
+const MAX_LENGTH = 2300;
 
 // 입력 처리 함수
 const handleInput = (event) => {

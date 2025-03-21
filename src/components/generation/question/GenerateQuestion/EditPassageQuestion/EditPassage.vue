@@ -33,7 +33,7 @@
         </div>
         <div class="passage-container">
             <p>지문</p>
-            <div id="passage-count"><span style="color: #FF9500;">{{ textLength }}</span>/1700</div>
+            <div id="passage-count"><span style="color: #FF9500;">{{ textLength }}</span>/2300</div>
             <div id="passage-content-main">
                 <!-- 기본 텍스트 입력 영역 -->
                 <div id="content-text" 
@@ -47,13 +47,6 @@
             </div>
         </div>
     </div>
-    <ConfirmModalComponent
-        :isOpen="isConfirmModalOpen"
-        title="글자 수를 확인해 주세요."
-        message="500자 이하의 지문으로 정상적인 문항을 생성하기 어렵습니다. 충분한 지문을 입력해 주세요."
-        @close="isConfirmModalOpen = false"
-        @confirm="isConfirmModalOpen = false"
-    />
 </template>
 <script setup>
 import { ref, watch, nextTick, computed, onMounted, defineProps, defineEmits } from 'vue';
@@ -74,7 +67,7 @@ const props = defineProps({
 
 // 상수 정의
 const MIN_LENGTH = 500;
-const MAX_LENGTH = 1700;
+const MAX_LENGTH = 2300;
 
 // 상태 관리
 const title = ref(props.initialTitle || '');
@@ -85,7 +78,6 @@ const contentText = ref('');
 const currentSymbolType = ref('㉠');
 const selectionStart = ref(0);
 const selectionEnd = ref(0);
-const isConfirmModalOpen = ref(false);
 const textLength = ref(0);
 
 // 글로벌 선택 상태 변수 추가
@@ -158,11 +150,6 @@ const getTextLength = () => {
 
     // HTML 태그를 제외한 순수 텍스트 길이만 반환
     return contentDiv.textContent.length;
-};
-
-// 모달 닫기
-const closeConfirmModal = () => {
-    isConfirmModalOpen.value = false;
 };
 
 // 텍스트 선택 처리
@@ -328,7 +315,6 @@ const handleButtonClick = (event, type) => {
 // 글자 수 검증 함수
 const validateTextLength = () => {
     if (getTextLength() < MIN_LENGTH) {
-        isConfirmModalOpen.value = true;
         return false;
     }
     return true;

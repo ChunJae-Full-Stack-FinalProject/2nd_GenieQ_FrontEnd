@@ -294,11 +294,6 @@ onMounted(() => {
 });
 </script>
 <style scoped>
-.app-container {
-    width: 100%;
-    padding: 20px 30px 80px 20px;
-}
-
 #main-title {
     position: absolute;
     width: 87px;
