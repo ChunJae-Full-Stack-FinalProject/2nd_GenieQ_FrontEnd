@@ -178,7 +178,7 @@ const confirmCreatePassage = () => {
         // console.log('[1-2] 지문 생성 API 요청 데이터:', requestData);
 
         const apiUrl = import.meta.env.VITE_API_URL;
-        //fetch(`${apiUrl}/api/test/generate-passage`, {
+        // fetch(`${apiUrl}/api/test/generate-passage`, {
         fetch('http://api.chunjae-it-edu.com/generate-passage', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
