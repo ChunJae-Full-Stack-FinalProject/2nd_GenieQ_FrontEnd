@@ -49,7 +49,7 @@ const props = defineProps({
     // 해설
     description: {
         type: String,
-        default: "연구 커뮤니티는 이러한 모델의 규모를 확장하면 성능이 향상된다고 인정한다고 했으므로, \n① 'LLMs의 성능은 모델의 크기를 줄일수록 향상된다.' 는 글의 내용과 일치하지 않는다."
+        default: ""
     },
     // 편집 모드 상태를 props로 받음
     isEditing: {

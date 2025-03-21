@@ -288,7 +288,8 @@ const handleWorkItemClick = (item) => {
             queCode: q.queCode,
             queQuery: q.queQuery,
             queOption: q.queOption,
-            queAnswer: q.queAnswer
+            queAnswer: q.queAnswer,
+            description: q.description
           }))
         }
       };
