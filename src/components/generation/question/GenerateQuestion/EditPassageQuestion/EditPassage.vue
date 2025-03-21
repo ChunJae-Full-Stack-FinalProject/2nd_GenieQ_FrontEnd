@@ -33,7 +33,7 @@
         </div>
         <div class="passage-container">
             <p>지문</p>
-            <div id="passage-count"><span style="color: #FF9500;">{{ textLength }}</span>/1700</div>
+            <div id="passage-count"><span style="color: #FF9500;">{{ textLength }}</span>/2300</div>
             <div id="passage-content-main">
                 <!-- 기본 텍스트 입력 영역 -->
                 <div id="content-text" 
@@ -74,7 +74,7 @@ const props = defineProps({
 
 // 상수 정의
 const MIN_LENGTH = 500;
-const MAX_LENGTH = 1700;
+const MAX_LENGTH = 2300;
 
 // 상태 관리
 const title = ref(props.initialTitle || '');
