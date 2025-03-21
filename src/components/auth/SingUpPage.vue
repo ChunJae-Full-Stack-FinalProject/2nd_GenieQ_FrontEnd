@@ -287,7 +287,7 @@ const sendVerificationEmail = () => {
           reply_to: "no-reply@genieq.com"
         };
         
-        console.log("전송 파라미터:", templateParams);
+
         
         return emailjs.send(
           'service_gamja',
@@ -303,14 +303,14 @@ const sendVerificationEmail = () => {
     .then(result => {
       // 이메일 전송 결과가 있는 경우에만 처리
       if (result) {
-        console.log('이메일 발송 성공!', generatedCode.value);
+
         isEmailSent.value = true;
         isSending.value = false;
         startTimer(); // 타이머 시작
       }
     })
     .catch(error => {
-      console.error('이메일 처리 중 오류:', error);
+
       emailError.value = '인증 메일 발송에 실패했습니다. 다시 시도해주세요.';
       isSending.value = false;
     });
@@ -529,12 +529,12 @@ const submitForm = (event) =>
       return response.text(); // 성공 메시지가 응답으로 오는 경우
     })
     .then(data => {
-      console.log('회원가입 성공:', data);
+
       alert('회원가입이 완료되었습니다. 로그인 페이지로 이동합니다.');
       router.push('/login'); // 로그인 페이지로 이동
     })
     .catch(error => {
-      console.error('회원가입 오류:', error);
+
       
       // 에러 메시지 표시
       if (error.message.includes('이미 존재하는 이메일')) {

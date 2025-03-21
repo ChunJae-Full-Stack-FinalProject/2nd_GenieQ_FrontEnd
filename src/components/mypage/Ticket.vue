@@ -245,7 +245,7 @@ const fetchPaymentHistory = () => {
   .then(response => {
     if (!response.ok) {
       if (response.status === 401) {
-        console.error('인증 오류(401): 로그인이 필요합니다');
+
         router.push({ path: '/login' });
         throw new Error('인증이 필요합니다');
       }
@@ -254,7 +254,7 @@ const fetchPaymentHistory = () => {
     return response.json();
   })
   .then(data => {
-    console.log('결제 내역 데이터:', data);
+
     paymentHistory.value = data.map(item => ({
     payCode: item.payCode,
     payName: item.payName,
@@ -264,7 +264,7 @@ const fetchPaymentHistory = () => {
    
   })
   .catch(error => {
-    console.error("결제 내역 조회 오류:", error);
+
   });
 };
 
@@ -416,12 +416,12 @@ const purchaseCount = computed(() => {
       })
     })
     .then(response => {
-      console.log("서버 응답 상태 코드:", response.status);
+
       if (!response.ok) {
         // 인증 오류 처리 (401)
         if (response.status === 401) {
           // (추가) 로그 - 인증 오류 감지
-          console.error('인증 오류(401): 로그인이 필요합니다');
+
           
           // 인증 상태 초기화
           authStore.user = null;
@@ -442,7 +442,7 @@ const purchaseCount = computed(() => {
       return response.text();
     })
     .then(data => {
-      console.log('결제 성공', data);
+
 
       // 결제 성공 시 티켓 수 갱신
       getTicketCount(); // 최신 티켓 수 다시 조회
@@ -457,7 +457,7 @@ const purchaseCount = computed(() => {
       isConfirmModalOpen.value = true;
     })
     .catch(error => {
-      console.error('결제 실패:', error);
+
     })
     .finally(() => {
     // 처리 상태 해제 → 버튼 활성화
@@ -492,12 +492,12 @@ function getTicketCount() {
     credentials: 'include' // 쿠키를 포함시켜 세션 유지
   })
   .then(response => {
-    console.log("서버 응답 상태 코드:", response.status);
+
     if (!response.ok) {
       // 인증 오류 처리 (401)
       if (response.status === 401) {
         // (추가) 로그 - 인증 오류 감지
-        console.error('인증 오류(401): 로그인이 필요합니다');
+
         
         // 인증 상태 초기화
         authStore.user = null;
@@ -523,11 +523,11 @@ function getTicketCount() {
   })
   .then(data => {
     // 티켓 정보 갱신
-    console.log("티켓 수량: ", data);
+
     ticketCount.value = data;
   })
   .catch(error => {
-    console.error("티켓 조회 실패:", error);
+
   });
 }
 
@@ -607,7 +607,7 @@ const downloadExcel = () => {
 
     XLSX.writeFile(workbook, fileName);
   } catch (error) {
-    console.error('엑셀 다운로드 중 오류 발생:', error);
+
     alert('엑셀 다운로드 중 오류가 발생했습니다.');
   }
 };

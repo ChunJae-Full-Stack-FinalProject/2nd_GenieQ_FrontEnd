@@ -76,8 +76,8 @@ const getFile = async () => {
     if (isProcessing.value) return; // 중복 실행 방지
     isProcessing.value = true;
 
-    console.log("파일 타입: ", selectedFile.value);
-    console.log("pasCode: ", props.pasCode);
+    // console.log("파일 타입: ", selectedFile.value);
+    // console.log("pasCode: ", props.pasCode);
 
     const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -92,7 +92,7 @@ const getFile = async () => {
 
         if (!response.ok) {
             if (response.status === 401) {
-                console.error('인증 오류(401): 로그인이 필요합니다');
+                // console.error('인증 오류(401): 로그인이 필요합니다');
                 
                 //인증 상태 초기화
                 authStore.user = null;
@@ -109,7 +109,7 @@ const getFile = async () => {
             }
 
             if (response.status === 403) {
-                console.error('권한 오류(403): 권한이 없습니다.');
+                // console.error('권한 오류(403): 권한이 없습니다.');
                 alert('파일 다운로드에 필요한 권한이 없습니다.');
                 throw new Error('파일 다운로드 권한이 없습니다.');
             }
@@ -126,13 +126,13 @@ const getFile = async () => {
         let fileName = `file.${selectedFile.value === 'word' ? 'docx' : selectedFile.value}`;
 
         if (contentDisposition) {
-            console.log('Content-Disposition:', contentDisposition);
+            // console.log('Content-Disposition:', contentDisposition);
 
             // 규식 수정 → 큰따옴표, 작은따옴표 모두 처리
             const match = contentDisposition.match(/filename\*?=(?:UTF-8'')?["']?([^;"']+)["']?/);
             if (match) {
                 fileName = decodeURIComponent(match[1]); // 서버에서 반환된 파일명 사용
-                console.log('추출된 파일 이름:', fileName);
+                // console.log('추출된 파일 이름:', fileName);
             }
         }
 

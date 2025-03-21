@@ -20,7 +20,7 @@ onMounted(async () => {
     const file = await files["/src/assets/policy/privacy.txt"](); 
     privacyText.value = file;
   } catch (error) {
-    console.error("개인정보 처리방침을 불러오는 중 오류 발생:", error);
+
     privacyText.value = "개인정보 처리방침을 불러오는 중 오류가 발생했습니다.";
   }
 });

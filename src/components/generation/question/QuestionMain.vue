@@ -88,7 +88,7 @@ const fetchListCount = () => {
         if (!response.ok) {
             // 인증 오류 처리 (401)
             if (response.status === 401) {
-                console.error('인증 오류(401): 로그인이 필요합니다');
+
 
                 // 인증 상태 초기화
                 authStore.user = null;
@@ -112,7 +112,7 @@ const fetchListCount = () => {
         recentListCount.value = data;
     })
     .catch(error => {
-        console.error("최근 작업 내역 개수 조회 실패 : ", error);
+
     })
 };
 
@@ -230,7 +230,7 @@ onMounted(() => {
             // 사용 후 삭제
             localStorage.removeItem('tempPassageData');
         } catch (error) {
-            console.error('저장된 지문 데이터를 불러오는 중 오류 발생:', error);
+
         }
     }
     setTimeout(() => {

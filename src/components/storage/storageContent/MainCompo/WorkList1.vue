@@ -98,7 +98,7 @@
       if (!response.ok) {
         // 인증 오류 처리 (401)
         if (response.status === 401) {
-          console.error('인증 오류(401): 로그인이 필요합니다');
+
   
           // 인증 상태 초기화
           authStore.user = null;
@@ -129,12 +129,12 @@
       }));
     })
     .catch(error => {
-      console.error('최근 작업 리스트 불러오기 실패: ', error);
+
     });
   };
   
   // 작업명 클릭시, 해당 화면으로 이동
-const handleWorkItemClick = (item) => {
+  const handleWorkItemClick = (item) => {
   const apiUrl = import.meta.env.VITE_API_URL;
   const pasCode = item.PAS_CODE;
 
@@ -160,7 +160,7 @@ const handleWorkItemClick = (item) => {
     if (!response.ok) {
       // 인증 오류 처리 (401)
       if (response.status === 401) {
-        console.error('인증 오류(401): 로그인이 필요합니다');
+
         
         // 인증 상태 초기화
         authStore.user = null;
@@ -180,7 +180,7 @@ const handleWorkItemClick = (item) => {
     return response.json();
   })
   .then(data => {
-    console.log('가져온 데이터 : ', data);
+
 
     if (isPassage) {
       // 지문인 경우 - PassageContent.vue로 이동
@@ -214,7 +214,8 @@ const handleWorkItemClick = (item) => {
             queCode: q.queCode,
             queQuery: q.queQuery,
             queOption: q.queOption,
-            queAnswer: q.queAnswer
+            queAnswer: q.queAnswer,
+            description: q.description
           }))
         }
       };
@@ -230,7 +231,7 @@ const handleWorkItemClick = (item) => {
     }
   })
   .catch(error => {
-    console.error('데이터 가져오기 실패:', error);
+
     alert('데이터를 가져오는 중 오류가 발생했습니다.');
   });
 }
@@ -252,8 +253,8 @@ const handleWorkItemClick = (item) => {
   
   // 파일 형식 선택 후 처리
   const handleFileSelection = (fileType) => {
-    console.log('선택된 파일 형식:', fileType);
-    console.log('선택된 작업 아이템:', selectedItem.value);
+
+
   
     // 파일 추출 로직 구현
   };
@@ -283,7 +284,7 @@ const handleWorkItemClick = (item) => {
       return response.json();
     })
     .then(data => {
-      console.log('즐겨찾기 업데이트 성공:', data);
+
       
       // 서버에서 반환한 업데이트된 데이터로 항목 상태 갱신
       if (data.isFavorite !== undefined) {
@@ -294,7 +295,7 @@ const handleWorkItemClick = (item) => {
       }
     })
     .catch(error => {
-      console.error('즐겨찾기 업데이트 실패:', error);
+
     });
   };
   </script>
@@ -352,30 +353,34 @@ const handleWorkItemClick = (item) => {
     align-items: center;
     padding: 0px;
     gap: 20px;
-
+    height: 378px;
     position: absolute;
     top: 73px;
+    background: #FFFFFF;
+    border-radius: 12px;
+    box-sizing: border-box;
+    overflow: hidden;
   }
   
   .table-container {
     width: 100%;
+    height: 500px;
     overflow-x: auto;
     overflow: hidden;
   }
   
   .data-table {
     width: 1472px;
-    height: 414px;
     background-color: #FFFFFF;
     border-collapse: collapse;
     table-layout: fixed;
     border-radius: 12px;
+    height: 46px;
   }
   
   .data-table th {
     text-align: left;
     padding: 10px 20px;    
-    height: 46px;
     border-bottom: 1px solid #e1e1e1;
     font-weight: 700;
     font-size: 20px;

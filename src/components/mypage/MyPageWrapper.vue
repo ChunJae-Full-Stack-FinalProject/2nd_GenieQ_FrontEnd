@@ -29,7 +29,7 @@ const tabs = ["회원정보", "이용권", "공지사항", "자주 묻는 질문
 const selectedTab = ref('회원정보');
 
 onMounted(()=> {
-  console.log("컴포넌트가 마운트되었습니다 !");
+  // console.log("컴포넌트가 마운트되었습니다 !");
   // 라우터 쿼리 파라미터가 있고, 유효한 탭 값인 경우에만 설정
   if (route.query.tab && tabs.includes(route.query.tab)) {
     selectedTab.value = route.query.tab;
@@ -49,6 +49,12 @@ onMounted(()=> {
   left: 156px;
   top: 0px;
   background: #FFFFFF;
+}
+/* 화면 너비가 1920px 이하일 때 width를 조정 */
+@media (max-width: 1920px) {
+  .mypage-header {
+    width: 1920px; /* 너비 조정 */
+  }
 }
 
 /* "마이페이지" 제목 스타일 */

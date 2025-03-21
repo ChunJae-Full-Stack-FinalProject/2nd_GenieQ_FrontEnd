@@ -199,7 +199,7 @@ const processWithdrawal = () => {
     return response.text();
   })
   .then(data => {
-    console.log('회원탈퇴 성공:', data);
+
     
     // 경고 모달 닫기
     showWithdrawalWarning.value = false;
@@ -208,7 +208,7 @@ const processWithdrawal = () => {
     showWithdrawalComplete.value = true;
   })
   .catch(err => {
-    console.error('회원탈퇴 오류:', err);
+
     alert('회원탈퇴 처리 중 오류가 발생했습니다: ' + err.message);
   })
   .finally(() => {
@@ -234,7 +234,7 @@ const redirectAfterWithdrawal = () => {
 const fetchUserInfo = () => {
   // 로그인 상태 확인
   if (!authStore.isAuthenticated) {
-    console.error('로그인되지 않은 상태입니다.');
+
     router.push('/login');
     return;
   }
@@ -257,7 +257,7 @@ const fetchUserInfo = () => {
     return response.json();
   })
   .then(data => {
-    console.log('사용자 정보 조회 성공:', data);
+
     
     // 반응형 userData 업데이트
     userData.value = {
@@ -273,12 +273,12 @@ const fetchUserInfo = () => {
       memType: data.memType || ''
     };
     
-    console.log('데이터 매핑 후:', userData.value);
+
   })
   .catch(error => {
-    console.error('사용자 정보 조회 오류:', error);
-    console.error('에러 유형:', error.name);
-    console.error('에러 메시지:', error.message);
+
+
+
     error.value = `사용자 정보를 불러오는 중 오류가 발생했습니다: ${error.message}`;
   })
   .finally(() => {
@@ -300,7 +300,7 @@ const updateName = () => {
     "memName": userData.value.name
   };
   
-  console.log('이름 업데이트 요청 데이터:', nameData);
+
   
   return fetch(`${apiUrl}/api/info/update/name`, {
     method: 'PATCH',
@@ -325,7 +325,7 @@ const updateName = () => {
     }
   })
   .then(data => {
-    console.log('이름 업데이트 성공:', data);
+
     originalUserData.value.name = userData.value.name;
     return true;
   });
@@ -345,7 +345,7 @@ const updateType = () => {
     "memType": userData.value.memType
   };
   
-  console.log('소속 업데이트 요청 데이터:', typeData);
+
   
   return fetch(`${apiUrl}/api/info/update/type`, {
     method: 'PATCH',
@@ -370,7 +370,7 @@ const updateType = () => {
     }
   })
   .then(data => {
-    console.log('소속 업데이트 성공:', data);
+
     originalUserData.value.memType = userData.value.memType;
     return true;
   });
@@ -386,7 +386,7 @@ let isSaving = false;
 const saveUserInfo = () => {
   // 이미 저장 중이면 실행하지 않음
   if (isSaving) {
-    console.log('이미 저장 중입니다.');
+
     return;
   }
   
@@ -416,10 +416,10 @@ const saveUserInfo = () => {
     return;
   }
     
-  console.log('변경할 정보:', {
-    name: isNameChanged ? userData.value.name : '변경 없음',
-    memType: isTypeChanged ? userData.value.memType : '변경 없음'
-  });
+  // console.log('변경할 정보:', {
+  //   name: isNameChanged ? userData.value.name : '변경 없음',
+  //   memType: isTypeChanged ? userData.value.memType : '변경 없음'
+  // });
     
   // 성공 여부 추적
   let successCount = 0;
@@ -434,7 +434,7 @@ const saveUserInfo = () => {
         successCount++;
       })
       .catch(nameError => {
-        console.error('이름 업데이트 중 오류:', nameError);
+
         throw nameError;
       });
   }
@@ -446,7 +446,7 @@ const saveUserInfo = () => {
         successCount++;
       })
       .catch(typeError => {
-        console.error('소속 업데이트 중 오류:', typeError);
+
         throw typeError;
       });
   }
@@ -460,9 +460,9 @@ const saveUserInfo = () => {
       }
     })
     .catch(err => {
-      console.error('사용자 정보 업데이트 오류:', err);
-      console.error('에러 유형:', err.name);
-      console.error('에러 메시지:', err.message);
+
+
+
       error.value = `정보를 저장하는 중 오류가 발생했습니다: ${err.message}`;
       alert('정보 저장에 실패했습니다. ' + err.message);
     })
@@ -486,7 +486,7 @@ const handleLogout = () => {
     router.push('/login');
   })
   .catch(error => {
-    console.error('로그아웃 중 오류 발생:', error);
+
     localStorage.removeItem('authUser');
     authStore.user = null;
     authStore.isAuthenticated = false;

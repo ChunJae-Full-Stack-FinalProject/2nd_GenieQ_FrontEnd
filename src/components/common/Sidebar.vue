@@ -46,6 +46,7 @@ const isActive = (path) => {
 // 지문 데이터 제거 함수
 const clearPassageData = () => {
     localStorage.removeItem('genieq-passage-data');
+    localStorage.removeItem('genieq-passage-for-question');
 };
 </script>
 

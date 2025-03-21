@@ -37,7 +37,7 @@ onMounted(async () => {
     const file = await files["/src/assets/policy/terms.txt"](); 
     termsText.value = file; 
   } catch (error) {
-    console.error("이용약관을 불러오는 중 오류 발생:", error);
+
     termsText.value = "이용약관을 불러오는 중 오류가 발생했습니다.";
   }
 });

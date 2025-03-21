@@ -15,12 +15,12 @@
         /* height: 100%; */
         min-height: 100%;
         background-color: #F6F6F6; /* 배경색 추가 */
-        /* overflow-x: scroll !important;  */
+        overflow-x: auto !important; /* 가로 스크롤 허용 */
         overflow-y: unset !important; 
       
       }
       body { 
-        min-width: 1200px; /* 최소 너비 설정 */
+        min-width: 1920px; /* 최소 너비 설정 */
       }
       #app {
         display: flex;
@@ -30,6 +30,15 @@
       }
       .sidebar { 
         /* overflow-y: auto */
+      }
+      /* 가로 스크롤바만 숨기기 */
+      html::-webkit-scrollbar {
+        display: none; /* 크롬, 사파리에서 가로 스크롤바 숨김 */
+      }
+
+      html {
+        scrollbar-width: none; /* 파이어폭스에서 가로 스크롤바 숨김 */
+        -ms-overflow-style: none; /* IE에서 가로 스크롤바 숨김 */
       }
     </style>
   </head>

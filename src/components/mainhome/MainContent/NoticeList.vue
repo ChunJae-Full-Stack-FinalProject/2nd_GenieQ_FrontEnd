@@ -55,7 +55,7 @@ const fetchNotices = () => {
         if (!response.ok) {
             // 인증 오류 처리 (401)
             if (response.status === 401) {
-                console.error('인증 오류(401): 로그인이 필요합니다');
+
 
                 // 인증 상태 초기화
                 authStore.user = null;
@@ -85,7 +85,7 @@ const fetchNotices = () => {
         })).slice(0, 4); // 최신 4개만 가져옴
     })
     .catch(error => {
-        console.error('공지사항 데이터 불러오기 실패:', error);
+
     });
 };
 </script>

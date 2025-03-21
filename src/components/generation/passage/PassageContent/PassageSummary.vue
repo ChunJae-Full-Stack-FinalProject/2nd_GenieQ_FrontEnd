@@ -33,7 +33,7 @@ const gist = ref('');
 
 // gistText computed 속성 - 문자열로 직접 출력
 const gistText = computed(() => {
-    console.log('[gistText] 계산 중, 현재 gist 값:', gist.value);
+
     
     // gist가 빈 배열이거나 없을 때 localStorage에서 다시 확인
     if (!gist.value || (Array.isArray(gist.value) && gist.value.length === 0)) {
@@ -44,7 +44,7 @@ const gistText = computed(() => {
                 
                 // gist 데이터가 있으면 반환
                 if (passageData.gist) {
-                    console.log('[gistText] localStorage에서 gist 복구:', passageData.gist);
+
                     
                     // gist 값을 업데이트 (나중에 사용하기 위해)
                     if (typeof passageData.gist === 'string') {
@@ -57,7 +57,7 @@ const gistText = computed(() => {
                 }
             }
         } catch (error) {
-            console.error('[gistText] localStorage 데이터 확인 중 오류:', error);
+
         }
         localStorage.removeItem('genieq-passage-data');
         return '핵심 논점이 없습니다.';
@@ -75,14 +75,14 @@ const gistText = computed(() => {
 
 // LocalStorage에서 데이터 로드하는 함수
 const loadFromLocalStorage = () => {
-    console.log('[loadFromLocalStorage] 로컬 스토리지에서 데이터 로드 시도');
+
     
     // saveResponse에서 데이터 로드 - 첫 번째 시도
     try {
         const saveResponseStr = localStorage.getItem('saveResponse');
         if (saveResponseStr) {
             const saveResponse = JSON.parse(saveResponseStr);
-            console.log('[loadFromLocalStorage-1] saveResponse 데이터:', saveResponse);
+
             
             if (saveResponse && saveResponse.passage) {
                 // 데이터가 있으면 설정
@@ -95,11 +95,11 @@ const loadFromLocalStorage = () => {
                     gist.value = saveResponse.passage.gist;
                 }
                 
-                console.log('[loadFromLocalStorage-1] 값 설정됨:', { 
-                    subject: subject.value, 
-                    keyword: keyword.value, 
-                    gist: gist.value 
-                });
+                // console.log('[loadFromLocalStorage-1] 값 설정됨:', { 
+                //     subject: subject.value, 
+                //     keyword: keyword.value, 
+                //     gist: gist.value 
+                // });
                 
                 // 하나라도 데이터가 설정되었으면 성공으로 간주
                 if (subject.value || keyword.value || gist.value) {
@@ -108,7 +108,7 @@ const loadFromLocalStorage = () => {
             }
         }
     } catch (error) {
-        console.error('[loadFromLocalStorage-1] saveResponse 데이터 로드 오류:', error);
+
     }
     
     // genieq-passage-data에서 데이터 로드 - 두 번째 시도
@@ -116,7 +116,7 @@ const loadFromLocalStorage = () => {
         const storedData = localStorage.getItem('genieq-passage-data');
         if (storedData) {
             const passageData = JSON.parse(storedData);
-            console.log('[loadFromLocalStorage-2] genieq-passage-data 데이터:', passageData);
+
             
             // 데이터가 있으면 설정
             if (!subject.value) {
@@ -134,11 +134,11 @@ const loadFromLocalStorage = () => {
                 }
             }
             
-            console.log('[loadFromLocalStorage-2] 값 설정됨:', { 
-                subject: subject.value, 
-                keyword: keyword.value, 
-                gist: gist.value 
-            });
+            // console.log('[loadFromLocalStorage-2] 값 설정됨:', { 
+            //     subject: subject.value, 
+            //     keyword: keyword.value, 
+            //     gist: gist.value 
+            // });
             
             // 하나라도 데이터가 설정되었으면 성공으로 간주
             if (subject.value || keyword.value || gist.value) {
@@ -146,22 +146,22 @@ const loadFromLocalStorage = () => {
             }
         }
     } catch (error) {
-        console.error('[loadFromLocalStorage-2] genieq-passage-data 데이터 로드 오류:', error);
+
     }
     
-    console.log('[loadFromLocalStorage] 데이터 로드 실패');
+
     return false; // 데이터 로드 실패
 };
 
 // 외부에서 직접 호출할 수 있는 업데이트 메서드
 const updateData = () => {
-    console.log('[updateData] 데이터 업데이트 요청됨');
+
     return loadFromLocalStorage();
 };
 
 // 컴포넌트 마운트 시 초기 데이터 로드
 onMounted(() => {
-    console.log('[마운트] PassageSummary 컴포넌트 마운트됨');
+
     loadFromLocalStorage();
 });
 
@@ -175,9 +175,9 @@ const getSummary = () => {
 };
 // 요약 정보 설정 (외부에서 호출 가능)
 const setSummary = (summaryData) => {
-    console.log('[27] PassageSummary: 요약 정보 설정', summaryData);
+
     if (!summaryData) {
-        console.error('[setSummary] 유효하지 않은 요약 데이터');
+
         return;
     }
         // subject와 keyword 값 설정 - 명시적으로 빈 문자열 처리
@@ -188,7 +188,7 @@ const setSummary = (summaryData) => {
             // 빈 배열이 아닌 경우에만 설정
             if (!(Array.isArray(summaryData.gist) && summaryData.gist.length === 0)) {
                 gist.value = summaryData.gist;
-                console.log('[setSummary] gist 설정됨:', gist.value);
+
             } else {
                 // 빈 배열인 경우 로컬 스토리지에서 gist 복구 시도
                 try {
@@ -197,25 +197,25 @@ const setSummary = (summaryData) => {
                         const passageData = JSON.parse(storedData);
                         if (passageData.gist || passageData.PAS_GIST) {
                             gist.value = passageData.gist || passageData.PAS_GIST;
-                            console.log('[setSummary] 로컬 스토리지에서 gist 복구:', gist.value);
+
                         }
                     }
                 } catch (error) {
-                    console.error('[setSummary] 로컬 스토리지에서 gist 복구 중 오류:', error);
+
                 }
             }
     }
-    console.log('[28] PassageSummary: 설정된 요약 정보', {
-        subject: subject.value,
-        keyword: keyword.value,
-        gist: gist.value,
-        gistText: gistText.value 
-    });
+    // console.log('[28] PassageSummary: 설정된 요약 정보', {
+    //     subject: subject.value,
+    //     keyword: keyword.value,
+    //     gist: gist.value,
+    //     gistText: gistText.value 
+    // });
 };
 
 // 값 변경 감지
 watch([subject, keyword, gist], () => {
-    console.log('[watch] 요약 정보 변경됨:', { subject: subject.value, keyword: keyword.value, gist: gist.value, gistText: gistText.value });
+
 });
 // 외부에서 사용 가능한 메서드 노출
 defineExpose({

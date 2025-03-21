@@ -95,7 +95,7 @@ fetch(`${apiUrl}/pass/select/favolist`, {
   if (!response.ok) {
     // 인증 오류 처리 (401)
     if (response.status === 401) {
-      console.error('인증 오류(401): 로그인이 필요합니다');
+
 
       // 인증 상태 초기화
       authStore.user = null;
@@ -126,7 +126,7 @@ fetch(`${apiUrl}/pass/select/favolist`, {
   }));
 })
 .catch(error => {
-  console.error('즐겨찾기 리스트 불러오기 실패: ', error);
+
 });
 };
 
@@ -157,7 +157,7 @@ const handleWorkItemClick = (item) => {
     if (!response.ok) {
       // 인증 오류 처리 (401)
       if (response.status === 401) {
-        console.error('인증 오류(401): 로그인이 필요합니다');
+
         
         // 인증 상태 초기화
         authStore.user = null;
@@ -177,7 +177,7 @@ const handleWorkItemClick = (item) => {
     return response.json();
   })
   .then(data => {
-    console.log('가져온 데이터 : ', data);
+
 
     if (isPassage) {
       // 지문인 경우 - PassageContent.vue로 이동
@@ -211,7 +211,8 @@ const handleWorkItemClick = (item) => {
             queCode: q.queCode,
             queQuery: q.queQuery,
             queOption: q.queOption,
-            queAnswer: q.queAnswer
+            queAnswer: q.queAnswer,
+            description: q.description
           }))
         }
       };
@@ -227,7 +228,7 @@ const handleWorkItemClick = (item) => {
     }
   })
   .catch(error => {
-    console.error('데이터 가져오기 실패:', error);
+
     alert('데이터를 가져오는 중 오류가 발생했습니다.');
   });
 }
@@ -249,8 +250,8 @@ isModalOpen.value = false;
 
 // 파일 형식 선택 후 처리
 const handleFileSelection = (fileType) => {
-console.log('선택된 파일 형식:', fileType);
-console.log('선택된 작업 아이템:', selectedItem.value);
+
+
 
 // 파일 추출 로직 구현
 };
@@ -280,7 +281,7 @@ fetch(`${apiUrl}/pass/favo`, {
   return response.json();
 })
 .then(data => {
-  console.log('즐겨찾기 업데이트 성공:', data);
+
   
   // 서버에서 반환한 업데이트된 데이터로 항목 상태 갱신
   if (data.isFavorite !== undefined) {
@@ -296,7 +297,7 @@ fetch(`${apiUrl}/pass/favo`, {
   }
 })
 .catch(error => {
-  console.error('즐겨찾기 업데이트 실패:', error);
+
 });
 };
 </script>

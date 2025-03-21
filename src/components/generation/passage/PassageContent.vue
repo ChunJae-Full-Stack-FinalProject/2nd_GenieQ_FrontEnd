@@ -119,7 +119,7 @@ const openPaymentUsageModal = () => {
         if (paymentUsageModalRef.value && paymentUsageModalRef.value.updateCreditCount) {
             authStore.updateTicketCount().then(count => {
                 paymentUsageModalRef.value.updateCreditCount(count);
-                console.log('[LOG] 모달 열기 전 이용권 정보 갱신:', count);
+
                 
                 // 갱신 후 모달 열기
                 isPaymentUsageModalOpen.value = true;
@@ -147,7 +147,7 @@ const closeSaveSuccessModal = () => {
 // 백엔드 API에 지문 저장 함수 (handleGenerate 함수에서 호출)
 const savePassageToBackend = (data) => {
     if (!data || !data.generated_passage) {
-        console.error("savePassageToBackend: 유효하지 않은 데이터", data);
+
         alert('지문 데이터가 유효하지 않습니다.');
         isLoading.value = false;
         isProcessing.value = false;
@@ -155,11 +155,11 @@ const savePassageToBackend = (data) => {
     }
     
     loadingMessage.value = '생성된 지문을 저장 중입니다...';
-    console.log("[LOG-1] 재생성된 데이터 저장 시도:", {
-        type: data.type_passage,
-        keyword: data.keyword,
-        content_length: data.generated_passage ? data.generated_passage.length : 0
-    });
+    // console.log("[LOG-1] 재생성된 데이터 저장 시도:", {
+    //     type: data.type_passage,
+    //     keyword: data.keyword,
+    //     content_length: data.generated_passage ? data.generated_passage.length : 0
+    // });
 
     const saveData = {
         type: data.type_passage || type.value,
@@ -198,7 +198,7 @@ const savePassageToBackend = (data) => {
     })
     .then(responseData => {
         authStore.updateTicketCount().then(newCount => {
-            console.log('[LOG] 재생성 후 이용권 업데이트 완료:', newCount);
+
         }); // 차감된 이용권으로 update
 
         const passageData = {
@@ -223,7 +223,7 @@ const savePassageToBackend = (data) => {
         isProcessing.value = false;
     })
     .catch(error => {
-      console.error('[LOG-5] 저장 실패:', error);
+
       alert('저장 중 오류가 발생했습니다: ' + error.message);
       isLoading.value = false;
       isProcessing.value = false;
@@ -231,7 +231,7 @@ const savePassageToBackend = (data) => {
 };
 const handleGenerate = () => {
     if (isProcessing.value) { return; }
-    console.log('[1] 지문 재생성 시작');
+
     closePaymentUsageModal();
     // 재생성 처리 로직
     isProcessing.value = true;
@@ -242,7 +242,7 @@ const handleGenerate = () => {
     const savedGenerateDataStr = localStorage.getItem('genieq-passage-data');
     
     if (!savedGenerateDataStr) {
-        console.error('[2] 저장된 지문 데이터가 없습니다.');
+
         isLoading.value = false;
         return;
     }
@@ -251,9 +251,9 @@ const handleGenerate = () => {
     let savedGenerateData;
     try {
         savedGenerateData = JSON.parse(savedGenerateDataStr);
-        console.log('[3] 파싱된 지문 데이터:', savedGenerateData);
+
     } catch (error) {
-        console.error('[4] 지문 데이터 파싱 오류:', error);
+
         alert('지문 데이터 처리 중 오류가 발생했습니다.');
         isLoading.value = false;
         return;
@@ -265,8 +265,8 @@ const handleGenerate = () => {
     };
 
     const apiUrl = import.meta.env.VITE_API_URL;
-    fetch(`${apiUrl}/api/test/generate-passage`, {
-    // fetch('http://10.41.1.56:7777/generate-passage', {
+    // fetch(`${apiUrl}/api/test/generate-passage`, {
+    fetch('http://api.chunjae-it-edu.com/generate-passage', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestData)
@@ -302,8 +302,8 @@ const handleGenerate = () => {
         hasManualSave.value = true;
     })
     .catch(error => {
-        console.log("test 서버로 요청을 대신합니다.");
-        // alert('http://10.41.1.56:7777/generate-passage 서버로의 요청에 실패했습니다.\nhttp://43.202.6.90:9090/test/generate-passage 로 요청을 대신합니다.');
+
+        // alert('http://api.chunjae-it-edu.com/generate-passage 서버로의 요청에 실패했습니다.\nhttp://43.202.6.90:9090/test/generate-passage 로 요청을 대신합니다.');
             
         fetch(`${apiUrl}/api/test/generate-passage`, {
             method: 'POST',
@@ -378,7 +378,7 @@ const handleSaveButtonClick = () => {
         return response.json();
     })
     .then(responseData => {
-            console.log('업데이트 응답 데이터:', responseData);
+
             // 통합 데이터 구조로 저장
             const updatedData = {
                 pasCode: pasCode.value,
@@ -438,7 +438,7 @@ const prepareDataForQuestions = () => {
         pasCode: pasCode.value
     };
     // 통합 키로 저장 (QuestionMain에서 사용)
-    localStorage.setItem('genieq-passage-for-question', JSON.stringify(passageForQuestion));
+    // localStorage.setItem('genieq-passage-for-question', JSON.stringify(passageForQuestion));
     // console.log('문항 생성을 위한 지문 데이터 준비:', passageForQuestion);
 };
 // 파일 모달 열기 함수
@@ -588,7 +588,7 @@ const loadPassageData = () => {
             try {
                 data = JSON.parse(storedData);
             } catch (parseError) {
-                console.error('[2] JSON 파싱 오류:', parseError);
+
                 return null;
             }
 
@@ -615,14 +615,14 @@ const loadPassageData = () => {
                 keyword: data.keyword || '',
                 items: gistData
             };
-            console.log('[12-2] 지문 데이터 로드 완료:', {
-                title: title.value,
-                contentLength: content.value?.length || 0,
-                pasCode: pasCode.value,
-                type: type.value,
-                keyword: keyword.value,
-                summary: summary.value
-            });
+            // console.log('[12-2] 지문 데이터 로드 완료:', {
+            //     title: title.value,
+            //     contentLength: content.value?.length || 0,
+            //     pasCode: pasCode.value,
+            //     type: type.value,
+            //     keyword: keyword.value,
+            //     summary: summary.value
+            // });
             return data;
         }
     } catch (error) {
@@ -721,9 +721,9 @@ onBeforeUnmount(() => {
     // 질문 페이지로 이동하는 경우에만 데이터 유지, 그 외에는 삭제
     if (!navigatingToQuestions.value) {
         localStorage.removeItem('genieq-passage-data');
-        console.log('이어서 문항 생성하기가 아닌 다른 경로로 이동하여 지문 데이터 삭제됨');
+
     } else {
-        console.log('이어서 문항 생성하기로 이동하여 지문 데이터 유지됨');
+
     }
     // 라우터 가드 제거
     if (routerGuard) {
@@ -734,7 +734,7 @@ onBeforeUnmount(() => {
 // 데이터가 변경될 때마다 호출될 콜백 함수
 // 이 함수를 자식 컴포넌트에서 호출하도록 구현하여 내용 변경 감지
 const handleContentChange = (data) => {
-    console.log('내용 변경 감지:', data);
+
     // (수정) data가 null이 아닌 경우에만 처리
     if (data) {
         // (수정) 명시적으로 제목과 내용 설정
@@ -753,13 +753,13 @@ const handleContentChange = (data) => {
         hasManualSave.value = false;
         isContentChanged.value = true;
 
-        console.log('내용 변경 처리 완료:', {
-            titleLength: data.title?.length || 0,
-            contentLength: data.content?.length || 0,
-            summary: data.summary,
-            hasManualSave: hasManualSave.value,
-            isContentChanged: isContentChanged.value
-        });
+        // console.log('내용 변경 처리 완료:', {
+        //     titleLength: data.title?.length || 0,
+        //     contentLength: data.content?.length || 0,
+        //     summary: data.summary,
+        //     hasManualSave: hasManualSave.value,
+        //     isContentChanged: isContentChanged.value
+        // });
     }
 };
 </script>

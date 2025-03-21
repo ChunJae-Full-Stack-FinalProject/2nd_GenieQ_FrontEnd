@@ -32,7 +32,7 @@ export const useAuthStore = defineStore('auth', {
       this.user = userData; 
       this.isAuthenticated = true;//인증상태
       this.error = null;
-      console.log('Auth Store: 사용자 정보 설정됨', userData); // (추가) 로그: 사용자 정보 설정
+      // console.log('Auth Store: 사용자 정보 설정됨', userData); // (추가) 로그: 사용자 정보 설정
     },
 
     //사용자 티켓 정보만 업데이트 하는 메서드
@@ -62,7 +62,7 @@ export const useAuthStore = defineStore('auth', {
         return parseInt(data) || 0;
       })
       .catch(error =>{
-        console.error("티켓 조회 실패:", error);
+
         return 0;
       });
     },
@@ -72,7 +72,7 @@ export const useAuthStore = defineStore('auth', {
       this.isLoading = true;
       this.error = null;
       
-      console.log('로그인 시도:', credentials); // (추가) 로그: 로그인 시도
+      // console.log('로그인 시도:', credentials); // (추가) 로그: 로그인 시도
       
       return new Promise((resolve, reject) => {
         const apiUrl = import.meta.env.VITE_API_URL;
@@ -91,7 +91,7 @@ export const useAuthStore = defineStore('auth', {
           return response.json(); // promise를 반환함. 반환된 값이 다음 then()의 매개변수로 자동 전달된다.
         })
         .then(userData => {
-          console.log('로그인 성공:', userData); // (추가) 로그: 로그인 성공
+          // console.log('로그인 성공:', userData); // (추가) 로그: 로그인 성공
           
           // 사용자 정보 상태 업데이트
           this.user = userData;
@@ -118,7 +118,7 @@ export const useAuthStore = defineStore('auth', {
     logout() {
       this.isLoading = true;
       
-      console.log('로그아웃 시도'); // (추가) 로그: 로그아웃 시도
+      // console.log('로그아웃 시도'); // (추가) 로그: 로그아웃 시도
       
       return new Promise((resolve, reject) => {
         const apiUrl = import.meta.env.VITE_API_URL;
@@ -134,7 +134,7 @@ export const useAuthStore = defineStore('auth', {
           // 로컬 스토리지 항목 제거
           localStorage.removeItem('authUser');
           
-          console.log('로그아웃 성공'); // (추가) 로그: 로그아웃 성공
+          // console.log('로그아웃 성공'); // (추가) 로그: 로그아웃 성공
           resolve({ success: true });
         })
         .catch(error => {
@@ -155,9 +155,9 @@ export const useAuthStore = defineStore('auth', {
         try {
           this.user = JSON.parse(storedUser);
           this.isAuthenticated = true;
-          console.log('인증 상태 복원됨:', this.user); // (추가) 로그: 인증 상태 복원
+          // console.log('인증 상태 복원됨:', this.user); // (추가) 로그: 인증 상태 복원
         } catch (error) {
-          console.error('저장된 인증 정보 파싱 오류:', error); // (추가) 로그: 인증 정보 파싱 오류
+          // console.error('저장된 인증 정보 파싱 오류:', error); // (추가) 로그: 인증 정보 파싱 오류
           localStorage.removeItem('authUser');
         }
       }
