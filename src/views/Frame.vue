@@ -37,7 +37,6 @@ import GenieQFooter from '@/components/common/Footer.vue';
 .content-area {
   flex: 1;
   background-color: #F6F6F6;
-  padding-bottom: 50px;
 }
 
 #footer {

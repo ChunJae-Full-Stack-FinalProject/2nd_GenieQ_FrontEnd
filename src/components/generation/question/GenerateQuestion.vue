@@ -1048,10 +1048,6 @@ watch(currentSlide, (newSlide) => {
 });
 </script>
 <style scoped>
-.app-container {
-  width: 100%;
-  padding: 20px 30px 480px 20px;
-}
 #main-head {
   position: absolute;
   width: 90px;

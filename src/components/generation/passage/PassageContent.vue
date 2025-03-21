@@ -752,24 +752,11 @@ const handleContentChange = (data) => {
         // 내용이 변경되면 저장 플래그 초기화 (추출하기 버튼 비활성화)
         hasManualSave.value = false;
         isContentChanged.value = true;
-
-        // console.log('내용 변경 처리 완료:', {
-        //     titleLength: data.title?.length || 0,
-        //     contentLength: data.content?.length || 0,
-        //     summary: data.summary,
-        //     hasManualSave: hasManualSave.value,
-        //     isContentChanged: isContentChanged.value
-        // });
     }
 };
 </script>
 
 <style scoped>
-.app-container {
-    width: 100%;
-    padding: 20px 30px 80px 20px;
-}
-
 #main-title {
     position: absolute;
     width: 87px;
