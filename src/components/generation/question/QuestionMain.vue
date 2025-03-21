@@ -4,7 +4,7 @@
         <div class="main-content">
             <InsertPassage ref="insertPassageRef"/>
             <PaymentUsage ref="paymentUsageRef" @credit-update="onCreditUpdate"/>
-            <BaseButton id="reset_button" text="초기화" type="type2" width="248px" height="54px" :disabled="!hasContent" @click="resetPassage"/>
+            <BaseButton id="reset_button" text="초기화" type="type2" width="248px" height="54px" :disabled="!resetContent" @click="resetTitlePassage"/>
             <BaseButton 
                 id="select-type" 
                 text="문항 유형 선택하기" 
@@ -162,7 +162,7 @@ const setPassage = (passage) => {
 };
 
 // 지문 초기화 함수
-const resetPassage = () => {
+const resetTitlePassage = () => {
     currentPassage.value = {
         PAS_TITLE: '',
         PAS_CONTENT: '',
@@ -171,6 +171,15 @@ const resetPassage = () => {
 };
 
 const hasContent = computed(() => {
+    return (
+    (currentPassage.value.PAS_CONTENT &&
+    currentPassage.value.PAS_CONTENT.trim().length > 0) &&
+    (insertPassageRef.value?.passageTitle && // 제목 입력 상태 체크
+    insertPassageRef.value?.passageTitle.trim().length > 0)
+  );
+});
+
+const resetContent = computed(() => {
     return (
     (currentPassage.value.PAS_CONTENT &&
     currentPassage.value.PAS_CONTENT.trim().length > 0) ||
@@ -234,7 +243,7 @@ onMounted(() => {
 
 // provide를 통해 하위 컴포넌트에 상태와 메서드 제공
 provide('passageData', {
-    currentPassage, setPassage, resetPassage, openLoadPassageModal, validatePassageLength, showLengthWarning
+    currentPassage, setPassage, resetTitlePassage, openLoadPassageModal, validatePassageLength, showLengthWarning
 });
 
 const closeGenerateQuestionModal = () => {
