@@ -168,6 +168,7 @@ const resetTitlePassage = () => {
         PAS_CONTENT: '',
         PAS_GIST:''
     };
+    insertPassageRef.value.passageTitle = '';
 };
 
 const hasContent = computed(() => {
