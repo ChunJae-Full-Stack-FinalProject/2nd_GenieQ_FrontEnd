@@ -7,6 +7,7 @@
         :key="tab"
         @click="selectedTab = tab"
         :class="{'active-tab': selectedTab === tab}"
+        class="mypage-header-tab-button"
       >
         {{ tab }}
       </span>
@@ -41,6 +42,9 @@ onMounted(()=> {
 </script>
 
 <style scoped>
+.mypage-header-tab-button{
+  cursor: pointer;
+}
 /* 마이페이지 상단바 전체 스타일 */
 .mypage-header {
   position: absolute;

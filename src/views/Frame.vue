@@ -21,11 +21,11 @@ import GenieQFooter from '@/components/common/Footer.vue';
   display: flex;
   overflow-x: auto;
   min-width: 1200px;
-  min-height: 100vh;
+  /* min-height: 100vh; */
 }
 
 .main-content {
-  min-height: 100vh;
+  min-height: 973px;
   width: calc(100% - 156px);
   margin-left: 156px;
   display: flex;

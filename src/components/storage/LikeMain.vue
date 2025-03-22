@@ -47,7 +47,7 @@
                     {{ item.PAS_TITLE }}
                   </div>
                 </td>
-                <td class="work-title" @contextmenu="showEditForm(index, $event)">{{ item.PAS_KEYWORD }}</td>
+                <td class="work-title" @contextmenu="showEditForm(index, $event)" @click="handleWorkItemClick(item)">{{ item.PAS_KEYWORD }}</td>
                 <td class="work-type" @contextmenu="showEditForm(index, $event)">
                   <span class="type-tag">{{ item.PAS_IS_GENERATED }}</span>
                 </td>
@@ -750,9 +750,10 @@ text-overflow: ellipsis;
 
 .data-table th:nth-child(3), .data-table td:nth-child(3) {
 width: 10%;
-
 }
-
+.data-table td:nth-child(3) {
+cursor: pointer;
+}
 .data-table th:nth-child(4), .data-table td:nth-child(4) {
 width: 7%;
 text-align: center;
