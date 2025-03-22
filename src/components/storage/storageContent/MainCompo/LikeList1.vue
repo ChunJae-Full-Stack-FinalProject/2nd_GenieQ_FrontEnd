@@ -23,7 +23,7 @@
             <tbody>
               <tr v-for="(item, index) in displayItems" :key="index">
                 <td class="work-name" @click="handleWorkItemClick(item)">{{ item.PAS_TITLE }}</td>
-                <td class="work-title">{{ item.PAS_KEYWORD }}</td>
+                <td class="work-title" @click="handleWorkItemClick(item)">{{ item.PAS_KEYWORD }}</td>
                 <td class="work-type"><span class="type-tag">{{ item.PAS_IS_GENERATED }}</span></td>
                 <td class="work-date">{{ item.PAS_DATE }}</td>
                 <td class="work-action">
@@ -387,6 +387,7 @@ width: 30%;
 white-space: nowrap;
 overflow: hidden;
 text-overflow: ellipsis;
+cursor: pointer;
 }
 
 .data-table th:nth-child(2), .data-table td:nth-child(2) {
@@ -394,8 +395,11 @@ width: 20%;
 white-space: nowrap;
 overflow: hidden;
 text-overflow: ellipsis;
+cursor: pointer;
 }
-
+.data-table td:nth-child(2) {
+cursor: pointer;
+}
 .data-table th:nth-child(3), .data-table td:nth-child(3) {
 width: 10%;
 }
@@ -455,6 +459,7 @@ border-bottom-right-radius: 12px;
 
 /* 추출 버튼 */
 .extract-btn {
+  cursor: pointer;
   display: flex;
   flex-direction: row;
   justify-content: center;
