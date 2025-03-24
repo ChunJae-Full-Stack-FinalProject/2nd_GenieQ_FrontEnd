@@ -12,7 +12,7 @@ const userInput = ref('');
 // 상위 컴포넌트에서 제공한 데이터 주입
 const { currentPassage, showLengthWarning } = inject('passageData');
 const MIN_LENGTH = 500;
-const MAX_LENGTH = 1700;
+const MAX_LENGTH = 2300;
 
 // 부모 컴포넌트에서 전달받은 지문 상태 감시
 watch(() => currentPassage.value.PAS_CONTENT, (newContent) => {
