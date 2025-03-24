@@ -14,7 +14,7 @@
                 자료실 지문
             </p>
         </div>
-        <div id="passage-count"><span style="color: #FF9500;">{{ currentLength }}</span>/1700</div>
+        <div id="passage-count"><span style="color: #FF9500;">{{ currentLength }}</span>/2300</div>
 
         <div>
             <div v-if="activeTab === 'user'" class="insert-passage-main">
