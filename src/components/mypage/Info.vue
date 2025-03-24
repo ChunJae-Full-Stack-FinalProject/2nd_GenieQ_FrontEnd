@@ -694,6 +694,7 @@ onMounted(() => {
   line-height: 150%;
   letter-spacing: -0.02em;
   color: #5F5F5F;
+  cursor: pointer;
 }
 
 .logout {
