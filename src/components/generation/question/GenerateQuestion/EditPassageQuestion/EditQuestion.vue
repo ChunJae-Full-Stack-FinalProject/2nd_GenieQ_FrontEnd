@@ -235,7 +235,8 @@ defineExpose({
     font-family: 'Pretendard';
     font-style: normal;
     font-weight: 400;
-    font-size: 24px;
+    font-size: 20px;
+    font-weight: 600;
     line-height: 150%;
 
     letter-spacing: -0.02em;
@@ -248,7 +249,8 @@ defineExpose({
     font-family: 'Pretendard';
     font-style: normal;
     font-weight: 400;
-    font-size: 24px;
+    font-size: 20px;
+    font-weight: 600;
     line-height: 150%;
 
     letter-spacing: -0.02em;
