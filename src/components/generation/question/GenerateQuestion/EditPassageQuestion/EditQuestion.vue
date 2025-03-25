@@ -21,7 +21,7 @@
                     </div>
                 </div>
             </div>
-            <BaseButton text="재생성하기" type="type4" id="recreate-button" width="200px" height="54px" @click="handleRecreate" :disabled="props.isFromRoute"/>
+            <!-- <BaseButton text="재생성하기" type="type4" id="recreate-button" width="200px" height="54px" @click="handleRecreate" :disabled="props.isFromRoute"/> -->
         </div>
     </div>
 </template>

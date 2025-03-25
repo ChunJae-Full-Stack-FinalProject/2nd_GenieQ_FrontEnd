@@ -4,7 +4,7 @@
         <div class="main-content">
             <PassageContentMain ref="passageContentRef" @content-changed="handleContentChange"/>   
             <PassageSummary ref="passageSummaryRef"/>
-            <BaseButton v-if="!isFromRoute" id="recreate-button" text="재생성하기" type="type2" width="248px" height="54px" @click="openPaymentUsageModal" :disabled="isContentChanged"/>
+            <!-- <BaseButton v-if="!isFromRoute" id="recreate-button" text="재생성하기" type="type2" width="248px" height="54px" @click="openPaymentUsageModal" :disabled="isContentChanged"/> -->
             <BaseButton id="save-button" text="저장하기" type="type2" width="248px" height="54px" @click="handleSaveButtonClick" :disabled="!isContentChanged"/>
             <BaseButton id="download-button" text="추출하기" type="type2" width="248px" height="54px" :disabled="isContentChanged || !hasManualSave" @click="checkContentLengthAndOpenFileModal()"/>
             <router-link to="/questions" custom v-slot="{ navigate }">
