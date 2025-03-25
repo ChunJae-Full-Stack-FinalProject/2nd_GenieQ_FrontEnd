@@ -221,10 +221,20 @@ const handleGenerateQuestion = async () => {
             
             const result = await response.json();
 
+            // (추가) 선택지에서 쉼표 제거 또는 대체
+            const processedOptions = result.generated_option.map(option => {
+                // 쉼표를 다른 문자(예: 대시)로 대체
+                return option.replace(/,/g, '');
+            });
 
+            console.log('쉼표 제거해 줬는지 확인:', {
+                original: result.generated_option,
+                processed: processedOptions
+            });
 
             // ✅ 3단계: 문항 저장 API 호출
 
+            console.log(result.generated_option);
             const saveRequestData = {
                 "type": result.type_passage,
                 "keyword": result.keyword[0],
