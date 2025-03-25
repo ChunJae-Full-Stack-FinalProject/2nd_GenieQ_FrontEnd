@@ -21,21 +21,41 @@ const handleBeforeUnload = () => {
 
 // 앱이 로드될 때 인증 상태 초기화
 onMounted(() => {
-  console.log('Developed by Team Genius https://github.com/ChunJae-Full-Stack-FinalProject with 천재교육(풀스택 8기, PM 8기, AI개발팀)')
-  console.log('25-03-18 19:15 version');
-  console.log('- 파비콘 적용');
-  console.log('- 콘솔 로그 삭제');
-  console.log('- 문항 예제 데이터 수정');
-  console.log('25-03-19 12:36 version');
-  console.log('- 문항 유형 생성하기 버튼 비활성화 문제 수정');
-  console.log('25-03-19 13:30 version');
-  console.log('- 요청 주소 변경');
-  console.log('25-03-19 14:48 version');
-  console.log('- 테이블 데이터 개수 부족할 때 각 tr 높이 조정');
-  console.log('25-03-19 16:45 version');
-  console.log('- 문항 재생성 & 추가시 오류 해결');
-  console.log('25-03-19 23:32 version');
-  console.log('일부 디자인 문제 해결');
+  console.log(`
+
+.d8888b.                    d8b         %c.d8888b.    %c
+d88P  Y88b                  Y8P         %cd88P  Y88b  %c
+888    888                              %c888    888  %c
+888        .d88b.  88888b.  888 .d88b.  %c888    888  %c
+888  88888 88.  88 888 "88b 888 88.  88 %c888  "Y888  %c
+888    888 888888P 888  888 888 888888P %c888    888b.%c
+Y88b  d88P Yb.     888  888 888 Yb.     %cY88b  d8888b.%c
+"Y88888P"  "Y889P" 888  888 888 "Y889P" %c"Y8888P"  88b.
+  `,
+    "color: #ff9f40;","color: #000000;",    "color: #ff9f40;","color: #000000;",    "color: #ff9f40;","color: #000000;",    "color: #ff9f40;","color: #000000;",    "color: #ff9f40;","color: #000000;",    "color: #ff9f40;","color: #000000;",    "color: #ff9f40;","color: #000000;",    "color: #ff9f40;",
+  );
+  console.log(`
+Developed by Team Genius(풀스택 8기) 
+
+with 천재교육(PM 8기, AI개발팀)
+
+https://github.com/ChunJae-Full-Stack-FinalProject 
+  `);
+  console.log(`
+--------------------------------------------------
+version : 25-03-22 10:32
+  - 0319 QA 요청 사항 반영
+  - 테이블 커서 스타일, 불필요 스크롤 바 제거
+  - 세션 정보 (서버) 부분 수정된 버전으로 배포완료
+
+version : 25-03-22 14:14
+  - 마이페이지 height 973px 이하에서만 적용되도록 추가 적용
+
+version : 25-03-24 11:20
+  - 1700->2300 제한 해제
+  - Design 글씨 크기 및 볼드 설정 변경
+--------------------------------------------------
+  `);
   
   authStore.initializeAuth();
   
