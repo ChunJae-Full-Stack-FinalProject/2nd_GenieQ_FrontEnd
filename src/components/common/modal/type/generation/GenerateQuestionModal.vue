@@ -230,7 +230,7 @@ const handleGenerateQuestion = async () => {
                 "keyword": result.keyword[0],
                 "title": passageData?.PAS_TITLE || '',
                 "content": passageData?.PAS_CONTENT || '',
-                "gist": passageData?.PAS_GIST ||'',
+                "gist": passageData?.PAS_GIST ||result.generated_core_point,
                 "isGenerated": 0,
                 "questions":[{
                     "queQuery": result.generated_question,
