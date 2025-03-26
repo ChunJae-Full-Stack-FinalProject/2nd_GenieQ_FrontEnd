@@ -343,7 +343,7 @@ const handleRecreateGeneration = async () => {
     // (추가) 선택지에서 쉼표 제거 또는 대체
     const processedOptions = result.generated_option.map(option => {
         // 쉼표를 다른 문자(예: 대시)로 대체
-        return option.replace(/,/g, '');
+        return option.replace(/,/g, '').replace(/^[①②③④⑤]\s*/, '');
     });
 
     console.log('쉼표 제거해 줬는지 확인:', {
@@ -354,7 +354,7 @@ const handleRecreateGeneration = async () => {
     //2단계: 문항 저장 API 호출
     const newQuestion = {
       "queQuery": result.generated_question,
-      "queOption": result.generated_option,
+      "queOption": processedOptions,
       "queAnswer": result.generated_answer,
       "description": result.generated_description
     };
@@ -749,7 +749,7 @@ const handleQuestionGeneration = async () => {
             // (추가) 선택지에서 쉼표 제거 또는 대체
             const processedOptions = result.generated_option.map(option => {
                 // 쉼표를 다른 문자(예: 대시)로 대체
-                return option.replace(/,/g, '');
+                return option.replace(/,/g, '').replace(/^[①②③④⑤]\s*/, '');
             });
 
             console.log('쉼표 제거해 줬는지 확인용 로직:', {
@@ -760,7 +760,7 @@ const handleQuestionGeneration = async () => {
             //2단계: 문항 저장 API 호출
             const newQuestion = {
               "queQuery": result.generated_question,
-              "queOption": result.generated_option,
+              "queOption": processedOptions,
               "queAnswer": result.generated_answer,
               "description": result.generated_description
             };
