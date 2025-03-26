@@ -224,7 +224,7 @@ const handleGenerateQuestion = async () => {
             // (추가) 선택지에서 쉼표 제거 또는 대체
             const processedOptions = result.generated_option.map(option => {
                 // 쉼표를 다른 문자(예: 대시)로 대체
-                return option.replace(/,/g, '');
+                return option.replace(/,/g, '').replace(/^[①②③④⑤]\s*/, '');
             });
 
             console.log('쉼표 제거해 줬는지 확인:', {
@@ -244,7 +244,7 @@ const handleGenerateQuestion = async () => {
                 "isGenerated": 0,
                 "questions":[{
                     "queQuery": result.generated_question,
-                    "queOption": result.generated_option,
+                    "queOption": processedOptions,
                     "queAnswer": result.generated_answer,
                     "description": result.generated_description
                 }]
