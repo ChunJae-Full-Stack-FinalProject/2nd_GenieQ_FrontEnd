@@ -2,7 +2,7 @@
   <div class="portfolio-page">
     <div class="team-container">
       <div class="team-header">
-        <h1 class="title">Genie<span class="highlight-q">Q</span>를 함께 만든 사람들</h1>
+        <h1 class="team-page-title">Genie<span class="highlight-q">Q</span>를 함께 만든 사람들</h1>
         <!-- <p class="subtitle">프로젝트 팀원 소개</p> -->
       </div>
       
@@ -26,7 +26,7 @@
     <!-- 새로운 페이지 소개 섹션 -->
     <div class="page-container">
       <div class="page-header">
-        <h1 class="title">Genie<span class="highlight-q">Q</span> 페이지 소개</h1>
+        <h1 class="team-page-title">Genie<span class="highlight-q">Q</span> 페이지 소개</h1>
       </div>
       
       <div class="page-menu">
@@ -162,7 +162,6 @@ watch(() => route.params.teamId, (newTeamId) => {
 
 .team-container, .page-container {
   width: 90%;
-  min-width: 390px;
   max-width: 1200px;
   margin: 0 auto;
   padding: 30px;
@@ -175,8 +174,9 @@ watch(() => route.params.teamId, (newTeamId) => {
   text-align: center;
 }
 
-.title {
-  font-size: 36px;
+.team-page-title {
+  white-space: nowrap; /* 줄바꿈 방지 */
+  font-size: clamp(12px, 5vw, 36px);
   font-weight: 700;
   color: #303030;
   margin-bottom: 8px;
@@ -281,14 +281,29 @@ watch(() => route.params.teamId, (newTeamId) => {
     padding: 20px 10px;
   }
   
-  .title {
-    font-size: 28px;
+  .team-menu {
+    gap:5px;
+  }
+
+  .team-page-title {
+    white-space: nowrap; /* 줄바꿈 방지 */
+    font-size: 26px;
   }
   
   .subtitle {
     font-size: 18px;
   }
+
+  .team-container, .page-container {
+    gap:10px;
+  }
   
+  .team-link, .page-link {
+    display: block;
+    padding: 10px 18px;
+    font-weight: 500;
+    font-size: 14px;
+  }
   .team-view, .page-view {
     padding: 20px 15px;
   }

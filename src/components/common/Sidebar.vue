@@ -1,6 +1,8 @@
 <template>
     <div class="sidebar">
-        <div class="logo">Genie<span class="highlight-q">Q</span></div>
+        <router-link to="/team" class="nav-logo">
+          <div class="logo">Genie<span class="highlight-q">Q</span></div>
+        </router-link>
         <nav>
             <router-link to="/" class="nav-item" :class="{ 'active-box': isActive('/') }">
                 <img src="@/assets/icons/icon_home.png" alt="홈페이지" class="home-icon" /> 
@@ -88,6 +90,11 @@ const clearPassageData = () => {
 
 .nav-item .icon {
   margin-right: 10px;
+}
+
+.nav-logo {
+  color: white;
+  text-decoration: none;
 }
 
 /* 현재 선택된 메뉴(홈, 지문 생성, 문항 생성, 자료실) 스타일 */

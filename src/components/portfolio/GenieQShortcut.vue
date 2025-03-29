@@ -1,7 +1,7 @@
 <template>
     <div class="shortcut-container">
       <!-- GenieQ 바로가기 아이콘 -->
-      <div class="shortcut-icon" @click="toggleTooltip">
+      <div class="shortcut-icon" @click="toggleTooltip" :class="{ 'bounce': isBouncing }">
         <img src="/src/assets/images/genieq_logo.png" alt="GenieQ 바로가기" class="logo-image">
       </div>
       
@@ -11,7 +11,9 @@
           <h3 class="tooltip-title">GenieQ 바로가기</h3>
           <p class="tooltip-text">GenieQ 서비스를 이용하시려면 직접 회원가입을 하시거나 개발자에게 문의하세요.</p>
           <div class="tooltip-buttons">
-            <a href="http://43.202.6.90" target="_blank" class="tooltip-button primary">GenieQ 방문하기</a>
+            <router-link to="/" class="nav-menu">
+              <div class="tooltip-button primary">GenieQ 방문하기</div>
+            </router-link>
             <a href="mailto:kwanghoon041@gmail.com" class="tooltip-button secondary">개발자 문의</a>
           </div>
           <button class="tooltip-close" @click="toggleTooltip">
@@ -23,13 +25,44 @@
   </template>
   
   <script setup>
-  import { ref } from 'vue';
+  import { ref, onMounted, onBeforeUnmount } from 'vue';
   
   const showTooltip = ref(false);
+  const isBouncing = ref(false);
   
   const toggleTooltip = () => {
     showTooltip.value = !showTooltip.value;
   };
+  
+  // 아이콘 튀는 애니메이션 토글 함수
+  const toggleBounce = () => {
+    isBouncing.value = true;
+    
+    // 600ms 후에 애니메이션 종료
+    setTimeout(() => {
+      isBouncing.value = false;
+    }, 600);
+  };
+  
+  let bounceInterval;
+  
+  onMounted(() => {
+    // 5초에서 15초 사이의 랜덤한 간격으로 아이콘 튀게 하기
+    const startBounceInterval = () => {
+      const randomTime = Math.floor(Math.random() * (13000 - 5000 + 1)) + 2000;
+      bounceInterval = setTimeout(() => {
+        toggleBounce();
+        startBounceInterval(); // 재귀적으로 호출하여 다음 간격 설정
+      }, randomTime);
+    };
+    
+    startBounceInterval();
+  });
+  
+  onBeforeUnmount(() => {
+    // 컴포넌트 제거 시 타이머 정리
+    if (bounceInterval) clearTimeout(bounceInterval);
+  });
   </script>
   
   <style scoped>
@@ -60,6 +93,25 @@
     border-color: #FF9F40;
   }
   
+  @keyframes bounce {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    40% {
+      transform: translateY(-20px);
+    }
+    60% {
+      transform: translateY(-15px);
+    }
+    80% {
+      transform: translateY(-5px);
+    }
+  }
+  
+  .shortcut-icon.bounce {
+    animation: bounce 0.6s ease;
+  }
+  
   .logo-image {
     width: 40px;
     height: 40px;
@@ -70,7 +122,7 @@
     position: absolute;
     bottom: 80px;
     right: 0;
-    width: 400px;
+    width: 300px;
     animation: fadeIn 0.3s ease-out;
   }
   
@@ -127,6 +179,7 @@
     display: flex;
     gap: 10px;
     margin-top: 15px;
+    white-space: nowrap;
   }
   
   .tooltip-button {
@@ -193,7 +246,12 @@
     }
     
     .shortcut-tooltip {
-      width: 350px;
+      width: 280px;
     }
+    
+  }
+
+  .nav-menu {
+    text-decoration: none;
   }
   </style>

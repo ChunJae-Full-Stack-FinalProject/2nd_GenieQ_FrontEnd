@@ -114,11 +114,11 @@ onMounted(() => {
 .portfolio-team {
   display: flex;
   flex-direction: column;
-  gap: 30px;
+  gap: 10px;
 }
 
 .team-info {
-  margin-bottom: 30px;
+  margin-bottom: 10px;
   text-align: center;
 }
 
