@@ -1,47 +1,49 @@
 <template>
-  <div v-if="team" class="portfolio-team">
-    <div class="team-info">
-      <h2 class="team-name">{{ team.name }}</h2>
-      <p class="team-description">{{ team.description }}</p>
-    </div>
+  <transition name="page-fade" mode="out-in">
+    <div v-if="team" class="portfolio-team" :key="team.id">
+      <div class="team-info">
+        <h2 class="team-name">{{ team.name }}</h2>
+        <p class="team-description">{{ team.description }}</p>
+      </div>
 
-    <div class="members-grid">
-      <div v-for="member in team.members" :key="member.id" class="member-card" @click="goToMemberDetail(member.id)">
-        <div class="member-avatar">
-          <img :src="getMemberImage(member)" :alt="member.name" class="avatar-image">
-        </div>
-        <div class="member-info">
-          <div class="name-role-container">
-            <h3 class="member-name">{{ member.name }}</h3>
-            <span v-if="member.role === '팀장'" class="role-badge">팀장</span>
+      <div class="members-grid">
+        <div v-for="member in team.members" :key="member.id" class="member-card" @click="goToMemberDetail(member.id)">
+          <div class="member-avatar">
+            <img :src="getMemberImage(member)" :alt="member.name" class="avatar-image">
           </div>
-          <div class="member-responsibilities">
-            <!-- 첫 번째 줄: 최대 2개 책임 표시 -->
-            <div class="responsibility-line">
-              <span v-for="(responsibility, index) in getFirstLineResponsibilities(member)" :key="'line1-' + index"
-                class="responsibility-tag">
-                {{ responsibility }}
-              </span>
+          <div class="member-info">
+            <div class="name-role-container">
+              <h3 class="member-name">{{ member.name }}</h3>
+              <span v-if="member.role === '팀장'" class="role-badge">팀장</span>
             </div>
-            <!-- 두 번째 줄: 3~4번째 책임 표시 -->
-            <div class="responsibility-line" v-if="getSecondLineResponsibilities(member).length > 0">
-              <span v-for="(responsibility, index) in getSecondLineResponsibilities(member)" :key="'line2-' + index"
-                class="responsibility-tag">
-                {{ responsibility }}
-              </span>
-              <!-- 나머지 책임이 있으면 +n 표시 -->
-              <span v-if="member.responsibilities.length > 4" class="more-tag">
-                +{{ member.responsibilities.length - 4 }}
-              </span>
+            <div class="member-responsibilities">
+              <!-- 첫 번째 줄: 최대 2개 책임 표시 -->
+              <div class="responsibility-line">
+                <span v-for="(responsibility, index) in getFirstLineResponsibilities(member)" :key="'line1-' + index"
+                  class="responsibility-tag">
+                  {{ responsibility }}
+                </span>
+              </div>
+              <!-- 두 번째 줄: 3~4번째 책임 표시 -->
+              <div class="responsibility-line" v-if="getSecondLineResponsibilities(member).length > 0">
+                <span v-for="(responsibility, index) in getSecondLineResponsibilities(member)" :key="'line2-' + index"
+                  class="responsibility-tag">
+                  {{ responsibility }}
+                </span>
+                <!-- 나머지 책임이 있으면 +n 표시 -->
+                <span v-if="member.responsibilities.length > 4" class="more-tag">
+                  +{{ member.responsibilities.length - 4 }}
+                </span>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-  <div v-else class="loading-container">
-    <p>팀 정보를 불러오는 중입니다...</p>
-  </div>
+    <div v-else class="loading-container" :key="'loading'">
+      <p>팀 정보를 불러오는 중입니다...</p>
+    </div>
+  </transition>
 </template>
 
 <script setup>
@@ -53,18 +55,29 @@ const route = useRoute();
 const router = useRouter();
 const team = ref(null);
 
+// 로그 메시지 - 컴포넌트 마운트 시
+// console.log('[1] PortfolioTeam 컴포넌트 마운트');
+
 // 팀 정보 로드
 const loadTeamData = () => {
   const teamId = route.params.teamId;
   
+  // console.log(`[2] 팀 데이터 로드 시작: teamId = ${teamId}`);
+  
   try {
     const foundTeam = portfolioData.teams.find(t => t.id === teamId);
     if (foundTeam) {
+      // 팀 데이터 로드 성공 시 로그
+      // console.log(`[3] 팀 데이터 로드 성공: ${foundTeam.name}, 멤버 수: ${foundTeam.members.length}`);
       team.value = foundTeam;
     } else {
+      // 팀 데이터를 찾지 못했을 때 로그
+      // console.warn(`[4] 팀 데이터를 찾을 수 없음: ${teamId}`);
       team.value = null;
     }
   } catch (error) {
+    // 에러 로그
+    // console.error('[5] 팀 데이터 로드 오류:', error);
     team.value = null;
   }
 };
@@ -80,12 +93,17 @@ const getSecondLineResponsibilities = (member) => {
 };
 
 // 경로 파라미터 변경 시 데이터 다시 로드
-watch(() => route.params.teamId, () => {
+watch(() => route.params.teamId, (newTeamId, oldTeamId) => {
+  // 팀 ID 변경 감지 로그
+  // console.log(`[6] 팀 ID 변경 감지: ${oldTeamId} -> ${newTeamId}`);
   loadTeamData();
 });
 
 // 멤버 상세 페이지로 이동
 const goToMemberDetail = (memberId) => {
+  // 멤버 상세 페이지 이동 로그
+  // console.log(`[7] 멤버 상세 페이지로 이동: teamId = ${route.params.teamId}, memberId = ${memberId}`);
+  
   router.push({
     name: 'portfolioMember',
     params: {
@@ -243,6 +261,18 @@ onMounted(() => {
   align-items: center;
   height: 200px;
   color: #757575;
+}
+
+/* 페이지 전환 애니메이션 */
+.page-fade-enter-active,
+.page-fade-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.page-fade-enter-from,
+.page-fade-leave-to {
+  opacity: 0;
+  transform: translateY(10px);
 }
 
 /* 모바일 반응형 스타일 */
