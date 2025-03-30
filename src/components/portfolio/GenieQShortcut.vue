@@ -1,8 +1,12 @@
 <template>
     <div class="shortcut-container">
+      <!-- 배경 오버레이 (초기 진입 시 표시) -->
+      <div v-if="showInitialOverlay" class="initial-overlay" @click="dismissInitialOverlay"></div>
       <!-- GenieQ 바로가기 아이콘 -->
       <div class="shortcut-icon" @click="toggleTooltip" :class="{ 'bounce': isBouncing }">
         <img src="/src/assets/images/genieq_logo.png" alt="GenieQ 바로가기" class="logo-image">
+        <!-- 초기 진입 시 안내 메시지 -->
+        <div v-if="showInitialOverlay" class="initial-indicator">GenieQ 바로가기</div>
       </div>
       
       <!-- 안내 말풍선 -->
@@ -26,14 +30,27 @@
   
   <script setup>
   import { ref, onMounted, onBeforeUnmount } from 'vue';
+  import { useRoute } from 'vue-router';
+
+  const route = useRoute();
+  const showInitialOverlay = ref(false);
   
   const showTooltip = ref(false);
   const isBouncing = ref(false);
   
   const toggleTooltip = () => {
     showTooltip.value = !showTooltip.value;
+
+    // 초기 오버레이가 표시 중이면 제거
+    if (showInitialOverlay.value) {
+      showInitialOverlay.value = false;
+    }
   };
-  
+  // 초기 오버레이 닫기 함수
+  const dismissInitialOverlay = () => {
+    showInitialOverlay.value = false;
+  };
+
   // 아이콘 튀는 애니메이션 토글 함수
   const toggleBounce = () => {
     isBouncing.value = true;
@@ -47,6 +64,19 @@
   let bounceInterval;
   
   onMounted(() => {
+    // 페이지 진입 시 팀 뷰 페이지인 경우에만 오버레이 표시
+    if (route.path.includes('/team')) {
+      // 0.5초 후에 오버레이 표시 (페이지 로딩 후)
+      setTimeout(() => {
+        showInitialOverlay.value = true;
+        
+        // 10초 후 자동으로 오버레이 숨김
+        setTimeout(() => {
+          showInitialOverlay.value = false;
+        }, 10000);
+      }, 500);
+    }
+
     // 5초에서 15초 사이의 랜덤한 간격으로 아이콘 튀게 하기
     const startBounceInterval = () => {
       const randomTime = Math.floor(Math.random() * (13000 - 5000 + 1)) + 2000;
@@ -73,6 +103,55 @@
     z-index: 1000;
   }
   
+  /* 초기 오버레이 스타일 */
+  .initial-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    animation: fadeIn 0.5s ease-out;
+  }
+  
+  /* 아이콘 하이라이트 스타일 */
+  .shortcut-icon.highlighted {
+    transform: scale(1.3);
+    box-shadow: 0 0 20px rgba(255, 159, 64, 0.8), 0 0 40px rgba(255, 159, 64, 0.4);
+    z-index: 1001;
+    border: 3px solid #FF9F40;
+  }
+  
+  /* 초기 인디케이터 스타일 */
+  .initial-indicator {
+    position: absolute;
+    top: -40px;
+    right: 0;
+    background-color: #FF9F40;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 14px;
+    white-space: nowrap;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    animation: pulse 2s infinite;
+  }
+  
+  /* 초기 인디케이터 화살표 */
+  .initial-indicator::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    right: 24px;
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid #FF9F40;
+  }
+  
   .shortcut-icon {
     width: 60px;
     height: 60px;
@@ -85,6 +164,8 @@
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     transition: all 0.3s ease;
     border: 2px solid #FFEDDC;
+    position: relative;
+    z-index: 1000;
   }
   
   .shortcut-icon:hover {
@@ -108,6 +189,27 @@
     }
   }
   
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(255, 159, 64, 0.7);
+    }
+    70% {
+      box-shadow: 0 0 0 10px rgba(255, 159, 64, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(255, 159, 64, 0);
+    }
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  
   .shortcut-icon.bounce {
     animation: bounce 0.6s ease;
   }
@@ -124,17 +226,7 @@
     right: 0;
     width: 300px;
     animation: fadeIn 0.3s ease-out;
-  }
-  
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    z-index: 1002;
   }
   
   .tooltip-content {
