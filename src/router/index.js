@@ -75,6 +75,7 @@ const router = createRouter({
   routes: [
     // 인증 없이 접근 가능 - 로그인 페이지
     { path: '/login', name: 'login', component: LoginView },
+    { path: '/login/:id', name: 'auto-login', component: LoginView },
     { path: '/ex', name: 'ex', component: ExampleView },
     ...authRoutes,
     {

@@ -50,10 +50,11 @@
 <script setup>
 import { ref, watch, onMounted } from 'vue';
 import { Icon } from '@iconify/vue'; // 또는 사용 중인 아이콘 라이브러리에 맞게 수정
-import { useRouter } from 'vue-router';
+import { useRouter,useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/auth'; // Auth 스토어 가져오기
 // 라우터와 스토어 초기화
 const router = useRouter();
+const route = useRoute();
 const authStore = useAuthStore();
 // 상태 관리
 const email = ref('');
@@ -70,11 +71,32 @@ onMounted(() => {
 
     router.push('/home');
   }
-  // 테스트 계정 정보 알림 - 처음 방문 시에만 표시
-  // if (!authStore.isLoggedIn) {
-  //   alert('테스트 계정 정보:\n이메일: teacher@gmail.com\n비밀번호: 1234');
-  // }
+  
+  // (추가) URL 파라미터 확인 
+  const memId = route.params.id;
+  
+  // 아이디 파라미터가 있으면 자동 로그인 시도
+  if (memId) {
+    console.log(`[URL 파라미터 감지] id: ${memId}`);
+    autoLogin(memId);
+  } else {
+    console.log('[일반 로그인 페이지 로드]');
+  }
 });
+
+// (추가) 자동 로그인 함수 - 이메일과 비밀번호를 설정하고 loginHandler 호출
+const autoLogin = (memId) => {
+  
+  // 이메일과 비밀번호 설정
+  email.value = `${memId}@naver.com`;
+  password.value = 'qwer1234@'; // 고정된 비밀번호
+  
+  if (!emailError.value) {
+    loginHandler(true); // 자동 로그인 모드로 loginHandler 호출
+  } else {
+    router.replace('/login'); // 로그인 페이지로 이동
+  }
+};
 
 // 이메일 유효성 검사
 const validateEmail = () => {
@@ -88,7 +110,7 @@ const validateEmail = () => {
 };
 
 // 로그인 기능
-const loginHandler = () => {
+const loginHandler = (isAutoLogin = false) => {
   // 유효성 검사 다시 확인
   validateEmail();
   
@@ -138,6 +160,9 @@ const loginHandler = () => {
   .catch(error => {
     // console.error('로그인 오류:', error); // (추가) 로그: 로그인 오류
     loginFailed.value = true; // 로그인 실패 상태 활성화
+    if (isAutoLogin) {
+      router.replace('/login');
+    }
   })
   .finally(() => {
     isLoading.value = false;
