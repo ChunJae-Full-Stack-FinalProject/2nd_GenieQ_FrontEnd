@@ -338,11 +338,19 @@ watch(email, validateEmail);
 
 /* 미디어 쿼리 추가 - 모바일 환경 대응 */
 @media (max-width: 768px) {
+  .login-container{
+    padding: 10px;
+  }
   .login-header {
     margin-top: 80px;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
   }
-  
+  p.subtitle{
+    margin-bottom: 0px;
+  }
+  .form-title {
+    margin-bottom: 20px;
+  }
   .title, .highlight {
     font-size: 20px;
   }
@@ -350,12 +358,9 @@ watch(email, validateEmail);
     display: none;
   }
   .login-box {
-    width: 100%;
-    max-width: 380px;
     height: auto;
-    padding: 20px 15px;
+    padding: 20px 0px;
   }
-  
   .login-button {
     width: 100%;
   }

@@ -9,7 +9,7 @@
       <div class="member-profile">
         <div class="profile-header">
           <div class="member-avatar">
-            <img :src="getMemberImage(member)" :alt="member.name" class="avatar-image">
+            <img :src="member.image" :alt="member.name" class="avatar-image">
           </div>
           <div class="member-header-info">
             <h2 class="member-name">{{ member.name }}</h2>
@@ -170,34 +170,6 @@ const getLinkText = (link) => {
       return '웹사이트';
     default:
       return link.url.replace(/^https?:\/\//, '');
-  }
-};
-
-// 멤버 이미지 URL 가져오기
-const getMemberImage = (member) => {
-  // 이미지 경로 관련 디버깅 추가
-  if (!member.image) {
-    // console.warn('[8] 멤버 이미지 경로가 없음:', member);
-    return '/src/assets/images/default-avatar.png'; // 기본 이미지 반환
-  }
-  
-  try {
-    // GitHub 이미지인 경우 그대로 사용, 기본 이미지는 로컬 경로로 변환
-    if (member.image.includes('github.com') || member.image.includes('http')) {
-      // console.log(`[9] 외부 이미지 URL 사용: ${member.image}`);
-      return member.image;
-    }
-    
-    // (수정) 상대 경로 및 절대 경로 처리 개선
-    const imagePath = member.image.startsWith('/') 
-      ? member.image 
-      : `/src/assets/images/${member.image}`;
-    
-    // console.log(`[10] 로컬 이미지 경로 변환: ${member.image} -> ${imagePath}`);
-    return imagePath;
-  } catch (err) {
-    // console.error('[11] 이미지 URL 처리 오류:', err);
-    return '/src/assets/images/default-avatar.png'; // 오류 시 기본 이미지 반환
   }
 };
 

@@ -9,7 +9,7 @@
       <div class="members-grid">
         <div v-for="member in team.members" :key="member.id" class="member-card" @click="goToMemberDetail(member.id)">
           <div class="member-avatar">
-            <img :src="getMemberImage(member)" :alt="member.name" class="avatar-image">
+            <img :src="member.image" :alt="member.name" class="avatar-image">
           </div>
           <div class="member-info">
             <div class="name-role-container">
@@ -111,15 +111,6 @@ const goToMemberDetail = (memberId) => {
       memberId: memberId
     }
   });
-};
-
-// 멤버 이미지 URL 가져오기
-const getMemberImage = (member) => {
-  // GitHub 이미지인 경우 그대로 사용, 기본 이미지는 로컬 경로로 변환
-  if (member.image.includes('github.com')) {
-    return member.image;
-  }
-  return `/src/assets/images/${member.image}`;
 };
 
 // 컴포넌트 마운트 시 데이터 로드
