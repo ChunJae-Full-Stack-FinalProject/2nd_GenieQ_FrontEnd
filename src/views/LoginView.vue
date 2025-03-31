@@ -39,7 +39,7 @@
           </button>
 
           <div class="signup-section">
-            <a class="notion" href="https://learned-science-af1.notion.site/1af66d6c49e280209a8af79ece08be6d">GenieQ가 처음이신가요?</a>
+            <a class="notion" href="https://genieq.notion.site/">GenieQ가 처음이신가요?</a>
             <router-link to="/signup" class="signup-link">계정 만들기</router-link>
         </div>
       </div>
