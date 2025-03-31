@@ -2,7 +2,7 @@
   <div class="login-container">
     <div class="login-header">
       <h2 class="title">문제 출제를 <span class="highlight">더 쉽고, 빠르고, 정확하게!</span></h2>
-        <p class="subtitle">Genie<span class="highlight-orange">Q</span>와 함께 새로운 차원의 문제 생성을 경험하세요.</p>
+        <p class="subtitle">Genie<span class="highlight-orange">Q</span><span class="subtitle2">와 함께 새로운 차원의 문제 생성을 경험하세요.</span></p>
      
     </div>
     <div class="login-box">
@@ -186,7 +186,7 @@ watch(email, validateEmail);
      margin-bottom: 12px;
    }
    
-   .subtitle {
+   .subtitle, .subtitle2 {
      font-size: 48px;
      color: #000000;
      margin-bottom: 20px;
@@ -334,5 +334,44 @@ watch(email, validateEmail);
 /* 입력 폼 너비 조정 */
 .input-wrapper {
   width: 100%;
+}
+
+/* 미디어 쿼리 추가 - 모바일 환경 대응 */
+@media (max-width: 768px) {
+  .login-header {
+    margin-top: 80px;
+    margin-bottom: 30px;
+  }
+  
+  .title, .highlight {
+    font-size: 20px;
+  }
+  .subtitle2 {
+    display: none;
+  }
+  .login-box {
+    width: 100%;
+    max-width: 380px;
+    height: auto;
+    padding: 20px 15px;
+  }
+  
+  .login-button {
+    width: 100%;
+  }
+  
+  .signup-section {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .notion {
+    margin-right: 0;
+  }
+  
+  .signup-link {
+    margin-left: 0;
+  }
 }
    </style>
