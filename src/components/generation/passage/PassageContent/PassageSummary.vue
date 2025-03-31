@@ -4,7 +4,7 @@
             <p id="passage-type-text">지문 유형</p>
             <div class="passage-type-main">
                 <div id="subject">
-                    <p id="subject-head">지문 주제</p>
+                    <p id="subject-head">지문 분야</p>
                     <p id="subject-text">{{ subject }}</p>
                 </div>
                 <div id="keyword">
