@@ -20,7 +20,7 @@
         <div class="member-details">
           <div class="detail-section">
             <h3 class="section-title">소개</h3>
-            <p class="member-bio">{{ member.bio }}</p>
+            <p class="member-bio" style="white-space: pre-line;">{{ member.bio }}</p>
           </div>
           
           <div class="detail-section">
@@ -230,6 +230,14 @@ onMounted(() => {
   // console.log('  - router.currentRoute.value:', router.currentRoute.value.params);
   
   loadMemberData();
+
+  // 모바일 환경에서 스크롤 위치 조정
+  setTimeout(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  }, 100);
 });
 </script>
 
