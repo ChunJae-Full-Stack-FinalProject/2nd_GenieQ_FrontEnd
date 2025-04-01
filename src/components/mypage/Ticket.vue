@@ -56,9 +56,24 @@
                 </div>
                 <div class="purchase-section">
                   <div class="price-section">
-                    <span class="package-price">10,000원</span>
+                    <span class="package-price">20,000원</span>
                   </div>
                   <button class="purchase-btn" @click="openPurchaseWarningModal(10)">구매하기</button>
+                </div>
+              </div>
+              
+              <!-- 30회 이용권 -->
+              <div class="package-card">
+                <div class="package-info">
+                  <span class="package-title">지문/문항 생성 30회 이용권</span>
+                </div>
+                <div class="purchase-section">
+                  <div class="price-section">
+                    <span class="original-price">60,000원</span>
+                    <span class="discount-rate">5% 할인</span>
+                    <span class="package-price">57,000원</span>
+                  </div>
+                  <button class="purchase-btn" @click="openPurchaseWarningModal(30)">구매하기</button>
                 </div>
               </div>
               
@@ -69,26 +84,11 @@
                 </div>
                 <div class="purchase-section">
                   <div class="price-section">
-                    <span class="original-price">50,000원</span>
-                    <span class="discount-rate">20% 할인</span>
-                    <span class="package-price">40,000원</span>
+                    <span class="original-price">100,000원</span>
+                    <span class="discount-rate">10% 할인</span>
+                    <span class="package-price">90,000원</span>
                   </div>
                   <button class="purchase-btn" @click="openPurchaseWarningModal(50)">구매하기</button>
-                </div>
-              </div>
-              
-              <!-- 100회 이용권 -->
-              <div class="package-card">
-                <div class="package-info">
-                  <span class="package-title">지문/문항 생성 100회 이용권</span>
-                </div>
-                <div class="purchase-section">
-                  <div class="price-section">
-                    <span class="original-price">100,000원</span>
-                    <span class="discount-rate">30% 할인</span>
-                    <span class="package-price">70,000원</span>
-                  </div>
-                  <button class="purchase-btn" @click="openPurchaseWarningModal(100)">구매하기</button>
                 </div>
               </div>
             </div>
@@ -270,17 +270,17 @@ const fetchPaymentHistory = () => {
 
 
 
-// 데이터 초기화 함수
-const initializeData = () => {
-  for (let i = 1; i <= 60; i++) {
-    paymentHistory.value.push({
-      id: i,
-      title: `지문/문항 생성 ${i % 3 === 0 ? 100 : i % 2 === 0 ? 50 : 10}회 이용권`,
-      price: i % 3 === 0 ? '70,000원' : i % 2 === 0 ? '40,000원' : '10,000원',
-      date: `2024-03-${String(31 - (i % 30)).padStart(2, '0')}`
-    });
-  }
-};
+// // 데이터 초기화 함수
+// const initializeData = () => {
+//   for (let i = 1; i <= 60; i++) {
+//     paymentHistory.value.push({
+//       id: i,
+//       title: `지문/문항 생성 ${i % 3 === 0 ? 100 : i % 2 === 0 ? 50 : 10}회 이용권`,
+//       price: i % 3 === 0 ? '70,000원' : i % 2 === 0 ? '40,000원' : '10,000원',
+//       date: `2024-03-${String(31 - (i % 30)).padStart(2, '0')}`
+//     });
+//   }
+// };
 
 // 필터링된 내역 계산
 const filteredHistory = computed(() => {
@@ -377,15 +377,15 @@ const purchaseTicket = ref(0);
 // ticCode에 따른 이용권 횟수 매핑
 const ticketMapping = {
   1: 10,
-  2: 50,
-  3: 100
+  2: 30,
+  3: 50
 };
 
 const openPurchaseWarningModal = (count) => {
    // ticCode로 매핑되도록 수정
   if (count === 10) purchaseTicket.value = 1;
-  if (count === 50) purchaseTicket.value = 2;
-  if (count === 100) purchaseTicket.value = 3;
+  if (count === 30) purchaseTicket.value = 2;
+  if (count === 50) purchaseTicket.value = 3;
   isPurchaseWarningModal.value = true;
 };
 
@@ -534,7 +534,7 @@ function getTicketCount() {
 // 컴포넌트 마운트 시 초기화
 onMounted(() => {
   endDate.value = getTodayFormatted();
-  initializeData();
+  // initializeData();
 });
 
 const downloadExcel = () => {

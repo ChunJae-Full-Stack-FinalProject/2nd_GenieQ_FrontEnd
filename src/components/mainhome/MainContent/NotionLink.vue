@@ -1,5 +1,5 @@
 <template>
-    <a class="notionlink-container" href="https://learned-science-af1.notion.site/1af66d6c49e280209a8af79ece08be6d">
+    <a class="notionlink-container" href="https://genieq.notion.site/">
         <div class="top-container">
             <div class="notionlink-title">사용법 보러가기</div>
         </div>

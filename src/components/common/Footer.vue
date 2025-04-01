@@ -4,7 +4,8 @@
             Copyright © Chunjae Education, Inc. ALL rights reserved.
             <router-link to="/terms" class="footer-link" active-class="active">이용약관</router-link> |
             <router-link to="/privacy" class="footer-link" active-class="active">개인정보처리방침</router-link> |
-            <a href="https://pf.kakao.com/_blqXxl" target="_blank" class="footer-link">고객센터</a>
+            <a href="https://pf.kakao.com/_blqXxl" target="_blank" class="footer-link">고객센터</a> |
+            <router-link to="/" class="footer-link" active-class="active">genieQ</router-link>
         </div>
     </footer>
 </template>
