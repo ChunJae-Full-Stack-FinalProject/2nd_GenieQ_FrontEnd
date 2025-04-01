@@ -192,6 +192,16 @@ const resetContent = computed(() => {
 // LoadPassageModal에서 지문 선택 시 호출될 함수
 const handleLoadPassage = (passage) => {
     setPassage(passage);
+    // 제목 설정 - 불러온 지문의 제목이 있을 경우
+    if (passage.PAS_TITLE) {
+        // 현재 지문의 제목 설정
+        currentPassage.value.PAS_TITLE = passage.PAS_TITLE;
+        
+        // 입력 필드 업데이트 (컴포넌트 참조가 있는 경우)
+        if (insertPassageRef.value && insertPassageRef.value.passageTitle !== undefined) {
+            insertPassageRef.value.passageTitle = passage.PAS_TITLE;
+        }
+    }
     showLoadPassageModal.value = false;
 };
 

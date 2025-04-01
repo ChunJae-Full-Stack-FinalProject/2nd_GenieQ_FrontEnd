@@ -39,23 +39,31 @@ const activeTab = ref('user');
 const { currentPassage, openLoadPassageModal } = inject('passageData');
 
 const setActiveTab = (tab) => {
-  // 이미 선택된 탭이면 아무것도 하지 않음
-  if (activeTab.value === tab) return;
-  
-  // 사용자 입력 탭에서 자료실 탭으로 변경하려고 하는데 지문이 있을 경우
-  if (activeTab.value === 'user' && tab === 'stores' && currentPassage.value.PAS_CONTENT) {
-    // 경고 표시
-    if (confirm('입력한 지문 내용이 초기화됩니다. 계속하시겠습니까?')) {
-      // 확인 시 탭 변경 및 데이터 초기화
+  // 자료실 탭을 클릭한 경우, 현재 지문 내용이 있으면 초기화 물어보기
+  if (tab === 'stores' && currentPassage.value.PAS_CONTENT) {
+    if (confirm('지문 내용을 초기화하시겠습니까?')) {
+      // 탭 변경 및 내용 초기화
       activeTab.value = tab;
-      // 초기화
+      
+      // 지문 내용 초기화
       currentPassage.value.PAS_CONTENT = '';
+      currentPassage.value.PAS_GIST = '';
+      
+      // 제목도 초기화
+      currentPassage.value.PAS_TITLE = '';
+      if (passageTitle) {
+        passageTitle.value = '';
+      }
+      
+      // 모달에서 선택된 정보도 초기화 - 전역 상태가 있다면
+      localStorage.removeItem('selectedPassageData');
     }
+    // 취소한 경우 탭 변경하지 않음
+    return;
   }
-  // 그 외의 경우 (자료실→사용자 입력 또는 지문이 없을 때) 바로 탭 변경
-  else {
-    activeTab.value = tab;
-  }
+  
+  // 그 외 모든 경우는 단순 탭 변경
+  activeTab.value = tab;
 };
 
 

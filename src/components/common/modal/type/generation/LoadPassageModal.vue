@@ -90,6 +90,7 @@ const selectedPassage = ref(null); // 선택된 지문 저장
 const selectedPassageId = ref(null); // 선택된 지문의 ID 저장 (활성화 상태 유지를 위해)
 
 onMounted(() => {
+  closeModal();
   loadPreviews ();
 });
 
