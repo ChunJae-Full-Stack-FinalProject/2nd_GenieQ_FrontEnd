@@ -24,13 +24,23 @@
                 <StoresInsertPassage/>
             </div>
         </div>
+
+        <WarningModalComponent
+            :isOpen="isWarningModalOpen"            title="지문 내용을 초기화하시겠습니까?"            message="현재 입력된 지문 내용이 모두 삭제됩니다."
+            cancelText="취소"                       confirmText="확인"
+            @close="closeWarningModal"              @confirm="confirmWarningModal"
+            />
     </div>
 </template>
 <script setup>
 import StoresInsertPassage from './StoresInsertPassage.vue';
 import UserInsertPassage from './UserInsertPassage.vue';
+import WarningModalComponent from '@/components/common/modal/type/WarningModalComponent.vue';
 
 import { ref, inject, computed, watch, defineExpose, onMounted} from 'vue';
+
+const isWarningModalOpen = ref(false);
+const pendingTabChange = ref(null);
 
 // 현재 활성화된 탭 상태 관리
 const activeTab = ref('user');
@@ -41,24 +51,9 @@ const { currentPassage, openLoadPassageModal } = inject('passageData');
 const setActiveTab = (tab) => {
   // 자료실 탭을 클릭한 경우, 현재 지문 내용이 있으면 초기화 물어보기
   if (tab === 'stores' && currentPassage.value.PAS_CONTENT) {
-    if (confirm('지문 내용을 초기화하시겠습니까?')) {
-      // 탭 변경 및 내용 초기화
-      activeTab.value = tab;
-      
-      // 지문 내용 초기화
-      currentPassage.value.PAS_CONTENT = '';
-      currentPassage.value.PAS_GIST = '';
-      
-      // 제목도 초기화
-      currentPassage.value.PAS_TITLE = '';
-      if (passageTitle) {
-        passageTitle.value = '';
-      }
-      
-      // 모달에서 선택된 정보도 초기화 - 전역 상태가 있다면
-      localStorage.removeItem('selectedPassageData');
-    }
-    // 취소한 경우 탭 변경하지 않음
+    // 경고 모달 표시
+    isWarningModalOpen.value = true;
+    pendingTabChange.value = tab; // 대기 중인 탭 변경 저장
     return;
   }
   
@@ -66,6 +61,37 @@ const setActiveTab = (tab) => {
   activeTab.value = tab;
 };
 
+
+// 경고 모달 닫기
+const closeWarningModal = () => {
+  isWarningModalOpen.value = false;
+  pendingTabChange.value = null; // 대기 중인 탭 변경 취소
+};
+
+// 경고 모달 확인 버튼 클릭 처리
+const confirmWarningModal = () => {
+  isWarningModalOpen.value = false;
+  
+  if (pendingTabChange.value) {
+    // 탭 변경 및 내용 초기화
+    activeTab.value = pendingTabChange.value;
+    
+    // 지문 내용 초기화
+    currentPassage.value.PAS_CONTENT = '';
+    currentPassage.value.PAS_GIST = '';
+    
+    // 제목도 초기화
+    currentPassage.value.PAS_TITLE = '';
+    if (passageTitle) {
+      passageTitle.value = '';
+    }
+    
+    // 모달에서 선택된 정보도 초기화 - 전역 상태가 있다면
+    localStorage.removeItem('selectedPassageData');
+    
+    pendingTabChange.value = null; // 처리 완료
+  }
+};
 
 // 제목 길이 50자 제한
 // saveTitle이 존재할 때만 접근하도록 수정

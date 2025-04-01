@@ -42,7 +42,7 @@
         </div>
 
         <!-- ✅ 검색 결과가 있을 때 리스트 표시 -->
-        <SearchList v-else :items="filteredPassages" :activeItemId="selectedPassageId" @preview="selectPassage" />
+        <SearchList v-else :items="filteredPassages" :activeItemId="selectedPassageId" @preview="selectPassage" @activeItemChange="handleActiveItemChange" />
       </div>
 
 
@@ -91,8 +91,14 @@ const selectedPassageId = ref(null); // 선택된 지문의 ID 저장 (활성화
 
 onMounted(() => {
   closeModal();
+  // console.log('[LoadPassageModal] 컴포넌트 마운트');
   loadPreviews ();
 });
+
+const handleActiveItemChange = (itemId) => {
+  // console.log('[LoadPassageModal] 활성화된 항목 변경:', itemId);
+  selectedPassageId.value = itemId;
+};
 
 const loadPreviews  = () => {
   const apiUrl = import.meta.env.VITE_API_URL;
@@ -148,9 +154,14 @@ const loadPreviews  = () => {
 
 // 불러오기 버튼 클릭 시 처리
 const handleLoadPassage = () => {
+  console.log('[LoadPassage] 불러오기 버튼 클릭, 상태:', {
+    selectedPassage: selectedPassage.value ? selectedPassage.value.PAS_TITLE : 'null', selectedPassageId: selectedPassageId.value, activeItemInList: filteredPassages.value.find(p => p.PAS_CODE === selectedPassageId.value)?.PAS_TITLE || 'null' });
+  
   if (selectedPassage.value) {
     // 부모 컴포넌트에 선택한 지문 전달
+    // console.log('[LoadPassage] 미리보기된 지문 불러오기:', selectedPassage.value.PAS_TITLE);
     emit("loadPassage", selectedPassage.value);
+    closeModal();
   } 
   // 미리보기는 아니지만 활성화된 아이템 ID가 있는 경우
   else if (selectedPassageId.value) {
@@ -158,12 +169,10 @@ const handleLoadPassage = () => {
       p => p.PAS_CODE === selectedPassageId.value
     );
     if (activePassage) {
+      // console.log('[LoadPassage] 활성화된 지문 불러오기:', activePassage.PAS_TITLE);
       emit("loadPassage", activePassage);
+      closeModal();
     }
-  }
-  // 위 두 경우가 모두 아니고 필터링된 목록에 지문이 있는 경우
-  else if (filteredPassages.value.length > 0) {
-    emit("loadPassage", filteredPassages.value[0]);
   }
 };
 
