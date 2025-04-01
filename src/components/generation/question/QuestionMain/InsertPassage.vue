@@ -39,7 +39,31 @@ const activeTab = ref('user');
 const { currentPassage, openLoadPassageModal } = inject('passageData');
 
 const setActiveTab = (tab) => {
-    activeTab.value = tab;
+  // 자료실 탭을 클릭한 경우, 현재 지문 내용이 있으면 초기화 물어보기
+  if (tab === 'stores' && currentPassage.value.PAS_CONTENT) {
+    if (confirm('지문 내용을 초기화하시겠습니까?')) {
+      // 탭 변경 및 내용 초기화
+      activeTab.value = tab;
+      
+      // 지문 내용 초기화
+      currentPassage.value.PAS_CONTENT = '';
+      currentPassage.value.PAS_GIST = '';
+      
+      // 제목도 초기화
+      currentPassage.value.PAS_TITLE = '';
+      if (passageTitle) {
+        passageTitle.value = '';
+      }
+      
+      // 모달에서 선택된 정보도 초기화 - 전역 상태가 있다면
+      localStorage.removeItem('selectedPassageData');
+    }
+    // 취소한 경우 탭 변경하지 않음
+    return;
+  }
+  
+  // 그 외 모든 경우는 단순 탭 변경
+  activeTab.value = tab;
 };
 
 
