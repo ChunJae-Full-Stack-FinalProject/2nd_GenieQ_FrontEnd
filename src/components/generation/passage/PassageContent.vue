@@ -3,7 +3,6 @@
         <p id="main-title">지문 생성</p>
         <div class="main-content">
             <PassageContentMain ref="passageContentRef" @content-changed="handleContentChange"/>   
-            <PassageSummary ref="passageSummaryRef"/>
             <!-- <BaseButton v-if="!isFromRoute" id="recreate-button" text="재생성하기" type="type2" width="248px" height="54px" @click="openPaymentUsageModal" :disabled="isContentChanged"/> -->
             <BaseButton id="save-button" text="저장하기" type="type2" width="248px" height="54px" @click="handleSaveButtonClick" :disabled="!isContentChanged"/>
             <BaseButton id="download-button" text="추출하기" type="type2" width="248px" height="54px" :disabled="isContentChanged || !hasManualSave" @click="checkContentLengthAndOpenFileModal()"/>
@@ -14,7 +13,7 @@
             <PlainTooltip id="start-edit" message="필요한 부분을 클릭하고 편집을 시작하세요" width="316px"/>
         </div>
         <!-- 파일 선택 모달 -->
-        <FileSelectModal :isOpen="isFileModalOpen" @close="closeFileModal" @confirm="handleFileSelect" />
+        <FileSelectModal :isOpen="isFileModalOpen" :pasCode="pasCode" @close="closeFileModal" @confirm="handleFileSelect" />
         <!-- 글자 수 확인 모달 -->
         <ConfirmModalComponent :isOpen="isConfirmModalOpen" title="글자 수를 확인해 주세요." message="500자 이하의 지문으로 정상적인 문항을 생성하기 어렵습니다. 충분한 지문을 입력해 주세요." @close="closeConfirmModal"            @confirm="closeConfirmModal" />
         <!-- 저장하지 않고 페이지 이동 시 경고 모달 -->
@@ -452,14 +451,16 @@ const prepareDataForQuestions = () => {
     // console.log('문항 생성을 위한 지문 데이터 준비:', passageForQuestion);
 };
 // 파일 모달 열기 함수
-const openFileModal = () => {
+const openFileModal = (code) => {
+    pasCode.value = code;
     isFileModalOpen.value = true;
 };
 // 내용 길이 확인 후 파일 모달 열기
 const checkContentLengthAndOpenFileModal = () => {
     if (checkContentLength(new Event('click'))) {
-        openFileModal();
-    }
+    const data = loadPassageData();
+    openFileModal(data.pasCode);
+  }
 };
 // 모달 닫기
 const closeFileModal = () => {
