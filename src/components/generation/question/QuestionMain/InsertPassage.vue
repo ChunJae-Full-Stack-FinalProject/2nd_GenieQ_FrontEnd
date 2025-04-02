@@ -236,6 +236,7 @@ defineExpose({ passageTitle });
     font-weight: 600;
     font-size: 16px;
     line-height: 150%;
+    cursor: pointer;
 
     letter-spacing: -0.02em;
     color: #424242;
