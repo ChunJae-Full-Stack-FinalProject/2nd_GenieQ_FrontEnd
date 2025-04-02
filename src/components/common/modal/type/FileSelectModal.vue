@@ -121,35 +121,47 @@ const getFile = async () => {
         // 응답을 blob으로 변환
         const blob = await response.blob();
 
+        // 다운로드 링크 생성
+        const url = window.URL.createObjectURL(blob);
+
+        // 다운로드 링크 생성 및 클릭 이벤트 발생시키기
+        const a = document.createElement('a');
+        a.href = url;
+
         //  Content-Disposition에서 파일 이름 추출 정규식 수정
         const contentDisposition = response.headers.get('Content-Disposition');
         let fileName = `file.${selectedFile.value === 'word' ? 'docx' : selectedFile.value}`;
 
         if (contentDisposition) {
-            // console.log('Content-Disposition:', contentDisposition);
-
             // 규식 수정 → 큰따옴표, 작은따옴표 모두 처리
-            const match = contentDisposition.match(/filename\*?=(?:UTF-8'')?["']?([^;"']+)["']?/);
-            if (match) {
-                fileName = decodeURIComponent(match[1]); // 서버에서 반환된 파일명 사용
-                // console.log('추출된 파일 이름:', fileName);
+            const filenameMatch = contentDisposition.match(/filename\*?=['"]?(?:UTF-\d['"]?)?([^;\r\n"']*)['"]?/i) || 
+                            contentDisposition.match(/filename="([^"]*)"/) ||
+                            contentDisposition.match(/filename=([^;]*)/);
+
+            if (filenameMatch && filenameMatch[1]) {
+                try {
+                // 디코딩 시도 (이미 디코딩된 경우를 대비해 try-catch 사용)
+                let decodeFilename = decodeURIComponent(filenameMatch[1].trim());
+                
+                // "+" 문자를 공백으로 변환 (인코딩 과정에서 +가 공백을 의미하는 중)
+                fileName = decodeFilename.replace(/\+/g, ' ');
+                } catch (e) {
+                // 디코딩 실패 시 원래 값 사용
+                    fileName = filenameMatch[1].trim();
+                }
             }
-        }
+        }   
 
-            //Blob URL 생성 → 새 창에서 열기
-            const url = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', fileName);
-            document.body.appendChild(link);
-            link.click();
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        
+        // 메모리 누수 방지를 위한 객체 URL 해제
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
 
-            //URL 정리
-            window.URL.revokeObjectURL(url);
-            link.remove();
-
-            console.log(`파일 다운로드 성공: ${fileName}`);
-            closeModal();
+        console.log(`파일 다운로드 성공: ${fileName}`);
+        closeModal();
         } catch (error) {
             console.error("파일 다운로드 실패:", error.message);
             alert(`파일 다운로드 실패: ${error.message}`);
