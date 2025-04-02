@@ -18,7 +18,7 @@
             <router-link to="/" class="nav-menu">
               <div class="tooltip-button primary">GenieQ 방문하기</div>
             </router-link>
-            <a href="mailto:kwanghoon041@gmail.com" class="tooltip-button secondary">개발자 문의</a>
+            <a href="https://genieq.notion.site/" class="tooltip-button secondary">사용 방법 확인</a>
           </div>
           <button class="tooltip-close" @click="toggleTooltip">
             <span>&times;</span>
@@ -40,7 +40,6 @@
   
   const toggleTooltip = () => {
     showTooltip.value = !showTooltip.value;
-
     // 초기 오버레이가 표시 중이면 제거
     if (showInitialOverlay.value) {
       showInitialOverlay.value = false;
@@ -70,16 +69,16 @@
       setTimeout(() => {
         showInitialOverlay.value = true;
         
-        // 10초 후 자동으로 오버레이 숨김
+        // 4초 후 자동으로 오버레이 숨김
         setTimeout(() => {
           showInitialOverlay.value = false;
-        }, 10000);
+        }, 4000);
       }, 500);
     }
 
-    // 5초에서 15초 사이의 랜덤한 간격으로 아이콘 튀게 하기
+    // 2초에서 10초 사이의 랜덤한 간격으로 아이콘 튀게 하기
     const startBounceInterval = () => {
-      const randomTime = Math.floor(Math.random() * (13000 - 5000 + 1)) + 2000;
+      const randomTime = Math.floor(Math.random() * (10000 - 2000 + 1)) + 2000;
       bounceInterval = setTimeout(() => {
         toggleBounce();
         startBounceInterval(); // 재귀적으로 호출하여 다음 간격 설정
@@ -110,7 +109,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.8);
     z-index: 999;
     animation: fadeIn 0.5s ease-out;
   }
