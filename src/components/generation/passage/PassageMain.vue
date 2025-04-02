@@ -195,11 +195,31 @@ const confirmCreatePassage = () => {
         .catch(error => {
             // console.log("test 서버로 요청을 대신합니다.");
             alert('http://api.chunjae-it-edu.com/generate-passage 서버로의 요청에 실패했습니다.\nhttp://43.202.6.90:9090/test/generate-passage 로 요청을 대신합니다.');
-            
+            const badRequestData = {
+                type_passage: selectedCategory.value,
+                keyword: [inputText.value],
+                errorMsg: {
+                    message: error.message,
+                    timestamp: new Date().toISOString(),
+                    requestData: requestData,
+                    browserInfo: {
+                        userAgent: navigator.userAgent,
+                        language: navigator.language,
+                        platform: navigator.platform
+                    },
+                    // 에러 발생 위치 추적을 위한 정보
+                    errorLocation: error.fileName ? {
+                        fileName: error.fileName,
+                        lineNumber: error.lineNumber,
+                        columnNumber: error.columnNumber
+                    } : 'Location info not available'
+                }
+            };
+
             fetch(`${apiUrl}/api/test/generate-passage`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(requestData)
+                    body: JSON.stringify(badRequestData)
                 })
                 .then(response => {
                     if (!response.ok) { throw new Error(`API 호출 실패: ${response.status}`); }

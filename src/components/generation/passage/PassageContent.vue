@@ -14,7 +14,7 @@
             <PlainTooltip id="start-edit" message="필요한 부분을 클릭하고 편집을 시작하세요" width="316px"/>
         </div>
         <!-- 파일 선택 모달 -->
-        <FileSelectModal :isOpen="isFileModalOpen" @close="closeFileModal" @confirm="handleFileSelect" />
+        <FileSelectModal :isOpen="isFileModalOpen" :pasCode="pasCode" @close="closeFileModal" @confirm="handleFileSelect" />
         <!-- 글자 수 확인 모달 -->
         <ConfirmModalComponent :isOpen="isConfirmModalOpen" title="글자 수를 확인해 주세요." message="500자 이하의 지문으로 정상적인 문항을 생성하기 어렵습니다. 충분한 지문을 입력해 주세요." @close="closeConfirmModal"            @confirm="closeConfirmModal" />
         <!-- 저장하지 않고 페이지 이동 시 경고 모달 -->
@@ -142,6 +142,19 @@ const openSaveSuccessModal = () => {
 
 const closeSaveSuccessModal = () => {
     isSaveSuccessModalOpen.value = false;
+};
+
+const validatePassageLength = () => {
+  if (passageContentRef.value) {
+    // 기존 메서드가 있다면 호출
+    if (typeof passageContentRef.value.validateTextLength === 'function') {
+      return passageContentRef.value.validateTextLength();
+    }
+    // 아니면 직접 내용 길이 검증
+    const contentText = content.value || '';
+    return contentText.length >= 500;
+  }
+  return false;
 };
 
 // 백엔드 API에 지문 저장 함수 (handleGenerate 함수에서 호출)
@@ -332,11 +345,7 @@ const handleGenerate = () => {
 const handleSaveButtonClick = () => {
     if (isProcessing.value) { return; }
     isProcessing.value = true;
-    // 내용 검증
-    if (!content.value || content.value.length < 500) {
-        alert('500자 이상 입력해주세요.');
-        return;
-    }
+
     // 로딩 상태 활성화
     isLoading.value = true;
     loadingMessage.value = '저장 중입니다...';
@@ -407,24 +416,25 @@ const handleSaveButtonClick = () => {
 };
 // 이어서 문항 생성하기 버튼 클릭 시 데이터 저장
 const handleConnectCreate = (event, navigate) => {
-    // 내용 길이 확인
-    if (checkContentLength(event)) {
-        // 내용에 변경사항이 있고 저장되지 않은 상태라면 경고 모달 표시
-        if (hasUnsavedChanges()) {
-            // 대기 중인 네비게이션 설정
-            isWarningModalOpen.value = true;
-            pendingRoute.value = '/questions';
-            event.preventDefault();
-            return;
-        }
-        // 저장된 상태라면 이동 준비
-        // 지문 정보 수집 및 전달
-        prepareDataForQuestions();
-        navigatingToQuestions.value = true; // 질문 페이지로 이동하는 플래그 설정
-        navigate(event); // 네비게이션 실행
-    } else {
-        event.preventDefault(); // 글자 수가 충분하지 않으면 이동 방지
+    // 내용 길이 확인 (500자 검증)
+    if (!validatePassageLength()) {
+        isConfirmModalOpen.value = true;
+        event.preventDefault();
+        return; // 함수 종료
     }
+    // 변경사항 확인
+    if (hasUnsavedChanges()) {
+        // 대기 중인 네비게이션 설정
+        isWarningModalOpen.value = true;
+        pendingRoute.value = '/questions';
+        event.preventDefault();
+        return;
+    }
+    
+    // 모든 검증을 통과한 경우 데이터 준비 및 이동
+    prepareDataForQuestions();
+    navigatingToQuestions.value = true;
+    navigate(event);
 };
 // 문항 생성 페이지로 데이터 전달 준비
 const prepareDataForQuestions = () => {
@@ -442,14 +452,16 @@ const prepareDataForQuestions = () => {
     // console.log('문항 생성을 위한 지문 데이터 준비:', passageForQuestion);
 };
 // 파일 모달 열기 함수
-const openFileModal = () => {
+const openFileModal = (code) => {
+    pasCode.value = code;
     isFileModalOpen.value = true;
 };
 // 내용 길이 확인 후 파일 모달 열기
 const checkContentLengthAndOpenFileModal = () => {
     if (checkContentLength(new Event('click'))) {
-        openFileModal();
-    }
+    const data = loadPassageData();
+    openFileModal(data.pasCode);
+  }
 };
 // 모달 닫기
 const closeFileModal = () => {
