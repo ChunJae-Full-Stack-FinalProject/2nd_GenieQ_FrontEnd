@@ -222,7 +222,7 @@ const authStore = useAuthStore();
 // ✅ 값 저장 후 PaymentUsageModal 열기
 const handleUpdateQuestion = (data) => {
   if (data) {
-
+    console.log("부모에서 받은 값: ", data);
     selectedQuestion.value = {
       pattern: data.pattern || '',
       type: data.type || '',
@@ -239,7 +239,7 @@ const handlePassageChange = (updatedData) => {
   passageData.value.title = updatedData.title || '';
   passageData.value.content = updatedData.content || '';
 
-
+  console.log('지문 수정됨:', passageData.value);
   
   // 상태 변경 감지
   handleContentChange();
@@ -249,7 +249,7 @@ const handlePassageChange = (updatedData) => {
 const handleDescriptionChange = (event, index) => {
   if (!event || index === undefined) return;
 
-
+  console.log(`문항 ${index + 1} 해설 수정됨:`, event);
 
   if (event.queAnswer) {
     questionsData.value[index].queAnswer = event.queAnswer;
@@ -265,18 +265,21 @@ const handleDescriptionChange = (event, index) => {
 
 // 재생성하기 버튼 클릭 핸들러
 const handleRecreateButtonClick = (index) => {
+    console.log('재생성하기 버튼 클릭됨, 문항 인덱스:', index || currentSlide.value);
+
     // 현재 재생성하려는 문항 인덱스 저장
     currentRecreateIndex.value = index !== undefined ? index : currentSlide.value;
 
     // ✅ 지문 길이 검증이 필요하면 추가
     if (!validatePassageLength()) {
-      showLengthConfirm(); // 지문이 너무 짧을 경우 경고
-      return; // ✅ 검증 실패 시 함수 종료
+        showLengthWarning(); // 지문이 너무 짧을 경우 경고
+        return; // ✅ 검증 실패 시 함수 종료
     }
+
     selectedQuestion.value = {
-      mode: 'recreate',
-      title: questionsData.value[index].queQuery,
-      options: questionsData.value[index].queOption
+        mode: 'recreate',
+        title: questionsData.value[index].queQuery,
+        options: questionsData.value[index].queOption
     };
 
     showRecreateModal.value = true;
@@ -307,9 +310,9 @@ const handleRecreateGeneration = async () => {
         "mode": "recreate"
     };
 
+    console.log("Request Data:", requestData);
 
-
-    const response = await fetch('http://api.chunjae-it-edu.com/generate-question', {
+    const response = await fetch('http://10.41.1.56:7777/generate-question', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -320,7 +323,7 @@ const handleRecreateGeneration = async () => {
     if (!response.ok) {
       // 인증 오류 처리 (401)
       if (response.status === 401) {
-
+          console.error('인증 오류(401): 로그인이 필요합니다');
 
           // 인증 상태 초기화
           authStore.user = null;
@@ -339,22 +342,13 @@ const handleRecreateGeneration = async () => {
     }
     
     const result = await response.json();
-
-    // (추가) 선택지에서 쉼표 제거 또는 대체
-    const processedOptions = result.generated_option.map(option => {
-        // 쉼표를 다른 문자(예: 대시)로 대체
-        return option.replace(/,/g, '').replace(/^[①②③④⑤]\s*/, '');
-    });
-
-    console.log('쉼표 제거해 줬는지 확인:', {
-        original: result.generated_option,
-        processed: processedOptions
-    });
+    console.log('문항 생성 성공:', result);
+    
 
     //2단계: 문항 저장 API 호출
     const newQuestion = {
       "queQuery": result.generated_question,
-      "queOption": processedOptions,
+      "queOption": result.generated_option,
       "queAnswer": result.generated_answer,
       "description": result.generated_description
     };
@@ -373,7 +367,7 @@ const handleRecreateGeneration = async () => {
       "mode": "recreate"
     };
 
-
+    console.log("saveRequest: ", saveRequestData);
 
     const updateResponse = await fetch(`${apiUrl}/pass/ques/update/${saveResponse.value.passage.pasCode}`, {
         method: 'PUT',
@@ -387,7 +381,7 @@ const handleRecreateGeneration = async () => {
     if (!updateResponse.ok) {
       // 인증 오류 처리 (401)
       if (response.status === 401) {
-
+          console.error('인증 오류(401): 로그인이 필요합니다');
 
           // 인증 상태 초기화
           authStore.user = null;
@@ -407,7 +401,7 @@ const handleRecreateGeneration = async () => {
 
             
     const updateResult = await updateResponse.json();
-
+    console.log('문항 저장 성공:', updateResult);
 
     // 상태 업데이트
     questionsData.value = [...questionsData.value, newQuestion]; // 기존 질문 + 새 질문 추가
@@ -421,16 +415,16 @@ const handleRecreateGeneration = async () => {
 
     localStorage.setItem('saveResponse', JSON.stringify(saveResponse.value));
 
-
+    console.log('저장된 값:', localStorage.getItem('saveResponse'));
     isLoading.value = false;
 
     // 모달 닫기
     showRecreateModal.value = false;
-    isProcessing.value = false;     
+    isProcessing.value = true;     
   } catch (error) {
-
+      console.error('API 요청 실패:', error);
       alert(`오류 발생: ${error.message}`);
-      isProcessing.value = false;
+      isProcessing.value = true;
   }
 };
 
@@ -469,14 +463,14 @@ const confirmEditWarningModal = () => {
   // 현재 슬라이드의 EditQuestion 컴포넌트에서 편집 모드를 true로 강제 설정
   nextTick(() => {
     if (editQuestionRefs.value && editQuestionRefs.value[currentSlide.value]) {
-
+      console.log('수정 모드 활성화: 현재 슬라이드', currentSlide.value);
       const currentEditQuestion = editQuestionRefs.value[currentSlide.value];
       currentEditQuestion.toggleEditMode(true); // true를 명시적으로 전달
     } else {
-      // console.error('에러: 현재 슬라이드의 EditQuestion 컴포넌트를 찾을 수 없습니다.', { 
-      //   slideIndex: currentSlide.value, 
-      //   refsLength: editQuestionRefs.value ? editQuestionRefs.value.length : 0
-      // });
+      console.error('에러: 현재 슬라이드의 EditQuestion 컴포넌트를 찾을 수 없습니다.', { 
+        slideIndex: currentSlide.value, 
+        refsLength: editQuestionRefs.value ? editQuestionRefs.value.length : 0
+      });
     }
   });
 };
@@ -508,103 +502,108 @@ const handleContentChange = () => {
   isContentChanged.value = true;
   hasManualSave.value = false;
   isSaved.value = false;
-
-};
-
-// 실제 저장 로직 (모달 분기처리하면서 저장 로직 3번 반복으로 인해 별도로 선언함)
-const performSave = () => {
-  const currentContent = editPassageRef.value.getContent();
-  const currentTitle = editPassageRef.value.getTitle();
-
-  const apiUrl = import.meta.env.VITE_API_URL;
-  const pasCode = saveResponse.value.passage.pasCode;
-  // const selectedQuestion = saveResponse.value.question;
-  
-  // 올바른 요청 데이터 구조 생성
-  const requestData = {
-    "type": saveResponse.value.passage.type,
-    "keyword": saveResponse.value.passage.keyword,
-    "title": passageData.value.title,
-    "content": currentContent,
-    "gist": saveResponse.value.passage.gist || '',
-    "isGenerated": saveResponse.value.passage.isGenerated || 0,
-    "questions": saveResponse.value.passage.questions || []
-  };
-
-  if (isProcessing.value) return; // 중복 실행 방지
-  isProcessing.value = true;
-
-  // 지문 저장 api
-  fetch(`${apiUrl}/pass/ques/update/${pasCode}`, {
-    method: 'PUT',
-    headers: {
-        'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(requestData),
-    credentials: 'include'
-  })
-  .then(response => {
-    if (!response.ok) {
-      // 인증 오류 처리 (401)
-      if (response.status === 401) {
-        // 인증 상태 초기화
-        authStore.user = null;
-        authStore.isAuthenticated = false;
-        localStorage.removeItem('authUser');
-
-        // 로그인 페이지로 리다이렉트
-        router.push({ 
-            path: '/login', 
-            query: { redirect: route.fullPath }
-        });
-        throw new Error('인증이 필요합니다');
-      }
-      throw new Error(`지문 저장 실패: ${response.status}`);
-    }
-    return response.json();
-  })
-  .then(data => {
-      // API 응답으로 받은 데이터로 saveResponse 업데이트
-      saveResponse.value = {
-          ...saveResponse.value,
-          passage: data
-      };
-      
-      // 업데이트된 데이터를 로컬스토리지에 저장
-      localStorage.setItem('saveResponse', JSON.stringify(saveResponse.value));
-      
-      // 상태 업데이트
-      isSaved.value = true;
-      hasManualSave.value = true;
-      isContentChanged.value = false;
-  })
-  .catch(error => {
-      alert("지문 저장에 실패했습니다.");
-  })
-  .finally(() => {
-      isProcessing.value = false;
-  });
-  
-  savePassageData();
-  isSaved.value = false;
-  hasManualSave.value = true;
-  isContentChanged.value = false; // 저장 후 내용 변경 플래그를 false로 설정
-
-  return true;
+  console.log('내용이 변경되었습니다:', { isContentChanged: isContentChanged.value, hasManualSave: hasManualSave.value });
 };
 
 // 저장 버튼 클릭 핸들러
 const handleSaveButtonClick = () => {
+
   updateEditingMode(false);
 
   if (editPassageRef.value) {
     const isValid = editPassageRef.value.validateTextLength();
     
-    if (isValid || isFromRoute.value) {
-      // 자료실에서 온 경우, 모달 노출 없이 바로 저장
-
+    if (isValid) {
       // 저장 버튼 클릭 시 EditPassage 컴포넌트에서 최신 내용 가져오기
-      performSave();
+      const currentContent = editPassageRef.value.getContent();
+      const currentTitle = editPassageRef.value.getTitle();
+      
+      // 로깅 확인
+      console.log("저장할 데이터:", { 
+        title: currentTitle, 
+        content: currentContent 
+      });
+
+      const apiUrl = import.meta.env.VITE_API_URL;
+      const pasCode = saveResponse.value.passage.pasCode;
+      
+      // 올바른 요청 데이터 구조 생성
+      const requestData = {
+        "type": saveResponse.value.passage.type,
+        "keyword": saveResponse.value.passage.keyword,
+        "title": passageData.value.title,
+        "content": currentContent,
+        "gist": saveResponse.value.passage.gist || '',
+        "isGenerated": saveResponse.value.passage.isGenerated || 0,
+        "questions": saveResponse.value.passage.questions || []
+      };
+
+      if (isProcessing.value) return; // 중복 실행 방지
+      isProcessing.value = true;
+
+      // 지문 저장 api
+      fetch(`${apiUrl}/pass/ques/update/${pasCode}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestData),
+        credentials: 'include'
+      })
+      .then(response => {
+          if (!response.ok) {
+              // 인증 오류 처리 (401)
+              if (response.status === 401) {
+                  console.error('인증 오류(401): 로그인이 필요합니다');
+
+                  // 인증 상태 초기화
+                  authStore.user = null;
+                  authStore.isAuthenticated = false;
+                  localStorage.removeItem('authUser');
+
+                  // 로그인 페이지로 리다이렉트
+                  router.push({ 
+                      path: '/login', 
+                      query: { redirect: route.fullPath }
+                  });
+
+                  throw new Error('인증이 필요합니다');
+              }
+              throw new Error(`지문 저장 실패: ${response.status}`);
+          }
+          return response.json();
+      })
+      .then(data => {
+          // API 응답으로 받은 데이터로 saveResponse 업데이트
+          saveResponse.value = {
+              ...saveResponse.value,
+              passage: data
+          };
+          
+          // 업데이트된 데이터를 로컬스토리지에 저장
+          localStorage.setItem('saveResponse', JSON.stringify(saveResponse.value));
+          
+          // 상태 업데이트
+          isSaved.value = true;
+          hasManualSave.value = true;
+          isContentChanged.value = false;
+          
+          console.log('지문이 성공적으로 저장되었습니다:', data);
+      })
+      .catch(error => {
+          console.error("지문 수정 실패 : ", error);
+          alert("지문 저장에 실패했습니다.");
+      })
+      .finally(() => {
+          isProcessing.value = false;
+      });
+      
+      savePassageData();
+      isSaved.value = false;
+      hasManualSave.value = true;
+      isContentChanged.value = false; // 저장 후 내용 변경 플래그를 false로 설정
+      console.log('내용이 저장되었습니다:', { isContentChanged: isContentChanged.value, hasManualSave: hasManualSave.value });
+
       return true;
     } else {
       showLengthWarning();
@@ -618,11 +617,12 @@ const handleSaveButtonClick = () => {
 const savePassageData = () => {
   if (passageData.value) {
     localStorage.setItem('generateQuestionPassageData', JSON.stringify(passageData.value));
+    console.log('지문 데이터 저장 완료:', passageData.value);
   }
 };
 
 const updateEditingMode = (value) => {
-
+  console.log('전역 편집 모드 변경:', value);
   isEditingGlobal.value = value;
 };
 
@@ -634,32 +634,15 @@ const validatePassageLength = () => {
   return false;
 };
 
-// showLengthConfirm 함수
-const showLengthConfirm = () => {
-  isConfirmModalOpen.value = true;
-};
-
 // showLengthWarning 함수
 const showLengthWarning = () => {
-  isLengthWarning.value = true;
-}
-
-  // 취소 버튼 클릭
-  const cancelLengthWarning = () => {
-    isLengthWarning.value = false;
-  };
-
-  // 저장 버튼 클릭
-  const confirmLengthWarning = () => {
-    isLengthWarning.value = false;
-    // 저장 실행 함수 호출
-    performSave();
-  }
+  isConfirmModalOpen.value = true;
+};
 
 // validateAndOpenModal 함수 수정
 const validateAndOpenModal = () => {
   if (!validatePassageLength()) {
-    showLengthConfirm();
+    showLengthWarning();
   } else {
     localStorage.setItem('tempPassageData', JSON.stringify(passageData.value));
     // GenerateQuestion 표시
@@ -669,12 +652,7 @@ const validateAndOpenModal = () => {
 
 // 파일 선택 모달 열기 함수
 const openFileModal = () => {
-  // 지문 길이 검증
-  if (!validatePassageLength()) {
-    showLengthConfirm();
-  } else {
-    isFileModalOpen.value = true;
-  }
+  isFileModalOpen.value = true;
 };
 
 // 파일 선택 모달 닫기 함수
@@ -684,7 +662,7 @@ const closeFileModal = () => {
 
 // 파일 선택 처리 함수
 const handleFileSelect = (fileType) => {
-
+  console.log('선택된 파일 형식:', fileType);
   // 여기에 선택된 파일 형식에 따른 추출 로직 구현
   // 예: PDF, Word, TXT 파일 생성 및 다운로드 등
 };
@@ -713,9 +691,9 @@ const handleQuestionGeneration = async () => {
                 "question_example": selectedQuestion.value.queExample,
             };
 
+            console.log("Request Data:", requestData);
 
-
-            const response = await fetch('http://api.chunjae-it-edu.com/generate-question', {
+            const response = await fetch('http://10.41.1.56:7777/generate-question', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -726,7 +704,7 @@ const handleQuestionGeneration = async () => {
             if (!response.ok) {
               // 인증 오류 처리 (401)
               if (response.status === 401) {
-
+                  console.error('인증 오류(401): 로그인이 필요합니다');
 
                   // 인증 상태 초기화
                   authStore.user = null;
@@ -745,22 +723,13 @@ const handleQuestionGeneration = async () => {
             }
             
             const result = await response.json();
+            console.log('문항 생성 성공:', result);
             
-            // (추가) 선택지에서 쉼표 제거 또는 대체
-            const processedOptions = result.generated_option.map(option => {
-                // 쉼표를 다른 문자(예: 대시)로 대체
-                return option.replace(/,/g, '').replace(/^[①②③④⑤]\s*/, '');
-            });
-
-            console.log('쉼표 제거해 줬는지 확인용 로직:', {
-                original: result.generated_option,
-                processed: processedOptions
-            });
 
             //2단계: 문항 저장 API 호출
             const newQuestion = {
               "queQuery": result.generated_question,
-              "queOption": processedOptions,
+              "queOption": result.generated_option,
               "queAnswer": result.generated_answer,
               "description": result.generated_description
             };
@@ -780,7 +749,7 @@ const handleQuestionGeneration = async () => {
               "mode": "generate", // mode를 명확히 추가
             };
 
-
+            console.log("saveRequest: ", saveRequestData);
 
             const updateResponse = await fetch(`${apiUrl}/pass/ques/update/${saveResponse.value.passage.pasCode}`, {
                 method: 'PUT',
@@ -794,7 +763,7 @@ const handleQuestionGeneration = async () => {
             if (!updateResponse.ok) {
               // 인증 오류 처리 (401)
               if (response.status === 401) {
-
+                  console.error('인증 오류(401): 로그인이 필요합니다');
 
                   // 인증 상태 초기화
                   authStore.user = null;
@@ -814,7 +783,7 @@ const handleQuestionGeneration = async () => {
 
             
             const updateResult = await updateResponse.json();
-
+            console.log('문항 저장 성공:', updateResult);
 
             // 상태 업데이트
             questionsData.value = [...questionsData.value, newQuestion]; // 기존 질문 + 새 질문 추가
@@ -828,14 +797,14 @@ const handleQuestionGeneration = async () => {
 
             localStorage.setItem('saveResponse', JSON.stringify(saveResponse.value));
 
-
+            console.log('저장된 값:', localStorage.getItem('saveResponse'));
             isLoading.value = false;
 
             // 모달 닫기
             showPaymentModal.value = false;
             isProcessing.value = false;     
       } catch (error) {
-
+          console.error('API 요청 실패:', error);
           alert(`오류 발생: ${error.message}`);
           isProcessing.value = false;
       }
@@ -844,7 +813,7 @@ const handleQuestionGeneration = async () => {
 const handleQuestionChange = (updatedData, index) => {
     if (!updatedData || index === undefined) return;
 
-
+    console.log(`문항 수정됨 [${index}]:`, updatedData);
 
     // ✅ 수정된 값 명확하게 저장
     questionsData.value[index] = {
@@ -887,13 +856,13 @@ const hasUnsavedChanges = () => {
                           passageData.value.content.length > 0 &&
                           !hasManualSave.value;
                           
-  // console.log('변경 감지 상태:', {
-  //   isContentChanged: isContentChanged.value,
-  //   isSaved: isSaved.value,
-  //   hasManualSave: hasManualSave.value,
-  //   hasContentChanged,
-  //   hasUnsavedContent
-  // });
+  console.log('변경 감지 상태:', {
+    isContentChanged: isContentChanged.value,
+    isSaved: isSaved.value,
+    hasManualSave: hasManualSave.value,
+    hasContentChanged,
+    hasUnsavedContent
+  });
 
   return hasContentChanged || hasUnsavedContent;
 };
@@ -909,13 +878,14 @@ const handleBeforeUnload = (e) => {
 
 // 이동 취소 - 현재 화면 유지
 const cancelNavigation = () => {
+  console.log('네비게이션 취소됨');
   isWarningModalOpen.value = false;
   pendingRoute.value = null;
 };
 
 // 이동 확인 - 타겟 페이지로 이동
 const confirmNavigation = () => {
-
+  console.log('네비게이션 승인됨, 이동 실행');
   isWarningModalOpen.value = false;
   isContentChanged.value = false;
   hasManualSave.value = true;
@@ -937,7 +907,7 @@ onMounted(() => {
     const data = localStorage.getItem('saveResponse');
     if (data) {
       saveResponse.value = JSON.parse(data);
-
+      console.log("로드된 데이터:", saveResponse.value);
       
       // ✅ 값이 있으면 상태에 반영
       passageData.value.title = saveResponse.value.passage?.title || '';
@@ -946,7 +916,7 @@ onMounted(() => {
       pasCode.value = saveResponse.value.passage?.pasCode || '';
     }
   } catch (error) {
-
+    console.error('JSON 파싱 오류:', error);
     saveResponse.value = {}; // ✅ 오류 발생 시 빈 객체로 초기화
   }
   // URL 쿼리 파라미터에서 문항 유형과 서술 방식 가져오기
@@ -981,7 +951,7 @@ onMounted(() => {
           editPassageRef.value.setContent(passageData.value.content);
         }
       } catch (error) {
-
+        console.error('저장된 지문 데이터를 불러오는 중 오류 발생:', error);
       }
     }
   }
@@ -989,18 +959,18 @@ onMounted(() => {
   // 이전 경로가 /home 또는 /storage로 시작하는지 확인
   const fromPath = route.query.from || '';
   isFromRoute.value = fromPath.startsWith('/home') || fromPath.startsWith('/storage');
-
+  console.log('이전 경로:', route.query.from, isFromRoute.value);
   
   // 브라우저 새로고침, 닫기 등에 대한 이벤트 리스너 추가
   window.addEventListener('beforeunload', handleBeforeUnload);
   
   // 전역 네비게이션 가드 설정
   routerGuard = router.beforeEach((to, from, next) => {
-
+    console.log('라우터 가드 호출됨', { from: from.path, to: to.path, current: route.path });
     
     // 현재 라우트에서 다른 라우트로 이동하는 경우에만 확인
     if (from.path === route.path && hasUnsavedChanges()) {
-
+      console.log('저장되지 않은 변경사항 감지됨, 네비게이션 중단 및 모달 표시');
       
       // 저장되지 않은 변경사항이 있다면 모달 표시하고 대기
       isWarningModalOpen.value = true;
@@ -1009,7 +979,7 @@ onMounted(() => {
       return false; // 네비게이션 중단
     }
     
-
+    console.log('네비게이션 계속 진행');
     localStorage.removeItem('saveResponse');
     return next(); // 네비게이션 계속
   });
@@ -1062,10 +1032,14 @@ provide('passageData', {
 
 // 슬라이드가 변경될 때마다 포커스 조정 (접근성 개선)
 watch(currentSlide, (newSlide) => {
-
+  console.log(`슬라이드 변경: ${newSlide + 1}/${questionsData.value.length}`);
 });
 </script>
 <style scoped>
+.app-container {
+  width: 100%;
+  padding: 20px 30px 480px 20px;
+}
 #main-head {
   position: absolute;
   width: 90px;
