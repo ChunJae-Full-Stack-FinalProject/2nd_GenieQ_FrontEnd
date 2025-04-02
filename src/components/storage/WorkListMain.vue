@@ -13,7 +13,7 @@
       <div class="search-container">
         <input 
           type="text" 
-          placeholder="작업명, 제목, 유형 검색" 
+          placeholder="작업명, 제재 검색" 
           class="search-input"
           v-model="searchQuery"
           @input="handleSearch"
@@ -545,12 +545,10 @@ const advancedSearch = (items, query) => {
       // 각 필드별로 정규화 후 검색
       const normalizedTitle = normalizeText(item.PAS_TITLE || '');
       const normalizedKeyword = normalizeText(item.PAS_KEYWORD || '');
-      const normalizedType = normalizeText(item.PAS_IS_GENERATED || '');
 
       // 정확한 매칭이 아닌 부분 문자열 검색 (includes)
       return normalizedTitle.includes(normalizedQuery) ||
-        normalizedKeyword.includes(normalizedQuery) ||
-        normalizedType.includes(normalizedQuery);
+        normalizedKeyword.includes(normalizedQuery);
     } catch (error) {
 
       return false;
