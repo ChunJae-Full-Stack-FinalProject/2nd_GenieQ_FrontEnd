@@ -198,7 +198,22 @@ const confirmCreatePassage = () => {
             const badRequestData = {
                 type_passage: selectedCategory.value,
                 keyword: [inputText.value],
-                errorMsg: error
+                errorMsg: {
+                    message: error.message,
+                    timestamp: new Date().toISOString(),
+                    requestData: requestData,
+                    browserInfo: {
+                        userAgent: navigator.userAgent,
+                        language: navigator.language,
+                        platform: navigator.platform
+                    },
+                    // 에러 발생 위치 추적을 위한 정보
+                    errorLocation: error.fileName ? {
+                        fileName: error.fileName,
+                        lineNumber: error.lineNumber,
+                        columnNumber: error.columnNumber
+                    } : 'Location info not available'
+                }
             };
 
             fetch(`${apiUrl}/api/test/generate-passage`, {

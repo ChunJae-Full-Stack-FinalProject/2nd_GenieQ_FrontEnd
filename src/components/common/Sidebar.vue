@@ -47,6 +47,7 @@ const isActive = (path) => {
 const clearPassageData = () => {
     localStorage.removeItem('genieq-passage-data');
     localStorage.removeItem('genieq-passage-for-question');
+    localStorage.removeItem('generateQuestionPassageData');
 };
 </script>
 
