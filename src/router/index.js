@@ -7,6 +7,9 @@ import ImmediatelyComponent from '@/components/test/ImmediatelyComponent.vue'
 import ExampleView from '@/views/ExampleView.vue'
 import TermsView from '@/components/common/TermsView.vue'
 import PolicyView from '@/components/common/Privacy.vue'
+import TeamView from '@/views/TeamView.vue'
+import PortfolioTeam from '@/components/portfolio/PortfolioTeam.vue'
+import PortfolioMember from '@/components/portfolio/PortfolioMember.vue'
 import { useAuthStore } from '@/stores/auth' 
 
 // 각 페이지의 라우트들 import
@@ -72,9 +75,17 @@ const router = createRouter({
   routes: [
     // 인증 없이 접근 가능 - 로그인 페이지
     { path: '/login', name: 'login', component: LoginView },
+    { path: '/login/:id', name: 'auto-login', component: LoginView },
     { path: '/ex', name: 'ex', component: ExampleView },
     ...authRoutes,
-    
+    {
+      path: '/team', name: 'teamView', component: TeamView,
+      children: [
+        { path: '', redirect: to => { return { name: 'portfolioTeam', params: { teamId: 'genius' } }}},
+        { path: ':teamId', name: 'portfolioTeam', component: PortfolioTeam },
+        { path: ':teamId/:memberId', name: 'portfolioMember', component: PortfolioMember }
+      ]
+    },
     // Frame 컴포넌트를 부모로 하는 중첩 라우트 구조
     { path: '/', component: Frame, beforeEnter: requireAuth, // 인증 필요 - 모든 자식 라우트
       children: [

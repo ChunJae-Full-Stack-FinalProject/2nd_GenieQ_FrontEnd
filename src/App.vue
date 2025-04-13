@@ -85,4 +85,14 @@ onBeforeUnmount(() => {
   min-height: 100vh;
   width: 100%;
 }
+
+
+/* 미디어 쿼리 추가 - 모바일 환경 대응 */
+@media (max-width: 768px) {
+  .login-bg {
+    background-size: 100vw;
+    background-position: top;
+    background-color: white;
+  }
+}
 </style>

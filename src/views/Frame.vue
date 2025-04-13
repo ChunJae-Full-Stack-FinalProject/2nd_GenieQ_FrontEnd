@@ -13,6 +13,29 @@
 <script setup>
 import Sidebar from '@/components/common/Sidebar.vue';
 import GenieQFooter from '@/components/common/Footer.vue';
+import { onMounted, onUnmounted } from 'vue';
+
+// 기존 body 스타일을 저장할 변수
+let originalMinWidth;
+
+// 컴포넌트 마운트 시 body에 minWidth 적용
+onMounted(() => {
+  // 기존 스타일 저장
+  originalMinWidth = document.body.style.minWidth;
+  
+  // Frame에 필요한 스타일 적용
+  document.body.style.minWidth = '1920px';
+  
+  console.log('[Frame] body 스타일 적용: min-width=1920px');
+});
+
+// 컴포넌트 언마운트 시 body 스타일 복원
+onUnmounted(() => {
+  // 기존 스타일로 복원
+  document.body.style.minWidth = originalMinWidth;
+  
+  console.log('[Frame] body 스타일 복원');
+});
 </script>
 
 <style>
